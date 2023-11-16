@@ -27,11 +27,7 @@ class RTCIceServer {
 
   @override
   String toString() {
-    return 'RTCIceServer{' +
-        ' username: $username,' +
-        ' credential: $credential,' +
-        ' url: $url,' +
-        '}';
+    return 'RTCIceServer{ username: $username, credential: $credential, url: $url}';
   }
 
   RTCIceServer copyWith({
@@ -39,7 +35,7 @@ class RTCIceServer {
     String credential,
     String url,
   }) {
-    return new RTCIceServer(
+    return  RTCIceServer(
       username: username ?? this.username,
       credential: credential ?? this.credential,
       url: url ?? this.url,
@@ -68,7 +64,7 @@ class RTCIceServer {
   }
 
   factory RTCIceServer.fromMap(Map<String, dynamic> map) {
-    return new RTCIceServer(
+    return RTCIceServer(
       username: map['username'] as String,
       credential: map['credential'] as String,
       url: map['url'] as String,

@@ -24,9 +24,10 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       title: 'Flutter Janus Demo',
       theme: ThemeData(
-        primarySwatch: Colors.blue,
+        primarySwatch: Colors.orange,
       ),
-      home: MyHomePage(title: 'Flutter Janus Demo Home Page'),
+      // home: MyHomePage(title: 'Flutter Janus Demo Home Page'),
+      home: VideoRoomPage("1234567", "Test"),
     );
   }
 }
@@ -49,11 +50,16 @@ class _MyHomePageState extends State<MyHomePage> {
                 VideoRoomPage(room, displayName)));
   }
 
-  String room = "";
+  String room = "1234567";
   String displayName = "";
+
+  var roomTextController = TextEditingController();
+
 
   @override
   Widget build(BuildContext context) {
+
+    roomTextController.value = TextEditingValue(text: room);
     return Scaffold(
       appBar: AppBar(
         title: Text(widget.title),
@@ -67,14 +73,15 @@ class _MyHomePageState extends State<MyHomePage> {
               onChanged: (text) {
                 displayName = text;
               },
-              decoration: new InputDecoration(labelText: "Enter display name"),
+              decoration:  const InputDecoration(labelText: "Enter display name"),
             ),
 
             TextField(
+                controller: roomTextController,
                 onChanged: (text) {
                   room = text;
                 },
-                decoration: new InputDecoration(labelText: "Enter room number"),
+                decoration:  const InputDecoration(labelText: "Enter room number"),
                 keyboardType: TextInputType.number,
                 inputFormatters: <TextInputFormatter>[
                   FilteringTextInputFormatter.digitsOnly
