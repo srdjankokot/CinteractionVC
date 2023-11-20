@@ -19,7 +19,7 @@ enum RoomAction {
 }
 
 class RoomReq {
-  
+
   String request;     // create, destroy, edit , exists, list, allowed, kick
 
   int room;
@@ -43,6 +43,8 @@ class RoomReq {
   int audioActivePackets;
 
   int audioLevelAverage;
+  int bitrate;
+  int firFreq;
 
 
   RoomReq({
@@ -54,10 +56,12 @@ class RoomReq {
     this.pin, 
     this.isPrivate = false, 
     this.allowed,
-    this.publishers = 100,
+    this.publishers = 40,
     this.audiolevelEvent = true,
     this.audioActivePackets = 100,
     this.audioLevelAverage = 25,
+    this.bitrate = 128000,
+    this.firFreq,
   });
 
   Map<String, dynamic> toMap() {
@@ -69,6 +73,7 @@ class RoomReq {
       'is_private': this.isPrivate,
       'publishers': this.publishers,
       'audiolevel_event': this.audiolevelEvent,
+      'bitrate': this.bitrate
     };
     if(null != secret){
       map['secret'] = this.secret;
@@ -87,5 +92,38 @@ class RoomReq {
     }
     return map;
   }
+
+  Map<String, dynamic> toMapNew() {
+    Map<String, dynamic> map = {
+      'request': this.request,
+      'room': this.room,
+      'permanent': this.permanent,
+      'description': this.description,
+      'is_private': this.isPrivate,
+      'new_publishers': this.publishers,
+      'audiolevel_event': this.audiolevelEvent,
+      'new_bitrate': this.bitrate,
+      'new_fir_freq': this.firFreq
+    };
+    if(null != secret){
+      map['secret'] = this.secret;
+    }
+    if(null != pin){
+      map['pin'] = this.pin;
+    }
+    if(null != allowed){
+      map['allowed'] = this.allowed;
+    }
+    if(null != audioActivePackets){
+      map['audio_active_packets'] = this.audioActivePackets;
+    }
+    if(null != audioLevelAverage){
+      map['audio_level_average'] = this.audioLevelAverage;
+    }
+    return map;
+  }
+
+
+
 
 }

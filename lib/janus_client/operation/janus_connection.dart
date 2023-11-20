@@ -4,10 +4,11 @@ import 'package:flutter_webrtc/flutter_webrtc.dart';
 import '../ice_server.dart';
 
 /// 将流加入之后的执行
-typedef void OnAddStreamCallback(JanusConnection connection, MediaStream stream);
+typedef OnAddStreamCallback = void Function(JanusConnection connection, MediaStream stream);
+typedef OnAddTrackCallback = void Function(JanusConnection connection, MediaStream stream, MediaStreamTrack track);
 
 /// ice发送之后的执行
-typedef void OnIceCandidateCallback(JanusConnection connection, RTCIceCandidate candidate);
+typedef OnIceCandidateCallback = void Function(JanusConnection connection, RTCIceCandidate candidate);
 
 
 const Map<String, dynamic> _config = {
@@ -43,41 +44,30 @@ const Map<String, dynamic> _iceServers = {
     ]
   };
 
-/// webrtc步骤
-/// 1. 获得本地媒体
-/// 2. 创建对等连接
-/// 3. 关联媒体和数据
-/// 4. 交换会话描述 createOffer createAnswer sdp
+/// webrtc steps
+/// 1. Get local media
+/// 2. Create a connection
+/// 3. Media connection and data
+/// 4. Exchange description createOffer createAnswer sdp
 
-/// janus连接对象
+/// janus connection object
 class JanusConnection {
 
-  int handleId;                   // janus句柄ID
-
+  int handleId;                   // janus handle ID
   List<RTCIceServer> iceServers;
-
-  String display;                 // 昵称
-
-  int feedId;                     // janus会话session_id   
-
-  bool remote;                    // 是否为远端对等连接（非己方）
-
-  bool videoPresent;              // 视频是否展示（显示有限的远端视频流）
-  
-  bool audio;                           // 音频状态
-
-  bool video;                           // 视频状态
+  String display;                 // Nick name
+  int feedId;                     // janus session_id
+  bool remote;                    // Whether it is a remote peer-to-peer connection（Not our own side）
+  bool videoPresent;              // Whether the video is displayed（Display limited far-end video stream）
+  bool audio;                           // audio status
+  bool video;                           // video status
 
   int privateChatUnreadCount = 0;
-
-  RTCPeerConnection _connection;        // 当前peer连接对象
-
-  RTCVideoRenderer remoteRenderer;      // 远程媒体数据渲染器
-
-  MediaStream remoteStream;             // 远程媒体数据渲染器
-
-  OnAddStreamCallback onAddStream;      // 添加流
-
+  RTCPeerConnection _connection;        // current peer connection object
+  RTCVideoRenderer remoteRenderer;      // Remote media data renderer
+  MediaStream remoteStream;             // Remote media data renderer
+  OnAddStreamCallback onAddStream;
+  OnAddTrackCallback onAddTrack; // Add stream
   OnIceCandidateCallback onIceCandidate;  // ice
 
 
@@ -92,69 +82,78 @@ class JanusConnection {
     this.videoPresent = false,
   }) {
     debugPrint('JanusConnection init===$display==$feedId==$handleId');
-    this.remoteRenderer = RTCVideoRenderer();
+    remoteRenderer = RTCVideoRenderer();
     // this.remoteRenderer.mirror = true;
     // this.remoteRenderer.objectFit = RTCVideoViewObjectFit.RTCVideoViewObjectFitCover;
   }
 
-  /// init连接，init远程媒体数据渲染器
+  /// init connect，init Remote media data renderer
   Future<void> initConnection() async{
-    await this.remoteRenderer.initialize();
+    await remoteRenderer.initialize();
     await createConnection();
   }
 
   void disConnect(){
     debugPrint('JanusConnection disConnect===$display==$feedId==$handleId');
-    this._connection.close();
-    this.remoteStream?.dispose();
-    this.remoteRenderer?.dispose();
+    _connection.close();
+    remoteStream?.dispose();
+    remoteRenderer?.dispose();
   }
 
-  /// 设置本地会话描述添加到RTCPeerConnection
+  /// Set local session description added to RTCPeerConnection
   Future<RTCSessionDescription> createOffer({Map<String, dynamic> constraints = constraints}) async {
-    RTCSessionDescription sdp = await this._connection.createOffer(constraints);
-    this._connection.setLocalDescription(sdp);
+    RTCSessionDescription sdp = await _connection.createOffer(constraints);
+    _connection.setLocalDescription(sdp);
     return sdp;
   }
 
-  /// 将远程会话描述添加到RTCPeerConnection
+  /// Add remote session description to RTCPeerConnection
   RTCSessionDescription setRemoteDescription(Map<String, dynamic> jsep){
     RTCSessionDescription sdp = RTCSessionDescription(jsep['sdp'], jsep['type']);
-    this._connection.setRemoteDescription(sdp);
+    _connection.setRemoteDescription(sdp);
     return sdp;
   }
 
-  /// 将本地流添加到RTCPeerConnection
+  /// Add local stream to RTCPeerConnection
   void addLocalStream(MediaStream localStream) {
-    debugPrint('addLocalStream=====>${this._connection}');
-    this._connection.addStream(localStream);
+    debugPrint('addLocalStream=====>$_connection');
+    _connection.addStream(localStream);
   }
 
-  /// 回复sdp
+  void addLocalTrack(MediaStream localStream) {
+    debugPrint('addLocalTrack=====>$_connection');
+    localStream.getTracks().forEach((element) {
+      _connection.addTrack(element, localStream);
+    });
+  }
+
+  /// reply sdp
   Future<RTCSessionDescription> createAnswer({Map<String, dynamic> constraints = constraints}) async {
-    RTCSessionDescription sdp = await this._connection.createAnswer(constraints);
-    // 通过setLocalDescription想浏览器通知会话描述，并将其发送之远程对等端，从而发起呼叫
-    this._connection.setLocalDescription(sdp);
+    RTCSessionDescription sdp = await _connection.createAnswer(constraints);
+    // pass setLocalDescription notifies the browser of the session description and sends it to the remote peer to initiate the call
+    _connection.setLocalDescription(sdp);
     return sdp;
   }
 
   Future createConnection() async{
 
     Map<String, dynamic> configuration = _iceServers;
-    if(null != this.iceServers && this.iceServers.length > 0){
-      configuration = {'iceServers': this.iceServers.map((e) => e.toMap()).toList(),};
+    if(null != iceServers && iceServers.isNotEmpty){
+      configuration = {'iceServers': iceServers.map((e) => e.toMap()).toList(),};
     }
-    this._connection = await createPeerConnection(configuration,_config);
-    // ice加入后处理
-    this._connection.onIceCandidate = (candidate) => this.onIceCandidate(this, candidate);
-    // stream add后处理
-    this._connection.onAddStream = (stream) => this.onAddStream(this, stream);
-    // stream remove后处理
-    this._connection.onRemoveStream = (stream) {};
-    // channel　数据传输处理
-    this._connection.onDataChannel = (channel) {};
+    _connection = await createPeerConnection(configuration,_config);
+    // ice Add post-processing
+    _connection.onIceCandidate = (candidate) => onIceCandidate(this, candidate);
+    // stream add post-processing
+    _connection.onAddStream = (stream) => onAddStream(this, stream);
+    // stream remove post-processing
+    _connection.onRemoveStream = (stream) {};
+    // channel data transfer processing
+    _connection.onDataChannel = (channel) {};
 
-    return this._connection;
+    _connection.onAddTrack = (stream, track) => onAddTrack(this, stream, track);
+
+    return _connection;
 
   }
 

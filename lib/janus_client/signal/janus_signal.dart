@@ -1,5 +1,3 @@
-
-
 import 'dart:async';
 import 'dart:convert';
 // import 'dart:ffi';
@@ -33,7 +31,8 @@ import '../operation/janus_transaction.dart';
 /// 7.发送ice，trickle
 ///
 
-typedef void OnMessage(JanusHandle handle, Map plugin, Map jsep, JanusHandle feedHandle);
+typedef void OnMessage(
+    JanusHandle handle, Map plugin, Map jsep, JanusHandle feedHandle);
 
 typedef void ChangeDisplay(int feedId, String display);
 
@@ -43,11 +42,10 @@ typedef void NotifyTalking(int feedId);
 
 /// janus信令处理
 class JanusSignal {
-
   bool disConnected = false;
 
   String _kJanus = 'janus';
-  
+
   int _sessionId = -1;
 
   int _handleId = -1;
@@ -55,7 +53,7 @@ class JanusSignal {
   int _roomId;
 
   // websocket服务器地址
-  String _url;   
+  String _url;
 
   // websocket服务器密钥
   String _apiSecret;
@@ -98,14 +96,14 @@ class JanusSignal {
   Map<dynamic, JanusHandle> _feedMap = <dynamic, JanusHandle>{};
 
   JsonEncoder _encoder = JsonEncoder();
-  
+
   JsonDecoder _decoder = JsonDecoder();
 
-  get handleId => this._handleId;       // self handleId
+  get handleId => this._handleId; // self handleId
 
-  get sessionId => this._sessionId;     // self session
+  get sessionId => this._sessionId; // self session
 
-  get handleMap => this._handleMap;     // self session
+  get handleMap => this._handleMap; // self session
 
   set sessionId(int sessionId) => this._sessionId = sessionId;
 
@@ -117,30 +115,42 @@ class JanusSignal {
 
   set token(String token) => this._token = token;
 
-  set withCredentials(bool withCredentials) => this._withCredentials = withCredentials;
+  set withCredentials(bool withCredentials) =>
+      this._withCredentials = withCredentials;
 
   set onMessage(OnMessage onMessage) => this._onMessage = onMessage;
 
-  set changeDisplay(ChangeDisplay changeDisplay) => this._changeDisplay = changeDisplay;
+  set changeDisplay(ChangeDisplay changeDisplay) =>
+      this._changeDisplay = changeDisplay;
 
   set endMeeting(EndMeeting endMeeting) => this._endMeeting = endMeeting;
 
-  set notifyTalking(NotifyTalking notifyTalking) => this._notifyTalking = notifyTalking;
+  set notifyTalking(NotifyTalking notifyTalking) =>
+      this._notifyTalking = notifyTalking;
 
   set display(String display) => this._display = display;
 
-  set refreshInterval(int refreshInterval) => this._refreshInterval = refreshInterval;
+  set refreshInterval(int refreshInterval) =>
+      this._refreshInterval = refreshInterval;
 
-  dynamic get _apiMap => this._withCredentials ? this._apiSecret != null ? {"apisecret": this._apiSecret} : {} : {};
+  dynamic get _apiMap => this._withCredentials
+      ? this._apiSecret != null
+          ? {"apisecret": this._apiSecret}
+          : {}
+      : {};
 
-  dynamic get _tokenMap => this._withCredentials ? this._token != null ? {"token": this._token} : {} : {};
+  dynamic get _tokenMap => this._withCredentials
+      ? this._token != null
+          ? {"token": this._token}
+          : {}
+      : {};
 
   JanusSignal._();
 
   Timer keepApliveTimer;
 
-
   static JanusSignal _instance;
+
   /// 单例
   static JanusSignal getInstance({
     @required String url,
@@ -154,19 +164,18 @@ class JanusSignal {
     if (_instance == null) {
       _instance = JanusSignal._();
     }
-    if(url != null) _instance.url = url;
-    if(apiSecret != null) _instance.apiSecret = apiSecret;
-    if(token != null) _instance.token = token;
-    if(withCredentials != null) _instance.withCredentials = withCredentials;
-    if(display != null) _instance.display = display;
-    if(refreshInterval != null) _instance.refreshInterval = refreshInterval;
-    if(disConnected != null) _instance.disConnected = disConnected;
+    if (url != null) _instance.url = url;
+    if (apiSecret != null) _instance.apiSecret = apiSecret;
+    if (token != null) _instance.token = token;
+    if (withCredentials != null) _instance.withCredentials = withCredentials;
+    if (display != null) _instance.display = display;
+    if (refreshInterval != null) _instance.refreshInterval = refreshInterval;
+    if (disConnected != null) _instance.disConnected = disConnected;
     return _instance;
   }
 
-  
   /// 信令获得连接
-  void connect(){
+  void connect() {
     debugPrint('janus connect===========>${_url}');
     Iterable<String> it = ['janus-protocol'];
     _channel = WebSocketChannel.connect(Uri.parse(_url), protocols: it);
@@ -175,15 +184,13 @@ class JanusSignal {
     _stream = _channel.stream;
     _stream.listen((message) {
       debugPrint('$_kJanus receieve: $message');
-      if(null != message){
+      if (null != message) {
         handleMessage(_decoder.convert(message));
       }
     }).onDone(() {
       print('closed　by server');
     });
   }
-
-
 
   /// websocket断开链接
   void disconnect() {
@@ -194,13 +201,11 @@ class JanusSignal {
   }
 
   /// 发送message给janus
-  void sendMessage({
-    @required int handleId,
-    @required Map body, 
-    Map jsep,
-    String transaction 
-  }){
-
+  void sendMessage(
+      {@required int handleId,
+      @required Map body,
+      Map jsep,
+      String transaction}) {
     transaction ??= randomAlphaNumeric(12);
     Map<String, dynamic> msgMap = {
       "janus": "message",
@@ -209,31 +214,31 @@ class JanusSignal {
       "session_id": this._sessionId,
       "handle_id": handleId
     };
-    if(jsep != null){
+    if (jsep != null) {
       msgMap["jsep"] = jsep;
     }
     this.send(msgMap);
-
   }
 
   /// 公共消息发送
   void send(Map map) {
     debugPrint('janus disconnect====send=======>$disConnected');
-    if(this.disConnected){
+    if (disConnected) {
       return;
     }
     debugPrint('janus client send=====>>>>>>$map');
     String json = this._encoder.convert(map);
-    this._sink.add(json);
-
+    _sink.add(json);
   }
 
   /// 创建会话
-  void createSession({@required TransactionSuccess success, @required TransactionError error}){
+  void createSession(
+      {@required TransactionSuccess success,
+      @required TransactionError error}) {
     String transaction = randomAlphaNumeric(12);
     JanusTransaction jt = JanusTransaction(tid: transaction);
 
-    jt.success = (Map data){
+    jt.success = (Map data) {
       debugPrint('createSession seuccess');
       this.sessionId = data['data']['id'];
       this.keepAlive();
@@ -257,16 +262,17 @@ class JanusSignal {
     @required String opaqueId,
     @required TransactionSuccess success,
     @required TransactionError error,
-  }){
+  }) {
     String transaction = randomAlphaNumeric(12);
     JanusTransaction jt = JanusTransaction(tid: transaction);
 
-    jt.success =  (data){
+    jt.success = (data) {
       this._handleId = data['data']['id'];
-      debugPrint('janus attach success=====data: $data======>handleId: ${this._handleId}');
+      debugPrint(
+          'janus attach success=====data: $data======>handleId: ${this._handleId}');
       this._handleMap[this._handleId] = JanusHandle(handleId: this._handleId);
       success(data);
-    } ;
+    };
     jt.error = error;
     _transMap[transaction] = jt;
 
@@ -292,7 +298,8 @@ class JanusSignal {
     OnKicked onKicked,
   }) {
     dynamic senderSessionId = data['data']['id']; // sessionId
-    JanusHandle handle = this._handleMap[senderSessionId] ?? JanusHandle(handleId: senderSessionId);
+    JanusHandle handle =
+        _handleMap[senderSessionId] ?? JanusHandle(handleId: senderSessionId);
     handle.onJoined = onJoined;
     handle.onRemoteJsep = onRemoteJsep;
     handle.onLeaving = onLeaving;
@@ -300,23 +307,23 @@ class JanusSignal {
     handle.display = display ?? this._display;
 
     // 设置handle的session_id,　不是远程的session_id就是自己的session_id
-    if(feedId != null){                 
+    if (feedId != null) {
       handle.feedId = feedId;
-      this._feedMap[feedId] = handle;
-    } else{
-      handle.feedId = this.sessionId;
+      _feedMap[feedId] = handle;
+    } else {
+      handle.feedId = sessionId;
     }
-    
-    this._handleMap[handle.handleId] = handle;
-    this.sendMessage(body: body, handleId: handle.handleId);
+
+    _handleMap[handle.handleId] = handle;
+    sendMessage(body: body, handleId: handle.handleId);
   }
 
   ///　发送ice给janus
   void trickleCandidata({
-    @required int handleId, 
+    @required int handleId,
     @required Map<String, dynamic> candidate,
-  }){
-     Map trickleMap = {
+  }) {
+    Map trickleMap = {
       "janus": "trickle",
       "candidate": candidate,
       "transaction": randomNumeric(12),
@@ -327,155 +334,156 @@ class JanusSignal {
   }
 
   /// 心跳
-  void keepAlive(){
-
+  void keepAlive() {
     Map<String, dynamic> aliveMap = {
       'janus': 'keepalive',
       'session_id': this._sessionId,
       ...this._apiMap,
       ...this._tokenMap,
     };
-    this.keepApliveTimer =  Timer.periodic(Duration(seconds: this._refreshInterval), (timer) {
+    this.keepApliveTimer =
+        Timer.periodic(Duration(seconds: this._refreshInterval), (timer) {
       aliveMap['transaction'] = randomNumeric(12);
       this.send(aliveMap);
     });
-    
   }
 
   /// 处理janus服务器返回消息
   void handleMessage(Map<dynamic, dynamic> message) {
     String janus = message[this._kJanus];
     debugPrint('$_kJanus handleMessage $janus');
-    switch(janus){
-      case 'success': {
-        String transaction = message['transaction'];
-        JanusTransaction jt = this._transMap[transaction];
-        if(null != jt && jt.success != null) {
-          jt.success(message);
-        }
-        _transMap.remove(transaction);
-      }
-      break;
-
-      case 'error': {
-        String transaction = message['transaction'];
-        JanusTransaction jt = this._transMap[transaction];
-        if(null != jt && jt.error != null) {
-          jt.error(message);
-        }
-        _transMap.remove(transaction);
-      }
-      break;
-
-      case 'ack': {
-      }
-      break;
-
-      case 'event': {
-
-        Map<String, dynamic> plugin = message['plugindata']['data'];
-
-        if(plugin['videoroom']  == 'talking' && null != this._notifyTalking) {
-          this._notifyTalking(plugin['id']);
-          return;
-        }
-
-        if(plugin['videoroom']  == 'destroyed' && null != this._endMeeting) {
-          this._endMeeting();
-          return;
-        }
-
-        if(null != this._handleMap[plugin['id']] && null != plugin['id'] && null != plugin['display'] && null != this._changeDisplay){
-          this._handleMap[plugin['id']].display = plugin['display'];
-          this._changeDisplay(plugin['id'], plugin['display']);
-        }
-        
-        // 创建房间成功　失败执行方法
-        String transaction = message['transaction'];
-        JanusTransaction jt = this._transMap[transaction];
-        if(null != plugin && null != jt){
-          if(null != plugin['error']){
-            debugPrint('$_kJanus handleMessage event error====>: ${plugin['error']}');
-            jt.error(plugin);
-          }else{
-            jt?.success(plugin);
+    switch (janus) {
+      case 'success':
+        {
+          String transaction = message['transaction'];
+          JanusTransaction jt = this._transMap[transaction];
+          if (null != jt && jt.success != null) {
+            jt.success(message);
           }
-          this._transMap.remove(transaction);
+          _transMap.remove(transaction);
         }
-        
+        break;
 
-        JanusHandle handle = this._handleMap[message['sender']];
-        
-        JanusHandle feedHandle;
-        if(plugin['leaving'] != null || plugin['kicked'] != null){  // 有人离开
-          if(plugin['leaving'] != null && null == plugin['reason']){    // 有人离开
-            feedHandle = this._feedMap[plugin['leaving']];
+      case 'error':
+        {
+          String transaction = message['transaction'];
+          JanusTransaction jt = this._transMap[transaction];
+          if (null != jt && jt.error != null) {
+            jt.error(message);
           }
-          if(plugin['kicked'] != null && null == plugin['reason']){     // 有人被踢
-            feedHandle = this._feedMap[plugin['kicked']];
+          _transMap.remove(transaction);
+        }
+        break;
+
+      case 'ack':
+        {}
+        break;
+
+      case 'event':
+        {
+          Map<String, dynamic> plugin = message['plugindata']['data'];
+
+          if (plugin['videoroom'] == 'talking' && null != _notifyTalking) {
+            _notifyTalking(plugin['id']);
+            return;
           }
-          if(plugin['leaving'] != null && null != plugin['reason']){    // 自己被踢
-            feedHandle = this.handleMap[this.sessionId];
+
+          if (plugin['videoroom'] == 'destroyed' && null != _endMeeting) {
+            _endMeeting();
+            return;
+          }
+
+          if (null != _handleMap[plugin['id']] &&
+              null != plugin['id'] &&
+              null != plugin['display'] &&
+              null != _changeDisplay) {
+            _handleMap[plugin['id']].display = plugin['display'];
+            _changeDisplay(plugin['id'], plugin['display']);
+          }
+
+          // 创建房间成功　失败执行方法
+          String transaction = message['transaction'];
+          JanusTransaction jt = _transMap[transaction];
+          if (null != plugin && null != jt) {
+            if (null != plugin['error']) {
+              debugPrint('$_kJanus handleMessage event error====>: ${plugin['error']}');
+              jt.error(plugin);
+            } else {
+              jt?.success(plugin);
+            }
+            _transMap.remove(transaction);
+          }
+
+          JanusHandle handle = _handleMap[message['sender']];
+
+          JanusHandle feedHandle;
+          if (plugin['leaving'] != null || plugin['kicked'] != null) {
+            // 有人离开
+            if (plugin['leaving'] != null && null == plugin['reason']) {
+              // 有人离开
+              feedHandle = _feedMap[plugin['leaving']];
+            }
+            if (plugin['kicked'] != null && null == plugin['reason']) {
+              // 有人被踢
+              feedHandle = _feedMap[plugin['kicked']];
+            }
+            if (plugin['leaving'] != null && null != plugin['reason']) {
+              // 自己被踢
+              feedHandle = handleMap[sessionId];
+            }
+          }
+          _onMessage(handle, plugin, message["jsep"], feedHandle);
+
+          if (plugin['leaving'] != null && null == plugin['reason']) {
+            // 有人离开,移除handle
+            // this._feedMap.remove(plugin['leaving']);
+            // this._handleMap.remove(message['sender']);
+            _feedMap.remove(feedHandle.feedId);
+            _handleMap.remove(feedHandle.handleId);
+          }
+
+          if (plugin['kicked'] != null && null == plugin['reason']) {
+            // 将某人踢掉,移除handle
+            // this._feedMap.remove(plugin['kicked']);
+            // this._handleMap.remove(message['sender']);
+            _feedMap.remove(feedHandle.feedId);
+            _handleMap.remove(feedHandle.handleId);
           }
         }
-        this._onMessage(handle, plugin, message["jsep"], feedHandle);
+        break;
 
-        if(plugin['leaving'] != null && null == plugin['reason']) {  // 有人离开,移除handle  
-          // this._feedMap.remove(plugin['leaving']);
-          // this._handleMap.remove(message['sender']);
-          this._feedMap.remove(feedHandle.feedId);
-          this._handleMap.remove(feedHandle.handleId);
+      case 'detached':
+        {
+          // 插件从Janus会话detach的通知，释放了一个插件句柄
+          debugPrint('$_kJanus handleMessage detached: $message');
+          JanusHandle handle = this._handleMap[message['sender']];
+          handle?.onLeaving(handle);
         }
+        break;
 
-        if(plugin['kicked'] != null && null == plugin['reason']){   // 将某人踢掉,移除handle
-          // this._feedMap.remove(plugin['kicked']);
-          // this._handleMap.remove(message['sender']);
-          this._feedMap.remove(feedHandle.feedId);
-          this._handleMap.remove(feedHandle.handleId);
+      default:
+        {
+          debugPrint('$_kJanus handleMessage defalut: $message');
+          JanusHandle handle = this._handleMap[message['sender']];
+          if (handle == null) {
+            print('missing handle');
+          }
         }
-      }
-      break;
-
-      case 'detached': {  // 插件从Janus会话detach的通知，释放了一个插件句柄
-        debugPrint('$_kJanus handleMessage detached: $message');
-        JanusHandle handle = this._handleMap[message['sender']];
-        handle?.onLeaving(handle);
-      }
-      break;
-
-      default: {
-        debugPrint('$_kJanus handleMessage defalut: $message');
-        JanusHandle handle = this._handleMap[message['sender']];
-        if(handle == null){
-          print('missing handle');
-        }
-      }
     }
-
   }
 
-  /// 房间创建销毁等逻辑
-  void videoRoomHandle({ 
-    @required Map<String, dynamic> req, 
-    @required TransactionSuccess success, 
-    @required TransactionError error
-  }){
-    JanusHandle handle = this._handleMap[this._handleId];
+  /// Logic such as room creation and destruction
+  void videoRoomHandle(
+      {@required Map<String, dynamic> req,
+      @required TransactionSuccess success,
+      @required TransactionError error}) {
+    JanusHandle handle = _handleMap[_handleId];
     String transaction = randomAlphaNumeric(12);
     JanusTransaction jt = JanusTransaction(tid: transaction);
     jt.success = success;
     jt.error = error;
-    this._transMap[transaction] = jt;
-    this.sendMessage(handleId: handle.handleId, body: req, transaction: transaction);
+    _transMap[transaction] = jt;
+    sendMessage(handleId: handle.handleId, body: req, transaction: transaction);
   }
-
-  // /// 获取用户
-  // void getParticipants(){
-  //   Map<String, dynamic> req = <String, dynamic>{
-  //     "request" : "listparticipants",
-  //     "room" : this._roomId,
-  //   };
-  //   this.videoRoomHandle
-  // }
 
 }
