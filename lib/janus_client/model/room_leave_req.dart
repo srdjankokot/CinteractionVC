@@ -26,7 +26,7 @@ class RoomLeaveReq {
 
   Map<String, dynamic> toMap() {
     return {
-      'request': this.request, 
+      'request': request,
     };
   }
 }

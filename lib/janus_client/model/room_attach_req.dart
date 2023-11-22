@@ -26,10 +26,10 @@ class RoomAttachReq {
 
   Map<String, dynamic> toMap() {
     Map<String, dynamic> map = {
-      'videoroom': this.videoroom, 
-      'room': this.room,
-      'feed': this.feed,
-      'display': this.display,
+      'videoroom': videoroom,
+      'room': room,
+      'feed': feed,
+      'display': display,
     };
 
     map.removeWhere((key, value) => value == null);

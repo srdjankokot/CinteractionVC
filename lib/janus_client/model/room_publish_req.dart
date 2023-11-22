@@ -81,18 +81,18 @@ class RoomPublishReq {
 
   Map<String, dynamic> toMap() {
     Map<String, dynamic> map =  {
-      'request': this.request, 
-      'audio': this.audio,
-      'video': this.video,
-      'data': this.data,
-      'audiocodec': this.audiocodec,
-      'videocodec': this.videocodec,
-      'bitrate': this.bitrate,
-      'record': this.record,
-      'filename': this.filename,
-      'display': this.display,
-      'audio_level_average': this.audioActivePackets,
-      'audio_active_packets': this.audioLevelAverage,
+      'request': request,
+      'audio': audio,
+      'video': video,
+      'data': data,
+      'audiocodec': audiocodec,
+      'videocodec': videocodec,
+      'bitrate': bitrate,
+      'record': record,
+      'filename': filename,
+      'display': display,
+      'audio_level_average': audioActivePackets,
+      'audio_active_packets': audioLevelAverage,
     };
     map.removeWhere((key, value) => value == null);
     return map;

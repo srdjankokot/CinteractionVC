@@ -56,69 +56,68 @@ class RoomReq {
     this.pin, 
     this.isPrivate = false, 
     this.allowed,
-    this.publishers = 40,
+    this.publishers = 100,
     this.audiolevelEvent = true,
     this.audioActivePackets = 100,
     this.audioLevelAverage = 25,
     this.bitrate = 128000,
-    this.firFreq,
+    this.firFreq = 10,
   });
 
   Map<String, dynamic> toMap() {
     Map<String, dynamic> map = {
-      'request': this.request, 
-      'room': this.room,
-      'permanent': this.permanent,
-      'description': this.description,
-      'is_private': this.isPrivate,
-      'publishers': this.publishers,
-      'audiolevel_event': this.audiolevelEvent,
-      'bitrate': this.bitrate
+      'request': request,
+      'room': room,
+      'permanent': permanent,
+      'description': description,
+      'is_private': isPrivate,
+      'publishers': publishers,
+      'audiolevel_event': audiolevelEvent,
     };
     if(null != secret){
-      map['secret'] = this.secret;
+      map['secret'] = secret;
     }
      if(null != pin){
-      map['pin'] = this.pin;
+      map['pin'] = pin;
     }
     if(null != allowed){
-      map['allowed'] = this.allowed;
+      map['allowed'] = allowed;
     }
     if(null != audioActivePackets){
-      map['audio_active_packets'] = this.audioActivePackets;
+      map['audio_active_packets'] = audioActivePackets;
     }
     if(null != audioLevelAverage){
-      map['audio_level_average'] = this.audioLevelAverage;
+      map['audio_level_average'] = audioLevelAverage;
     }
     return map;
   }
 
   Map<String, dynamic> toMapNew() {
     Map<String, dynamic> map = {
-      'request': this.request,
-      'room': this.room,
-      'permanent': this.permanent,
-      'description': this.description,
-      'is_private': this.isPrivate,
-      'new_publishers': this.publishers,
-      'audiolevel_event': this.audiolevelEvent,
-      'new_bitrate': this.bitrate,
-      'new_fir_freq': this.firFreq
+      'request': request,
+      'room': room,
+      'permanent': permanent,
+      'description': description,
+      'is_private': isPrivate,
+      'new_publishers': publishers,
+      'audiolevel_event': audiolevelEvent,
+      'new_bitrate': bitrate,
+      'new_fir_freq': firFreq
     };
     if(null != secret){
-      map['secret'] = this.secret;
+      map['secret'] = secret;
     }
     if(null != pin){
-      map['pin'] = this.pin;
+      map['pin'] = pin;
     }
     if(null != allowed){
-      map['allowed'] = this.allowed;
+      map['allowed'] = allowed;
     }
     if(null != audioActivePackets){
-      map['audio_active_packets'] = this.audioActivePackets;
+      map['audio_active_packets'] = audioActivePackets;
     }
     if(null != audioLevelAverage){
-      map['audio_level_average'] = this.audioLevelAverage;
+      map['audio_level_average'] = audioLevelAverage;
     }
     return map;
   }

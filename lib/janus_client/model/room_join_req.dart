@@ -64,11 +64,11 @@ class RoomJoinReq {
 
   Map<String, dynamic> toMap() {
     Map<String, dynamic> map = {
-      'request': this.request, 
-      'ptype': this.ptype,
-      'id': this.id,
-      'display': this.display,
-      'token': this.token,
+      'request': request,
+      'ptype': ptype,
+      'id': id,
+      'display': display,
+      'token': token,
     };
 
     map.removeWhere((key, value) => value == null);
