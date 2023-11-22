@@ -26,8 +26,8 @@ class MyApp extends StatelessWidget {
       theme: ThemeData(
         primarySwatch: Colors.orange,
       ),
-      // home: MyHomePage(title: 'Flutter Janus Demo Home Page'),
-      home: VideoRoomPage("999667", "Test"),
+      home: MyHomePage(title: 'Cinteraction Virtual Classroom'),
+      // home: VideoRoomPage("999888", "Test"),
     );
   }
 }

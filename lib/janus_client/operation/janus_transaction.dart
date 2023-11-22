@@ -1,9 +1,9 @@
 
 import 'package:flutter/cupertino.dart';
 
-typedef void TransactionSuccess(Map<String, dynamic> data);
-typedef void TransactionError(Map<String, dynamic> data);
-typedef void TransactionDestoryed();
+typedef TransactionSuccess = void Function(Map<String, dynamic> data);
+typedef TransactionError = void Function(Map<String, dynamic> data);
+typedef TransactionDestoryed = void Function();
 
 /// Janus事务，事务的概念可以参考SIP协议，可以理解为一问一答这样一个交互的过程，用事务ID来标识。
 class JanusTransaction {

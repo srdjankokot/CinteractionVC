@@ -31,20 +31,19 @@ import '../operation/janus_transaction.dart';
 /// 7.发送ice，trickle
 ///
 
-typedef void OnMessage(
-    JanusHandle handle, Map plugin, Map jsep, JanusHandle feedHandle);
+typedef OnMessage = void Function(JanusHandle handle, Map plugin, Map jsep, JanusHandle feedHandle);
 
-typedef void ChangeDisplay(int feedId, String display);
+typedef ChangeDisplay = void Function(int feedId, String display);
 
-typedef void EndMeeting();
+typedef EndMeeting = void Function();
 
-typedef void NotifyTalking(int feedId);
+typedef NotifyTalking = void Function(int feedId);
 
-/// janus信令处理
+/// janus signaling processing
 class JanusSignal {
   bool disConnected = false;
 
-  String _kJanus = 'janus';
+  final String _kJanus = 'janus';
 
   int _sessionId = -1;
 
@@ -64,7 +63,7 @@ class JanusSignal {
   // 是否需要使用
   bool _withCredentials = false;
 
-  // websocket信息回调处理
+  // websocket information callback processing
   OnMessage _onMessage;
 
   ChangeDisplay _changeDisplay;
@@ -80,68 +79,68 @@ class JanusSignal {
 
   WebSocketSink _sink;
 
-  // 显示昵称
+  // Show nickname
   String _display = 'janus';
 
-  // keepalive时间
+  // keepalive time
   int _refreshInterval = 20;
 
-  // janus事务集合
-  Map<dynamic, JanusTransaction> _transMap = <dynamic, JanusTransaction>{};
+  // janus transaction collection
+  final Map<dynamic, JanusTransaction> _transMap = <dynamic, JanusTransaction>{};
 
-  // janus句柄集合
-  Map<dynamic, JanusHandle> _handleMap = <dynamic, JanusHandle>{};
+  // janus handle collection
+  final Map<dynamic, JanusHandle> _handleMap = <dynamic, JanusHandle>{};
 
-  // janus远程流集合
-  Map<dynamic, JanusHandle> _feedMap = <dynamic, JanusHandle>{};
+  // janus remote stream collection
+  final Map<dynamic, JanusHandle> _feedMap = <dynamic, JanusHandle>{};
 
-  JsonEncoder _encoder = JsonEncoder();
+  final JsonEncoder _encoder = const JsonEncoder();
 
-  JsonDecoder _decoder = JsonDecoder();
+  final JsonDecoder _decoder = const JsonDecoder();
 
-  get handleId => this._handleId; // self handleId
+  get handleId => _handleId; // self handleId
 
-  get sessionId => this._sessionId; // self session
+  get sessionId => _sessionId; // self session
 
-  get handleMap => this._handleMap; // self session
+  get handleMap => _handleMap; // self session
 
-  set sessionId(int sessionId) => this._sessionId = sessionId;
+  set sessionId(int sessionId) => _sessionId = sessionId;
 
-  set roomId(int roomId) => this._roomId = roomId;
+  set roomId(int roomId) => _roomId = roomId;
 
-  set url(String url) => this._url = url;
+  set url(String url) => _url = url;
 
-  set apiSecret(String apiSecret) => this._apiSecret = apiSecret;
+  set apiSecret(String apiSecret) => _apiSecret = apiSecret;
 
-  set token(String token) => this._token = token;
+  set token(String token) => _token = token;
 
   set withCredentials(bool withCredentials) =>
-      this._withCredentials = withCredentials;
+      _withCredentials = withCredentials;
 
-  set onMessage(OnMessage onMessage) => this._onMessage = onMessage;
+  set onMessage(OnMessage onMessage) => _onMessage = onMessage;
 
   set changeDisplay(ChangeDisplay changeDisplay) =>
-      this._changeDisplay = changeDisplay;
+      _changeDisplay = changeDisplay;
 
-  set endMeeting(EndMeeting endMeeting) => this._endMeeting = endMeeting;
+  set endMeeting(EndMeeting endMeeting) => _endMeeting = endMeeting;
 
   set notifyTalking(NotifyTalking notifyTalking) =>
-      this._notifyTalking = notifyTalking;
+      _notifyTalking = notifyTalking;
 
-  set display(String display) => this._display = display;
+  set display(String display) => _display = display;
 
   set refreshInterval(int refreshInterval) =>
-      this._refreshInterval = refreshInterval;
+      _refreshInterval = refreshInterval;
 
-  dynamic get _apiMap => this._withCredentials
-      ? this._apiSecret != null
-          ? {"apisecret": this._apiSecret}
+  dynamic get _apiMap => _withCredentials
+      ? _apiSecret != null
+          ? {"apisecret": _apiSecret}
           : {}
       : {};
 
-  dynamic get _tokenMap => this._withCredentials
-      ? this._token != null
-          ? {"token": this._token}
+  dynamic get _tokenMap => _withCredentials
+      ? _token != null
+          ? {"token": _token}
           : {}
       : {};
 
@@ -151,7 +150,7 @@ class JanusSignal {
 
   static JanusSignal _instance;
 
-  /// 单例
+  /// Singleton
   static JanusSignal getInstance({
     @required String url,
     String apiSecret,
@@ -161,9 +160,7 @@ class JanusSignal {
     int refreshInterval = 20,
     disConnected = false,
   }) {
-    if (_instance == null) {
-      _instance = JanusSignal._();
-    }
+    _instance ??= JanusSignal._();
     if (url != null) _instance.url = url;
     if (apiSecret != null) _instance.apiSecret = apiSecret;
     if (token != null) _instance.token = token;
@@ -174,7 +171,7 @@ class JanusSignal {
     return _instance;
   }
 
-  /// 信令获得连接
+  /// Signaling to get a connection
   void connect() {
     debugPrint('janus connect===========>${_url}');
     Iterable<String> it = ['janus-protocol'];
@@ -192,15 +189,15 @@ class JanusSignal {
     });
   }
 
-  /// websocket断开链接
+  /// websocket disconnect
   void disconnect() {
     debugPrint('janus disconnect===========>$disConnected');
-    this.keepApliveTimer?.cancel();
-    this._sink.close();
-    this.disConnected = true;
+    keepApliveTimer?.cancel();
+    _sink.close();
+    disConnected = true;
   }
 
-  /// 发送message给janus
+  /// Send message to janus
   void sendMessage(
       {@required int handleId,
       @required Map body,
@@ -211,27 +208,27 @@ class JanusSignal {
       "janus": "message",
       "body": body,
       "transaction": transaction,
-      "session_id": this._sessionId,
+      "session_id": _sessionId,
       "handle_id": handleId
     };
     if (jsep != null) {
       msgMap["jsep"] = jsep;
     }
-    this.send(msgMap);
+    send(msgMap);
   }
 
-  /// 公共消息发送
+  /// Public messaging
   void send(Map map) {
     debugPrint('janus disconnect====send=======>$disConnected');
     if (disConnected) {
       return;
     }
     debugPrint('janus client send=====>>>>>>$map');
-    String json = this._encoder.convert(map);
+    String json = _encoder.convert(map);
     _sink.add(json);
   }
 
-  /// 创建会话
+  /// Create session
   void createSession(
       {@required TransactionSuccess success,
       @required TransactionError error}) {
@@ -240,23 +237,23 @@ class JanusSignal {
 
     jt.success = (Map data) {
       debugPrint('createSession seuccess');
-      this.sessionId = data['data']['id'];
-      this.keepAlive();
+      sessionId = data['data']['id'];
+      keepAlive();
       success(data);
     };
     jt.error = error;
 
-    this._transMap[transaction] = jt;
+    _transMap[transaction] = jt;
     Map<String, dynamic> createMap = {
       'janus': 'create',
       'transaction': transaction,
-      ...this._apiMap,
-      ...this._tokenMap,
+      ..._apiMap,
+      ..._tokenMap,
     };
-    this.send(createMap);
+    send(createMap);
   }
 
-  /// attach关联janus插件
+  /// attach associated janus plug-in
   void attach({
     @required String plugin,
     @required String opaqueId,
@@ -266,11 +263,9 @@ class JanusSignal {
     String transaction = randomAlphaNumeric(12);
     JanusTransaction jt = JanusTransaction(tid: transaction);
 
-    jt.success = (data) {
-      this._handleId = data['data']['id'];
-      debugPrint(
-          'janus attach success=====data: $data======>handleId: ${this._handleId}');
-      this._handleMap[this._handleId] = JanusHandle(handleId: this._handleId);
+    jt.success = (data) {_handleId = data['data']['id'];
+      debugPrint('janus attach success=====data: $data======>handleId: ${_handleId}');
+      _handleMap[_handleId] = JanusHandle(handleId: _handleId);
       success(data);
     };
     jt.error = error;
@@ -280,13 +275,13 @@ class JanusSignal {
       "janus": "attach",
       "plugin": plugin,
       "transaction": transaction,
-      "session_id": this._sessionId,
+      "session_id": _sessionId,
       "opaque_id": opaqueId
     };
-    this.send(attachMap);
+    send(attachMap);
   }
 
-  ///　加入房间
+  ///　join room
   void joinRoom({
     @required Map<String, dynamic> data,
     @required Map<String, dynamic> body,
@@ -304,9 +299,9 @@ class JanusSignal {
     handle.onRemoteJsep = onRemoteJsep;
     handle.onLeaving = onLeaving;
     handle.onKicked = onKicked;
-    handle.display = display ?? this._display;
+    handle.display = display ?? _display;
 
-    // 设置handle的session_id,　不是远程的session_id就是自己的session_id
+    // Set the session_id of the handle, either the remote session_id or your own session_id
     if (feedId != null) {
       handle.feedId = feedId;
       _feedMap[feedId] = handle;
@@ -318,8 +313,8 @@ class JanusSignal {
     sendMessage(body: body, handleId: handle.handleId);
   }
 
-  ///　发送ice给janus
-  void trickleCandidata({
+  ///　Send ice to janus
+  void trickleCandidate({
     @required int handleId,
     @required Map<String, dynamic> candidate,
   }) {
@@ -327,36 +322,35 @@ class JanusSignal {
       "janus": "trickle",
       "candidate": candidate,
       "transaction": randomNumeric(12),
-      "session_id": this._sessionId,
+      "session_id": _sessionId,
       "handle_id": handleId,
     };
-    this.send(trickleMap);
+    send(trickleMap);
   }
 
-  /// 心跳
+  /// heartbeat
   void keepAlive() {
     Map<String, dynamic> aliveMap = {
       'janus': 'keepalive',
-      'session_id': this._sessionId,
-      ...this._apiMap,
-      ...this._tokenMap,
+      'session_id': _sessionId,
+      ..._apiMap,
+      ..._tokenMap,
     };
-    this.keepApliveTimer =
-        Timer.periodic(Duration(seconds: this._refreshInterval), (timer) {
+    keepApliveTimer = Timer.periodic(Duration(seconds: _refreshInterval), (timer) {
       aliveMap['transaction'] = randomNumeric(12);
-      this.send(aliveMap);
+      send(aliveMap);
     });
   }
 
-  /// 处理janus服务器返回消息
+  /// Processing the message returned by the janus server
   void handleMessage(Map<dynamic, dynamic> message) {
-    String janus = message[this._kJanus];
+    String janus = message[_kJanus];
     debugPrint('$_kJanus handleMessage $janus');
     switch (janus) {
       case 'success':
         {
           String transaction = message['transaction'];
-          JanusTransaction jt = this._transMap[transaction];
+          JanusTransaction jt = _transMap[transaction];
           if (null != jt && jt.success != null) {
             jt.success(message);
           }
@@ -367,7 +361,7 @@ class JanusSignal {
       case 'error':
         {
           String transaction = message['transaction'];
-          JanusTransaction jt = this._transMap[transaction];
+          JanusTransaction jt = _transMap[transaction];
           if (null != jt && jt.error != null) {
             jt.error(message);
           }
@@ -401,7 +395,7 @@ class JanusSignal {
             _changeDisplay(plugin['id'], plugin['display']);
           }
 
-          // 创建房间成功　失败执行方法
+          // Room creation successful, execution method failed
           String transaction = message['transaction'];
           JanusTransaction jt = _transMap[transaction];
           if (null != plugin && null != jt) {
@@ -418,17 +412,17 @@ class JanusSignal {
 
           JanusHandle feedHandle;
           if (plugin['leaving'] != null || plugin['kicked'] != null) {
-            // 有人离开
+            // someone left
             if (plugin['leaving'] != null && null == plugin['reason']) {
-              // 有人离开
+              // someone left
               feedHandle = _feedMap[plugin['leaving']];
             }
             if (plugin['kicked'] != null && null == plugin['reason']) {
-              // 有人被踢
+              // someone was kicked
               feedHandle = _feedMap[plugin['kicked']];
             }
             if (plugin['leaving'] != null && null != plugin['reason']) {
-              // 自己被踢
+              // Get kicked yourself
               feedHandle = handleMap[sessionId];
             }
           }
@@ -456,7 +450,7 @@ class JanusSignal {
         {
           // 插件从Janus会话detach的通知，释放了一个插件句柄
           debugPrint('$_kJanus handleMessage detached: $message');
-          JanusHandle handle = this._handleMap[message['sender']];
+          JanusHandle handle = _handleMap[message['sender']];
           handle?.onLeaving(handle);
         }
         break;
@@ -464,7 +458,7 @@ class JanusSignal {
       default:
         {
           debugPrint('$_kJanus handleMessage defalut: $message');
-          JanusHandle handle = this._handleMap[message['sender']];
+          JanusHandle handle = _handleMap[message['sender']];
           if (handle == null) {
             print('missing handle');
           }
