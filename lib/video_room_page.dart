@@ -461,15 +461,35 @@ class _VideoRoomPage extends State<VideoRoomPage> {
     return list;
   }
 
-  Widget _buildVideoWidget(
-      orientation, RTCVideoRenderer renderer, String display) {
+  Widget _buildVideoWidget(orientation, RTCVideoRenderer renderer, String display) {
+
+
+
     return Container(
       color: Colors.orangeAccent,
       margin: const EdgeInsets.all(5.0),
-      child: Center(
-        child: RTCVideoView(renderer,
-            objectFit: RTCVideoViewObjectFit.RTCVideoViewObjectFitCover),
+      child: Stack(
+
+        children: [Center(
+          child: RTCVideoView(renderer,
+              objectFit: RTCVideoViewObjectFit.RTCVideoViewObjectFitCover,
+          ),
+          
+        ),
+       Positioned(
+         bottom: 0,
+           right: 0,
+           child:
+           Container(
+             color: Colors.orangeAccent,
+             margin: const EdgeInsets.all(2.0),
+           child:  Text(display, style: const TextStyle(color: Colors.white)),
+           )
+
+       )
+        ],
       ),
     );
+
   }
 }
