@@ -1,32 +1,35 @@
 PODS:
   - Flutter (1.0.0)
-  - flutter_webrtc (0.2.2):
+  - flutter_webrtc (0.9.31):
     - Flutter
-    - GoogleWebRTC (= 1.1.29400)
-    - Libyuv (= 1703)
-  - GoogleWebRTC (1.1.29400)
-  - Libyuv (1703)
+    - WebRTC-SDK (= 104.5112.17)
+  - path_provider_foundation (0.0.1):
+    - Flutter
+    - FlutterMacOS
+  - WebRTC-SDK (104.5112.17)
 
 DEPENDENCIES:
   - Flutter (from `Flutter`)
   - flutter_webrtc (from `.symlinks/plugins/flutter_webrtc/ios`)
+  - path_provider_foundation (from `.symlinks/plugins/path_provider_foundation/ios`)
 
 SPEC REPOS:
   trunk:
-    - GoogleWebRTC
-    - Libyuv
+    - WebRTC-SDK
 
 EXTERNAL SOURCES:
   Flutter:
     :path: Flutter
   flutter_webrtc:
     :path: ".symlinks/plugins/flutter_webrtc/ios"
+  path_provider_foundation:
+    :path: ".symlinks/plugins/path_provider_foundation/ios"
 
 SPEC CHECKSUMS:
   Flutter: f04841e97a9d0b0a8025694d0796dd46242b2854
-  flutter_webrtc: 626ca239bcc4390a514a2ac2b21b16d0c58b33fe
-  GoogleWebRTC: cfb83bc346435a17fe06bb05f04ad826b858a7fb
-  Libyuv: 5f79ced0ee66e60a612ca97de1e6ccacd187a437
+  flutter_webrtc: 02c023207f972145a3bc8c7aada86754f264d563
+  path_provider_foundation: 29f094ae23ebbca9d3d0cec13889cd9060c0e943
+  WebRTC-SDK: 082ae4893212534a779ca233f19a9df8efd5f3bd
 
 PODFILE CHECKSUM: ef19549a9bc3046e7bb7d2fab4d021637c0c58a3
 

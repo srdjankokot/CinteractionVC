@@ -83,7 +83,8 @@ class _VideoRoomPage extends State<VideoRoomPage> {
 
   ///　janus signaling event processing
   void onMessage() {
-    _janusSignal.onMessage = (JanusHandle handle, Map plugin, Map jsep, JanusHandle feedHandle) {
+    _janusSignal.onMessage =
+        (JanusHandle handle, Map plugin, Map jsep, JanusHandle feedHandle) {
       String videoroom = plugin['videoroom'];
       if (videoroom == 'joined') {
         handle.onJoined(handle);
@@ -94,13 +95,14 @@ class _VideoRoomPage extends State<VideoRoomPage> {
 
       if (publishers != null && publishers.isNotEmpty) {
         for (var publisher in publishers) {
-
           int feed = publisher['id'];
           String display = publisher['display'];
 
-          debugPrint('stop1====>${_janusSignal.sessionId}==$feed==$displayName===$display');
+          debugPrint(
+              'stop1====>${_janusSignal.sessionId}==$feed==$displayName===$display');
           if (_janusSignal.sessionId == feed && displayName == display) {
-            debugPrint('stop2====>${_janusSignal.sessionId}==$feed==$displayName===$display');
+            debugPrint(
+                'stop2====>${_janusSignal.sessionId}==$feed==$displayName===$display');
             continue;
           }
 
@@ -238,7 +240,9 @@ class _VideoRoomPage extends State<VideoRoomPage> {
 
   void createRoom(Map<String, dynamic> attachData) {
     _janusSignal.videoRoomHandle(
-        req: RoomReq(request: 'create', room: room, description: 'this is my room').toMap(),
+        req: RoomReq(
+                request: 'create', room: room, description: 'this is my room')
+            .toMap(),
         success: (data) {
           debugPrint('create room=====>>>>>>$data');
           joinRoom(attachData);
@@ -293,7 +297,8 @@ class _VideoRoomPage extends State<VideoRoomPage> {
   }
 
   /// Observers process remote media information
-  void subscriberHandleRemoteJsep(JanusHandle handle, Map<String, dynamic> jsep) async {
+  void subscriberHandleRemoteJsep(
+      JanusHandle handle, Map<String, dynamic> jsep) async {
     _localStream ??= await createStream();
     JanusConnection jc = await createJanusConnection(handle: handle);
     jc.setRemoteDescription(jsep);
@@ -312,7 +317,8 @@ class _VideoRoomPage extends State<VideoRoomPage> {
         iceServers: iceServers,
         display: handle.display);
 
-    debugPrint('Create peer connection===>${peerConnectionMap.length} ====${handle.handleId}');
+    debugPrint(
+        'Create peer connection===>${peerConnectionMap.length} ====${handle.handleId}');
 
     peerConnectionMap[handle.feedId] = jc;
     await jc.initConnection();
@@ -347,9 +353,9 @@ class _VideoRoomPage extends State<VideoRoomPage> {
           // Provide your own width, height and frame rate here
           // 'minHeight': '720',
 
-          'width': { 'max': 640},
-          'height': { 'max': 400},
-          'frameRate': { 'max': 15, 'min': 5 },
+          'width': {'max': 640},
+          'height': {'max': 400},
+          'frameRate': {'max': 15, 'min': 5},
         },
         'facingMode': 'user',
         'optional': [],
@@ -415,11 +421,6 @@ class _VideoRoomPage extends State<VideoRoomPage> {
         //   children: list,
         // );
 
-
-
-
-
-
         return GridView.builder(
             gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
               crossAxisCount: col,
@@ -444,15 +445,14 @@ class _VideoRoomPage extends State<VideoRoomPage> {
     for (var peerConnection in peerConnectionMap.entries) {
       // if (list.length <= maxRenderer) {
       if (_janusSignal.sessionId != peerConnection.key) {
-
         // for(int i = 0; i<20; i++)
         //   {
-            list = [
-              ...list,
-              _buildVideoWidget(orientation, peerConnection.value.remoteRenderer,
-                  peerConnection.value.display)
-            ];
-          // }
+        list = [
+          ...list,
+          _buildVideoWidget(orientation, peerConnection.value.remoteRenderer,
+              peerConnection.value.display)
+        ];
+        // }
       }
       // } else {
       //   continue;
@@ -461,35 +461,75 @@ class _VideoRoomPage extends State<VideoRoomPage> {
     return list;
   }
 
-  Widget _buildVideoWidget(orientation, RTCVideoRenderer renderer, String display) {
-
-
-
+  Widget _buildVideoWidget(
+      orientation, RTCVideoRenderer renderer, String display) {
     return Container(
       color: Colors.orangeAccent,
       margin: const EdgeInsets.all(5.0),
       child: Stack(
-
-        children: [Center(
-          child: RTCVideoView(renderer,
+        children: [
+          Center(
+            child: RTCVideoView(
+              renderer,
               objectFit: RTCVideoViewObjectFit.RTCVideoViewObjectFitCover,
+            ),
           ),
-          
-        ),
-       Positioned(
-         bottom: 0,
-           right: 0,
-           child:
-           Container(
-             color: Colors.orangeAccent,
-             margin: const EdgeInsets.all(2.0),
-           child:  Text(display, style: const TextStyle(color: Colors.white)),
-           )
-
-       )
+          Positioned(
+              bottom: 0,
+              right: 0,
+              child: Container(
+                color: Colors.orangeAccent,
+                margin: const EdgeInsets.all(2.0),
+                child:
+                    Text(display, style: const TextStyle(color: Colors.white)),
+              )),
+          Positioned(
+            top: 0,
+            left: 0,
+            child: TextButton(
+                onPressed: () => getFrameFromStream(renderer),
+                child: const Text("GET FRAME")),
+          )
         ],
       ),
     );
+  }
 
+  Future<void> getFrameFromStream(RTCVideoRenderer renderer) async {
+
+    MediaStreamTrack track = renderer.srcObject.getVideoTracks().first;
+    final buffer = await track.captureFrame();
+    Uint8List data = buffer.asUint8List();
+    showDialog(context: context, builder: (_) => ImageDialog(data));
+
+  }
+}
+
+class ImageDialog extends StatelessWidget {
+  final Uint8List image;
+
+  const ImageDialog(this.image, {Key key}) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return Dialog(
+      child: Center(
+        child: Image.memory(
+          image,
+          fit: BoxFit.contain,
+          width: double.infinity,
+          height: double.infinity,
+        )
+    )
+    );
+
+
+      // Container(
+      //   width: 200,
+      //   height: 200,
+      //   decoration: BoxDecoration(
+      //       image: DecorationImage(image: image, fit: BoxFit.cover)),
+      // ),
+    // );
   }
 }
