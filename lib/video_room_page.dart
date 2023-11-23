@@ -464,8 +464,11 @@ class _VideoRoomPage extends State<VideoRoomPage> {
   Widget _buildVideoWidget(
       orientation, RTCVideoRenderer renderer, String display) {
     return Container(
-      color: Colors.orangeAccent,
+      clipBehavior: Clip.hardEdge,
       margin: const EdgeInsets.all(5.0),
+      decoration: const BoxDecoration(
+          color: Colors.orangeAccent,
+          borderRadius: BorderRadius.all(Radius.circular(15))),
       child: Stack(
         children: [
           Center(
@@ -478,8 +481,11 @@ class _VideoRoomPage extends State<VideoRoomPage> {
               bottom: 0,
               right: 0,
               child: Container(
-                color: Colors.orangeAccent,
-                margin: const EdgeInsets.all(2.0),
+                decoration: const BoxDecoration(
+                    color: Colors.orangeAccent,
+                    borderRadius: BorderRadius.all(Radius.circular(3))),
+                margin: const EdgeInsets.all(10.0),
+                padding: const EdgeInsets.all(5),
                 child:
                     Text(display, style: const TextStyle(color: Colors.white)),
               )),
@@ -496,12 +502,12 @@ class _VideoRoomPage extends State<VideoRoomPage> {
   }
 
   Future<void> getFrameFromStream(RTCVideoRenderer renderer) async {
-
     MediaStreamTrack track = renderer.srcObject.getVideoTracks().first;
     final buffer = await track.captureFrame();
     Uint8List data = buffer.asUint8List();
-    showDialog(context: context, builder: (_) => ImageDialog(data));
 
+    if (!mounted) return;
+    showDialog(context: context, builder: (_) => ImageDialog(data));
   }
 }
 
@@ -513,23 +519,20 @@ class ImageDialog extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Dialog(
-      child: Center(
-        child: Image.memory(
-          image,
-          fit: BoxFit.contain,
-          width: double.infinity,
-          height: double.infinity,
-        )
-    )
-    );
+        child: Center(
+            child: Image.memory(
+      image,
+      fit: BoxFit.contain,
+      width: double.infinity,
+      height: double.infinity,
+    )));
 
-
-      // Container(
-      //   width: 200,
-      //   height: 200,
-      //   decoration: BoxDecoration(
-      //       image: DecorationImage(image: image, fit: BoxFit.cover)),
-      // ),
+    // Container(
+    //   width: 200,
+    //   height: 200,
+    //   decoration: BoxDecoration(
+    //       image: DecorationImage(image: image, fit: BoxFit.cover)),
+    // ),
     // );
   }
 }
