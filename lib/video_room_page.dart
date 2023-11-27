@@ -1,5 +1,6 @@
 import 'dart:io';
 
+import 'package:cinteraction_vc/janus_client/model/room_audio_mute_req.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:cinteraction_vc/janus_client/janus_client_plugin.dart';
@@ -22,6 +23,9 @@ class _VideoRoomPage extends State<VideoRoomPage> {
   int maxRenderer = 3;
   String displayName = 'Srdjan';
 
+  bool videoEnabled = true;
+  bool audioEnabled = true;
+
   _VideoRoomPage(this.room, this.displayName);
 
   String pluginName = 'janus.plugin.videoroom';
@@ -37,6 +41,7 @@ class _VideoRoomPage extends State<VideoRoomPage> {
   int selfHandleId = -1;
 
   int _mypvtid;
+  int _myid;
 
   @override
   void deactivate() {
@@ -83,12 +88,32 @@ class _VideoRoomPage extends State<VideoRoomPage> {
 
   ///　janus signaling event processing
   void onMessage() {
+    _janusSignal.notifyTalking = (feedId) => {debugPrint("$feedId")};
+
     _janusSignal.onMessage =
         (JanusHandle handle, Map plugin, Map jsep, JanusHandle feedHandle) {
       String videoroom = plugin['videoroom'];
       if (videoroom == 'joined') {
         handle.onJoined(handle);
         _mypvtid = plugin['private_id'];
+        _myid = plugin['id'];
+      }
+
+      if (videoroom == 'event') {
+        var peer = peerConnectionMap[plugin['id']];
+        if (peer != null) {
+          if (plugin['mid'] == '1') {
+            //video
+            peer.video = plugin['moderation'] == 'unmuted';
+            peerConnectionMap[plugin['id']] = peer;
+            setState(() {});
+          } else if (plugin['mid'] == '0') {
+            //audio
+            peer.audio = plugin['moderation'] == 'unmuted';
+            peerConnectionMap[plugin['id']] = peer;
+            setState(() {});
+          }
+        }
       }
 
       List<dynamic> publishers = plugin['publishers'];
@@ -110,8 +135,7 @@ class _VideoRoomPage extends State<VideoRoomPage> {
               plugin: pluginName,
               opaqueId: opaqueId,
               success: (Map<String, dynamic> data) {
-                debugPrint(
-                    'attach data: $data, firstAttachData: $attachRoomData');
+                debugPrint('attach data: $data');
 
                 Map<String, dynamic> body = {
                   "request": "join",
@@ -174,14 +198,11 @@ class _VideoRoomPage extends State<VideoRoomPage> {
     });
   }
 
-  Map<String, dynamic> attachRoomData;
-
   void attachPlugin() {
     _janusSignal.attach(
         plugin: pluginName,
         opaqueId: opaqueId,
         success: (Map<String, dynamic> attachData) {
-          attachRoomData = attachData;
           // this.joinRoom(data);
           checkRoom(attachData);
         },
@@ -329,6 +350,15 @@ class _VideoRoomPage extends State<VideoRoomPage> {
       if (stream.getVideoTracks().isNotEmpty) {
         connection.remoteStream = stream;
         connection.remoteRenderer.srcObject = stream;
+
+        connection.remoteStream.getVideoTracks().first.onMute =
+            () => {debugPrint("onMute")};
+        connection.remoteStream.getVideoTracks().first.onUnMute =
+            () => {debugPrint("onUnMute")};
+
+        connection.remoteStream.getVideoTracks().first.onEnded =
+            () => {debugPrint("onEnded")};
+
         setState(() {});
       }
     };
@@ -352,7 +382,6 @@ class _VideoRoomPage extends State<VideoRoomPage> {
           // 'minWidth': '1280',
           // Provide your own width, height and frame rate here
           // 'minHeight': '720',
-
           'width': {'max': 640},
           'height': {'max': 400},
           'frameRate': {'max': 15, 'min': 5},
@@ -388,20 +417,44 @@ class _VideoRoomPage extends State<VideoRoomPage> {
         body: RoomLeaveReq().toMap(),
       );
     }
-
     Navigator.of(context).pop();
+  }
+
+  void mute(bool muted, String mid) {
+    _janusSignal.sendMessage(
+        handleId: selfHandleId,
+        body: RoomAudioMuteReq(mute: muted, id: _myid, room: room, mid: mid)
+            .toMap());
+
+    peerConnectionMap[_janusSignal.sessionId]
+        .mute(mid == "1" ? "video" : "audio", muted);
+
+    // _localRenderer.srcObject.getVideoTracks().first.enabled = muted;
+    // for (MediaStreamTrack track
+    //     in _localRenderer.srcObject.getVideoTracks()) {
+    //   track.enabled = muted;
+    // }
+
+    // _janusSignal.videoRoomHandle(
+    //     req: RoomPublishReq(request: 'configure', video: muted).toMap(),
+    //     success: (data) {
+    //       debugPrint('exists room=====>>>>>>$data');
+    //     },
+    //     error: (data) {
+    //       print('find room error========>$data');
+    //     });
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text("Cinteraction VC"),
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: Colors.black),
-          onPressed: () => {leave()},
-        ),
-      ),
+      // appBar: AppBar(
+      //   title: const Text("Cinteraction VC"),
+      //   leading: IconButton(
+      //     icon: const Icon(Icons.arrow_back, color: Colors.black),
+      //     onPressed: () => {leave()},
+      //   ),
+      // ),
       body: OrientationBuilder(builder: (context, orientation) {
         var col = 2;
         if (kIsWeb) {
@@ -411,16 +464,6 @@ class _VideoRoomPage extends State<VideoRoomPage> {
         }
 
         List<Widget> list = getListOfRenderWidgets(orientation);
-
-        // return GridView.count(
-        //   primary: false,
-        //   padding: const EdgeInsets.all(20),
-        //   crossAxisSpacing: 10,
-        //   mainAxisSpacing: 10,
-        //   crossAxisCount: 2,
-        //   children: list,
-        // );
-
         return GridView.builder(
             gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
               crossAxisCount: col,
@@ -432,6 +475,44 @@ class _VideoRoomPage extends State<VideoRoomPage> {
               return list[index];
             });
       }),
+
+      bottomNavigationBar: Container(
+        child: Row(
+          children: [
+            IconButton(
+                icon: const Icon(
+                  Icons.call_end,
+                  color: Colors.red,
+                ),
+                onPressed: () async {
+                  leave();
+                }),
+            IconButton(
+                icon: Icon(
+                  audioEnabled ? Icons.mic : Icons.mic_off,
+                  color: Colors.green,
+                ),
+                onPressed: () {
+                  setState(() {
+                    audioEnabled = !audioEnabled;
+                  });
+
+                  mute(!audioEnabled, "0");
+                }),
+            IconButton(
+                icon: Icon(
+                  videoEnabled ? Icons.videocam_sharp : Icons.videocam_off,
+                  color: Colors.green,
+                ),
+                onPressed: () {
+                  videoEnabled = !videoEnabled;
+                  mute(!videoEnabled, "1");
+                  setState(() {});
+
+                }),
+          ],
+        ),
+      ),
     );
   }
 
@@ -439,7 +520,10 @@ class _VideoRoomPage extends State<VideoRoomPage> {
     List<Widget> list = List.empty();
 
     if (_localRenderer != null) {
-      list = [...list, _buildVideoWidget(orientation, _localRenderer, "Me")];
+      list = [
+        ...list,
+        _buildVideoWidget(orientation, _localRenderer, "Me", videoEnabled, audioEnabled)
+      ];
     }
 
     for (var peerConnection in peerConnectionMap.entries) {
@@ -450,7 +534,7 @@ class _VideoRoomPage extends State<VideoRoomPage> {
         list = [
           ...list,
           _buildVideoWidget(orientation, peerConnection.value.remoteRenderer,
-              peerConnection.value.display)
+              peerConnection.value.display, peerConnection.value.video, peerConnection.value.audio)
         ];
         // }
       }
@@ -461,8 +545,8 @@ class _VideoRoomPage extends State<VideoRoomPage> {
     return list;
   }
 
-  Widget _buildVideoWidget(
-      orientation, RTCVideoRenderer renderer, String display) {
+  Widget _buildVideoWidget(orientation, RTCVideoRenderer renderer,
+      String display, bool video, bool audio) {
     return Container(
       clipBehavior: Clip.hardEdge,
       margin: const EdgeInsets.all(5.0),
@@ -471,12 +555,11 @@ class _VideoRoomPage extends State<VideoRoomPage> {
           borderRadius: BorderRadius.all(Radius.circular(15))),
       child: Stack(
         children: [
-          Center(
-            child: RTCVideoView(
+            Center(
+                child:video? RTCVideoView(
               renderer,
               objectFit: RTCVideoViewObjectFit.RTCVideoViewObjectFitCover,
-            ),
-          ),
+            ) : const Text('Video is disabled')),
           Positioned(
               bottom: 0,
               right: 0,
@@ -495,7 +578,25 @@ class _VideoRoomPage extends State<VideoRoomPage> {
             child: TextButton(
                 onPressed: () => getFrameFromStream(renderer),
                 child: const Text("GET FRAME")),
-          )
+          ),
+
+            Positioned(
+                bottom: 10,
+                left: 0,
+                child: Icon(
+                  !audio ? Icons.mic_off : Icons.mic,
+                  color: Colors.green,
+                )),
+
+            Positioned(
+                bottom: 30,
+                left: 0,
+                child: Icon(
+                  !video
+                      ? Icons.videocam_off
+                      : Icons.videocam_sharp,
+                  color: Colors.green,
+                ))
         ],
       ),
     );

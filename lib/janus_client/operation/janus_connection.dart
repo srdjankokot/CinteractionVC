@@ -4,12 +4,14 @@ import 'package:flutter_webrtc/flutter_webrtc.dart';
 import '../ice_server.dart';
 
 /// 将流加入之后的执行
-typedef OnAddStreamCallback = void Function(JanusConnection connection, MediaStream stream);
-typedef OnAddTrackCallback = void Function(JanusConnection connection, MediaStream stream, MediaStreamTrack track);
+typedef OnAddStreamCallback = void Function(
+    JanusConnection connection, MediaStream stream);
+typedef OnAddTrackCallback = void Function(
+    JanusConnection connection, MediaStream stream, MediaStreamTrack track);
 
 /// ice发送之后的执行
-typedef OnIceCandidateCallback = void Function(JanusConnection connection, RTCIceCandidate candidate);
-
+typedef OnIceCandidateCallback = void Function(
+    JanusConnection connection, RTCIceCandidate candidate);
 
 const Map<String, dynamic> _config = {
   'mandatory': {},
@@ -35,14 +37,14 @@ const Map<String, dynamic> noVideoconstraints = {
 };
 
 const Map<String, dynamic> _iceServers = {
-    'iceServers': [
-      {
-        'url': 'turn:turn.al.mancangyun:3478',
-        'username': 'root',
-        'credential': 'mypasswd'
-      },
-    ]
-  };
+  'iceServers': [
+    {
+      'url': 'turn:turn.al.mancangyun:3478',
+      'username': 'root',
+      'credential': 'mypasswd'
+    },
+  ]
+};
 
 /// webrtc steps
 /// 1. Get local media
@@ -52,33 +54,33 @@ const Map<String, dynamic> _iceServers = {
 
 /// janus connection object
 class JanusConnection {
-
-  int handleId;                   // janus handle ID
+  int handleId; // janus handle ID
   List<RTCIceServer> iceServers;
-  String display;                 // Nick name
-  int feedId;                     // janus session_id
-  bool remote;                    // Whether it is a remote peer-to-peer connection（Not our own side）
-  bool videoPresent;              // Whether the video is displayed（Display limited far-end video stream）
-  bool audio;                           // audio status
-  bool video;                           // video status
+  String display = ""; // Nick name
+  int feedId; // janus session_id
+  bool
+      remote; // Whether it is a remote peer-to-peer connection（Not our own side）
+  bool
+      videoPresent; // Whether the video is displayed（Display limited far-end video stream）
+  bool audio; // audio status
+  bool video; // video status
 
   int privateChatUnreadCount = 0;
-  RTCPeerConnection _connection;        // current peer connection object
-  RTCVideoRenderer remoteRenderer;      // Remote media data renderer
-  MediaStream remoteStream;             // Remote media data renderer
+  RTCPeerConnection _connection; // current peer connection object
+  RTCVideoRenderer remoteRenderer; // Remote media data renderer
+  MediaStream remoteStream; // Remote media data renderer
   OnAddStreamCallback onAddStream;
   OnAddTrackCallback onAddTrack; // Add stream
-  OnIceCandidateCallback onIceCandidate;  // ice
-
+  OnIceCandidateCallback onIceCandidate; // ice
 
   JanusConnection({
-    @required this.handleId, 
-    this.iceServers, 
-    this.display, 
+    @required this.handleId,
+    this.iceServers,
+    this.display,
     this.feedId,
     this.audio = true,
-    this.video = true, 
-    this.remote = true, 
+    this.video = true,
+    this.remote = true,
     this.videoPresent = false,
   }) {
     debugPrint('JanusConnection init===$display==$feedId==$handleId');
@@ -88,12 +90,12 @@ class JanusConnection {
   }
 
   /// init connect，init Remote media data renderer
-  Future<void> initConnection() async{
+  Future<void> initConnection() async {
     await remoteRenderer.initialize();
     await createConnection();
   }
 
-  void disConnect(){
+  void disConnect() {
     debugPrint('JanusConnection disConnect===$display==$feedId==$handleId');
     _connection.close();
     remoteStream?.dispose();
@@ -101,15 +103,17 @@ class JanusConnection {
   }
 
   /// Set local session description added to RTCPeerConnection
-  Future<RTCSessionDescription> createOffer({Map<String, dynamic> constraints = constraints}) async {
+  Future<RTCSessionDescription> createOffer(
+      {Map<String, dynamic> constraints = constraints}) async {
     RTCSessionDescription sdp = await _connection.createOffer(constraints);
     _connection.setLocalDescription(sdp);
     return sdp;
   }
 
   /// Add remote session description to RTCPeerConnection
-  RTCSessionDescription setRemoteDescription(Map<String, dynamic> jsep){
-    RTCSessionDescription sdp = RTCSessionDescription(jsep['sdp'], jsep['type']);
+  RTCSessionDescription setRemoteDescription(Map<String, dynamic> jsep) {
+    RTCSessionDescription sdp =
+        RTCSessionDescription(jsep['sdp'], jsep['type']);
     _connection.setRemoteDescription(sdp);
     return sdp;
   }
@@ -128,33 +132,56 @@ class JanusConnection {
   }
 
   /// reply sdp
-  Future<RTCSessionDescription> createAnswer({Map<String, dynamic> constraints = constraints}) async {
+  Future<RTCSessionDescription> createAnswer(
+      {Map<String, dynamic> constraints = constraints}) async {
     RTCSessionDescription sdp = await _connection.createAnswer(constraints);
     // pass setLocalDescription notifies the browser of the session description and sends it to the remote peer to initiate the call
     _connection.setLocalDescription(sdp);
     return sdp;
   }
 
-  Future createConnection() async{
-
+  Future createConnection() async {
     Map<String, dynamic> configuration = _iceServers;
-    if(null != iceServers && iceServers.isNotEmpty){
-      configuration = {'iceServers': iceServers.map((e) => e.toMap()).toList(),};
+    if (null != iceServers && iceServers.isNotEmpty) {
+      configuration = {
+        'iceServers': iceServers.map((e) => e.toMap()).toList(),
+      };
     }
-    _connection = await createPeerConnection(configuration,_config);
+    _connection = await createPeerConnection(configuration, _config);
     // ice Add post-processing
     _connection.onIceCandidate = (candidate) => onIceCandidate(this, candidate);
     // stream add post-processing
     _connection.onAddStream = (stream) => onAddStream(this, stream);
     // stream remove post-processing
-    _connection.onRemoveStream = (stream) {};
+    _connection.onRemoveStream = (stream) {
+      debugPrint("onRemoveStream");
+    };
     // channel data transfer processing
     _connection.onDataChannel = (channel) {};
 
+    _connection.onTrack = (event) => {debugPrint("onTrack")};
+
+    _connection.onConnectionState =
+        (state) => {debugPrint("onConnectionState")};
+
+    _connection.onRenegotiationNeeded =
+        () => {debugPrint("onRenegotiationNeeded")};
+
     _connection.onAddTrack = (stream, track) => onAddTrack(this, stream, track);
 
-    return _connection;
 
+    return _connection;
   }
 
+
+  void mute(String kind, bool enabled) async{
+    var transrecievers = (await _connection.getTransceivers())
+        ?.where((element) => element.sender.track.kind == kind)
+        ?.toList();
+    if (transrecievers.isEmpty) {
+    return;
+    }
+
+    await transrecievers.first.setDirection(enabled ? TransceiverDirection.SendOnly : TransceiverDirection.Inactive);
+  }
 }
