@@ -15,12 +15,19 @@
 import 'package:flutter/cupertino.dart';
 
 enum RoomAction {
-  create, destroy, edit , exists, list, allowed, kick, listparticipants
+  create,
+  destroy,
+  edit,
+  exists,
+  list,
+  allowed,
+  kick,
+  listparticipants
 }
 
 class RoomReq {
 
-  String request;     // create, destroy, edit , exists, list, allowed, kick
+  String request; // create, destroy, edit , exists, list, allowed, kick
 
   int room;
 
@@ -45,16 +52,17 @@ class RoomReq {
   int audioLevelAverage;
   int bitrate;
   int firFreq;
+  String videocodec;
 
 
   RoomReq({
-    @required this.request, 
-    @required this.room, 
-    this.permanent = false, 
+    @required this.request,
+    @required this.room,
+    this.permanent = false,
     this.description = "",
-    this.secret, 
-    this.pin, 
-    this.isPrivate = false, 
+    this.secret,
+    this.pin,
+    this.isPrivate = false,
     this.allowed,
     this.publishers = 100,
     this.audiolevelEvent = true,
@@ -62,6 +70,8 @@ class RoomReq {
     this.audioLevelAverage = 25,
     this.bitrate = 128000,
     this.firFreq = 10,
+    this.videocodec = "vp8,vp9,h264"
+
   });
 
   Map<String, dynamic> toMap() {
@@ -74,20 +84,24 @@ class RoomReq {
       'publishers': publishers,
       'audiolevel_event': audiolevelEvent,
     };
-    if(null != secret){
+    if (null != secret) {
       map['secret'] = secret;
     }
-     if(null != pin){
+    if (null != pin) {
       map['pin'] = pin;
     }
-    if(null != allowed){
+    if (null != allowed) {
       map['allowed'] = allowed;
     }
-    if(null != audioActivePackets){
+    if (null != audioActivePackets) {
       map['audio_active_packets'] = audioActivePackets;
     }
-    if(null != audioLevelAverage){
+    if (null != audioLevelAverage) {
       map['audio_level_average'] = audioLevelAverage;
+    }
+
+    if (null != videocodec) {
+      map['videocodec'] = videocodec;
     }
     return map;
   }
@@ -104,25 +118,23 @@ class RoomReq {
       'new_bitrate': bitrate,
       'new_fir_freq': firFreq
     };
-    if(null != secret){
+    if (null != secret) {
       map['secret'] = secret;
     }
-    if(null != pin){
+    if (null != pin) {
       map['pin'] = pin;
     }
-    if(null != allowed){
+    if (null != allowed) {
       map['allowed'] = allowed;
     }
-    if(null != audioActivePackets){
+    if (null != audioActivePackets) {
       map['audio_active_packets'] = audioActivePackets;
     }
-    if(null != audioLevelAverage){
+    if (null != audioLevelAverage) {
       map['audio_level_average'] = audioLevelAverage;
     }
     return map;
   }
-
-
 
 
 }

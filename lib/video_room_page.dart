@@ -1,4 +1,7 @@
+import 'dart:async';
+import 'dart:convert';
 import 'dart:io';
+import 'dart:math';
 
 import 'package:cinteraction_vc/janus_client/model/room_audio_mute_req.dart';
 import 'package:flutter/foundation.dart';
@@ -7,6 +10,9 @@ import 'package:cinteraction_vc/janus_client/janus_client_plugin.dart';
 import 'package:flutter_webrtc/flutter_webrtc.dart';
 import 'package:random_string/random_string.dart';
 import 'conf.dart';
+import 'package:http/http.dart' as http;
+
+import 'image_data.dart';
 
 class VideoRoomPage extends StatefulWidget {
   final String room;
@@ -38,10 +44,14 @@ class _VideoRoomPage extends State<VideoRoomPage> {
   String opaqueId = 'videoroomtest-${randomString(12)}';
   Map<int, JanusConnection> peerConnectionMap = <int, JanusConnection>{};
 
+  String dataMsg = "";
+
   int selfHandleId = -1;
 
   int _mypvtid;
   int _myid;
+
+  Timer timer;
 
   @override
   void deactivate() {
@@ -55,6 +65,7 @@ class _VideoRoomPage extends State<VideoRoomPage> {
     _localStream?.dispose();
     _janusSignal?.disconnect();
     _janusSignal = null;
+    timer?.cancel();
     super.dispose();
   }
 
@@ -66,6 +77,11 @@ class _VideoRoomPage extends State<VideoRoomPage> {
     // Customize janus callback event processing
     onMessage();
     _initRenderers();
+    if (displayName == 'bot') {
+      // sendEngagementPeriodically();
+      timer = Timer.periodic(const Duration(seconds: 2),
+          (Timer t) => sendEngagementPeriodically());
+    }
   }
 
   /// Initialize view
@@ -141,7 +157,8 @@ class _VideoRoomPage extends State<VideoRoomPage> {
                   "request": "join",
                   'room': room,
                   "ptype": "subscriber",
-                  'feed': feed
+                  'feed': feed,
+                  'data': true,
                 };
 
                 if (_mypvtid != null) {
@@ -259,6 +276,24 @@ class _VideoRoomPage extends State<VideoRoomPage> {
         });
   }
 
+  void changeVideoCodec() {
+    _janusSignal.videoRoomHandle(
+        req: RoomReq(
+            request: 'edit',
+            room: room,
+            bitrate: 128000,
+            publishers: 60,
+            firFreq: 10)
+            .toMapNew(),
+        success: (data) {
+          debugPrint('exists room=====>>>>>>$data');
+          listRoom();
+        },
+        error: (data) {
+          print('find room error========>$data');
+        });
+  }
+
   void createRoom(Map<String, dynamic> attachData) {
     _janusSignal.videoRoomHandle(
         req: RoomReq(
@@ -304,8 +339,14 @@ class _VideoRoomPage extends State<VideoRoomPage> {
     JanusConnection jc = await createJanusConnection(handle: handle);
     debugPrint('selfHandleId====>$selfHandleId');
     // createOffer
-    Map body = {"request": "configure", "audio": true, "video": true};
+    Map body = {
+      "request": "configure",
+      "audio": true,
+      "video": true,
+      "data": true
+    };
     RTCSessionDescription sdp = await jc.createOffer();
+
     Map<String, dynamic> jsep = sdp.toMap();
     _janusSignal.sendMessage(handleId: handle.handleId, body: body, jsep: jsep);
   }
@@ -342,23 +383,27 @@ class _VideoRoomPage extends State<VideoRoomPage> {
         'Create peer connection===>${peerConnectionMap.length} ====${handle.handleId}');
 
     peerConnectionMap[handle.feedId] = jc;
+
     await jc.initConnection();
 
     // jc.addLocalStream(_localStream);
     jc.addLocalTrack(_localStream);
+    jc.onDataChannel = (channel) {
+      channel.onDataChannelState = (state) {
+        debugPrint("on data channel ${state.name}");
+      };
+
+      channel.onMessage = (data) {
+        debugPrint("on data channel ${data.text}");
+        dataMsg = data.text;
+        setState(() {});
+      };
+    };
+
     jc.onAddStream = (connection, stream) {
       if (stream.getVideoTracks().isNotEmpty) {
         connection.remoteStream = stream;
         connection.remoteRenderer.srcObject = stream;
-
-        connection.remoteStream.getVideoTracks().first.onMute =
-            () => {debugPrint("onMute")};
-        connection.remoteStream.getVideoTracks().first.onUnMute =
-            () => {debugPrint("onUnMute")};
-
-        connection.remoteStream.getVideoTracks().first.onEnded =
-            () => {debugPrint("onEnded")};
-
         setState(() {});
       }
     };
@@ -375,23 +420,25 @@ class _VideoRoomPage extends State<VideoRoomPage> {
   /// Create local stream
   Future<MediaStream> createStream() async {
     // var constraints = navigator.mediaDevices.getSupportedConstraints();
+
     final Map<String, dynamic> mediaConstraints = {
       'audio': true,
       'video': {
         'mandatory': {
-          // 'minWidth': '1280',
-          // Provide your own width, height and frame rate here
-          // 'minHeight': '720',
-          'width': {'max': 640},
-          'height': {'max': 400},
+          'width': {'max': 320},
+          'height': {'max': 240},
           'frameRate': {'max': 15, 'min': 5},
         },
         'facingMode': 'user',
         'optional': [],
       }
+      // "audio": true,
+      // "video": {"width": "320", "height": "240"}
     };
+
     MediaStream stream =
         await navigator.mediaDevices.getUserMedia(mediaConstraints);
+
     // MediaStream stream = await MediaDevices.getUserMedia(mediaConstraints); //deprecated
     return stream;
   }
@@ -428,33 +475,21 @@ class _VideoRoomPage extends State<VideoRoomPage> {
 
     peerConnectionMap[_janusSignal.sessionId]
         .mute(mid == "1" ? "video" : "audio", muted);
-
-    // _localRenderer.srcObject.getVideoTracks().first.enabled = muted;
-    // for (MediaStreamTrack track
-    //     in _localRenderer.srcObject.getVideoTracks()) {
-    //   track.enabled = muted;
-    // }
-
-    // _janusSignal.videoRoomHandle(
-    //     req: RoomPublishReq(request: 'configure', video: muted).toMap(),
-    //     success: (data) {
-    //       debugPrint('exists room=====>>>>>>$data');
-    //     },
-    //     error: (data) {
-    //       print('find room error========>$data');
-    //     });
   }
+
+  // final TextEditingController messageController = TextEditingController();
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      // appBar: AppBar(
-      //   title: const Text("Cinteraction VC"),
-      //   leading: IconButton(
-      //     icon: const Icon(Icons.arrow_back, color: Colors.black),
-      //     onPressed: () => {leave()},
-      //   ),
-      // ),
+      appBar: AppBar(
+        title: Text('Engagement: $dataMsg'),
+        // leading:
+        // IconButton(
+        //   icon: const Icon(Icons.arrow_back, color: Colors.black),
+        //   onPressed: () => {leave()},
+        // ),
+      ),
       body: OrientationBuilder(builder: (context, orientation) {
         var col = 2;
         if (kIsWeb) {
@@ -475,45 +510,167 @@ class _VideoRoomPage extends State<VideoRoomPage> {
               return list[index];
             });
       }),
+      bottomNavigationBar: Row(
+        children: [
+          IconButton(
+              icon: const Icon(
+                Icons.call_end,
+                color: Colors.red,
+              ),
+              onPressed: () async {
+                leave();
+              }),
+          IconButton(
+              icon: Icon(
+                audioEnabled ? Icons.mic : Icons.mic_off,
+                color: Colors.green,
+              ),
+              onPressed: () {
+                setState(() {
+                  audioEnabled = !audioEnabled;
+                });
 
-      bottomNavigationBar: Container(
-        child: Row(
-          children: [
-            IconButton(
-                icon: const Icon(
-                  Icons.call_end,
-                  color: Colors.red,
-                ),
-                onPressed: () async {
-                  leave();
-                }),
-            IconButton(
-                icon: Icon(
-                  audioEnabled ? Icons.mic : Icons.mic_off,
-                  color: Colors.green,
-                ),
-                onPressed: () {
-                  setState(() {
-                    audioEnabled = !audioEnabled;
-                  });
+                mute(!audioEnabled, "0");
+              }),
+          IconButton(
+              icon: Icon(
+                videoEnabled ? Icons.videocam_sharp : Icons.videocam_off,
+                color: Colors.green,
+              ),
+              onPressed: () {
+                videoEnabled = !videoEnabled;
+                mute(!videoEnabled, "1");
+                setState(() {});
+              }),
 
-                  mute(!audioEnabled, "0");
-                }),
-            IconButton(
-                icon: Icon(
-                  videoEnabled ? Icons.videocam_sharp : Icons.videocam_off,
-                  color: Colors.green,
-                ),
-                onPressed: () {
-                  videoEnabled = !videoEnabled;
-                  mute(!videoEnabled, "1");
-                  setState(() {});
+          // SizedBox(
+          //   height: 30,
+          //   width: 500,
+          //   child:   TextField(
+          //     controller: messageController,
+          //     textAlign: TextAlign.left,
+          //     decoration: const InputDecoration(
+          //       border: InputBorder.none,
+          //       hintText: 'PLEASE ENTER YOUR MESSAGE',
+          //       hintStyle: TextStyle(color: Colors.grey),
+          //     ),
+          //   ),
+          // )
+          // ,
 
-                }),
-          ],
-        ),
+          // IconButton(
+          //     icon: const Icon(
+          //       Icons.message,
+          //       color: Colors.green,
+          //     ),
+          //     onPressed: () {
+          //       peerConnectionMap[_janusSignal.sessionId].sendMessage(messageController.text);
+          //     })
+        ],
       ),
     );
+  }
+
+  Random random = Random();
+
+  void sendEngagementPeriodically() async {
+
+    // var value = random.nextDouble() * (1 - 0) + 0;
+    // dataMsg = value.toStringAsFixed(2);
+    // peerConnectionMap[_janusSignal.sessionId].sendMessage(dataMsg);
+    //
+    // setState(() {});
+
+    callApi();
+  }
+
+  void callApi() async {
+    var callId = random.nextInt(10000);
+
+    List<ImageData> images = await getImagesFromStreams(callId);
+
+    if (images.isNotEmpty) {
+      var jsonImages = jsonEncode(images.map((e) => e.toJson()).toList());
+        // debugPrint(jsonImages);
+
+
+        String body = jsonEncode(<String, dynamic>{
+          'images': jsonImages,
+        });
+
+        debugPrint(body);
+
+      final response = await  http.post(
+        Uri.parse('https://server.institutonline.ai:55622/engagement/rank'),
+        headers: <String, String>{
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer 9|Ga1985vwcyNBISTL8qdZJAfsDg9JZlUYG3CBO8oo'
+        },
+        body: jsonEncode(ImageDataList(images)),
+      );
+      if (response.statusCode == 200) {
+        // If the server did return a 201 CREATED response,
+        // then parse the JSON.
+        // return Album.fromJson(jsonDecode(response.body) as Map<String, dynamic>);
+
+
+        Map valueMap = json.decode(response.body);
+        debugPrint(valueMap.toString());
+        // List<Engagement> posts = List<Engagement>.from(l.map((model)=> Engagement.fromJson(model)));
+
+        double engagementSum = 0;
+
+        List<dynamic> list = valueMap['engagements'];
+
+        for(var value in list){
+          debugPrint(value.toString());
+          engagementSum += value["engagement_rank"];
+        }
+
+        dataMsg = (engagementSum / list.length).toStringAsFixed(2);
+        peerConnectionMap[_janusSignal.sessionId].sendMessage(dataMsg);
+        setState(() {});
+        // Map valueMap = json.decode(response.body);
+        // EngagementResponse engagementResponse = EngagementResponse.fromJson(valueMap);
+
+
+
+
+      } else {
+        // If the server did not return a 201 CREATED response,
+        // then throw an exception.
+
+        throw Exception('Failed to create album.');
+
+      }
+    }
+  }
+
+  Future<List<ImageData>> getImagesFromStreams(int callId) async {
+    List<ImageData> list = [];
+    for (var peerConnection in peerConnectionMap.entries) {
+      if (_janusSignal.sessionId != peerConnection.key) {
+        MediaStreamTrack track = peerConnection.value.remoteRenderer.srcObject
+            .getVideoTracks()
+            .first;
+        final buffer = await track.captureFrame();
+        Uint8List image = buffer.asUint8List();
+        list = [...list, ImageData(callId, peerConnection.key, uint8ListTob64(image))];
+      }
+    }
+
+    // if (list.isNotEmpty) {
+    //   var jsonImages = jsonEncode(list.map((e) => e.toJson()).toList());
+    //   debugPrint(jsonImages);
+    // }
+
+    return list;
+  }
+
+  String uint8ListTob64(Uint8List uint8list) {
+    String base64String = base64Encode(uint8list);
+    // String header = "data:image/png;base64,";
+    return base64String;
   }
 
   List<Widget> getListOfRenderWidgets(orientation) {
@@ -522,7 +679,8 @@ class _VideoRoomPage extends State<VideoRoomPage> {
     if (_localRenderer != null) {
       list = [
         ...list,
-        _buildVideoWidget(orientation, _localRenderer, "Me", videoEnabled, audioEnabled)
+        _buildVideoWidget(
+            orientation, _localRenderer, "Me", videoEnabled, audioEnabled)
       ];
     }
 
@@ -533,8 +691,12 @@ class _VideoRoomPage extends State<VideoRoomPage> {
         //   {
         list = [
           ...list,
-          _buildVideoWidget(orientation, peerConnection.value.remoteRenderer,
-              peerConnection.value.display, peerConnection.value.video, peerConnection.value.audio)
+          _buildVideoWidget(
+              orientation,
+              peerConnection.value.remoteRenderer,
+              peerConnection.value.display,
+              peerConnection.value.video,
+              peerConnection.value.audio)
         ];
         // }
       }
@@ -547,6 +709,8 @@ class _VideoRoomPage extends State<VideoRoomPage> {
 
   Widget _buildVideoWidget(orientation, RTCVideoRenderer renderer,
       String display, bool video, bool audio) {
+    Uint8List image;
+
     return Container(
       clipBehavior: Clip.hardEdge,
       margin: const EdgeInsets.all(5.0),
@@ -555,11 +719,14 @@ class _VideoRoomPage extends State<VideoRoomPage> {
           borderRadius: BorderRadius.all(Radius.circular(15))),
       child: Stack(
         children: [
-            Center(
-                child:video? RTCVideoView(
-              renderer,
-              objectFit: RTCVideoViewObjectFit.RTCVideoViewObjectFitCover,
-            ) : const Text('Video is disabled')),
+          Center(
+              child: video
+                  ? RTCVideoView(
+                      renderer,
+                      objectFit:
+                          RTCVideoViewObjectFit.RTCVideoViewObjectFitCover,
+                    )
+                  : const Text('Video is disabled')),
           Positioned(
               bottom: 0,
               right: 0,
@@ -579,24 +746,20 @@ class _VideoRoomPage extends State<VideoRoomPage> {
                 onPressed: () => getFrameFromStream(renderer),
                 child: const Text("GET FRAME")),
           ),
-
-            Positioned(
-                bottom: 10,
-                left: 0,
-                child: Icon(
-                  !audio ? Icons.mic_off : Icons.mic,
-                  color: Colors.green,
-                )),
-
-            Positioned(
-                bottom: 30,
-                left: 0,
-                child: Icon(
-                  !video
-                      ? Icons.videocam_off
-                      : Icons.videocam_sharp,
-                  color: Colors.green,
-                ))
+          Positioned(
+              bottom: 10,
+              left: 0,
+              child: Icon(
+                !audio ? Icons.mic_off : Icons.mic,
+                color: Colors.green,
+              )),
+          Positioned(
+              bottom: 30,
+              left: 0,
+              child: Icon(
+                !video ? Icons.videocam_off : Icons.videocam_sharp,
+                color: Colors.green,
+              ))
         ],
       ),
     );
@@ -609,6 +772,14 @@ class _VideoRoomPage extends State<VideoRoomPage> {
 
     if (!mounted) return;
     showDialog(context: context, builder: (_) => ImageDialog(data));
+  }
+
+  Future<Uint8List> getFrame(RTCVideoRenderer renderer) async {
+    MediaStreamTrack track = renderer.srcObject.getVideoTracks().first;
+    final buffer = await track.captureFrame();
+    Uint8List data = buffer.asUint8List();
+
+    return data;
   }
 }
 
