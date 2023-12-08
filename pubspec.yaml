@@ -19,7 +19,7 @@ publish_to: 'none' # Remove this line if you wish to publish to pub.dev
 version: 1.0.0+1
 
 environment:
-  sdk: '>=2.7.0 <3.0.0'
+  sdk: '>=2.19.0 <3.0.0'
 
 # Dependencies specify other packages that your package needs in order to work.
 # To automatically upgrade your package dependencies to the latest versions
@@ -34,6 +34,9 @@ dependencies:
 
   random_string: ^2.3.1
   web_socket_channel: ^2.4.0
+  janus_client: ^2.3.0
+  logging: ^1.2.0
+  webrtc_interface: ^1.0.3
   flutter_webrtc: ^0.9.34
 
   # The following adds the Cupertino Icons font to your application.

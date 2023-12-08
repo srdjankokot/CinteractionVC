@@ -1,8 +1,10 @@
 import 'dart:io';
 
-import 'package:cinteraction_vc/video_room_page.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
+
+import 'google_meet/video_room.dart';
 
 void main() {
   HttpOverrides.global = MyHttpOverrides();
@@ -11,7 +13,7 @@ void main() {
 
 class MyHttpOverrides extends HttpOverrides {
   @override
-  HttpClient createHttpClient(SecurityContext context) {
+  HttpClient createHttpClient(SecurityContext? context) {
     return super.createHttpClient(context)
       ..badCertificateCallback =
           (X509Certificate cert, String host, int port) => true;
@@ -27,35 +29,35 @@ class MyApp extends StatelessWidget {
       theme: ThemeData(
         primarySwatch: Colors.orange,
       ),
-      home: MyHomePage(title: 'Cinteraction Virtual Classroom'),
+      home: const MyHomePage(),
       // home: VideoRoomPage("999888", "Test"),
     );
   }
 }
 
 class MyHomePage extends StatefulWidget {
-  MyHomePage({Key key, this.title}) : super(key: key);
 
-  final String title;
+  final String title = 'Cinteraction Virtual Classroom';
+
+  const MyHomePage({super.key});
 
   @override
-  _MyHomePageState createState() => _MyHomePageState();
+  State<MyHomePage> createState() => _MyHomePageState();
 }
 
 class _MyHomePageState extends State<MyHomePage> {
-  void _entryVideoRoom() {
-    Navigator.push(
-        context,
-        MaterialPageRoute(
-            builder: (BuildContext context) =>
-                VideoRoomPage(room, displayName)));
-  }
 
   String room = "1234567";
   String displayName = "";
 
-  var roomTextController = TextEditingController();
+  void _entryVideoRoom() {
+    Navigator.push(
+        context,
+        MaterialPageRoute(
+            builder: (BuildContext context) => VideoRoomPage(room:  int.parse(room), displayName: displayName)));
+  }
 
+  var roomTextController = TextEditingController();
 
   @override
   Widget build(BuildContext context) {
@@ -90,7 +92,7 @@ class _MyHomePageState extends State<MyHomePage> {
 
             TextButton(
               onPressed: _entryVideoRoom,
-              child: Text('Video Room'),
+              child: const Text('Video Room'),
             ),
           ],
         ),
