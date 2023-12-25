@@ -7,8 +7,8 @@ import 'package:janus_client/janus_client.dart';
 import 'package:logging/logging.dart';
 import 'package:flutter/src/widgets/navigator.dart' as navigator;
 
-import '../conf.dart';
-import '../util.dart';
+import '../../conf.dart';
+import '../../util.dart';
 
 class VideoRoomPage extends StatefulWidget {
   final int room;
@@ -92,37 +92,45 @@ class _VideoRoomPage extends State<VideoRoomPage> {
     eventMessagesHandler();
 
     await localVideoRenderer.init();
-    localVideoRenderer.mediaStream = await videoPlugin?.initializeMediaDevices(
-        //         simulcastSendEncodings: [
-        //   RTCRtpEncoding(
-        //     active: true,
-        //     rid: 'h',
-        //     scalabilityMode: 'L1T2',
-        //     maxBitrate: 2000000,
-        //     numTemporalLayers: 0,
-        //     minBitrate: 1000000,
-        //   ),
-        //   RTCRtpEncoding(
-        //       active: true,
-        //       rid: 'm',
-        //       scalabilityMode: 'L1T2',
-        //       maxBitrate: 1000000,
-        //       scaleResolutionDownBy: 2),
-        //   RTCRtpEncoding(
-        //       active: true,
-        //       rid: 'l',
-        //       scalabilityMode: 'L1T2',
-        //       maxBitrate: 524288,
-        //       scaleResolutionDownBy: 2),
-        // ],
+    localVideoRenderer.mediaStream =
+        await videoPlugin?.initializeMediaDevices(simulcastSendEncodings: [
+      // RTCRtpEncoding(
+      //     active: true,
+      //     rid: 'h',
+      //     scalabilityMode: 'L1T2',
+      //     maxBitrate: 256000,
+      //     numTemporalLayers: 0,
+      //     minBitrate: 94000,
+      //     scaleResolutionDownBy: 2),
+      // RTCRtpEncoding(
+      //     active: true,
+      //     rid: 'm',
+      //     scalabilityMode: 'L1T2',
+      //     maxBitrate: 2000000,
+      //     minBitrate: 1000000),
+      // RTCRtpEncoding(
+      //     active: true,
+      //     rid: 'l',
+      //     scalabilityMode: 'L1T2',
+      //     maxBitrate: 20000,
+      //     scaleResolutionDownBy: 8),
+    ], mediaConstraints: {
+      'video': {
+        'width': {'min': 160, 'max': 1280},
+        'height': {'min': 90, 'max': 720}
+      },
+      'audio': true
+    }
 
-        mediaConstraints: {
-          'video': {
-            'width': {'ideal': 1280},
-            'height': {'ideal': 720}
-          },
-          'audio': true
-        });
+            //         mediaConstraints: {
+            //   'video': {
+            //     'width': {'min': 160, 'max': 320},
+            //     'height': {'min': 90, 'max': 240}
+            //   },
+            //   'audio': true
+            // }
+
+            );
     localVideoRenderer.videoRenderer.srcObject = localVideoRenderer.mediaStream;
     localVideoRenderer.publisherName = "You";
     localVideoRenderer.publisherId = myId.toString();
@@ -134,12 +142,11 @@ class _VideoRoomPage extends State<VideoRoomPage> {
       videoState.streamsToBeRendered
           .putIfAbsent('local', () => localVideoRenderer);
     });
-
-
+    // setBitrate(videoPlugin?.webRTCHandle?.peerConnection, 128000);
     await checkRoom();
   }
 
-  checkRoom() async{
+  checkRoom() async {
     var exist = await videoPlugin?.exists(room);
     JanusEvent event = JanusEvent.fromJson(exist);
     if (event.plugindata?.data['exists'] == true) {
@@ -150,16 +157,17 @@ class _VideoRoomPage extends State<VideoRoomPage> {
   }
 
   createRoom(int roomId) async {
+    // Map<String, dynamic>? extras ={
+    //   'videocodec': 'vp9'
+    // };
     var created = await videoPlugin?.createRoom(room);
     JanusEvent event = JanusEvent.fromJson(created);
-    if(event.plugindata?.data['videoroom'] == 'created'){
+    if (event.plugindata?.data['videoroom'] == 'created') {
       await joinPublisher();
-    }
-    else{
+    } else {
       debugPrint('error creating room');
     }
   }
-
 
   joinPublisher() async {
     await videoPlugin?.joinPublisher(room,
@@ -176,10 +184,14 @@ class _VideoRoomPage extends State<VideoRoomPage> {
         if (pop) {
           // Navigator.of(context).pop(joiningDialog);
         }
-        (await videoPlugin.configure(
-            bitrate: 3000000,
-            sessionDescription: await videoPlugin.createOffer(
-                audioRecv: false, videoRecv: false)));
+        {
+          var offer =
+              await videoPlugin.createOffer(audioRecv: false, videoRecv: false);
+
+          debugPrint("offer: ${offer.sdp}");
+          await videoPlugin.configure(
+              bitrate: 128000, sessionDescription: offer);
+        }
       }
       if (data is VideoRoomLeavingEvent) {
         unSubscribeTo(data.leaving!);
@@ -196,8 +208,6 @@ class _VideoRoomPage extends State<VideoRoomPage> {
     videoPlugin?.messages?.listen((payload) async {
       JanusEvent event = JanusEvent.fromJson(payload.event);
       List<dynamic>? publishers = event.plugindata?.data['publishers'];
-
-      debugPrint(event.toString());
       await attachSubscriberOnPublisherChange(publishers);
     });
 
@@ -254,6 +264,7 @@ class _VideoRoomPage extends State<VideoRoomPage> {
           }
           stream['id'] = publisher['id'];
           stream['display'] = publisher['display'];
+
           mappedStreams.add(stream);
         }
         sources.add(mappedStreams);
@@ -362,10 +373,12 @@ class _VideoRoomPage extends State<VideoRoomPage> {
 
         // Subscribe
         if (added == null) added = [];
+
         added.add({
           'feed': stream['id'], // This is mandatory
           'mid': stream['mid'] // This is optional (all streams, if missing)
         });
+
         if (videoState.feedIdToMidSubscriptionMap[stream['id']] == null)
           videoState.feedIdToMidSubscriptionMap[stream['id']] = {};
         videoState.feedIdToMidSubscriptionMap[stream['id']][stream['mid']] =
@@ -402,6 +415,17 @@ class _VideoRoomPage extends State<VideoRoomPage> {
         renderer?.isVideoMuted = muted;
       }
     });
+  }
+
+  setBitrate(RTCPeerConnection? peerConnection, int bitrate) async {
+    var senders = await peerConnection?.getSenders();
+    var sender = senders![1];
+    var params = sender.parameters;
+
+    params.encodings![0].maxBitrate = bitrate;
+    params.encodings![0].minBitrate = (bitrate / 2) as int?;
+    params.encodings![0].maxFramerate = 15;
+    sender.setParameters(params);
   }
 
   mute(RTCPeerConnection? peerConnection, String kind, bool enabled) async {
@@ -515,6 +539,34 @@ class _VideoRoomPage extends State<VideoRoomPage> {
     videoState.feedIdToMidSubscriptionMap.remove(id);
   }
 
+  Future<void> unSubscribeToVideo(int id) async {
+    var feed = videoState.feedIdToDisplayStreamsMap[id];
+    if (feed == null) return;
+
+    // videoState.feedIdToDisplayStreamsMap.remove(id.toString());
+    // await videoState.streamsToBeRendered[id]?.dispose();
+    // setState(() {
+    //   videoState.streamsToBeRendered.remove(id.toString());
+    // });
+    var unsubscribeStreams = (feed['streams'] as List<dynamic>).map((stream) {
+      return SubscriberUpdateStream(
+          feed: id, mid: stream['mid'], crossrefid: null);
+    }).toList();
+
+    List<SubscriberUpdateStream> list = [];
+    unsubscribeStreams.forEach((element) {
+      if (element.mid == '1') {
+        list.add(element);
+      }
+    });
+
+    if (remotePlugin != null) {
+      await remotePlugin?.update(unsubscribe: list);
+    }
+
+    // videoState.feedIdToMidSubscriptionMap.remove(id);
+  }
+
   switchCamera() async {
     setState(() {
       front = !front;
@@ -546,6 +598,7 @@ class _VideoRoomPage extends State<VideoRoomPage> {
         } else if (Platform.isAndroid) {
           col = 2;
         }
+
         return GridView.builder(
             gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
               crossAxisCount: col,
@@ -559,6 +612,7 @@ class _VideoRoomPage extends State<VideoRoomPage> {
                   .map((e) => e.value)
                   .toList();
               // StreamRenderer remoteStream = items[index];
+
               return getRendererItem(items[index]);
             });
       }),
@@ -622,7 +676,7 @@ class _VideoRoomPage extends State<VideoRoomPage> {
             IconButton(
                 icon: const Icon(
                   Icons.switch_camera,
-                  color: Colors.white,
+                  color: Colors.green,
                 ),
                 onPressed: joined ? switchCamera : null)
           ],
@@ -632,84 +686,93 @@ class _VideoRoomPage extends State<VideoRoomPage> {
   }
 
   Widget getRendererItem(StreamRenderer remoteStream) {
+    debugPrint('getRendererItem: ${remoteStream.publisherName!}');
     // return Container(
     //   decoration: const BoxDecoration(
     //       color: Colors.orangeAccent,
     //       borderRadius: BorderRadius.all(Radius.circular(15))),
     // );
+
+    // if(remoteStream.publisherName != 'You')
+      // {
+      //   if (int.parse(remoteStream.publisherName ?? "") > 3) {
+      //     // unSubscribeToVideo(int.parse(remoteStream.publisherId??""));
+      //     remoteStream.selectedQuality = [true, false, false];
+      //   }
+      // }
+
+
     return Container(
         clipBehavior: Clip.hardEdge,
         margin: const EdgeInsets.all(5.0),
-        decoration: BoxDecoration(
+        decoration: const BoxDecoration(
           color: Colors.orangeAccent,
-          border: Border.all(
-              color: Colors.black, width: 2, style: BorderStyle.solid),
-          borderRadius: const BorderRadius.all(Radius.circular(15)),
+          borderRadius: BorderRadius.all(Radius.circular(15)),
         ),
         child: Stack(
           children: [
-            Visibility(
-              visible: remoteStream.isVideoMuted == false,
-              replacement: Container(
-                child: Center(
-                  child: Text("Video Paused By ${remoteStream.publisherName!}",
-                      style: const TextStyle(color: Colors.black)),
-                ),
-              ),
-              child: Stack(children: [
-                RTCVideoView(
-                  remoteStream.videoRenderer,
-                  filterQuality: FilterQuality.none,
-                  objectFit: RTCVideoViewObjectFit.RTCVideoViewObjectFitCover,
-                  mirror: true,
-                ),
-                Visibility(
-                  visible: remoteStream.publisherId != myId.toString(),
-                  child: PositionedDirectional(
-                      top: 120,
-                      start: 20,
-                      child: ToggleButtons(
-                        direction: Axis.horizontal,
-                        onPressed: (int index) async {
-                          setState(() {
-                            // The button that is tapped is set to true, and the others to false.
-                            for (int i = 0;
-                                i < remoteStream.selectedQuality.length;
-                                i++) {
-                              remoteStream.selectedQuality[i] = i == index;
-                            }
-                          });
-                          await remotePlugin?.send(data: {
-                            'request': "configure",
-                            'mid': remoteStream.mid,
-                            'substream': index
-                          });
-                        },
-                        borderRadius:
-                            const BorderRadius.all(Radius.circular(8)),
-                        selectedBorderColor: Colors.red[700],
-                        selectedColor: Colors.white,
-                        fillColor: Colors.red[200],
-                        color: Colors.red[400],
-                        constraints: const BoxConstraints(
-                          minHeight: 20.0,
-                          minWidth: 50.0,
-                        ),
-                        isSelected: remoteStream.selectedQuality,
-                        children: const [
-                          Text('Low'),
-                          Text('Medium'),
-                          Text('High')
-                        ],
-                      )),
-                ),
-                Align(
-                  alignment: Alignment.bottomLeft,
-                  child: Text(
-                      '${remoteStream.videoRenderer.videoWidth}X${remoteStream.videoRenderer.videoHeight}'),
-                )
-              ]),
+            // Visibility(
+            //   visible: remoteStream.isVideoMuted == false,
+            //   replacement: Center(
+            //     child: Text("Video Paused By ${remoteStream.publisherName!}",
+            //         style: const TextStyle(color: Colors.black)),
+            //   ),
+            //   child: Stack(children: [
+            //
+            //   ]),
+            // ),
+
+            RTCVideoView(
+              remoteStream.videoRenderer,
+              filterQuality: FilterQuality.none,
+              objectFit: RTCVideoViewObjectFit.RTCVideoViewObjectFitCover,
+              mirror: true,
             ),
+
+            // Container(color: Colors.red,),
+            Visibility(
+              visible: remoteStream.publisherId != myId.toString(),
+              child: PositionedDirectional(
+                  top: 120,
+                  start: 20,
+                  child: ToggleButtons(
+                    direction: Axis.horizontal,
+                    onPressed: (int index) async {
+                      setState(() {
+                        // The button that is tapped is set to true, and the others to false.
+                        for (int i = 0;
+                            i < remoteStream.selectedQuality.length;
+                            i++) {
+                          remoteStream.selectedQuality[i] = i == index;
+                        }
+                      });
+                      await remotePlugin?.send(data: {
+                        'request': "configure",
+                        'mid': remoteStream.mid,
+                        'substream': index
+                      });
+                    },
+                    borderRadius: const BorderRadius.all(Radius.circular(8)),
+                    selectedBorderColor: Colors.red[700],
+                    selectedColor: Colors.white,
+                    fillColor: Colors.red[200],
+                    color: Colors.red[400],
+                    constraints: const BoxConstraints(
+                      minHeight: 20.0,
+                      minWidth: 50.0,
+                    ),
+                    isSelected: remoteStream.selectedQuality,
+                    children: const [Text('Low'), Text('Medium'), Text('High')],
+                  )),
+            ),
+            Align(
+              alignment: Alignment.bottomLeft,
+              child: Text(
+                '${remoteStream.videoRenderer.videoWidth}X${remoteStream.videoRenderer.videoHeight}',
+                style: const TextStyle(color: Colors.white),
+              ),
+            ),
+
             Align(
               alignment: AlignmentDirectional.bottomStart,
               child: Row(
