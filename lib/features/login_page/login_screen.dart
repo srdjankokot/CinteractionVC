@@ -1,4 +1,5 @@
 import 'package:cinteraction_vc/assets/strings/Strings.dart';
+import 'package:cinteraction_vc/features/login_page/login_screen_view.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -14,6 +15,10 @@ class LoginPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+
+    return  LoginView();
+
+
     void entryVideoRoom({required LoginStates state}) {
       Navigator.push(
           context,
