@@ -1,7 +1,8 @@
 
 
-import '../../profile/model/user.dart';
-import '../../profile/provider/user_mock_provider.dart';
+
+import '../../home/profile/model/user.dart';
+import '../../home/profile/provider/user_mock_provider.dart';
 
 class AuthRepository {
   const AuthRepository({

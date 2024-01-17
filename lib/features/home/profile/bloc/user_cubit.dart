@@ -3,7 +3,7 @@ import 'dart:async';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
-import '../../../core/logger/loggy_types.dart';
+import '../../../../core/logger/loggy_types.dart';
 import '../model/user.dart';
 import '../repository/user_repository.dart';
 

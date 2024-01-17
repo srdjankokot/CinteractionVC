@@ -2,9 +2,9 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../features/auth/repository/auth_repository.dart';
-import '../../features/profile/bloc/user_cubit.dart';
-import '../../features/profile/repository/user_repository.dart';
-import '../../features/profile/provider/user_mock_provider.dart';
+import '../../features/home/profile/bloc/user_cubit.dart';
+import '../../features/home/profile/provider/user_mock_provider.dart';
+import '../../features/home/profile/repository/user_repository.dart';
 
 class DI extends StatelessWidget {
   const DI({

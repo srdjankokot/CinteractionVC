@@ -3,6 +3,8 @@ import 'package:cinteraction_vc/core/ui/widget/EditText.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
 
+import '../../core/ui/images/image.dart';
+
 class LoginView extends StatefulWidget {
   @override
   _LoginViewState createState() => _LoginViewState();
@@ -27,9 +29,7 @@ class _LoginViewState extends State<LoginView> {
                     Container(
                       child: Column(
                         children: [
-                          const Image(
-                              image: AssetImage(
-                                  'lib/assets/images/original_long_logo.png')),
+                          imageSVGAsset('original_long_logo') as Widget,
                           const SizedBox(
                             height: 10,
                           ),

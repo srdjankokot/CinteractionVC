@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
-import '../../../../core/ui/widget/url_image.dart';
+import '../../../../../core/ui/widget/url_image.dart';
+
 
 class UserImage extends StatelessWidget {
   const UserImage.small(this.url, {super.key}) : size = 32;

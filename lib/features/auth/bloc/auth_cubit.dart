@@ -2,11 +2,10 @@ import 'dart:async';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:google_sign_in/google_sign_in.dart';
 
 import '../../../core/logger/loggy_types.dart';
-import '../../profile/model/user.dart';
-import '../../profile/repository/user_repository.dart';
+import '../../home/profile/model/user.dart';
+import '../../home/profile/repository/user_repository.dart';
 import '../repository/auth_repository.dart';
 
 

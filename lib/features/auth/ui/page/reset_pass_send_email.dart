@@ -1,8 +1,7 @@
 import 'package:cinteraction_vc/core/extension/context.dart';
 import 'package:flutter/material.dart';
 
-import '../../../../core/extension/image.dart';
-import '../../../../core/ui/input/input_field.dart';
+import '../../../../core/ui/images/image.dart';
 import '../../../../core/ui/widget/responsive.dart';
 
 class ResetPassEmailPage extends StatelessWidget{
@@ -20,8 +19,7 @@ class ResetPassEmailPage extends StatelessWidget{
               body: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  const Image(
-                      image: ImageAsset('original_long_logo.png')),
+                  imageSVGAsset('original_long_logo') as Widget,
 
                   Container(
                     width: 230,

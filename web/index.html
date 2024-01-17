@@ -50,9 +50,17 @@
           serviceWorkerVersion: serviceWorkerVersion,
         },
         onEntrypointLoaded: function(engineInitializer) {
-          engineInitializer.initializeEngine().then(function(appRunner) {
+
+          let config = {
+            renderer: "html",
+          }
+          engineInitializer.initializeEngine(config).then(function(appRunner) {
             appRunner.runApp();
           });
+
+<!--          engineInitializer.initializeEngine().then(function(appRunner) {-->
+<!--            appRunner.runApp();-->
+<!--          });-->
         }
       });
     });

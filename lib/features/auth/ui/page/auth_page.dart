@@ -1,13 +1,9 @@
-import 'dart:async';
-import 'dart:convert';
-
 import 'package:cinteraction_vc/core/extension/context.dart';
+import 'package:cinteraction_vc/core/ui/images/image.dart';
 import 'package:cinteraction_vc/core/extension/image.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:flutter_facebook_auth/flutter_facebook_auth.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 
 import '../../../../core/navigation/route.dart';
@@ -187,212 +183,465 @@ class _AuthPageState extends State<AuthPage> {
     return BlocConsumer<AuthCubit, AuthState>(
       listener: _onAuthState,
       builder: (context, state) {
-        return LoadingOverlay(
-            loading: state is AuthLoading,
-            child: Scaffold(
-                body: SafeArea(
-              child: Padding(
-                padding: const EdgeInsets.all(16),
-                child: ResponsiveLayout(
-                  body: Form(
-                    key: _formKey,
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.stretch,
-                      children: [
-                        const Image(
-                            image: ImageAsset('original_long_logo.png')),
+        final Widget body;
+        if (context.isWide) {
+          body = Material(
+            child: Form(
+              key: _formKey,
+              child: Column(
+                children: [
+                  Container(
+                    width: double.maxFinite,
+                    alignment: Alignment.centerRight,
 
-                        Container(
-                          width: 230,
-                          height: 239,
-                          decoration: const BoxDecoration(
-                            image: DecorationImage(
+                    child: imageSVGAsset('original_long_logo'),
+                  ),
+                  Expanded(
+                    flex: 1,
+                    child: Row(
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      children: [
+                        Expanded(
+                          flex: 1,
+                          child: Container(
+
+                            child: const Image(
                               image: ImageAsset('login_image.png'),
-                              fit: BoxFit.none,
+                              fit: BoxFit.fitHeight,
                             ),
                           ),
                         ),
-                        const SizedBox(height: 6),
-                        Text(
-                          _isSignUp ? 'Sign up' : 'Log in',
-                          textAlign: TextAlign.center,
-                          style: context.textTheme.headlineLarge,
-                        ),
-                        const SizedBox(height: 33),
+                        Expanded(
+                          flex: 1,
+                          child: Container(
 
-                        Visibility(
-                            visible: _isSignUp,
-                            child: Column(
-                              children: [
-                                InputField.name(
-                                    label: 'Enter your full name',
-                                    controller: _nameController,
-                                    textInputAction: TextInputAction.next),
-                                const SizedBox(height: 16),
-                              ],
-                            )),
+                            alignment: Alignment.center,
+                            child: Container(
 
-                        InputField.email(
-                          label: 'Enter your email',
-                          controller: _emailController,
-                        ),
+                              height: double.maxFinite,
 
-                        const SizedBox(height: 16),
-                        InputField.password(
-                          label: 'Enter your password',
-                          controller: _passwordController,
-                          textInputAction: _isSignUp
-                              ? TextInputAction.next
-                              : TextInputAction.done,
-                          onFieldSubmitted: _isSignUp ? null : (_) => _submit(),
-                        ),
+                              constraints: const BoxConstraints(minWidth: 200, maxWidth: 550),
+                              child: Column(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  Text(
+                                    _isSignUp ? 'Sign up' : 'Log in',
+                                    textAlign: TextAlign.center,
+                                    style: context.textTheme.headlineLarge,
+                                  ),
+                                  const SizedBox(height: 33),
 
-                        Visibility(
-                            visible: _isSignUp,
-                            child: Column(
-                              children: [
-                                const SizedBox(height: 16),
-                                InputField(
-                                  label: 'Confirm password',
-                                  controller: _confirmPasswordController,
-                                  textInputAction: TextInputAction.done,
-                                  onFieldSubmitted: (_) => _submit(),
-                                  keyboardType: TextInputType.visiblePassword,
-                                  autofillHints: const [AutofillHints.password],
-                                  validator: (confirmPassword) {
-                                    if (confirmPassword == null ||
-                                        confirmPassword.isEmpty) {
-                                      return 'Required';
-                                    }
+                                  Visibility(
+                                      visible: _isSignUp,
+                                      child: Column(
+                                        children: [
+                                          InputField.name(
+                                              label: 'Enter your full name',
+                                              controller: _nameController,
+                                              textInputAction:
+                                                  TextInputAction.next),
+                                          const SizedBox(height: 16),
+                                        ],
+                                      )),
 
-                                    if (_passwordController.text !=
-                                        confirmPassword) {
-                                      return 'Password doesn\'t match';
-                                    }
-                                  },
-                                ),
-                              ],
-                            )),
+                                  InputField.email(
+                                    label: 'Enter your email',
+                                    controller: _emailController,
+                                  ),
 
-                        Row(
-                          children: [
-                            Expanded(
-                              child: ListTileTheme(
-                                horizontalTitleGap: 0.0,
-                                child: CheckboxListTile(
-                                  contentPadding: EdgeInsets.zero,
-                                  controlAffinity:
-                                      ListTileControlAffinity.leading,
-                                  title: _isSignUp
-                                      ? const Text(
-                                          'I agree to the Terms of Service')
-                                      : const Text('Remember me'),
-                                  value: timeDilation != 1.0,
-                                  onChanged: (bool? value) {
-                                    setState(() {
-                                      timeDilation = value! ? 3.0 : 1.0;
-                                    });
-                                  },
-                                ),
+                                  const SizedBox(height: 16),
+                                  InputField.password(
+                                    label: 'Enter your password',
+                                    controller: _passwordController,
+                                    textInputAction: _isSignUp
+                                        ? TextInputAction.next
+                                        : TextInputAction.done,
+                                    onFieldSubmitted:
+                                        _isSignUp ? null : (_) => _submit(),
+                                  ),
+
+                                  Visibility(
+                                      visible: _isSignUp,
+                                      child: Column(
+                                        children: [
+                                          const SizedBox(height: 16),
+                                          InputField(
+                                            label: 'Confirm password',
+                                            controller:
+                                                _confirmPasswordController,
+                                            textInputAction:
+                                                TextInputAction.done,
+                                            onFieldSubmitted: (_) => _submit(),
+                                            keyboardType:
+                                                TextInputType.visiblePassword,
+                                            autofillHints: const [
+                                              AutofillHints.password
+                                            ],
+                                            validator: (confirmPassword) {
+                                              if (confirmPassword == null ||
+                                                  confirmPassword.isEmpty) {
+                                                return 'Required';
+                                              }
+
+                                              if (_passwordController.text !=
+                                                  confirmPassword) {
+                                                return 'Password doesn\'t match';
+                                              }
+                                            },
+                                          ),
+                                        ],
+                                      )),
+
+                                  Row(
+                                    children: [
+                                      Expanded(
+                                        child: ListTileTheme(
+                                          horizontalTitleGap: 0.0,
+                                          child: CheckboxListTile(
+                                            contentPadding: EdgeInsets.zero,
+                                            controlAffinity:
+                                                ListTileControlAffinity.leading,
+                                            title: _isSignUp
+                                                ? const Text(
+                                                    'I agree to the Terms of Service')
+                                                : const Text('Remember me'),
+                                            value: timeDilation != 1.0,
+                                            onChanged: (bool? value) {
+                                              setState(() {
+                                                timeDilation =
+                                                    value! ? 3.0 : 1.0;
+                                              });
+                                            },
+                                          ),
+                                        ),
+                                      ),
+                                      Visibility(
+                                        visible: !_isSignUp,
+                                        child: LabeledTextButton(
+                                          label: 'Forgot password',
+                                          action: '',
+                                          onTap: () => {
+                                            AppRoute.forgotPassword
+                                                .push(context)
+                                          },
+                                        ),
+                                      )
+                                    ],
+                                  ),
+
+                                  const SizedBox(height: 8),
+                                  SizedBox(
+                                    width: double.maxFinite,
+                                    child: ElevatedButton(
+                                      onPressed: _submit,
+                                      child: Text(
+                                          _isSignUp ? 'Register' : 'Log In'),
+                                    ),
+                                  ),
+
+                                  const SizedBox(height: 16),
+                                  // const Spacer(),
+
+                                  Row(
+                                    children: [
+                                      const Expanded(child: Divider()),
+                                      Container(
+                                        margin: const EdgeInsets.only(
+                                            left: 5, right: 5),
+                                        child: const Text('Or login with'),
+                                      ),
+                                      const Expanded(child: Divider()),
+                                    ],
+                                  ),
+
+                                  const SizedBox(height: 8),
+
+                                  Row(
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    children: [
+                                      SizedBox(
+                                        width: 70,
+                                        height: 60,
+                                        child: OutlinedButton(
+                                            onPressed: () => {
+                                                  context
+                                                      .read<AuthCubit>()
+                                                      .signInWithGoogle()
+                                                },
+                                            style: OutlinedButton.styleFrom(
+                                              side: const BorderSide(
+                                                  width: 1,
+                                                  color: Color(0xFFBDBDBD)),
+                                              shape: RoundedRectangleBorder(
+                                                side: const BorderSide(
+                                                    width: 1,
+                                                    color: Color(0xFFBDBDBD)),
+                                                borderRadius:
+                                                    BorderRadius.circular(18),
+                                              ),
+                                            ),
+                                            child:
+                                                imageSVGAsset('google_logo')),
+                                      ),
+                                      const SizedBox(width: 34),
+                                      SizedBox(
+                                        width: 70,
+                                        height: 60,
+                                        child: OutlinedButton(
+                                            onPressed: () => {
+                                                  context
+                                                      .read<AuthCubit>()
+                                                      .signInWithFacebook()
+                                                },
+                                            style: OutlinedButton.styleFrom(
+                                              side: const BorderSide(
+                                                  width: 1,
+                                                  color: Color(0xFFBDBDBD)),
+                                              shape: RoundedRectangleBorder(
+                                                side: const BorderSide(
+                                                    width: 1,
+                                                    color: Color(0xFFBDBDBD)),
+                                                borderRadius:
+                                                    BorderRadius.circular(18),
+                                              ),
+                                            ),
+                                            child: imageSVGAsset('fb_logo')),
+                                      )
+                                    ],
+                                  ),
+
+                                  Text(_contactText),
+                                  const SizedBox(height: 8),
+                                  LabeledTextButton(
+                                    label: _isSignUp
+                                        ? 'Already have an account?'
+                                        : 'Don’t have an account?',
+                                    action: _isSignUp ? 'Sign in' : 'Sign up',
+                                    onTap: () => _changeLayout(),
+                                  ),
+                                ],
                               ),
                             ),
-                            Visibility(
-                              visible: !_isSignUp,
-                              child: LabeledTextButton(
-                                label: 'Forgot password',
-                                action: '',
-                                onTap: () =>
-                                    {AppRoute.forgotPassword.push(context)},
-                              ),
-                            )
-                          ],
-                        ),
-
-                        const SizedBox(height: 8),
-                        ElevatedButton(
-                          onPressed: _submit,
-                          child: Text(_isSignUp ? 'Register' : 'Log In'),
-                        ),
-                        const Spacer(),
-                        const SizedBox(height: 16),
-                        // const Spacer(),
-
-                        Row(
-                          children: [
-                            const Expanded(child: Divider()),
-                            Container(
-                              margin: const EdgeInsets.only(left: 5, right: 5),
-                              child: const Text('Or login with'),
-                            ),
-                            const Expanded(child: Divider()),
-                          ],
-                        ),
-
-                        const SizedBox(height: 8),
-
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Container(
-                                padding: const EdgeInsets.all(12),
-                                width: 62.30,
-                                height: 52.21,
-                                decoration: ShapeDecoration(
-                                  shape: RoundedRectangleBorder(
-                                    side: const BorderSide(
-                                        width: 1, color: Color(0xFFBDBDBD)),
-                                    borderRadius: BorderRadius.circular(18),
-                                  ),
-                                ),
-                                child: InkWell(
-                                  onTap: () => {
-                                    context.read<AuthCubit>().signInWithGoogle()
-                                  }, // needed
-                                  child: const Image(
-                                    image: ImageAsset('google_log.png'),
-                                    fit: BoxFit.scaleDown,
-                                  ),
-                                )),
-                            const SizedBox(width: 34),
-                            Container(
-                                padding: const EdgeInsets.all(12),
-                                width: 62.30,
-                                height: 52.21,
-                                decoration: ShapeDecoration(
-                                  shape: RoundedRectangleBorder(
-                                    side: const BorderSide(
-                                        width: 1, color: Color(0xFFBDBDBD)),
-                                    borderRadius: BorderRadius.circular(18),
-                                  ),
-                                ),
-                                child: InkWell(
-                                  onTap: () => {
-                                    context.read<AuthCubit>().signInWithFacebook()
-                                  }
-                                  , // needed
-                                  child: const Image(
-                                    image: ImageAsset('fb_logo.png'),
-                                    fit: BoxFit.scaleDown,
-                                  ),
-                                )),
-                          ],
-                        ),
-
-                        Text(_contactText),
-                        const SizedBox(height: 8),
-                        LabeledTextButton(
-                          label: _isSignUp
-                              ? 'Already have an account?'
-                              : 'Don’t have an account?',
-                          action: _isSignUp ? 'Sign in' : 'Sign up',
-                          onTap: () => _changeLayout(),
+                          ),
                         ),
                       ],
                     ),
                   ),
-                ),
+                ],
               ),
-            )));
+            ),
+          );
+        } else {
+          body = ResponsiveLayout(
+            body: Form(
+              key: _formKey,
+              child: Column(
+                children: [
+                  imageSVGAsset('original_long_logo') as Widget,
+
+                  Container(
+                    width: 230,
+                    height: 239,
+                    decoration: const BoxDecoration(
+                      image: DecorationImage(
+                        image: ImageAsset('login_image.png'),
+                        fit: BoxFit.fitHeight,
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 6),
+                  Text(
+                    _isSignUp ? 'Sign up' : 'Log in',
+                    textAlign: TextAlign.center,
+                    style: context.textTheme.headlineLarge,
+                  ),
+                  const SizedBox(height: 33),
+
+                  Visibility(
+                      visible: _isSignUp,
+                      child: Column(
+                        children: [
+                          InputField.name(
+                              label: 'Enter your full name',
+                              controller: _nameController,
+                              textInputAction: TextInputAction.next),
+                          const SizedBox(height: 16),
+                        ],
+                      )),
+
+                  InputField.email(
+                    label: 'Enter your email',
+                    controller: _emailController,
+                  ),
+
+                  const SizedBox(height: 16),
+                  InputField.password(
+                    label: 'Enter your password',
+                    controller: _passwordController,
+                    textInputAction:
+                        _isSignUp ? TextInputAction.next : TextInputAction.done,
+                    onFieldSubmitted: _isSignUp ? null : (_) => _submit(),
+                  ),
+
+                  Visibility(
+                      visible: _isSignUp,
+                      child: Column(
+                        children: [
+                          const SizedBox(height: 16),
+                          InputField(
+                            label: 'Confirm password',
+                            controller: _confirmPasswordController,
+                            textInputAction: TextInputAction.done,
+                            onFieldSubmitted: (_) => _submit(),
+                            keyboardType: TextInputType.visiblePassword,
+                            autofillHints: const [AutofillHints.password],
+                            validator: (confirmPassword) {
+                              if (confirmPassword == null ||
+                                  confirmPassword.isEmpty) {
+                                return 'Required';
+                              }
+
+                              if (_passwordController.text != confirmPassword) {
+                                return 'Password doesn\'t match';
+                              }
+                            },
+                          ),
+                        ],
+                      )),
+
+                  Row(
+                    children: [
+                      Expanded(
+                        child: ListTileTheme(
+                          horizontalTitleGap: 0.0,
+                          child: CheckboxListTile(
+                            contentPadding: EdgeInsets.zero,
+                            controlAffinity: ListTileControlAffinity.leading,
+                            title: _isSignUp
+                                ? const Text('I agree to the Terms of Service')
+                                : const Text('Remember me'),
+                            value: timeDilation != 1.0,
+                            onChanged: (bool? value) {
+                              setState(() {
+                                timeDilation = value! ? 3.0 : 1.0;
+                              });
+                            },
+                          ),
+                        ),
+                      ),
+                      Visibility(
+                        visible: !_isSignUp,
+                        child: LabeledTextButton(
+                          label: 'Forgot password',
+                          action: '',
+                          onTap: () => {AppRoute.forgotPassword.push(context)},
+                        ),
+                      )
+                    ],
+                  ),
+
+                  const SizedBox(height: 8),
+                  SizedBox(
+                    width: double.maxFinite,
+                    child: ElevatedButton(
+                      onPressed: _submit,
+                      child: Text(_isSignUp ? 'Register' : 'Log In'),
+                    ),
+                  ),
+                  const Spacer(),
+                  const SizedBox(height: 16),
+                  // const Spacer(),
+
+                  Row(
+                    children: [
+                      const Expanded(child: Divider()),
+                      Container(
+                        margin: const EdgeInsets.only(left: 5, right: 5),
+                        child: const Text('Or login with'),
+                      ),
+                      const Expanded(child: Divider()),
+                    ],
+                  ),
+
+                  const SizedBox(height: 8),
+
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      SizedBox(
+                        width: 70,
+                        height: 60,
+                        child: OutlinedButton(
+                            onPressed: () =>
+                                {context.read<AuthCubit>().signInWithGoogle()},
+                            style: OutlinedButton.styleFrom(
+                              side: const BorderSide(
+                                  width: 1, color: Color(0xFFBDBDBD)),
+                              shape: RoundedRectangleBorder(
+                                side: const BorderSide(
+                                    width: 1, color: Color(0xFFBDBDBD)),
+                                borderRadius: BorderRadius.circular(18),
+                              ),
+                            ),
+                            child: imageSVGAsset('google_logo')),
+                      ),
+                      const SizedBox(width: 34),
+                      SizedBox(
+                        width: 70,
+                        height: 60,
+                        child: OutlinedButton(
+                            onPressed: () => {
+                                  context.read<AuthCubit>().signInWithFacebook()
+                                },
+                            style: OutlinedButton.styleFrom(
+                              side: const BorderSide(
+                                  width: 1, color: Color(0xFFBDBDBD)),
+                              shape: RoundedRectangleBorder(
+                                side: const BorderSide(
+                                    width: 1, color: Color(0xFFBDBDBD)),
+                                borderRadius: BorderRadius.circular(18),
+                              ),
+                            ),
+                            child: imageSVGAsset('fb_logo')),
+                      )
+                    ],
+                  ),
+
+                  Text(_contactText),
+                  const SizedBox(height: 8),
+                  LabeledTextButton(
+                    label: _isSignUp
+                        ? 'Already have an account?'
+                        : 'Don’t have an account?',
+                    action: _isSignUp ? 'Sign in' : 'Sign up',
+                    onTap: () => _changeLayout(),
+                  ),
+                ],
+              ),
+            ),
+          );
+        }
+
+        // return LoadingOverlay(
+        //     loading: state is AuthLoading,
+        //     child: Scaffold(
+        //         body: SafeArea(
+        //       child: Padding(
+        //           padding: const EdgeInsets.all(16),
+        //           child: body,
+        //         ),
+        //     )));
+
+        return LoadingOverlay(
+            loading: state is AuthLoading,
+            child: SizedBox(
+              height: MediaQuery.of(context).size.height,
+              width: MediaQuery.of(context).size.width,
+              child: Padding(
+                padding: const EdgeInsets.all(16),
+                child: body,
+              ),
+            ));
       },
     );
   }

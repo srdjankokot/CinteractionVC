@@ -1,9 +1,14 @@
+
+import 'package:cinteraction_vc/assets/colors/Colors.dart';
 import 'package:cinteraction_vc/core/extension/context.dart';
-import 'package:cinteraction_vc/features/login_page/login_screen.dart';
-import 'package:flutter/cupertino.dart';
+import 'package:cinteraction_vc/core/extension/context_user.dart';
+import 'package:cinteraction_vc/core/extension/image.dart';
 import 'package:flutter/material.dart';
 
-import '../../../profile/ui/widget/profile_tab.dart';
+import '../../../../core/ui/images/image.dart';
+import '../../../../core/ui/widget/call_button_shape.dart';
+import '../../../../core/util/menu_items.dart';
+import '../../profile/ui/widget/user_image.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -15,91 +20,103 @@ class HomePage extends StatefulWidget {
 class _HomePageState extends State<HomePage> {
   int _selectedIndex = 0;
 
-  final _tabs = <_HomeTab>[
-    _HomeTab(
-      label: 'Home',
-      icon: Image.asset(
-        "lib/assets/images/bottom_menu/menu_home.png",
-        fit: BoxFit.scaleDown,
-      ),
-      activeIcon: Image.asset(
-        "lib/assets/images/bottom_menu/menu_home_active.png",
-        fit: BoxFit.scaleDown,
-      ),
-      builder: (context) => const Center(child: Text('Home')),
-    ),
-    _HomeTab(
-      label: 'Dashboard',
-      icon: Image.asset(
-        "lib/assets/images/bottom_menu/menu_dashboard.png",
-        fit: BoxFit.scaleDown,
-      ),
-      activeIcon: Image.asset(
-        "lib/assets/images/bottom_menu/menu_home_active.png",
-        fit: BoxFit.scaleDown,
-      ),
-      builder: (context) => const Center(child: Text('Dashboard')),
-    ),
-    _HomeTab(
-      label: 'Meetings',
-      icon: Image.asset(
-        "lib/assets/images/bottom_menu/menu_meetings.png",
-        fit: BoxFit.scaleDown,
-      ),
-      activeIcon: Image.asset(
-        "lib/assets/images/bottom_menu/menu_meetings_active.png",
-        fit: BoxFit.scaleDown,
-      ),
-      builder: (context) => const Center(child: Text('Meetings')),
-    ),
-    _HomeTab(
-      label: 'Insights',
-      icon: Image.asset(
-        "lib/assets/images/bottom_menu/menu_insights.png",
-        fit: BoxFit.scaleDown,
-      ),
-      activeIcon: Image.asset(
-        "lib/assets/images/bottom_menu/menu_insights_active.png",
-        fit: BoxFit.scaleDown,
-      ),
-      builder: (context) => const Center(child: Text('Insights')),
-    ),
-    _HomeTab(
-      label: 'Profile',
-      icon: Image.asset(
-        "lib/assets/images/bottom_menu/menu_profile.png",
-        fit: BoxFit.scaleDown,
-      ),
-      activeIcon: Image.asset(
-        "lib/assets/images/bottom_menu/menu_profile_active.png",
-        fit: BoxFit.scaleDown,
-      ),
-      builder: (context) => const ProfileTab()
-    ),
-  ];
-
   @override
   Widget build(BuildContext context) {
+    final tabs = context.isWide ? desktopMenu : mobileBottomMenu;
+
+    final user = context.watchCurrentUser;
+
     final Widget body;
     final Widget? bottomNavigationBar;
-    final content = _tabs[_selectedIndex].builder(context);
+    final content = tabs[_selectedIndex].builder(context);
+    context.textTheme.labelSmall;
 
     if (context.isWide) {
       body = Row(
         children: [
-          NavigationRail(
-            selectedIndex: _selectedIndex,
-            onDestinationSelected: (index) {
-              setState(() => _selectedIndex = index);
-            },
-            destinations: [
-              for (final tab in _tabs)
-                NavigationRailDestination(
-                  label: Text(tab.label),
-                  icon: tab.icon,
-                ),
-            ],
+          Drawer(
+            child: Container(
+              color: Colors.white,
+              padding: const EdgeInsets.only(top: 20),
+              child: Column(
+                children: [
+                  for (final (index, item) in tabs.indexed)
+                    Column(
+                      children: [
+                        Visibility(
+                            visible: index == 4,
+                            child: Container(
+                              margin: const EdgeInsets.all(16),
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+
+                                  const Divider(),
+                                  const SizedBox(height: 16),
+                                  Container(
+                                    margin: const EdgeInsets.only(left: 10),
+                                    child: Text(
+                                      'Admin',
+                                      textAlign: TextAlign.left,
+                                      style: context.textTheme.labelSmall?.copyWith(
+                                        color: ColorConstants.kGrey300
+                                      )
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            )),
+                        Stack(
+                          children: [
+                            Visibility(
+                              visible: _selectedIndex == index,
+                              child: Row(
+                                children: [
+                                  Container(
+                                      width: 2,
+                                      height: 50,
+                                      color: ColorConstants.kPrimaryColor),
+                                  Expanded(
+                                    flex: 1,
+                                    child: Container(
+                                        height: 50,
+                                        color: ColorConstants.kPrimaryColor
+                                            .withOpacity(0.05)),
+                                  ),
+                                ],
+                              ),
+                            ),
+                            Container(
+                              height: 50,
+                              margin: const EdgeInsets.only(left: 20),
+                              child: ListTile(
+                                selected: _selectedIndex == index,
+                                title: Text(item.label,
+                                    style:
+                                        context.textTheme.labelMedium?.copyWith(
+                                      color: _selectedIndex == index
+                                          ? ColorConstants.kPrimaryColor
+                                          : ColorConstants.kGrey400,
+                                    )),
+                                leading: _selectedIndex == index
+                                    ? imageSVGAsset(item.assetName)?.copyWith(
+                                        colorFilter: const ColorFilter.mode(
+                                            ColorConstants.kPrimaryColor,
+                                            BlendMode.srcIn))
+                                    : imageSVGAsset(item.assetName),
+                                onTap: () =>
+                                    {setState(() => _selectedIndex = index)},
+                              ),
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
+                ],
+              ),
+            ),
           ),
+          const VerticalDivider(thickness: 1, width: 1),
           Expanded(child: content),
         ],
       );
@@ -110,30 +127,79 @@ class _HomePageState extends State<HomePage> {
         currentIndex: _selectedIndex,
         onTap: (index) => setState(() => _selectedIndex = index),
         items: [
-          for (final tab in _tabs)
+          for (final tab in tabs)
             BottomNavigationBarItem(
-                label: tab.label, icon: tab.icon, activeIcon: tab.activeIcon),
+              label: tab.label,
+              icon: imageSVGAsset(tab.assetName) as Widget,
+              activeIcon: imageSVGAsset(tab.assetName)?.copyWith(
+                  colorFilter: const ColorFilter.mode(
+                      ColorConstants.kPrimaryColor, BlendMode.srcIn)) as Widget,
+            ),
         ],
       );
     }
 
     return Scaffold(
+      appBar: context.isWide
+          ? PreferredSize(
+              preferredSize: const Size.fromHeight(97),
+              child: Container(
+                height: 97,
+                padding: const EdgeInsets.only(left: 30, right: 30),
+                decoration: const BoxDecoration(
+                  color: Colors.white,
+                  boxShadow: [
+                    BoxShadow(
+                      color: Color(0x14000000),
+                      blurRadius: 8,
+                      offset: Offset(0, 4),
+                      spreadRadius: 0,
+                    )
+                  ],
+                ),
+                child: Row(
+                  children: [
+                    imageSVGAsset('original_long_logo') as Widget,
+                    const Spacer(),
+                    if (user != null)
+                      Row(
+                        children: [
+                          CallButtonShape(
+                              image: imageSVGAsset('menu_notifications') as Widget,
+                              bgColor: ColorConstants.kGrey100,
+                              onClickAction: () => {}),
+                          const SizedBox(
+                            width: 10,
+                          ),
+                          UserImage.medium(user.imageUrl),
+                          const SizedBox(
+                            width: 10,
+                          ),
+                          Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                user.name,
+                                textAlign: TextAlign.center,
+                                style: context.textTheme.titleSmall,
+                              ),
+                              Text(
+                                'Professor',
+                                textAlign: TextAlign.center,
+                                style: context.textTheme.labelSmall,
+                              ),
+                            ],
+                          ),
+                        ],
+                      )
+                  ],
+                ),
+              ),
+            )
+          : null,
       body: body,
       bottomNavigationBar: bottomNavigationBar,
     );
   }
-}
-
-class _HomeTab {
-  const _HomeTab({
-    required this.label,
-    required this.icon,
-    required this.activeIcon,
-    required this.builder,
-  });
-
-  final String label;
-  final Image icon;
-  final Image activeIcon;
-  final WidgetBuilder builder;
 }
