@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 enum AppRoute {
   splash('/'),
   home('/home'),
+  meeting('/home/meeting'),
   settings('/settings'),
   auth('/auth'),
   forgotPassword('/auth/forgot_password'),

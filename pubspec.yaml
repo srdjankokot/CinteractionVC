@@ -59,6 +59,8 @@ dependencies:
     sdk: flutter
 
   intl: any
+  fading_edge_scrollview: ^4.0.0
+  flutter_svg: ^2.0.9
 
 dev_dependencies:
 
@@ -87,7 +89,7 @@ flutter:
   assets:
     - lib/assets/fonts/
     - lib/assets/images/
-    - lib/assets/images/bottom_menu/
+    - lib/assets/images/svg/
   #   - images/a_dot_burr.jpeg
   #   - images/a_dot_ham.jpeg
 

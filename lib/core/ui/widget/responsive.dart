@@ -30,7 +30,7 @@ class ResponsiveLayout extends StatelessWidget {
           child: Form(
             child: SingleChildScrollView(
               child: ConstrainedBox(
-                  constraints: BoxConstraints(maxWidth: constraint.maxWidth < mobileWidthBreakpoint? mobileWidthBreakpoint: desktopWidthBreakpoint, minHeight: constraint.maxHeight),
+                  constraints: BoxConstraints(maxWidth: constraint.maxWidth < mobileWidthBreakpoint? mobileWidthBreakpoint: constraint.maxWidth, minHeight: constraint.maxHeight),
                   child: IntrinsicHeight(
                       child: body
               ),

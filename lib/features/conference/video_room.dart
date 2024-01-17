@@ -1,13 +1,18 @@
 import 'dart:io';
+import 'dart:math';
 
+import 'package:cinteraction_vc/assets/colors/Colors.dart';
+import 'package:cinteraction_vc/core/extension/context.dart';
+import 'package:cinteraction_vc/core/ui/listview/fading_list_view.dart';
+import 'package:cinteraction_vc/core/ui/widget/call_button_shape.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_webrtc/flutter_webrtc.dart';
 import 'package:janus_client/janus_client.dart';
 import 'package:logging/logging.dart';
-import 'package:flutter/src/widgets/navigator.dart' as navigator;
 
 import '../../conf.dart';
+import '../../core/ui/images/image.dart';
 import '../../util.dart';
 
 class VideoRoomPage extends StatefulWidget {
@@ -582,250 +587,268 @@ class _VideoRoomPage extends State<VideoRoomPage> {
     });
   }
 
+  int _numberOfStream = 1;
+  bool _isGridLayout = true;
+
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      // appBar: AppBar(
-      //   actions: [
-      //
-      //   ],
-      //   title: const Text('Cinteraction Virtual Conference'),
-      // ),
-      body: OrientationBuilder(builder: (context, orientation) {
-        var col = 2;
-        if (kIsWeb) {
-          col = 7;
-        } else if (Platform.isAndroid) {
-          col = 2;
-        }
 
-        return GridView.builder(
-            gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-              crossAxisCount: col,
-              childAspectRatio: 1,
+
+    if(videoState.streamsToBeRendered.entries.isEmpty) {
+      return Container();
+    }
+
+    List<StreamRenderer> items = [];
+
+    for (var i = 0; i < _numberOfStream; i++) {
+      items.add(videoState.streamsToBeRendered.entries
+          .map((e) => e.value)
+          .toList()
+          .first);
+    }
+
+
+    return Container(
+      width: double.maxFinite,
+      height: double.maxFinite,
+      color: ColorConstants.kGrey700,
+      child: Stack(
+        children: [
+          getLayout(items),
+          Positioned(
+              top: 20,
+              left: 20,
+              child: Row(
+                children: [
+                  IconButton(
+                      icon: const Icon(
+                        Icons.add,
+                        color: Colors.white,
+                      ),
+                      onPressed: () => {
+                            setState(() {
+                              _numberOfStream++;
+                            })
+                          }),
+                  IconButton(
+                      icon: const Icon(
+                        Icons.remove,
+                        color: Colors.white,
+                      ),
+                      onPressed: () => {
+                            setState(() {
+                              _numberOfStream--;
+                            })
+                          }),
+                  IconButton(
+                      icon: const Icon(
+                        Icons.layers_outlined,
+                        color: Colors.white,
+                      ),
+                      onPressed: () => {
+                            setState(() {
+                              _isGridLayout = !_isGridLayout;
+                            })
+                          })
+                ],
+              )),
+          Positioned.fill(
+            bottom: 20,
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              crossAxisAlignment: CrossAxisAlignment.end,
+              children: [
+                CallButtonShape(
+                    image: imageSVGAsset('icon_microphone') as Widget,
+                    onClickAction: joined
+                        ? () async {
+                            setState(() {
+                              audioEnabled = !audioEnabled;
+                            });
+                            await mute(
+                                videoPlugin?.webRTCHandle?.peerConnection,
+                                'audio',
+                                audioEnabled);
+                            setState(() {
+                              localVideoRenderer.isAudioMuted = !audioEnabled;
+                            });
+                          }
+                        : null),
+                const SizedBox(width: 20),
+                CallButtonShape(
+                    image: imageSVGAsset('icon_video_recorder') as Widget,
+                    onClickAction: joined
+                        ? () async {
+                            setState(() {
+                              videoEnabled = !videoEnabled;
+                            });
+                            await mute(
+                                videoPlugin?.webRTCHandle?.peerConnection,
+                                'video',
+                                videoEnabled);
+                          }
+                        : null),
+                const SizedBox(width: 20),
+                CallButtonShape(
+                    image: imageSVGAsset('icon_arrow_square_up') as Widget,
+                    onClickAction: joined
+                        ? () async {
+                            if (screenSharing) {
+                              await disposeScreenSharing();
+                              return;
+                            }
+                            await screenShare();
+                          }
+                        : null),
+                const SizedBox(width: 20),
+                CallButtonShape(
+                    image: imageSVGAsset('icon_user') as Widget,
+
+                    onClickAction: joined ? switchCamera : null),
+                const SizedBox(width: 20),
+                CallButtonShape(
+                    image: imageSVGAsset('icon_phone') as Widget,
+                    bgColor: ColorConstants.kPrimaryColor,
+                    onClickAction: () => {
+                          callEnd()
+                              .then((value) => {Navigator.of(context).pop()})
+                        }),
+              ],
             ),
-            shrinkWrap: true,
-            itemCount: videoState.streamsToBeRendered.entries.length,
-            itemBuilder: (BuildContext ctx, int index) {
-              List<StreamRenderer> items = videoState
-                  .streamsToBeRendered.entries
-                  .map((e) => e.value)
-                  .toList();
-              // StreamRenderer remoteStream = items[index];
-
-              return getRendererItem(items[index]);
-            });
-      }),
-
-      bottomNavigationBar: Container(
-        child: Row(
-          children: [
-            IconButton(
-                icon: const Icon(
-                  Icons.call_end,
-                  color: Colors.red,
-                ),
-                onPressed: () async {
-                  callEnd().then((value) => {Navigator.of(context).pop()});
-                }),
-            IconButton(
-                icon: Icon(
-                  !screenSharing ? Icons.screen_share : Icons.stop_screen_share,
-                  color: Colors.green,
-                ),
-                onPressed: joined
-                    ? () async {
-                        if (screenSharing) {
-                          await disposeScreenSharing();
-                          return;
-                        }
-                        await screenShare();
-                      }
-                    : null),
-            IconButton(
-                icon: Icon(
-                  audioEnabled ? Icons.mic : Icons.mic_off,
-                  color: Colors.green,
-                ),
-                onPressed: joined
-                    ? () async {
-                        setState(() {
-                          audioEnabled = !audioEnabled;
-                        });
-                        await mute(videoPlugin?.webRTCHandle?.peerConnection,
-                            'audio', audioEnabled);
-                        setState(() {
-                          localVideoRenderer.isAudioMuted = !audioEnabled;
-                        });
-                      }
-                    : null),
-            IconButton(
-                icon: Icon(
-                  videoEnabled ? Icons.videocam : Icons.videocam_off,
-                  color: Colors.green,
-                ),
-                onPressed: joined
-                    ? () async {
-                        setState(() {
-                          videoEnabled = !videoEnabled;
-                        });
-                        await mute(videoPlugin?.webRTCHandle?.peerConnection,
-                            'video', videoEnabled);
-                      }
-                    : null),
-            IconButton(
-                icon: const Icon(
-                  Icons.switch_camera,
-                  color: Colors.green,
-                ),
-                onPressed: joined ? switchCamera : null)
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }
 
-  Widget getRendererItem(StreamRenderer remoteStream) {
-    debugPrint('getRendererItem: ${remoteStream.publisherName!}');
-    // return Container(
-    //   decoration: const BoxDecoration(
-    //       color: Colors.orangeAccent,
-    //       borderRadius: BorderRadius.all(Radius.circular(15))),
-    // );
+  Widget getLayout(List<StreamRenderer> items) {
+    var numberStream = _numberOfStream;
+    var row = sqrt(numberStream).round();
+    var col = ((numberStream) / row).ceil();
 
-    // if(remoteStream.publisherName != 'You')
-      // {
-      //   if (int.parse(remoteStream.publisherName ?? "") > 3) {
-      //     // unSubscribeToVideo(int.parse(remoteStream.publisherId??""));
-      //     remoteStream.selectedQuality = [true, false, false];
-      //   }
-      // }
+    var size = MediaQuery.of(context).size;
+    // final double itemHeight = (size.height - kToolbarHeight - 24) / row;
 
+    if (_isGridLayout) {
+      final double itemHeight = (size.height) / row;
+      final double itemWidth = size.width / col;
 
-    return Container(
-        clipBehavior: Clip.hardEdge,
-        margin: const EdgeInsets.all(5.0),
-        decoration: const BoxDecoration(
-          color: Colors.orangeAccent,
-          borderRadius: BorderRadius.all(Radius.circular(15)),
-        ),
-        child: Stack(
-          children: [
-            // Visibility(
-            //   visible: remoteStream.isVideoMuted == false,
-            //   replacement: Center(
-            //     child: Text("Video Paused By ${remoteStream.publisherName!}",
-            //         style: const TextStyle(color: Colors.black)),
-            //   ),
-            //   child: Stack(children: [
-            //
-            //   ]),
-            // ),
+      return Wrap(
+        runSpacing: 0,
+        spacing: 0,
+        alignment: WrapAlignment.center,
+        children: items
+            .map((e) => getRendererItem(
+                e, Random().nextInt(100), itemHeight, itemWidth))
+            .toList(),
+      );
+    } else {
+      const double itemHeight = 89;
+      const double itemWidth = 92;
 
-            RTCVideoView(
-              remoteStream.videoRenderer,
-              filterQuality: FilterQuality.none,
-              objectFit: RTCVideoViewObjectFit.RTCVideoViewObjectFitCover,
-              mirror: true,
-            ),
-
-            // Container(color: Colors.red,),
-            Visibility(
-              visible: remoteStream.publisherId != myId.toString(),
-              child: PositionedDirectional(
-                  top: 120,
-                  start: 20,
-                  child: ToggleButtons(
-                    direction: Axis.horizontal,
-                    onPressed: (int index) async {
-                      setState(() {
-                        // The button that is tapped is set to true, and the others to false.
-                        for (int i = 0;
-                            i < remoteStream.selectedQuality.length;
-                            i++) {
-                          remoteStream.selectedQuality[i] = i == index;
-                        }
-                      });
-                      await remotePlugin?.send(data: {
-                        'request': "configure",
-                        'mid': remoteStream.mid,
-                        'substream': index
-                      });
-                    },
-                    borderRadius: const BorderRadius.all(Radius.circular(8)),
-                    selectedBorderColor: Colors.red[700],
-                    selectedColor: Colors.white,
-                    fillColor: Colors.red[200],
-                    color: Colors.red[400],
-                    constraints: const BoxConstraints(
-                      minHeight: 20.0,
-                      minWidth: 50.0,
+      return Stack(
+        children: [
+          Container(
+            child: getRendererItem(items.first, Random().nextInt(100),
+                double.maxFinite, double.maxFinite),
+          ),
+          Container(
+            alignment: Alignment.centerRight,
+            margin: const EdgeInsets.only(right: 55),
+            child: SizedBox(
+              width: 100,
+              height: MediaQuery.of(context).size.height - 156,
+              child: ListView.builder(
+                shrinkWrap: true,
+                itemCount: items.length,
+                itemBuilder: (context, index) {
+                  return Container(
+                    clipBehavior: Clip.hardEdge,
+                    margin: const EdgeInsets.all(3),
+                    decoration: ShapeDecoration(
+                      shape: RoundedRectangleBorder(
+                        side: const BorderSide(width: 2, color: Colors.white),
+                        borderRadius: BorderRadius.circular(6),
+                      ),
                     ),
-                    isSelected: remoteStream.selectedQuality,
-                    children: const [Text('Low'), Text('Medium'), Text('High')],
-                  )),
-            ),
-            Align(
-              alignment: Alignment.bottomLeft,
-              child: Text(
-                '${remoteStream.videoRenderer.videoWidth}X${remoteStream.videoRenderer.videoHeight}',
-                style: const TextStyle(color: Colors.white),
+                    child: getRendererItem(items[index], Random().nextInt(100),
+                        itemHeight, itemWidth),
+                  );
+                },
               ),
             ),
+          ),
+        ],
+      );
 
-            Align(
-              alignment: AlignmentDirectional.bottomStart,
-              child: Row(
-                mainAxisSize: MainAxisSize.max,
-                mainAxisAlignment: MainAxisAlignment.end,
-                children: [
-                  Text(remoteStream.publisherName!),
-                  Icon(remoteStream.isAudioMuted == true
-                      ? Icons.mic_off
-                      : Icons.mic),
-                  IconButton(
-                      onPressed: () async {
-                        fullScreenDialog = await showDialog(
-                            context: context,
-                            builder: ((context) {
-                              return AlertDialog(
-                                contentPadding: EdgeInsets.all(10),
-                                insetPadding: EdgeInsets.zero,
-                                content: Container(
-                                  width: double.maxFinite,
-                                  padding: EdgeInsets.zero,
-                                  child: Stack(
-                                    children: [
-                                      Positioned.fill(
-                                          child: Padding(
-                                        padding: const EdgeInsets.all(0),
-                                        child: RTCVideoView(
-                                          remoteStream.videoRenderer,
-                                        ),
-                                      )),
-                                      Align(
-                                        alignment: Alignment.topRight,
-                                        child: IconButton(
-                                            onPressed: () {
-                                              navigator.Navigator.of(context)
-                                                  .pop(fullScreenDialog);
-                                            },
-                                            icon: const Icon(
-                                              Icons.close,
-                                              color: Colors.white,
-                                            )),
-                                      )
-                                    ],
-                                  ),
-                                ),
-                              );
-                            }));
-                      },
-                      icon: const Icon(Icons.fullscreen)),
-                ],
-              ),
-            )
-          ],
-        ));
+      return Container();
+    }
+
+    return const Text("NO LAYOUT");
+  }
+
+  Widget getRendererItem(StreamRenderer remoteStream, int engagement,
+      double height, double width) {
+    debugPrint('getRendererItem: ${remoteStream.publisherName!} $engagement');
+    return SizedBox(
+      height: height,
+      width: width,
+      child: Stack(
+        children: [
+
+          RTCVideoView(
+            remoteStream.videoRenderer,
+            filterQuality: FilterQuality.none,
+            objectFit: RTCVideoViewObjectFit.RTCVideoViewObjectFitCover,
+            mirror: true,
+          ),
+
+
+          Positioned(
+            top: 20,
+            right: 24,
+            child: Stack(
+              children: [
+                Container(
+                  clipBehavior: Clip.hardEdge,
+                  width: 133,
+                  height: 20,
+                  alignment: Alignment.centerLeft,
+                  decoration: ShapeDecoration(
+                    color: Colors.white,
+                    shape: RoundedRectangleBorder(
+                      side: const BorderSide(
+                        width: 1,
+                        strokeAlign: BorderSide.strokeAlignOutside,
+                        color: Colors.white,
+                      ),
+                      borderRadius: BorderRadius.circular(28),
+                    ),
+                  ),
+                  child: LayoutBuilder(builder:
+                      (BuildContext context, BoxConstraints constraint) {
+                    return Container(
+                      width: constraint.maxWidth * engagement / 100,
+                      height: double.maxFinite,
+                      color: ColorConstants.kSuccessGreen,
+                    );
+                  }),
+                ),
+                Positioned.fill(
+                    child: Align(
+                      alignment: Alignment.center,
+                      child: Text(
+                        '${engagement / 100}',
+                        textAlign: TextAlign.center,
+                        style: context.textTheme.labelSmall,
+                      ),
+                    ))
+              ],
+            ),
+          ),
+
+        ],
+      ),
+    );
   }
 }

@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
-import '../../features/profile/bloc/user_cubit.dart';
-import '../../features/profile/model/user.dart';
+import '../../features/home/profile/bloc/user_cubit.dart';
+import '../../features/home/profile/model/user.dart';
+
 
 extension BuildContextUserExt on BuildContext {
   User? get watchCurrentUser {

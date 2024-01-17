@@ -13,7 +13,7 @@ const _background = Colors.white;
 const _lightest = Colors.white;
 const _darkest = ColorConstants.kGrey400;
 const _darker = Colors.black87;
-const _divider = Colors.grey;
+const _divider = ColorConstants.kDividerGray;
 const _disabled = Colors.grey;
 
 const _red = Colors.red;
@@ -58,7 +58,13 @@ ThemeData _getTheme() {
     horizontal: 24,
     vertical: 18,
   );
-  final buttonTextStyle = textTheme.titleLarge;
+
+
+  const buttonTextStyle = TextStyle(
+    color: Colors.white,
+    fontSize: 24,
+    fontWeight: FontWeight.w500,
+  );
 
   return ThemeData(
     useMaterial3: true,
@@ -209,29 +215,29 @@ ThemeData _getTheme() {
 
 TextTheme _getTextTheme(ColorScheme colorScheme) {
   const headlineColor = _secondary;
-  const headlineWeight = FontWeight.w700;
+  const headlineWeight = FontWeight.w400;
   const headlineHeight = 1.2;
-  const headlineLetterSpacing = 2.5;
+  const headlineLetterSpacing = 1.0;
 
   const titleColor = _darkest;
   const titleWeight = FontWeight.bold;
   const titleHeight = 1.2;
-  const titleLetterSpacing = -0.96;
+  const titleLetterSpacing = 1.0;
 
   const bodyColor = _darker;
-  const bodyWeight = FontWeight.normal;
-  const bodyHeight = 1.5;
-  const bodyLetterSpacing = 0.0;
+  const bodyWeight = FontWeight.w400;
+  const bodyHeight = 1.0;
+  const bodyLetterSpacing = 1.0;
 
   const labelColor = titleColor;
 
   const textTheme = TextTheme(
     // Headline
     headlineLarge: TextStyle(
-      fontSize: 40,
+      fontSize: 32,
       height: headlineHeight,
       color: headlineColor,
-      fontWeight: headlineWeight,
+      fontWeight: FontWeight.w700,
     ),
     headlineMedium: TextStyle(
       fontSize: 32,

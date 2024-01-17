@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../../../core/navigation/route.dart';
-import '../../../profile/bloc/user_cubit.dart';
+import '../../../home/profile/bloc/user_cubit.dart';
 
 
 class SplashPage extends StatelessWidget {
