@@ -4,16 +4,16 @@ import 'package:google_fonts/google_fonts.dart';
 import '../../assets/colors/Colors.dart';
 
 final lightTheme = _getTheme();
+final titleThemeStyle = _getTitleTheme();
 
 const _primary = ColorConstants.kPrimaryColor;
 const _secondary = ColorConstants.kSecondaryColor;
-const _border = ColorConstants.kGrey200;
+const _border = ColorConstants.kGray4;
 
 const _background = Colors.white;
 const _lightest = Colors.white;
-const _darkest = ColorConstants.kGrey400;
-const _darker = Colors.black87;
-const _divider = ColorConstants.kDividerGray;
+const _darkest = ColorConstants.kGray1;
+const _divider = ColorConstants.kGray5;
 const _disabled = Colors.grey;
 
 const _red = Colors.red;
@@ -43,13 +43,15 @@ final _lightColorScheme = ColorScheme(
   outline: _divider,
 );
 
+
+
+
+
 ThemeData _getTheme() {
   final colorScheme = _lightColorScheme;
-  final textTheme = _getTextTheme(colorScheme);
-  final primaryTextTheme = textTheme.apply(
-    displayColor: colorScheme.onPrimary,
-    bodyColor: colorScheme.onPrimary,
-  );
+  final monteserratTextTheme = _getMonteserratTextTheme(colorScheme);
+  var nunitoTextTheme = getNunitoTextTheme(colorScheme);
+  final primaryTextTheme = monteserratTextTheme;
 
   final buttonShape = RoundedRectangleBorder(
     borderRadius: BorderRadius.circular(71),
@@ -70,7 +72,7 @@ ThemeData _getTheme() {
     useMaterial3: true,
     brightness: Brightness.light,
     colorScheme: colorScheme,
-    textTheme: textTheme,
+    textTheme: monteserratTextTheme,
     primaryTextTheme: primaryTextTheme,
     scaffoldBackgroundColor: colorScheme.background,
     disabledColor: _disabled,
@@ -80,7 +82,7 @@ ThemeData _getTheme() {
       thickness: 1,
     ),
     chipTheme: ChipThemeData(
-      labelStyle: textTheme.labelSmall,
+      labelStyle: monteserratTextTheme.labelSmall,
       side: const BorderSide(
         width: 0,
       ),
@@ -121,18 +123,20 @@ ThemeData _getTheme() {
       groupAlignment: 0,
     ),
     appBarTheme: AppBarTheme(
-      titleTextStyle: textTheme.titleLarge,
-      backgroundColor: _background,
+      titleTextStyle: monteserratTextTheme.bodyLarge,
+      backgroundColor: _secondary,
+      centerTitle: true,
+      foregroundColor: Colors.white,
     ),
     dialogTheme: DialogTheme(
       backgroundColor: colorScheme.background,
       surfaceTintColor: colorScheme.background,
-      titleTextStyle: textTheme.titleLarge,
+      titleTextStyle: monteserratTextTheme.titleLarge,
     ),
     snackBarTheme: SnackBarThemeData(
       behavior: SnackBarBehavior.floating,
       backgroundColor: _darkest,
-      contentTextStyle: primaryTextTheme.bodyLarge,
+      contentTextStyle: primaryTextTheme.displaySmall,
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.all(Radius.circular(8)),
       ),
@@ -165,8 +169,8 @@ ThemeData _getTheme() {
         borderSide: BorderSide(width: 1, color: _border),
         borderRadius: BorderRadius.all(Radius.circular(71)),
       ),
-      hintStyle: textTheme.bodyLarge,
-      labelStyle: textTheme.bodyLarge!.copyWith(
+      hintStyle: monteserratTextTheme.bodySmall,
+      labelStyle: monteserratTextTheme.bodySmall!.copyWith(
         color: Colors.black38,
         fontWeight: FontWeight.normal,
       ),
@@ -213,114 +217,120 @@ ThemeData _getTheme() {
   );
 }
 
-TextTheme _getTextTheme(ColorScheme colorScheme) {
-  const headlineColor = _secondary;
-  const headlineWeight = FontWeight.w400;
-  const headlineHeight = 1.2;
-  const headlineLetterSpacing = 1.0;
 
-  const titleColor = _darkest;
-  const titleWeight = FontWeight.bold;
-  const titleHeight = 1.2;
-  const titleLetterSpacing = 1.0;
+ThemeData _getTitleTheme() {
+  final colorScheme = _lightColorScheme;
+  var nunitoTextTheme = getNunitoTextTheme(colorScheme);
+  final primaryTextTheme = nunitoTextTheme;
 
-  const bodyColor = _darker;
-  const bodyWeight = FontWeight.w400;
-  const bodyHeight = 1.0;
-  const bodyLetterSpacing = 1.0;
+  return ThemeData(
+    useMaterial3: true,
+    brightness: Brightness.light,
+    colorScheme: colorScheme,
+    textTheme: nunitoTextTheme,
+    primaryTextTheme: primaryTextTheme,
+  );
+}
 
-  const labelColor = titleColor;
+
+
+TextTheme getNunitoTextTheme(ColorScheme colorScheme) {
+  const color = ColorConstants.kGray2;
+  const headingWeight = FontWeight.w700;
 
   const textTheme = TextTheme(
     // Headline
     headlineLarge: TextStyle(
-      fontSize: 32,
-      height: headlineHeight,
-      color: headlineColor,
-      fontWeight: FontWeight.w700,
+      fontSize: 50,
+      color: color,
+      fontWeight: headingWeight,
     ),
     headlineMedium: TextStyle(
-      fontSize: 32,
-      height: headlineHeight,
-      letterSpacing: headlineLetterSpacing,
-      color: headlineColor,
-      fontWeight: headlineWeight,
+      fontSize: 45,
+      color: color,
+      fontWeight: headingWeight,
     ),
     headlineSmall: TextStyle(
-      fontSize: 24,
-      height: headlineHeight,
-      letterSpacing: headlineLetterSpacing,
-      color: headlineColor,
-      fontWeight: headlineWeight,
+      fontSize: 40,
+      color: color,
+      fontWeight: headingWeight,
     ),
 
     // Title
     titleLarge: TextStyle(
-      fontSize: 20,
-      height: titleHeight,
-      letterSpacing: titleLetterSpacing,
-      color: titleColor,
-      fontWeight: titleWeight,
+      fontSize: 32,
+      color: color,
+      fontWeight: headingWeight,
     ),
     titleMedium: TextStyle(
-      fontSize: 18,
-      height: titleHeight,
-      letterSpacing: titleLetterSpacing,
-      color: titleColor,
-      fontWeight: titleWeight,
+      fontSize: 24,
+      color: color,
+      fontWeight: headingWeight,
     ),
     titleSmall: TextStyle(
-      fontSize: 14,
-      height: titleHeight,
-      letterSpacing: titleLetterSpacing,
-      color: titleColor,
-      fontWeight: titleWeight,
+      fontSize: 20,
+      color: color,
+      fontWeight: FontWeight.w600,
     ),
+  );
+  return GoogleFonts.nunitoTextTheme(textTheme);
+}
+
+TextTheme _getMonteserratTextTheme(ColorScheme colorScheme) {
+  const color = ColorConstants.kGray1;
+  const bodyWeight = FontWeight.w400;
+
+
+  const textTheme = TextTheme(
+    // Display
+    displayLarge: TextStyle(
+      fontSize: 20,
+      color: color,
+      fontWeight: FontWeight.w600,
+    ),
+    displayMedium: TextStyle(
+      fontSize: 18,
+      color: color,
+      fontWeight: FontWeight.w700,
+    ),
+    displaySmall: TextStyle(
+      fontSize: 16,
+      color: color,
+      fontWeight: FontWeight.w600,
+    ),
+
+
 
     // Body
     bodyLarge: TextStyle(
-      fontSize: 16,
-      height: bodyHeight,
-      letterSpacing: bodyLetterSpacing,
-      color: bodyColor,
+      fontSize: 20,
+      color: color,
       fontWeight: bodyWeight,
     ),
     bodyMedium: TextStyle(
-      fontSize: 16,
-      height: bodyHeight,
-      letterSpacing: bodyLetterSpacing,
-      color: bodyColor,
+      fontSize: 18,
+      color: color,
       fontWeight: bodyWeight,
     ),
     bodySmall: TextStyle(
-      fontSize: 12,
-      height: bodyHeight,
-      color: bodyColor,
+      fontSize: 16,
+      color: color,
       fontWeight: bodyWeight,
     ),
 
+
     // Label
     labelLarge: TextStyle(
-      fontSize: 18,
-      height: bodyHeight,
-      letterSpacing: bodyLetterSpacing,
-      color: labelColor,
-      fontWeight: bodyWeight,
+      fontSize: 14,
+      color: color,
+      fontWeight: FontWeight.w600,
     ),
     labelMedium: TextStyle(
-      fontSize: 16,
-      height: bodyHeight,
-      letterSpacing: bodyLetterSpacing,
-      color: labelColor,
-      fontWeight: bodyWeight,
-    ),
-    labelSmall: TextStyle(
       fontSize: 14,
-      height: bodyHeight,
-      letterSpacing: bodyLetterSpacing,
-      color: labelColor,
+      color: color,
       fontWeight: bodyWeight,
     ),
+
   );
     return GoogleFonts.montserratTextTheme(textTheme);
 }

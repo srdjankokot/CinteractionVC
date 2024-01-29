@@ -1,9 +1,11 @@
+import 'package:cinteraction_vc/core/app/style.dart';
 import 'package:flutter/material.dart';
 
 import '../ui/widget/responsive.dart';
 
 extension Context on BuildContext {
   TextTheme get textTheme => Theme.of(this).textTheme;
+  TextTheme get titleTheme => titleThemeStyle.textTheme;
   TextTheme get primaryTextTheme => Theme.of(this).primaryTextTheme;
 
   ColorScheme get colorScheme => Theme.of(this).colorScheme;
@@ -41,3 +43,4 @@ extension Context on BuildContext {
     return maxWidth > desktopWidthBreakpoint;
   }
 }
+

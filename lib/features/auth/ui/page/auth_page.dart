@@ -432,192 +432,195 @@ class _AuthPageState extends State<AuthPage> {
             ),
           );
         } else {
-          body = ResponsiveLayout(
-            body: Form(
-              key: _formKey,
-              child: Column(
-                children: [
-                  imageSVGAsset('original_long_logo') as Widget,
+          body = SafeArea(
 
-                  Container(
-                    width: 230,
-                    height: 239,
-                    decoration: const BoxDecoration(
-                      image: DecorationImage(
-                        image: ImageAsset('login_image.png'),
-                        fit: BoxFit.fitHeight,
-                      ),
-                    ),
-                  ),
-                  const SizedBox(height: 6),
-                  Text(
-                    _isSignUp ? 'Sign up' : 'Log in',
-                    textAlign: TextAlign.center,
-                    style: context.textTheme.headlineLarge,
-                  ),
-                  const SizedBox(height: 33),
-
-                  Visibility(
-                      visible: _isSignUp,
-                      child: Column(
-                        children: [
-                          InputField.name(
-                              label: 'Enter your full name',
-                              controller: _nameController,
-                              textInputAction: TextInputAction.next),
-                          const SizedBox(height: 16),
-                        ],
-                      )),
-
-                  InputField.email(
-                    label: 'Enter your email',
-                    controller: _emailController,
-                  ),
-
-                  const SizedBox(height: 16),
-                  InputField.password(
-                    label: 'Enter your password',
-                    controller: _passwordController,
-                    textInputAction:
-                        _isSignUp ? TextInputAction.next : TextInputAction.done,
-                    onFieldSubmitted: _isSignUp ? null : (_) => _submit(),
-                  ),
-
-                  Visibility(
-                      visible: _isSignUp,
-                      child: Column(
-                        children: [
-                          const SizedBox(height: 16),
-                          InputField(
-                            label: 'Confirm password',
-                            controller: _confirmPasswordController,
-                            textInputAction: TextInputAction.done,
-                            onFieldSubmitted: (_) => _submit(),
-                            keyboardType: TextInputType.visiblePassword,
-                            autofillHints: const [AutofillHints.password],
-                            validator: (confirmPassword) {
-                              if (confirmPassword == null ||
-                                  confirmPassword.isEmpty) {
-                                return 'Required';
-                              }
-
-                              if (_passwordController.text != confirmPassword) {
-                                return 'Password doesn\'t match';
-                              }
-                            },
-                          ),
-                        ],
-                      )),
-
-                  Row(
+              child: ResponsiveLayout(
+                body: Form(
+                  key: _formKey,
+                  child: Column(
                     children: [
-                      Expanded(
-                        child: ListTileTheme(
-                          horizontalTitleGap: 0.0,
-                          child: CheckboxListTile(
-                            contentPadding: EdgeInsets.zero,
-                            controlAffinity: ListTileControlAffinity.leading,
-                            title: _isSignUp
-                                ? const Text('I agree to the Terms of Service')
-                                : const Text('Remember me'),
-                            value: timeDilation != 1.0,
-                            onChanged: (bool? value) {
-                              setState(() {
-                                timeDilation = value! ? 3.0 : 1.0;
-                              });
-                            },
-                          ),
-                        ),
-                      ),
-                      Visibility(
-                        visible: !_isSignUp,
-                        child: LabeledTextButton(
-                          label: 'Forgot password',
-                          action: '',
-                          onTap: () => {AppRoute.forgotPassword.push(context)},
-                        ),
-                      )
-                    ],
-                  ),
+                      imageSVGAsset('original_long_logo') as Widget,
 
-                  const SizedBox(height: 8),
-                  SizedBox(
-                    width: double.maxFinite,
-                    child: ElevatedButton(
-                      onPressed: _submit,
-                      child: Text(_isSignUp ? 'Register' : 'Log In'),
-                    ),
-                  ),
-                  const Spacer(),
-                  const SizedBox(height: 16),
-                  // const Spacer(),
-
-                  Row(
-                    children: [
-                      const Expanded(child: Divider()),
                       Container(
-                        margin: const EdgeInsets.only(left: 5, right: 5),
-                        child: const Text('Or login with'),
+                        width: 230,
+                        height: 239,
+                        decoration: const BoxDecoration(
+                          image: DecorationImage(
+                            image: ImageAsset('login_image.png'),
+                            fit: BoxFit.fitHeight,
+                          ),
+                        ),
                       ),
-                      const Expanded(child: Divider()),
-                    ],
-                  ),
-
-                  const SizedBox(height: 8),
-
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      SizedBox(
-                        width: 70,
-                        height: 60,
-                        child: OutlinedButton(
-                            onPressed: () =>
-                                {context.read<AuthCubit>().signInWithGoogle()},
-                            style: OutlinedButton.styleFrom(
-                              side: const BorderSide(
-                                  width: 1, color: Color(0xFFBDBDBD)),
-                              shape: RoundedRectangleBorder(
-                                side: const BorderSide(
-                                    width: 1, color: Color(0xFFBDBDBD)),
-                                borderRadius: BorderRadius.circular(18),
-                              ),
-                            ),
-                            child: imageSVGAsset('google_logo')),
+                      const SizedBox(height: 6),
+                      Text(
+                        _isSignUp ? 'Sign up' : 'Log in',
+                        textAlign: TextAlign.center,
+                        style: context.textTheme.headlineLarge,
                       ),
-                      const SizedBox(width: 34),
-                      SizedBox(
-                        width: 70,
-                        height: 60,
-                        child: OutlinedButton(
-                            onPressed: () => {
-                                  context.read<AuthCubit>().signInWithFacebook()
+                      const SizedBox(height: 33),
+
+                      Visibility(
+                          visible: _isSignUp,
+                          child: Column(
+                            children: [
+                              InputField.name(
+                                  label: 'Enter your full name',
+                                  controller: _nameController,
+                                  textInputAction: TextInputAction.next),
+                              const SizedBox(height: 16),
+                            ],
+                          )),
+
+                      InputField.email(
+                        label: 'Enter your email',
+                        controller: _emailController,
+                      ),
+
+                      const SizedBox(height: 16),
+                      InputField.password(
+                        label: 'Enter your password',
+                        controller: _passwordController,
+                        textInputAction:
+                            _isSignUp ? TextInputAction.next : TextInputAction.done,
+                        onFieldSubmitted: _isSignUp ? null : (_) => _submit(),
+                      ),
+
+                      Visibility(
+                          visible: _isSignUp,
+                          child: Column(
+                            children: [
+                              const SizedBox(height: 16),
+                              InputField(
+                                label: 'Confirm password',
+                                controller: _confirmPasswordController,
+                                textInputAction: TextInputAction.done,
+                                onFieldSubmitted: (_) => _submit(),
+                                keyboardType: TextInputType.visiblePassword,
+                                autofillHints: const [AutofillHints.password],
+                                validator: (confirmPassword) {
+                                  if (confirmPassword == null ||
+                                      confirmPassword.isEmpty) {
+                                    return 'Required';
+                                  }
+
+                                  if (_passwordController.text != confirmPassword) {
+                                    return 'Password doesn\'t match';
+                                  }
                                 },
-                            style: OutlinedButton.styleFrom(
-                              side: const BorderSide(
-                                  width: 1, color: Color(0xFFBDBDBD)),
-                              shape: RoundedRectangleBorder(
-                                side: const BorderSide(
-                                    width: 1, color: Color(0xFFBDBDBD)),
-                                borderRadius: BorderRadius.circular(18),
+                              ),
+                            ],
+                          )),
+
+                      Row(
+                        children: [
+                          Expanded(
+                            child: ListTileTheme(
+                              horizontalTitleGap: 0.0,
+                              child: CheckboxListTile(
+                                contentPadding: EdgeInsets.zero,
+                                controlAffinity: ListTileControlAffinity.leading,
+                                title: _isSignUp
+                                    ? const Text('I agree to the Terms of Service')
+                                    : const Text('Remember me'),
+                                value: timeDilation != 1.0,
+                                onChanged: (bool? value) {
+                                  setState(() {
+                                    timeDilation = value! ? 3.0 : 1.0;
+                                  });
+                                },
                               ),
                             ),
-                            child: imageSVGAsset('fb_logo')),
-                      )
+                          ),
+                          Visibility(
+                            visible: !_isSignUp,
+                            child: LabeledTextButton(
+                              label: 'Forgot password',
+                              action: '',
+                              onTap: () => {AppRoute.forgotPassword.push(context)},
+                            ),
+                          )
+                        ],
+                      ),
+
+                      const SizedBox(height: 8),
+                      SizedBox(
+                        width: double.maxFinite,
+                        child: ElevatedButton(
+                          onPressed: _submit,
+                          child: Text(_isSignUp ? 'Register' : 'Log In'),
+                        ),
+                      ),
+                      const Spacer(),
+                      const SizedBox(height: 16),
+                      // const Spacer(),
+
+                      Row(
+                        children: [
+                          const Expanded(child: Divider()),
+                          Container(
+                            margin: const EdgeInsets.only(left: 5, right: 5),
+                            child: const Text('Or login with'),
+                          ),
+                          const Expanded(child: Divider()),
+                        ],
+                      ),
+
+                      const SizedBox(height: 8),
+
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          SizedBox(
+                            width: 70,
+                            height: 60,
+                            child: OutlinedButton(
+                                onPressed: () =>
+                                    {context.read<AuthCubit>().signInWithGoogle()},
+                                style: OutlinedButton.styleFrom(
+                                  side: const BorderSide(
+                                      width: 1, color: Color(0xFFBDBDBD)),
+                                  shape: RoundedRectangleBorder(
+                                    side: const BorderSide(
+                                        width: 1, color: Color(0xFFBDBDBD)),
+                                    borderRadius: BorderRadius.circular(18),
+                                  ),
+                                ),
+                                child: imageSVGAsset('google_logo')),
+                          ),
+                          const SizedBox(width: 34),
+                          SizedBox(
+                            width: 70,
+                            height: 60,
+                            child: OutlinedButton(
+                                onPressed: () => {
+                                      context.read<AuthCubit>().signInWithFacebook()
+                                    },
+                                style: OutlinedButton.styleFrom(
+                                  side: const BorderSide(
+                                      width: 1, color: Color(0xFFBDBDBD)),
+                                  shape: RoundedRectangleBorder(
+                                    side: const BorderSide(
+                                        width: 1, color: Color(0xFFBDBDBD)),
+                                    borderRadius: BorderRadius.circular(18),
+                                  ),
+                                ),
+                                child: imageSVGAsset('fb_logo')),
+                          )
+                        ],
+                      ),
+
+                      Text(_contactText),
+                      const SizedBox(height: 8),
+                      LabeledTextButton(
+                        label: _isSignUp
+                            ? 'Already have an account?'
+                            : 'Don’t have an account?',
+                        action: _isSignUp ? 'Sign in' : 'Sign up',
+                        onTap: () => _changeLayout(),
+                      ),
                     ],
                   ),
-
-                  Text(_contactText),
-                  const SizedBox(height: 8),
-                  LabeledTextButton(
-                    label: _isSignUp
-                        ? 'Already have an account?'
-                        : 'Don’t have an account?',
-                    action: _isSignUp ? 'Sign in' : 'Sign up',
-                    onTap: () => _changeLayout(),
-                  ),
-                ],
-              ),
+                ),
             ),
           );
         }
@@ -634,12 +637,15 @@ class _AuthPageState extends State<AuthPage> {
 
         return LoadingOverlay(
             loading: state is AuthLoading,
-            child: SizedBox(
-              height: MediaQuery.of(context).size.height,
-              width: MediaQuery.of(context).size.width,
-              child: Padding(
-                padding: const EdgeInsets.all(16),
-                child: body,
+            child: Container(
+              color: Colors.white,
+              child: SizedBox(
+                height: MediaQuery.of(context).size.height,
+                width: MediaQuery.of(context).size.width,
+                child: Padding(
+                  padding: const EdgeInsets.all(16),
+                  child: body,
+                ),
               ),
             ));
       },

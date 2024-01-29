@@ -1,10 +1,22 @@
+import 'package:cinteraction_vc/features/groups/bloc/groups_cubit.dart';
+import 'package:cinteraction_vc/features/groups/provider/groups_provider.dart';
+import 'package:cinteraction_vc/features/groups/repository/groups_repository.dart';
+import 'package:cinteraction_vc/features/meetings/bloc/meetings_cubit.dart';
+import 'package:cinteraction_vc/features/meetings/provider/meetings_provider.dart';
+import 'package:cinteraction_vc/features/meetings/repository/meetings_repository.dart';
+import 'package:cinteraction_vc/features/roles/bloc/roles_cubit.dart';
+import 'package:cinteraction_vc/features/roles/provider/roles_provider.dart';
+import 'package:cinteraction_vc/features/roles/repository/roles_repository.dart';
+import 'package:cinteraction_vc/features/users/repository/users_repository.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../features/auth/repository/auth_repository.dart';
-import '../../features/home/profile/bloc/user_cubit.dart';
-import '../../features/home/profile/provider/user_mock_provider.dart';
-import '../../features/home/profile/repository/user_repository.dart';
+import '../../features/profile/bloc/profile_cubit.dart';
+import '../../features/profile/provider/user_mock_provider.dart';
+import '../../features/profile/repository/profile_repository.dart';
+import '../../features/users/bloc/users_cubit.dart';
+import '../../features/users/provider/users_provider.dart';
 
 class DI extends StatelessWidget {
   const DI({
@@ -35,8 +47,24 @@ class _ProviderDI extends StatelessWidget {
   Widget build(BuildContext context) {
     return MultiRepositoryProvider(
       providers: [
-        RepositoryProvider<UserProvider>(
-          create: (context) => UserProvider(),
+        RepositoryProvider<ProfileProvider>(
+          create: (context) => ProfileProvider(),
+        ),
+
+        RepositoryProvider<UsersProvider>(
+          create: (context) => UsersProvider(),
+        ),
+
+
+        RepositoryProvider<GroupsProvider>(
+          create: (context) => GroupsProvider(),
+        ),
+
+        RepositoryProvider<RolesProvider>(
+          create: (context) => RolesProvider(),
+        ),
+        RepositoryProvider<MeetingProvider>(
+          create: (context) => MeetingProvider(),
         ),
       ],
       child: child,
@@ -53,16 +81,41 @@ class _RepositoryDI extends StatelessWidget {
   Widget build(BuildContext context) {
     return MultiRepositoryProvider(
       providers: [
-        RepositoryProvider<UserRepository>(
-          create: (context) => UserRepository(
-            userProvider: context.read<UserProvider>(),
+        RepositoryProvider<ProfileRepository>(
+          create: (context) => ProfileRepository(
+            profileProvider: context.read<ProfileProvider>(),
           ),
         ),
         RepositoryProvider<AuthRepository>(
           create: (context) => AuthRepository(
-            userProvider: context.read<UserProvider>(),
+            userProvider: context.read<ProfileProvider>(),
           ),
         ),
+
+        RepositoryProvider<UsersRepository>(
+          create: (context) => UsersRepository(
+            usersProvider: context.read<UsersProvider>(),
+          ),
+        ),
+
+
+        RepositoryProvider<GroupsRepository>(
+          create: (context) => GroupsRepository(
+            groupsProvider: context.read<GroupsProvider>(),
+          ),
+        ),
+
+        RepositoryProvider<RolesRepository>(
+          create: (context) => RolesRepository(
+            rolesProvider: context.read<RolesProvider>(),
+          ),
+        ),
+        RepositoryProvider<MeetingRepository>(
+          create: (context) => MeetingRepository(
+            meetingProvider: context.read<MeetingProvider>(),
+          ),
+        ),
+
       ],
       child: child,
     );
@@ -78,9 +131,38 @@ class _BlocDI extends StatelessWidget {
   Widget build(BuildContext context) {
     return MultiBlocProvider(
       providers: [
-        BlocProvider<UserCubit>(
-          create: (context) => UserCubit(
-            userRepository: context.read<UserRepository>(),
+        BlocProvider<ProfileCubit>(
+          create: (context) => ProfileCubit(
+            userRepository: context.read<ProfileRepository>(),
+          ),
+        ),
+
+        BlocProvider<UsersCubit>(
+          create: (context) => UsersCubit(
+              groupRepository: context.read<GroupsRepository>(),
+              usersRepository: context.read<UsersRepository>(),
+          ),
+        ),
+
+
+
+        BlocProvider<GroupsCubit>(
+          create: (context) => GroupsCubit(
+            groupRepository: context.read<GroupsRepository>(),
+          ),
+        ),
+
+
+
+        BlocProvider<RolesCubit>(
+          create: (context) => RolesCubit(
+            roleRepository: context.read<RolesRepository>(),
+          ),
+        ),
+
+        BlocProvider<MeetingCubit>(
+          create: (context) => MeetingCubit(
+            meetingRepository: context.read<MeetingRepository>(),
           ),
         ),
       ],

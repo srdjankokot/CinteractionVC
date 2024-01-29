@@ -1,15 +1,14 @@
 
 
-
-import '../../home/profile/model/user.dart';
-import '../../home/profile/provider/user_mock_provider.dart';
+import '../../profile/model/user.dart';
+import '../../profile/provider/user_mock_provider.dart';
 
 class AuthRepository {
   const AuthRepository({
     required this.userProvider,
   });
 
-  final UserProvider userProvider;
+  final ProfileProvider userProvider;
 
   Future<User?> signUpWithEmailAndPassword({
     required String email,
