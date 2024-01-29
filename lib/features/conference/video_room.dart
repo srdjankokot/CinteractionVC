@@ -1,10 +1,10 @@
-import 'dart:io';
 import 'dart:math';
 
 import 'package:cinteraction_vc/assets/colors/Colors.dart';
 import 'package:cinteraction_vc/core/extension/context.dart';
-import 'package:cinteraction_vc/core/ui/listview/fading_list_view.dart';
+import 'package:cinteraction_vc/core/extension/context_user.dart';
 import 'package:cinteraction_vc/core/ui/widget/call_button_shape.dart';
+import 'package:cinteraction_vc/core/ui/widget/engagement_progress.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_webrtc/flutter_webrtc.dart';
@@ -176,7 +176,7 @@ class _VideoRoomPage extends State<VideoRoomPage> {
 
   joinPublisher() async {
     await videoPlugin?.joinPublisher(room,
-        displayName: displayName, id: myId, pin: "");
+        displayName: context.getCurrentUser?.name, id: myId, pin: "");
   }
 
   attachPlugin({bool pop = false}) async {
@@ -445,6 +445,12 @@ class _VideoRoomPage extends State<VideoRoomPage> {
         : TransceiverDirection.Inactive);
   }
 
+  void finishCall()  {
+    callEnd().then((value) => {
+      Navigator.of(context).pop()
+    });
+  }
+
   Future<dynamic> callEnd() async {
     for (var feed in videoState.feedIdToDisplayStreamsMap.entries) {
       await unSubscribeTo(feed.key);
@@ -592,196 +598,325 @@ class _VideoRoomPage extends State<VideoRoomPage> {
 
   @override
   Widget build(BuildContext context) {
-
-
-    if(videoState.streamsToBeRendered.entries.isEmpty) {
+    if (videoState.streamsToBeRendered.entries.isEmpty) {
       return Container();
     }
 
     List<StreamRenderer> items = [];
 
     for (var i = 0; i < _numberOfStream; i++) {
-      items.add(videoState.streamsToBeRendered.entries
-          .map((e) => e.value)
-          .toList()
-          .first);
+      items.addAll(
+          videoState.streamsToBeRendered.entries.map((e) => e.value).toList());
     }
 
-
-    return Container(
-      width: double.maxFinite,
-      height: double.maxFinite,
-      color: ColorConstants.kGrey700,
-      child: Stack(
-        children: [
-          getLayout(items),
-          Positioned(
-              top: 20,
-              left: 20,
-              child: Row(
-                children: [
-                  IconButton(
-                      icon: const Icon(
-                        Icons.add,
-                        color: Colors.white,
+    return Center(
+      child: Container(
+          width: double.maxFinite,
+          height: double.maxFinite,
+          color: ColorConstants.kBlack3,
+          child: Builder(
+            builder: (context) {
+              if (context.isWide) {
+                return Stack(
+                  children: [
+                    getLayout(items),
+                    Positioned(
+                        top: 20,
+                        left: 20,
+                        child: Row(
+                          children: [
+                            IconButton(
+                                icon: const Icon(
+                                  Icons.add,
+                                  color: Colors.white,
+                                ),
+                                onPressed: () => {
+                                      setState(() {
+                                        _numberOfStream++;
+                                      })
+                                    }),
+                            IconButton(
+                                icon: const Icon(
+                                  Icons.remove,
+                                  color: Colors.white,
+                                ),
+                                onPressed: () => {
+                                      setState(() {
+                                        _numberOfStream--;
+                                      })
+                                    }),
+                            IconButton(
+                                icon: const Icon(
+                                  Icons.layers_outlined,
+                                  color: Colors.white,
+                                ),
+                                onPressed: () => {
+                                      setState(() {
+                                        _isGridLayout = !_isGridLayout;
+                                      })
+                                    })
+                          ],
+                        )),
+                    Positioned.fill(
+                      bottom: 20,
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        crossAxisAlignment: CrossAxisAlignment.end,
+                        children: [
+                          CallButtonShape(
+                              image: imageSVGAsset('icon_microphone') as Widget,
+                              onClickAction: joined
+                                  ? () async {
+                                      setState(() {
+                                        audioEnabled = !audioEnabled;
+                                      });
+                                      await mute(
+                                          videoPlugin
+                                              ?.webRTCHandle?.peerConnection,
+                                          'audio',
+                                          audioEnabled);
+                                      setState(() {
+                                        localVideoRenderer.isAudioMuted =
+                                            !audioEnabled;
+                                      });
+                                    }
+                                  : null),
+                          const SizedBox(width: 20),
+                          CallButtonShape(
+                              image: imageSVGAsset('icon_video_recorder')
+                                  as Widget,
+                              onClickAction: joined
+                                  ? () async {
+                                      setState(() {
+                                        videoEnabled = !videoEnabled;
+                                      });
+                                      await mute(
+                                          videoPlugin
+                                              ?.webRTCHandle?.peerConnection,
+                                          'video',
+                                          videoEnabled);
+                                    }
+                                  : null),
+                          const SizedBox(width: 20),
+                          CallButtonShape(
+                              image: imageSVGAsset('icon_arrow_square_up')
+                                  as Widget,
+                              onClickAction: joined
+                                  ? () async {
+                                      if (screenSharing) {
+                                        await disposeScreenSharing();
+                                        return;
+                                      }
+                                      await screenShare();
+                                    }
+                                  : null),
+                          const SizedBox(width: 20),
+                          CallButtonShape(
+                              image: imageSVGAsset('icon_user') as Widget,
+                              onClickAction: joined ? switchCamera : null),
+                          const SizedBox(width: 20),
+                          CallButtonShape(
+                              image: imageSVGAsset('icon_phone') as Widget,
+                              bgColor: ColorConstants.kPrimaryColor,
+                              onClickAction: finishCall),
+                        ],
                       ),
-                      onPressed: () => {
-                            setState(() {
-                              _numberOfStream++;
-                            })
-                          }),
-                  IconButton(
-                      icon: const Icon(
-                        Icons.remove,
-                        color: Colors.white,
-                      ),
-                      onPressed: () => {
-                            setState(() {
-                              _numberOfStream--;
-                            })
-                          }),
-                  IconButton(
-                      icon: const Icon(
-                        Icons.layers_outlined,
-                        color: Colors.white,
-                      ),
-                      onPressed: () => {
-                            setState(() {
-                              _isGridLayout = !_isGridLayout;
-                            })
-                          })
-                ],
-              )),
-          Positioned.fill(
-            bottom: 20,
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              crossAxisAlignment: CrossAxisAlignment.end,
-              children: [
-                CallButtonShape(
-                    image: imageSVGAsset('icon_microphone') as Widget,
-                    onClickAction: joined
-                        ? () async {
-                            setState(() {
-                              audioEnabled = !audioEnabled;
-                            });
-                            await mute(
-                                videoPlugin?.webRTCHandle?.peerConnection,
-                                'audio',
-                                audioEnabled);
-                            setState(() {
-                              localVideoRenderer.isAudioMuted = !audioEnabled;
-                            });
-                          }
-                        : null),
-                const SizedBox(width: 20),
-                CallButtonShape(
-                    image: imageSVGAsset('icon_video_recorder') as Widget,
-                    onClickAction: joined
-                        ? () async {
-                            setState(() {
-                              videoEnabled = !videoEnabled;
-                            });
-                            await mute(
-                                videoPlugin?.webRTCHandle?.peerConnection,
-                                'video',
-                                videoEnabled);
-                          }
-                        : null),
-                const SizedBox(width: 20),
-                CallButtonShape(
-                    image: imageSVGAsset('icon_arrow_square_up') as Widget,
-                    onClickAction: joined
-                        ? () async {
-                            if (screenSharing) {
-                              await disposeScreenSharing();
-                              return;
-                            }
-                            await screenShare();
-                          }
-                        : null),
-                const SizedBox(width: 20),
-                CallButtonShape(
-                    image: imageSVGAsset('icon_user') as Widget,
-
-                    onClickAction: joined ? switchCamera : null),
-                const SizedBox(width: 20),
-                CallButtonShape(
-                    image: imageSVGAsset('icon_phone') as Widget,
-                    bgColor: ColorConstants.kPrimaryColor,
-                    onClickAction: () => {
-                          callEnd()
-                              .then((value) => {Navigator.of(context).pop()})
-                        }),
-              ],
-            ),
-          ),
-        ],
-      ),
+                    ),
+                  ],
+                );
+              } else {
+                return SafeArea(
+                  child: Container(
+                    child: Column(
+                      children: [
+                        Row(
+                          children: [
+                            IconButton(
+                                icon: const Icon(
+                                  Icons.add,
+                                  color: Colors.white,
+                                ),
+                                onPressed: () => {
+                                      setState(() {
+                                        _numberOfStream++;
+                                      })
+                                    }),
+                            IconButton(
+                                icon: const Icon(
+                                  Icons.remove,
+                                  color: Colors.white,
+                                ),
+                                onPressed: () => {
+                                      setState(() {
+                                        _numberOfStream--;
+                                      })
+                                    }),
+                            IconButton(
+                                icon: imageSVGAsset('icon_switch_camera')
+                                    as Widget,
+                                onPressed: joined ? switchCamera : null),
+                          ],
+                        ),
+                        Expanded(child: getLayout(items)),
+                        Padding(
+                          padding:
+                              const EdgeInsets.only(top: 18.0, bottom: 18.0),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            crossAxisAlignment: CrossAxisAlignment.center,
+                            children: [
+                              CallButtonShape(
+                                  image: imageSVGAsset('icon_phone') as Widget,
+                                  bgColor: ColorConstants.kPrimaryColor,
+                                  onClickAction: finishCall),
+                              const SizedBox(width: 20),
+                              CallButtonShape(
+                                  image: imageSVGAsset('icon_microphone')
+                                      as Widget,
+                                  onClickAction: joined
+                                      ? () async {
+                                          setState(() {
+                                            audioEnabled = !audioEnabled;
+                                          });
+                                          await mute(
+                                              videoPlugin?.webRTCHandle
+                                                  ?.peerConnection,
+                                              'audio',
+                                              audioEnabled);
+                                          setState(() {
+                                            localVideoRenderer.isAudioMuted =
+                                                !audioEnabled;
+                                          });
+                                        }
+                                      : null),
+                              const SizedBox(width: 20),
+                              CallButtonShape(
+                                  image: imageSVGAsset('icon_video_recorder')
+                                      as Widget,
+                                  onClickAction: joined
+                                      ? () async {
+                                          setState(() {
+                                            videoEnabled = !videoEnabled;
+                                          });
+                                          await mute(
+                                              videoPlugin?.webRTCHandle
+                                                  ?.peerConnection,
+                                              'video',
+                                              videoEnabled);
+                                        }
+                                      : null),
+                              const SizedBox(width: 20),
+                              CallButtonShape(
+                                  image: imageSVGAsset('icon_arrow_square_up')
+                                      as Widget,
+                                  onClickAction: joined
+                                      ? () async {
+                                          if (screenSharing) {
+                                            await disposeScreenSharing();
+                                            return;
+                                          }
+                                          await screenShare();
+                                        }
+                                      : null),
+                              const SizedBox(width: 20),
+                              CallButtonShape(
+                                  image: imageSVGAsset('three_dots') as Widget,
+                                  onClickAction: joined ? switchCamera : null),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                );
+              }
+            },
+          )),
     );
   }
 
   Widget getLayout(List<StreamRenderer> items) {
-    var numberStream = _numberOfStream;
+    var numberStream = items.length;
     var row = sqrt(numberStream).round();
     var col = ((numberStream) / row).ceil();
 
     var size = MediaQuery.of(context).size;
     // final double itemHeight = (size.height - kToolbarHeight - 24) / row;
 
-    if (_isGridLayout) {
-      final double itemHeight = (size.height) / row;
-      final double itemWidth = size.width / col;
+    if (context.isWide) {
+      if (_isGridLayout) {
+        // desktop grid layout
+        final double itemHeight = (size.height) / row;
+        final double itemWidth = size.width / col;
 
-      return Wrap(
-        runSpacing: 0,
-        spacing: 0,
-        alignment: WrapAlignment.center,
-        children: items
-            .map((e) => getRendererItem(
-                e, Random().nextInt(100), itemHeight, itemWidth))
-            .toList(),
-      );
-    } else {
-      const double itemHeight = 89;
-      const double itemWidth = 92;
+        return Wrap(
+          runSpacing: 0,
+          spacing: 0,
+          alignment: WrapAlignment.center,
+          children: items
+              .map((e) => getRendererItem(
+                  e, Random().nextInt(100), itemHeight, itemWidth))
+              .toList(),
+        );
+      } else {
+        //desktop list layout
 
-      return Stack(
-        children: [
-          Container(
-            child: getRendererItem(items.first, Random().nextInt(100),
-                double.maxFinite, double.maxFinite),
-          ),
-          Container(
-            alignment: Alignment.centerRight,
-            margin: const EdgeInsets.only(right: 55),
-            child: SizedBox(
-              width: 100,
-              height: MediaQuery.of(context).size.height - 156,
-              child: ListView.builder(
-                shrinkWrap: true,
-                itemCount: items.length,
-                itemBuilder: (context, index) {
-                  return Container(
-                    clipBehavior: Clip.hardEdge,
-                    margin: const EdgeInsets.all(3),
-                    decoration: ShapeDecoration(
-                      shape: RoundedRectangleBorder(
-                        side: const BorderSide(width: 2, color: Colors.white),
-                        borderRadius: BorderRadius.circular(6),
+        const double itemHeight = 89;
+        const double itemWidth = 92;
+
+        return Stack(
+          children: [
+            Container(
+              child: getRendererItem(items.first, Random().nextInt(100),
+                  double.maxFinite, double.maxFinite),
+            ),
+            Container(
+              alignment: Alignment.centerRight,
+              margin: const EdgeInsets.only(right: 55),
+              child: SizedBox(
+                width: 100,
+                height: MediaQuery.of(context).size.height - 156,
+                child: ListView.builder(
+                  shrinkWrap: true,
+                  itemCount: items.length,
+                  itemBuilder: (context, index) {
+                    return Container(
+                      clipBehavior: Clip.hardEdge,
+                      margin: const EdgeInsets.all(3),
+                      decoration: ShapeDecoration(
+                        shape: RoundedRectangleBorder(
+                          side: const BorderSide(width: 2, color: Colors.white),
+                          borderRadius: BorderRadius.circular(6),
+                        ),
                       ),
-                    ),
-                    child: getRendererItem(items[index], Random().nextInt(100),
-                        itemHeight, itemWidth),
-                  );
-                },
+                      child: getRendererItem(items[index],
+                          Random().nextInt(100), itemHeight, itemWidth),
+                    );
+                  },
+                ),
               ),
             ),
-          ),
-        ],
+          ],
+        );
+        return Container();
+      }
+    } else {
+      final double itemWidth = size.width;
+      //Mobile layout
+      return LayoutBuilder(
+        builder: (BuildContext context, BoxConstraints constraints) {
+          return ListView.builder(
+              itemCount: items.length,
+              itemBuilder: (BuildContext context, int index) {
+                return getRendererItem(
+                    items[index],
+                    Random().nextInt(100),
+                    (constraints.minHeight) /
+                        (items.length > 3 ? 3 : items.length),
+                    itemWidth);
+              });
+        },
       );
-
-      return Container();
     }
 
     return const Text("NO LAYOUT");
@@ -790,64 +925,94 @@ class _VideoRoomPage extends State<VideoRoomPage> {
   Widget getRendererItem(StreamRenderer remoteStream, int engagement,
       double height, double width) {
     debugPrint('getRendererItem: ${remoteStream.publisherName!} $engagement');
+
+    if (context.isWide) {
+      return SizedBox(
+        height: height,
+        width: width,
+        child: Stack(
+          children: [
+            RTCVideoView(
+              remoteStream.videoRenderer,
+              filterQuality: FilterQuality.none,
+              objectFit: RTCVideoViewObjectFit.RTCVideoViewObjectFitCover,
+              mirror: true,
+            ),
+            Positioned(
+                top: 20,
+                right: 24,
+                child: EngagementProgress(engagement: engagement))
+
+            // Positioned(
+            //   bottom: 20,
+            //     right: 24,
+            //     child: Text(remoteStream.publisherName!))
+          ],
+        ),
+      );
+    }
+
+    return Container(
+      width: width,
+      height: height,
+      padding: const EdgeInsets.all(5),
+      child: Container(
+        decoration: ShapeDecoration(
+          shape: RoundedRectangleBorder(
+            side: const BorderSide(width: 2, color: Colors.white),
+            borderRadius: BorderRadius.circular(6),
+          ),
+        ),
+        child: Stack(
+          children: [
+            ClipRRect(
+              borderRadius: BorderRadius.circular(6),
+              child: RTCVideoView(
+                remoteStream.videoRenderer,
+                filterQuality: FilterQuality.none,
+                objectFit: RTCVideoViewObjectFit.RTCVideoViewObjectFitCover,
+                mirror: true,
+              ),
+            ),
+            Positioned(
+                bottom: 10,
+                right: 10,
+                child: EngagementProgress(engagement: engagement)),
+          ],
+        ),
+      ),
+    );
+
     return SizedBox(
       height: height,
       width: width,
-      child: Stack(
-        children: [
-
-          RTCVideoView(
-            remoteStream.videoRenderer,
-            filterQuality: FilterQuality.none,
-            objectFit: RTCVideoViewObjectFit.RTCVideoViewObjectFitCover,
-            mirror: true,
-          ),
-
-
-          Positioned(
-            top: 20,
-            right: 24,
-            child: Stack(
-              children: [
-                Container(
-                  clipBehavior: Clip.hardEdge,
-                  width: 133,
-                  height: 20,
-                  alignment: Alignment.centerLeft,
-                  decoration: ShapeDecoration(
-                    color: Colors.white,
-                    shape: RoundedRectangleBorder(
-                      side: const BorderSide(
-                        width: 1,
-                        strokeAlign: BorderSide.strokeAlignOutside,
-                        color: Colors.white,
-                      ),
-                      borderRadius: BorderRadius.circular(28),
-                    ),
-                  ),
-                  child: LayoutBuilder(builder:
-                      (BuildContext context, BoxConstraints constraint) {
-                    return Container(
-                      width: constraint.maxWidth * engagement / 100,
-                      height: double.maxFinite,
-                      color: ColorConstants.kSuccessGreen,
-                    );
-                  }),
-                ),
-                Positioned.fill(
-                    child: Align(
-                      alignment: Alignment.center,
-                      child: Text(
-                        '${engagement / 100}',
-                        textAlign: TextAlign.center,
-                        style: context.textTheme.labelSmall,
-                      ),
-                    ))
-              ],
+      child: Padding(
+        padding: const EdgeInsets.all(8.0),
+        child: Stack(
+          children: [
+            RTCVideoView(
+              remoteStream.videoRenderer,
+              filterQuality: FilterQuality.none,
+              objectFit: RTCVideoViewObjectFit.RTCVideoViewObjectFitCover,
+              mirror: true,
             ),
-          ),
 
-        ],
+            if (context.isWide)
+              Positioned(
+                  top: 20,
+                  right: 24,
+                  child: EngagementProgress(engagement: engagement))
+            else
+              Positioned(
+                  bottom: 10,
+                  right: 10,
+                  child: EngagementProgress(engagement: engagement)),
+            // Positioned(
+            //   bottom: 20,
+            //     right: 24,
+            //     child: Text(remoteStream.publisherName!))
+          ],
+        ),
       ),
     );
   }

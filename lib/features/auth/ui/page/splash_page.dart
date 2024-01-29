@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../../../core/navigation/route.dart';
-import '../../../home/profile/bloc/user_cubit.dart';
+import '../../../profile/bloc/profile_cubit.dart';
 
 
 class SplashPage extends StatelessWidget {
@@ -11,7 +11,7 @@ class SplashPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return BlocListener<UserCubit, UserState>(
+    return BlocListener<ProfileCubit, ProfileState>(
       listener: _onUserState,
       child: Scaffold(
         body: Center(
@@ -25,8 +25,8 @@ class SplashPage extends StatelessWidget {
     );
   }
 
-  void _onUserState(BuildContext context, UserState userState) {
-    if (userState is! UserLoaded) {
+  void _onUserState(BuildContext context, ProfileState userState) {
+    if (userState is! ProfileLoaded) {
       // User not loaded yet
       return;
     }

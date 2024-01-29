@@ -4,8 +4,8 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../../core/logger/loggy_types.dart';
-import '../../home/profile/model/user.dart';
-import '../../home/profile/repository/user_repository.dart';
+import '../../profile/model/user.dart';
+import '../../profile/repository/profile_repository.dart';
 import '../repository/auth_repository.dart';
 
 
@@ -18,7 +18,7 @@ class AuthCubit extends Cubit<AuthState> with BlocLoggy {
   }) : super(const AuthInitial());
 
   final AuthRepository authRepository;
-  final UserRepository userRepository;
+  final ProfileRepository userRepository;
 
   Future<void> signUpWithEmailAndPassword({
     required String email,

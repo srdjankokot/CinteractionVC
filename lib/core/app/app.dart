@@ -12,7 +12,7 @@ class CinteractionFlutterApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return DI(
       child: MaterialApp.router(
-        title: 'Cinteraction Flutter App',
+        title: 'Cinteraction',
         theme: lightTheme,
         debugShowCheckedModeBanner: false,
         routerConfig: router,
