@@ -32,7 +32,7 @@ User get _user => User(
     );
 
 List<Group> _mockGroups = [
-  Group(id: 'srdjan', name: 'Video production II', userList: _mockUsers)
+  Group(id: 'srdjan', name: 'Video production II', userList: _mockUsers, )
 ];
 
 Group get _mockGroup =>

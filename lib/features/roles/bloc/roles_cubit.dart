@@ -29,17 +29,17 @@ class RolesCubit extends Cubit<RoleState> with BlocLoggy{
 
 
   void _load() {
-    _groupSubscription = roleRepository.getRolesStream().listen(_onGroups);
+    _groupSubscription = roleRepository.getRolesStream().listen(_onRoles);
   }
 
-  void loadGroups() {
+  void loadRoles() {
     emit(const RolesIsLoading());
     roleRepository.getListOfRoles();
   }
 
 
-  void _onGroups(List<Role> groups) {
-    loggy.info('list of users: ${groups?.length}');
+  void _onRoles(List<Role> groups) {
+    loggy.info('list of users: ${groups.length}');
     emit(RolesLoaded(roles: groups));
   }
 

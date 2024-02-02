@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-const desktopWidthBreakpoint = 1280.0;
+const desktopWidthBreakpoint = 768.0;
 const mobileWidthBreakpoint = 600.0;
 
 class ResponsiveLayout extends StatelessWidget {
