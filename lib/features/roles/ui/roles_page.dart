@@ -20,7 +20,7 @@ class UsersPageState extends State<RolesPage> {
   @override
   void initState(){
     super.initState();
-    context.read<RolesCubit>().loadGroups();
+    context.read<RolesCubit>().loadRoles();
 
   }
 

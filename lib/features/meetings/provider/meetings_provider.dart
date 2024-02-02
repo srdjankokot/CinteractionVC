@@ -6,6 +6,8 @@ import '../model/meeting.dart';
 
 List<Meeting> _mockMeetings = [
   Meeting(
+      id: '',
+      passcode: '',
       name: 'introduction',
       organizer: _organizer,
       users: [_organizer, _organizer, _organizer, _organizer],
@@ -15,6 +17,7 @@ List<Meeting> _mockMeetings = [
       end: DateTime.now()),
 
   Meeting(
+      id: '',
       name: 'Video Production',
       organizer: _organizer,
       users: [_organizer, _organizer, _organizer, _organizer],
@@ -23,6 +26,7 @@ List<Meeting> _mockMeetings = [
       start: DateTime.now(),
       end: DateTime.now()),
   Meeting(
+      id: '',
       name: 'Video Gaming 2',
       organizer: _organizer,
       users: [_organizer, _organizer, _organizer, _organizer],
@@ -31,6 +35,7 @@ List<Meeting> _mockMeetings = [
       start: DateTime.now(),
       end: DateTime.now()),
   Meeting(
+      id: '',
       name: 'Video Gaming 3',
       organizer: _organizer,
       users: [_organizer, _organizer, _organizer, _organizer],
@@ -39,6 +44,7 @@ List<Meeting> _mockMeetings = [
       start: DateTime.now(),
       end: DateTime.now()),
   Meeting(
+      id: '',
       name: 'UX/UI Essentials',
       organizer: _organizer,
       users: [_organizer, _organizer, _organizer, _organizer],
@@ -51,6 +57,7 @@ List<Meeting> _mockMeetings = [
 
 List<Meeting> _mockScheduledMeetings = [
   Meeting(
+      id: '',
       name: 'introduction',
       organizer: _organizer,
       users: [_organizer, _organizer, _organizer, _organizer],
@@ -61,6 +68,7 @@ List<Meeting> _mockScheduledMeetings = [
 ];
 
 Meeting get _mockMeeting => Meeting(
+    id: '',
     name: 'introduction',
     organizer: _organizer,
     users: [_organizer, _organizer, _organizer, _organizer],

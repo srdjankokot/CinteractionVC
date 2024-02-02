@@ -10,6 +10,7 @@ import 'package:cinteraction_vc/features/meetings/bloc/meetings_cubit.dart';
 import 'package:cinteraction_vc/features/meetings/repository/meetings_repository.dart';
 import 'package:cinteraction_vc/features/roles/bloc/roles_cubit.dart';
 import 'package:cinteraction_vc/features/roles/repository/roles_repository.dart';
+import 'package:cinteraction_vc/features/roles/ui/roles_page.dart';
 import 'package:cinteraction_vc/features/users/ui/users_page.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
@@ -106,7 +107,7 @@ final GoRouter router = GoRouter(
           create: (context) => RolesCubit(
             roleRepository: context.read<RolesRepository>(),
           ),
-          child: const GroupsPage(),
+          child: const RolesPage(),
         );
       },
     ),

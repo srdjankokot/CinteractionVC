@@ -2,12 +2,13 @@ import 'package:cinteraction_vc/features/groups/ui/groups_page.dart';
 import 'package:cinteraction_vc/features/users/ui/users_page.dart';
 import 'package:flutter/cupertino.dart';
 
+import '../../features/dashboard/ui/dashboard_screen.dart';
 import '../../features/home/ui/home_tab.dart';
+import '../../features/insights/ui/insights_screen.dart';
 import '../../features/meetings/ui/meetings_page.dart';
 import '../../features/profile/ui/profile_tab.dart';
 import '../../features/roles/ui/roles_page.dart';
 import '../navigation/route.dart';
-
 
 class MenuItem {
   const MenuItem({
@@ -23,7 +24,6 @@ class MenuItem {
   final AppRoute? route;
 }
 
-
 final home = MenuItem(
   route: null,
   label: 'Home',
@@ -33,11 +33,10 @@ final home = MenuItem(
 
 final dashboard = MenuItem(
   route: null,
-label: 'Dashboard',
+  label: 'Dashboard',
   assetName: 'menu_dashboard',
-builder: (context) => const Center(child: Text('Dashboard')),
+  builder: (context) => const DashboardScreen(),
 );
-
 
 final meetings = MenuItem(
   route: null,
@@ -50,7 +49,7 @@ final insights = MenuItem(
   route: null,
   label: 'Insights',
   assetName: 'menu_insights',
-  builder: (context) => const Center(child: Text('Insights')),
+  builder: (context) => const InsightsScreen(),
 );
 
 final profile = MenuItem(
@@ -60,14 +59,13 @@ final profile = MenuItem(
   builder: (context) => const ProfileTab(),
 );
 
-
-
-
 final users = MenuItem(
- route: AppRoute.users,
+  route: AppRoute.users,
   label: 'Users',
   assetName: 'menu_profile',
-  builder: (context) => const UsersPage(groupId: '',),
+  builder: (context) => const UsersPage(
+    groupId: '',
+  ),
 );
 
 final groups = MenuItem(
@@ -105,7 +103,6 @@ final settings = MenuItem(
   builder: (context) => const Center(child: Text('Settings')),
 );
 
-
 final notifications = MenuItem(
   route: null,
   label: 'Notifications',
@@ -113,19 +110,33 @@ final notifications = MenuItem(
   builder: (context) => const Center(child: Text('Notifications')),
 );
 
-
-
 final mobileBottomMenu = <MenuItem>[
-  home, dashboard, meetings, insights, profile
+  home,
+  dashboard,
+  meetings,
+  insights,
+  profile
 ];
 
 final mobileProfileMenu = <MenuItem>[
-  users, groups, notifications, tags, roles, permissions, settings
+  users,
+  groups,
+  notifications,
+  tags,
+  roles,
+  permissions,
+  settings
 ];
-
 
 final desktopMenu = <MenuItem>[
-  home, dashboard, meetings, insights,  users, groups, tags, roles, permissions, settings
+  home,
+  dashboard,
+  meetings,
+  insights,
+  users,
+  groups,
+  tags,
+  roles,
+  permissions,
+  settings
 ];
-
-

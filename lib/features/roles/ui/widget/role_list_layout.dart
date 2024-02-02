@@ -9,6 +9,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../../../core/ui/widget/content_layout_web.dart';
+import '../../../../core/ui/widget/mobile_screen_toolbar.dart';
 import '../../../profile/model/user.dart';
 import '../../model/role.dart';
 
@@ -161,7 +162,55 @@ class RolesListLayout extends StatelessWidget {
           ),
       );
     } else {
-      return Container();
+      return SizedBox(
+          height: MediaQuery.of(context).size.height - 29,
+          child: MobileToolbarScreen(
+            title: 'Roles',
+            body: Padding(
+              padding: const EdgeInsets.all(12.0),
+              child: Column(
+                children: [
+                  Row(
+                    children: [
+                      Expanded(
+                          child: Text(
+                            '${roles.length} Roles',
+                            style: context.textTheme.bodySmall,
+                          )),
+                      IconButton(
+                          onPressed: () =>
+                          {context.read<RolesCubit>().addRole()},
+                          icon: imageSVGAsset('user_plus') as Widget)
+                    ],
+                  ),
+
+                  Expanded(
+                    child: ListView.builder(
+                        itemCount: roles.length,
+                        itemBuilder: (BuildContext context, int index){
+
+                          var role = roles[index];
+
+                          return Container(
+                            margin: const EdgeInsets.all(10),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(role.name,
+                                  style: context.textTheme.displaySmall,),
+                                AuthorityLevel(level: role.authorityLevel)
+                              ],
+                            ),
+                          );
+                        }
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          )
+      );
+
     }
   }
 }
