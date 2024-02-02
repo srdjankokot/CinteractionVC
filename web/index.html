@@ -16,6 +16,8 @@
   -->
   <base href="$FLUTTER_BASE_HREF">
 
+  <meta name="google-signin-client_id" content="86369065781-lpajm2ln4bu8ds7vlb6780rmq0evae3o.apps.googleusercontent.com" />
+
   <meta charset="UTF-8">
   <meta content="IE=Edge" http-equiv="X-UA-Compatible">
   <meta name="description" content="Flutter project for Cinteraction Virtual Classroom">
@@ -48,9 +50,17 @@
           serviceWorkerVersion: serviceWorkerVersion,
         },
         onEntrypointLoaded: function(engineInitializer) {
-          engineInitializer.initializeEngine().then(function(appRunner) {
+
+          let config = {
+            renderer: "html",
+          }
+          engineInitializer.initializeEngine(config).then(function(appRunner) {
             appRunner.runApp();
           });
+
+<!--          engineInitializer.initializeEngine().then(function(appRunner) {-->
+<!--            appRunner.runApp();-->
+<!--          });-->
         }
       });
     });
