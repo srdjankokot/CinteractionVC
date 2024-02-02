@@ -1,22 +1,19 @@
 import 'package:flutter_webrtc/flutter_webrtc.dart';
+import 'package:janus_client/janus_client.dart';
 
 class StreamRenderer {
   RTCVideoRenderer videoRenderer = RTCVideoRenderer();
-  MediaStream mediaStream;
+  MediaStream? mediaStream;
   String id;
-  String publisherId;
-  String publisherName;
-  String mid;
-  bool isAudioMuted;
+  String? publisherId;
+  String? publisherName;
+  String? mid;
+  bool? isAudioMuted;
   List<bool> selectedQuality = [false, false, true];
-  bool isVideoMuted;
+  bool? isVideoMuted;
 
   Future<void> dispose() async {
-    mediaStream?.getTracks()?.forEach((element) async {
-      await element.stop();
-    });
-    await mediaStream?.dispose();
-
+    await stopAllTracksAndDispose(mediaStream);
     videoRenderer.srcObject = null;
     await videoRenderer.dispose();
   }
@@ -32,18 +29,18 @@ class StreamRenderer {
   }
 }
 
-// class VideoRoomPluginStateManager {
-//   Map<dynamic, StreamRenderer> streamsToBeRendered = {};
-//   Map<dynamic, dynamic> feedIdToDisplayStreamsMap = {};
-//   Map<dynamic, dynamic> feedIdToMidSubscriptionMap = {};
-//   Map<dynamic, dynamic> subStreamsToFeedIdMap = {};
-//   List<SubscriberUpdateStream> subscribeStreams = [];
-//   List<SubscriberUpdateStream> unSubscribeStreams = [];
-//
-//   reset() {
-//     streamsToBeRendered.clear();
-//     feedIdToDisplayStreamsMap.clear();
-//     subStreamsToFeedIdMap.clear();
-//     feedIdToMidSubscriptionMap.clear();
-//   }
-// }
+class VideoRoomPluginStateManager {
+  Map<dynamic, StreamRenderer> streamsToBeRendered = {};
+  Map<dynamic, dynamic> feedIdToDisplayStreamsMap = {};
+  Map<dynamic, dynamic> feedIdToMidSubscriptionMap = {};
+  Map<dynamic, dynamic> subStreamsToFeedIdMap = {};
+  List<SubscriberUpdateStream> subscribeStreams = [];
+  List<SubscriberUpdateStream> unSubscribeStreams = [];
+
+  reset() {
+    streamsToBeRendered.clear();
+    feedIdToDisplayStreamsMap.clear();
+    subStreamsToFeedIdMap.clear();
+    feedIdToMidSubscriptionMap.clear();
+  }
+}
