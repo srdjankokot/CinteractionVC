@@ -49,9 +49,9 @@ abstract class Validators {
       return 'Password must be at least 6 characters long';
     }
 
-    if (!password.contains(RegExp('[A-Z]'))) {
-      return 'Password must contain at least one capital letter';
-    }
+    // if (!password.contains(RegExp('[A-Z]'))) {
+    //   return 'Password must contain at least one capital letter';
+    // }
 
     return null;
   }

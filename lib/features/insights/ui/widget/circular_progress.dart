@@ -149,11 +149,13 @@ class CircularProgress extends StatelessWidget {
                                     const SizedBox(
                                       width: 10,
                                     ),
-                                    Text(
-                                      '${bigProgressBar.value}% ${bigProgressBar.name}',
-                                      style: context.textTheme.bodySmall
-                                          ?.copyWith(
-                                              color: ColorConstants.kGray2),
+                                    Expanded(
+                                      child: Text(
+                                        '${bigProgressBar.value}% ${bigProgressBar.name}',
+                                        style: context.textTheme.bodySmall
+                                            ?.copyWith(
+                                                color: ColorConstants.kGray2),
+                                      ),
                                     )
                                   ],
                                 ),
@@ -173,11 +175,13 @@ class CircularProgress extends StatelessWidget {
                                     const SizedBox(
                                       width: 10,
                                     ),
-                                    Text(
-                                      '${smallProgressBar.value}% ${smallProgressBar.name}',
-                                      style: context.textTheme.bodySmall
-                                          ?.copyWith(
-                                              color: ColorConstants.kGray2),
+                                    Expanded(
+                                      child: Text(
+                                        '${smallProgressBar.value}% ${smallProgressBar.name}',
+                                        style: context.textTheme.bodySmall
+                                            ?.copyWith(
+                                                color: ColorConstants.kGray2),
+                                      ),
                                     )
                                   ],
                                 ),

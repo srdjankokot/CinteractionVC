@@ -24,3 +24,7 @@ class AuthFailure extends AuthState {
 
   final String errorMessage;
 }
+
+class IsLogged extends AuthState {
+  const IsLogged();
+}

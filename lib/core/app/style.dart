@@ -62,11 +62,7 @@ ThemeData _getTheme() {
   );
 
 
-  const buttonTextStyle = TextStyle(
-    color: Colors.white,
-    fontSize: 24,
-    fontWeight: FontWeight.w500,
-  );
+   var buttonTextStyle = primaryTextTheme.displaySmall;
 
   return ThemeData(
     useMaterial3: true,
@@ -214,6 +210,7 @@ ThemeData _getTheme() {
         textStyle: buttonTextStyle,
       ),
     ),
+
   );
 }
 
@@ -233,6 +230,7 @@ ThemeData _getTitleTheme() {
 }
 
 
+const minFontSize = 12.0;
 
 TextTheme getNunitoTextTheme(ColorScheme colorScheme) {
   const color = ColorConstants.kGray2;
@@ -241,34 +239,34 @@ TextTheme getNunitoTextTheme(ColorScheme colorScheme) {
   const textTheme = TextTheme(
     // Headline
     headlineLarge: TextStyle(
-      fontSize: 50,
+      fontSize: minFontSize * 3.57, //50,
       color: color,
       fontWeight: headingWeight,
     ),
     headlineMedium: TextStyle(
-      fontSize: 45,
+      fontSize: minFontSize * 3.21, //45,
       color: color,
       fontWeight: headingWeight,
     ),
     headlineSmall: TextStyle(
-      fontSize: 40,
+      fontSize: minFontSize * 2.857, //40,
       color: color,
       fontWeight: headingWeight,
     ),
 
     // Title
     titleLarge: TextStyle(
-      fontSize: 32,
+      fontSize: minFontSize * 2.285, //32,
       color: color,
       fontWeight: headingWeight,
     ),
     titleMedium: TextStyle(
-      fontSize: 24,
+      fontSize: minFontSize * 1.71, //24,
       color: color,
       fontWeight: headingWeight,
     ),
     titleSmall: TextStyle(
-      fontSize: 20,
+      fontSize: minFontSize * 1.43, //20,
       color: color,
       fontWeight: FontWeight.w600,
     ),
@@ -280,21 +278,20 @@ TextTheme _getMonteserratTextTheme(ColorScheme colorScheme) {
   const color = ColorConstants.kGray1;
   const bodyWeight = FontWeight.w400;
 
-
   const textTheme = TextTheme(
     // Display
     displayLarge: TextStyle(
-      fontSize: 20,
+      fontSize: minFontSize * 1.43, //20,
       color: color,
       fontWeight: FontWeight.w600,
     ),
     displayMedium: TextStyle(
-      fontSize: 18,
+      fontSize: minFontSize * 1.285, //18,
       color: color,
       fontWeight: FontWeight.w700,
     ),
     displaySmall: TextStyle(
-      fontSize: 16,
+      fontSize: minFontSize * 1.15,//16,
       color: color,
       fontWeight: FontWeight.w600,
     ),
@@ -303,17 +300,17 @@ TextTheme _getMonteserratTextTheme(ColorScheme colorScheme) {
 
     // Body
     bodyLarge: TextStyle(
-      fontSize: 20,
+      fontSize: minFontSize * 1.43, //20,
       color: color,
       fontWeight: bodyWeight,
     ),
     bodyMedium: TextStyle(
-      fontSize: 18,
+      fontSize: minFontSize * 1.285, //18,
       color: color,
       fontWeight: bodyWeight,
     ),
     bodySmall: TextStyle(
-      fontSize: 16,
+      fontSize: minFontSize * 1.15,//16
       color: color,
       fontWeight: bodyWeight,
     ),
@@ -321,12 +318,12 @@ TextTheme _getMonteserratTextTheme(ColorScheme colorScheme) {
 
     // Label
     labelLarge: TextStyle(
-      fontSize: 14,
+      fontSize: minFontSize,//14
       color: color,
       fontWeight: FontWeight.w600,
     ),
     labelMedium: TextStyle(
-      fontSize: 14,
+      fontSize: minFontSize,//14
       color: color,
       fontWeight: bodyWeight,
     ),

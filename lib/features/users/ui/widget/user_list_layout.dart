@@ -128,7 +128,7 @@ class UserListLayout extends StatelessWidget {
                                     children: [
                                       Text(
                                         user.name,
-                                        style: context.textTheme.titleSmall,
+                                        style: context.textTheme.displaySmall,
                                       ),
                                       Text(user.email)
                                     ],
@@ -193,8 +193,7 @@ class UserListLayout extends StatelessWidget {
                             style: context.textTheme.bodySmall,
                       )),
                       IconButton(
-                          onPressed: () =>
-                              {context.read<UsersCubit>().addUserGroup('srdjan')},
+                          onPressed: () => {context.read<UsersCubit>().addUser()},
                           icon: imageSVGAsset('user_plus') as Widget)
                     ],
                   ),

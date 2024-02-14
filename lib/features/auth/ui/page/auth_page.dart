@@ -51,132 +51,9 @@ class _AuthPageState extends State<AuthPage> {
   @override
   void initState() {
     super.initState();
-
-//     _googleSignIn.onCurrentUserChanged
-//         .listen((GoogleSignInAccount? account) async {
-// // #docregion CanAccessScopes
-//       // In mobile, being authenticated means being authorized...
-//       bool isAuthorized = account != null;
-//       // However, on web...
-//       if (kIsWeb && account != null) {
-//         isAuthorized = await _googleSignIn.canAccessScopes(scopes);
-//       }
-// // #enddocregion CanAccessScopes
-//
-//       setState(() {
-//         _currentUser = account;
-//         _isAuthorized = isAuthorized;
-//       });
-//
-//       // Now that we know that the user can access the required scopes, the app
-//       // can call the REST API.
-//       if (isAuthorized) {
-//         unawaited(_handleGetContact(account!));
-//         // _handleSignOut();
-//       }
-//     });
-//
-//     // In the web, _googleSignIn.signInSilently() triggers the One Tap UX.
-//     //
-//     // It is recommended by Google Identity Services to render both the One Tap UX
-//     // and the Google Sign In button together to "reduce friction and improve
-//     // sign-in rates" ([docs](https://developers.google.com/identity/gsi/web/guides/display-button#html)).
-//     _googleSignIn.signInSilently();
+    // context.read<AuthCubit>().getAccess();
   }
 
-  // Future<void> _handleSignOut() => _googleSignIn.disconnect();
-
-  // This is the on-click handler for the Sign In button that is rendered by Flutter.
-  //
-  // On the web, the on-click handler of the Sign In button is owned by the JS
-  // SDK, so this method can be considered mobile only.
-  // #docregion SignIn
-  // Future<void> _handleSignIn() async {
-  //   try {
-  //     await _googleSignIn.signIn();
-  //   } catch (error) {
-  //     print(error);
-  //   }
-  // }
-
-  // #enddocregion SignIn
-
-  // Prompts the user to authorize `scopes`.
-  //
-  // This action is **required** in platforms that don't perform Authentication
-  // and Authorization at the same time (like the web).
-  //
-  // On the web, this must be called from an user interaction (button click).
-  // #docregion RequestScopes
-  // Future<void> _handleAuthorizeScopes() async {
-  //   final bool isAuthorized = await _googleSignIn.requestScopes(scopes);
-  //   // #enddocregion RequestScopes
-  //   setState(() {
-  //     _isAuthorized = isAuthorized;
-  //   });
-  //   // #docregion RequestScopes
-  //   if (isAuthorized) {
-  //     unawaited(_handleGetContact(_currentUser!));
-  //   }
-  //   // #enddocregion RequestScopes
-  // }
-  //
-  // // Calls the People API REST endpoint for the signed-in user to retrieve information.
-  // Future<void> _handleGetContact(GoogleSignInAccount user) async {
-  //   setState(() {
-  //     _contactText = 'Loading contact info...';
-  //   });
-  //
-  //   print('You are logged in as ${user.displayName}');
-  //
-  //   setState(() {
-  //     _contactText = 'You are logged in as ${user.displayName}';
-  //   });
-  //
-  //   // final http.Response response = await http.get(
-  //   //   Uri.parse('https://people.googleapis.com/v1/people/me/connections'
-  //   //       '?requestMask.includeField=person.names'),
-  //   //   headers: await user.authHeaders,
-  //   // );
-  //   // if (response.statusCode != 200) {
-  //   //   setState(() {
-  //   //     _contactText = 'People API gave a ${response.statusCode} '
-  //   //         'response. Check logs for details.';
-  //   //   });
-  //   //   print('People API ${response.statusCode} response: ${response.body}');
-  //   //   return;
-  //   // }
-  //   // final Map<String, dynamic> data =
-  //   // json.decode(response.body) as Map<String, dynamic>;
-  //   // final String? namedContact = _pickFirstNamedContact(data);
-  //   // setState(() {
-  //   //   if (namedContact != null) {
-  //   //     _contactText = 'I see you know $namedContact!';
-  //   //   } else {
-  //   //     _contactText = 'No contacts to display.';
-  //   //   }
-  //   // });
-  // }
-
-  String? _pickFirstNamedContact(Map<String, dynamic> data) {
-    final List<dynamic>? connections = data['connections'] as List<dynamic>?;
-    final Map<String, dynamic>? contact = connections?.firstWhere(
-      (dynamic contact) => (contact as Map<Object?, dynamic>)['names'] != null,
-      orElse: () => null,
-    ) as Map<String, dynamic>?;
-    if (contact != null) {
-      final List<dynamic> names = contact['names'] as List<dynamic>;
-      final Map<String, dynamic>? name = names.firstWhere(
-        (dynamic name) =>
-            (name as Map<Object?, dynamic>)['displayName'] != null,
-        orElse: () => null,
-      ) as Map<String, dynamic>?;
-      if (name != null) {
-        return name['displayName'] as String?;
-      }
-    }
-    return null;
-  }
 
   @override
   Widget build(BuildContext ctx) {
@@ -625,35 +502,44 @@ class _AuthPageState extends State<AuthPage> {
           );
         }
 
-        // return LoadingOverlay(
-        //     loading: state is AuthLoading,
-        //     child: Scaffold(
-        //         body: SafeArea(
-        //       child: Padding(
-        //           padding: const EdgeInsets.all(16),
-        //           child: body,
-        //         ),
-        //     )));
-
-        return LoadingOverlay(
-            loading: state is AuthLoading,
-            child: Container(
-              color: Colors.white,
-              child: SizedBox(
-                height: MediaQuery.of(context).size.height,
-                width: MediaQuery.of(context).size.width,
-                child: Padding(
-                  padding: const EdgeInsets.all(16),
-                  child: body,
+        return Scaffold(
+          body: LoadingOverlay(
+              loading: state is AuthLoading,
+              child: Container(
+                color: Colors.white,
+                child: SizedBox(
+                  height: MediaQuery.of(context).size.height,
+                  width: MediaQuery.of(context).size.width,
+                  child: Padding(
+                    padding: const EdgeInsets.all(16),
+                    child: state is IsLogged? Center(child: Text('User is already logged in'),):body,
+                  ),
                 ),
-              ),
-            ));
+              )),
+        );
       },
     );
   }
 
   void _onAuthState(BuildContext context, AuthState state) {
     if (state is AuthFailure) {
+      print(state.errorMessage);
+
+      // final snackBar = SnackBar(
+      //   content: const Text('Yay! A SnackBar!'),
+      //   action: SnackBarAction(
+      //     label: 'Undo',
+      //     onPressed: () {
+      //       // Some code to undo the change.
+      //     },
+      //   ),
+      // );
+      //
+      // // Find the ScaffoldMessenger in the widget tree
+      // // and use it to show a SnackBar.
+      // ScaffoldMessenger.of(context).showSnackBar(snackBar);
+      //
+
       context.showSnackBarMessage(
         state.errorMessage,
         isError: true,

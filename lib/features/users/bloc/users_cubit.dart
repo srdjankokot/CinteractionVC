@@ -58,6 +58,7 @@ class UsersCubit extends Cubit<UsersState> with BlocLoggy{
     usersRepository.addUser();
   }
 
+
   Future<void> addUserGroup(String id) async {
     emit(const UsersIsLoading());
     groupRepository.addUserGroup(id);

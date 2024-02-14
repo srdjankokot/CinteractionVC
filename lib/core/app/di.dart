@@ -26,6 +26,7 @@ class DI extends StatelessWidget {
 
   final Widget child;
 
+
   @override
   Widget build(BuildContext context) {
     return _ProviderDI(
@@ -97,8 +98,6 @@ class _RepositoryDI extends StatelessWidget {
             usersProvider: context.read<UsersProvider>(),
           ),
         ),
-
-
         RepositoryProvider<GroupsRepository>(
           create: (context) => GroupsRepository(
             groupsProvider: context.read<GroupsProvider>(),

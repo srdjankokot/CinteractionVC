@@ -97,29 +97,28 @@ class _VideoRoomPage extends State<VideoRoomPage> {
     eventMessagesHandler();
 
     await localVideoRenderer.init();
-    localVideoRenderer.mediaStream =
-        await videoPlugin?.initializeMediaDevices(simulcastSendEncodings: [
-      // RTCRtpEncoding(
-      //     active: true,
-      //     rid: 'h',
-      //     scalabilityMode: 'L1T2',
-      //     maxBitrate: 256000,
-      //     numTemporalLayers: 0,
-      //     minBitrate: 94000,
-      //     scaleResolutionDownBy: 2),
-      // RTCRtpEncoding(
-      //     active: true,
-      //     rid: 'm',
-      //     scalabilityMode: 'L1T2',
-      //     maxBitrate: 2000000,
-      //     minBitrate: 1000000),
-      // RTCRtpEncoding(
-      //     active: true,
-      //     rid: 'l',
-      //     scalabilityMode: 'L1T2',
-      //     maxBitrate: 20000,
-      //     scaleResolutionDownBy: 8),
-    ], mediaConstraints: {
+    localVideoRenderer.mediaStream = await videoPlugin?.initializeMediaDevices(
+        simulcastSendEncodings: [
+          // RTCRtpEncoding(rid: "h", minBitrate: 2000000, maxBitrate: 2000000, active: true, scalabilityMode: 'L1T2'),
+          // RTCRtpEncoding(
+          //   rid: "m",
+          //   minBitrate: 1000000,
+          //   maxBitrate: 1000000,
+          //   active: true,
+          //   scalabilityMode: 'L1T2',
+          //   scaleResolutionDownBy: 2,
+          // ),
+          // RTCRtpEncoding(
+          //   rid: "l",
+          //   minBitrate: 512000,
+          //   maxBitrate: 512000,
+          //   active: true,
+          //   scalabilityMode: 'L1T2',
+          //   scaleResolutionDownBy: 3,
+          // ),
+        ],
+//mac os doesnt work with this constraints
+            mediaConstraints: {
       'video': {
         'width': {'min': 160, 'max': 1280},
         'height': {'min': 90, 'max': 720}
@@ -127,15 +126,12 @@ class _VideoRoomPage extends State<VideoRoomPage> {
       'audio': true
     }
 
-            //         mediaConstraints: {
-            //   'video': {
-            //     'width': {'min': 160, 'max': 320},
-            //     'height': {'min': 90, 'max': 240}
-            //   },
-            //   'audio': true
-            // }
+        // mediaConstraints: {
+        //   'video': {'width': 1280, 'height': 720},
+        //   'audio': true
+        // }
 
-            );
+        );
     localVideoRenderer.videoRenderer.srcObject = localVideoRenderer.mediaStream;
     localVideoRenderer.publisherName = "You";
     localVideoRenderer.publisherId = myId.toString();
@@ -445,10 +441,8 @@ class _VideoRoomPage extends State<VideoRoomPage> {
         : TransceiverDirection.Inactive);
   }
 
-  void finishCall()  {
-    callEnd().then((value) => {
-      Navigator.of(context).pop()
-    });
+  void finishCall() {
+    callEnd().then((value) => {Navigator.of(context).pop()});
   }
 
   Future<dynamic> callEnd() async {
@@ -545,8 +539,9 @@ class _VideoRoomPage extends State<VideoRoomPage> {
       return SubscriberUpdateStream(
           feed: id, mid: stream['mid'], crossrefid: null);
     }).toList();
-    if (remotePlugin != null)
+    if (remotePlugin != null) {
       await remotePlugin?.update(unsubscribe: unsubscribeStreams);
+    }
     videoState.feedIdToMidSubscriptionMap.remove(id);
   }
 
@@ -565,11 +560,11 @@ class _VideoRoomPage extends State<VideoRoomPage> {
     }).toList();
 
     List<SubscriberUpdateStream> list = [];
-    unsubscribeStreams.forEach((element) {
+    for (var element in unsubscribeStreams) {
       if (element.mid == '1') {
         list.add(element);
       }
-    });
+    }
 
     if (remotePlugin != null) {
       await remotePlugin?.update(unsubscribe: list);
@@ -924,7 +919,7 @@ class _VideoRoomPage extends State<VideoRoomPage> {
 
   Widget getRendererItem(StreamRenderer remoteStream, int engagement,
       double height, double width) {
-    debugPrint('getRendererItem: ${remoteStream.publisherName!} $engagement');
+    // debugPrint('getRendererItem: ${remoteStream.publisherName!} $engagement');
 
     if (context.isWide) {
       return SizedBox(
@@ -983,37 +978,5 @@ class _VideoRoomPage extends State<VideoRoomPage> {
       ),
     );
 
-    return SizedBox(
-      height: height,
-      width: width,
-      child: Padding(
-        padding: const EdgeInsets.all(8.0),
-        child: Stack(
-          children: [
-            RTCVideoView(
-              remoteStream.videoRenderer,
-              filterQuality: FilterQuality.none,
-              objectFit: RTCVideoViewObjectFit.RTCVideoViewObjectFitCover,
-              mirror: true,
-            ),
-
-            if (context.isWide)
-              Positioned(
-                  top: 20,
-                  right: 24,
-                  child: EngagementProgress(engagement: engagement))
-            else
-              Positioned(
-                  bottom: 10,
-                  right: 10,
-                  child: EngagementProgress(engagement: engagement)),
-            // Positioned(
-            //   bottom: 20,
-            //     right: 24,
-            //     child: Text(remoteStream.publisherName!))
-          ],
-        ),
-      ),
-    );
-  }
+}
 }
