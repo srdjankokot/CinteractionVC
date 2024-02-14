@@ -4,6 +4,8 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter_facebook_auth/flutter_facebook_auth.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 
+import '../../../core/io/network/handlers/sign_in_handler.dart';
+import '../../../core/io/network/models/login_response.dart';
 import '../model/user.dart';
 
 
@@ -36,8 +38,10 @@ class ProfileProvider {
   );
 
   final _userStream = StreamController<User?>.broadcast();
+  final _errorStream = StreamController<String>.broadcast();
 
   Stream<User?> getUserStream() => _userStream.stream;
+  Stream<String> getErrorStream() => _errorStream.stream;
 
   Future<User?> triggerLoggedIn() async {
     await _networkDelay();
@@ -46,6 +50,36 @@ class ProfileProvider {
     _userStream.add(user);
     return user;
   }
+
+  Future<User?> loginWithEmailPassword(String email, String pass) async {
+    // await _networkDelay();
+    SignIn handler = SignIn(email: email, password: pass);
+    var response = await handler.execute();
+
+
+    if(response != null)
+    {
+      try
+      {
+        var auth = LoginResponse.fromJson(response);
+
+        final user = _mockUser;
+        _userStream.add(user);
+        return user;
+      }
+      on Exception catch(e){
+        _userStream.add(null);
+        _errorStream.add(response['message'] as String);
+        return null;
+      }
+    }
+    else{
+      _userStream.add(null);
+      _errorStream.add('Something went wrong');
+      return null;
+    }
+  }
+
 
   Future<User?> triggerGoogleLoggedIn() async {
       var googleUser = await _googleSignIn.signIn();

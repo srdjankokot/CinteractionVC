@@ -1,91 +1,9 @@
 import 'dart:async';
-import 'dart:math';
 
-import '../../profile/model/user.dart';
+import 'package:cinteraction_vc/core/io/network/handlers/get_meetings_handler.dart';
+import 'package:cinteraction_vc/features/meetings/model/meeting_response.dart';
+
 import '../model/meeting.dart';
-
-List<Meeting> _mockMeetings = [
-  Meeting(
-      id: '',
-      passcode: '',
-      name: 'introduction',
-      organizer: _organizer,
-      users: [_organizer, _organizer, _organizer, _organizer],
-      avgEngagement: Random().nextInt(100),
-      recorded: true,
-      start: DateTime.now(),
-      end: DateTime.now()),
-
-  Meeting(
-      id: '',
-      name: 'Video Production',
-      organizer: _organizer,
-      users: [_organizer, _organizer, _organizer, _organizer],
-      avgEngagement: Random().nextInt(100),
-      recorded: true,
-      start: DateTime.now(),
-      end: DateTime.now()),
-  Meeting(
-      id: '',
-      name: 'Video Gaming 2',
-      organizer: _organizer,
-      users: [_organizer, _organizer, _organizer, _organizer],
-      avgEngagement: Random().nextInt(100),
-      recorded: true,
-      start: DateTime.now(),
-      end: DateTime.now()),
-  Meeting(
-      id: '',
-      name: 'Video Gaming 3',
-      organizer: _organizer,
-      users: [_organizer, _organizer, _organizer, _organizer],
-      avgEngagement: Random().nextInt(100),
-      recorded: true,
-      start: DateTime.now(),
-      end: DateTime.now()),
-  Meeting(
-      id: '',
-      name: 'UX/UI Essentials',
-      organizer: _organizer,
-      users: [_organizer, _organizer, _organizer, _organizer],
-      avgEngagement: Random().nextInt(100),
-      recorded: true,
-      start: DateTime.now(),
-      end: DateTime.now()),
-];
-
-
-List<Meeting> _mockScheduledMeetings = [
-  Meeting(
-      id: '',
-      name: 'introduction',
-      organizer: _organizer,
-      users: [_organizer, _organizer, _organizer, _organizer],
-      avgEngagement: Random().nextInt(100),
-      recorded: true,
-      start: DateTime.now(),
-      end: DateTime.now()),
-];
-
-Meeting get _mockMeeting => Meeting(
-    id: '',
-    name: 'introduction',
-    organizer: _organizer,
-    users: [_organizer, _organizer, _organizer, _organizer],
-    avgEngagement: Random().nextInt(100),
-    recorded: true,
-    start: DateTime.now(),
-    end: DateTime.now());
-// Group(id: 'group-id', name: 'Video production II', userList: _mockUsers);
-
-User get _organizer => User(
-      id: 'john-doe',
-      name: 'John Doe',
-      email: 'john@test.com',
-      imageUrl:
-          'https://images.unsplash.com/photo-1528892952291-009c663ce843?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=200&q=80',
-      createdAt: DateTime.now(),
-    );
 
 class MeetingProvider {
   MeetingProvider();
@@ -94,20 +12,31 @@ class MeetingProvider {
 
   Stream<List<Meeting>> getMeetingStream() => _meetingStream.stream;
 
+  MeetingResponse meetings = MeetingResponse(pastMeetings: List.empty(), scheduleMeetings: List.empty());
+
   Future<void> getMeetings() async {
-    // await _networkDelay();
-    _meetingStream.add(_mockMeetings);
+    await getMeetingFromServer();
+    _meetingStream.add(meetings.pastMeetings);
   }
 
   Future<void> getScheduledMeetings() async {
-    // await _networkDelay();
-    _meetingStream.add(_mockScheduledMeetings);
+    await getMeetingFromServer();
+    _meetingStream.add(meetings.scheduleMeetings);
   }
+
+  Future<void> getMeetingFromServer() async{
+    if(meetings.pastMeetings.isEmpty || meetings.scheduleMeetings.isEmpty){
+      GetMeetings handler = GetMeetings();
+      var result = await handler.execute();
+      meetings = MeetingResponse.fromJson(result!);
+    }
+  }
+
 
   Future<void> addMeeting() async {
     // await _networkDelay();
-    _mockMeetings = [..._mockMeetings, _mockMeeting];
-    _meetingStream.add(_mockMeetings);
+    // _mockMeetings = [..._mockMeetings, _mockMeeting];
+    // _meetingStream.add(_mockMeetings);
   }
 
   /// Simulate network delay

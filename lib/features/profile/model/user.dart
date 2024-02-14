@@ -1,5 +1,10 @@
 import 'dart:math';
 
+import 'package:json_annotation/json_annotation.dart';
+
+part 'user.g.dart';
+
+@JsonSerializable()
 class User {
    User( {
     required this.id,
@@ -9,10 +14,8 @@ class User {
     required this.createdAt,
   });
 
-  final String id;
+
   final String name;
-  final String email;
-  final String imageUrl;
 
   int? groups = Random().nextInt(10);
   int? avgEngagement = Random().nextInt(100);
@@ -21,4 +24,17 @@ class User {
   final bool onboarded =  Random().nextInt(2) == 1;
   late final bool checked  =  Random().nextInt(2) == 1;
   final DateTime createdAt;
+
+
+   factory User.fromJson(Map<String, dynamic> json) => _$UserFromJson(json);
+
+   Map<String, dynamic> toJson() => _$UserToJson(this);
+
+   String id;
+   String email;
+
+   @JsonKey(name: 'avatar')
+   String imageUrl;
+
+
 }

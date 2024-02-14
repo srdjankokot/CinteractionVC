@@ -66,7 +66,8 @@ final GoRouter router = GoRouter(
       // builder: (context, state) => const VideoRoomPage(room: 123456, displayName: 'Srdjan'),
       builder: (context, state) => BlocProvider(
         create: (context) => ConferenceCubit(),
-        child: const VideoRoomPage(room: 06082020, displayName: 'Srdjan'),
+        child: const VideoRoomPage(room: 6108560605, displayName: 'Srdjan'),
+        // child: const VideoRoomPage(room: 280298784, displayName: 'Srdjan'),
       ),
     ),
 

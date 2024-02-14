@@ -37,10 +37,11 @@ class HomeTab extends StatelessWidget {
             style: context.titleTheme.titleLarge,
           ),
           Container(
-            margin: const EdgeInsets.only(top: 50, left: 300, right: 300),
+            margin: const EdgeInsets.only(top: 50),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
+                Spacer(),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
@@ -96,16 +97,11 @@ class HomeTab extends StatelessWidget {
                     )
                   ],
                 ),
-                Visibility(
+                Spacer(),
+                const Visibility(
                     visible: true,
-                    child: Row(
-                      children: [
-                        const SizedBox(
-                          width: 250,
-                        ),
-                        const NextMeetingWidget(),
-                      ],
-                    ))
+                    child: NextMeetingWidget(),),
+                Spacer(),
               ],
             ),
           ),
@@ -285,7 +281,7 @@ class NextMeetingWidget extends StatelessWidget {
       );
 
   Meeting get _meeting => Meeting(
-      id: '225-885-25',
+      id: 2,
       passcode: '123456',
       name: 'Digital Photography',
       organizer: _organizer,
@@ -307,87 +303,85 @@ class NextMeetingWidget extends StatelessWidget {
           borderRadius: BorderRadius.circular(7),
         ),
       ),
-      child: Container(
-        child: IntrinsicWidth(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              Container(
+      child: IntrinsicWidth(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Container(
 
-                padding: const EdgeInsets.only(
-                    top: 20, bottom: 20, left: 20, right: 20),
-                decoration: const BoxDecoration(
-                  image: DecorationImage(
-                      image: ImageAsset('next_meeting_bg.png'), fit: BoxFit.fill),
-                ),
-                child: Column(
-                  children: [
-                    Container(
-                      margin: const EdgeInsets.only(bottom: 20),
-                      child: DigitalClock(
-                        showSecondsDigit: false,
-                        hourMinuteDigitTextStyle: context
-                            .titleTheme.headlineMedium
-                            ?.copyWith(color: Colors.white),
-                        colon: Text(
-                          ':',
-                          style: context.titleTheme.headlineMedium
-                              ?.copyWith(color: Colors.white, fontSize: 30),
-                        ),
+              padding: const EdgeInsets.only(
+                  top: 20, bottom: 20, left: 20, right: 20),
+              decoration: const BoxDecoration(
+                image: DecorationImage(
+                    image: ImageAsset('next_meeting_bg.png'), fit: BoxFit.fill),
+              ),
+              child: Column(
+                children: [
+                  Container(
+                    margin: const EdgeInsets.only(bottom: 20),
+                    child: DigitalClock(
+                      showSecondsDigit: false,
+                      hourMinuteDigitTextStyle: context
+                          .titleTheme.headlineMedium
+                          ?.copyWith(color: Colors.white),
+                      colon: Text(
+                        ':',
+                        style: context.titleTheme.headlineMedium
+                            ?.copyWith(color: Colors.white, fontSize: 30),
                       ),
                     ),
-                    Text(
-                      currentDate,
-                      style: context.textTheme.bodyLarge
-                          ?.copyWith(color: Colors.white),
-                    ),
-                  ],
-                ),
+                  ),
+                  Text(
+                    currentDate,
+                    style: context.textTheme.bodyLarge
+                        ?.copyWith(color: Colors.white),
+                  ),
+                ],
               ),
-              Container(
-                padding: const EdgeInsets.all(48),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      _meeting.name,
-                      style: context.textTheme.displayLarge,
-                    ),
-                    Text(
-                      '${_meeting.start.hour}:${_meeting.start.minute} - ${_meeting.end.hour}:${_meeting.end.minute}',
-                      style: context.textTheme.bodyLarge,
-                    ),
-                    Text(
-                      'Meeting ID: ${_meeting.id}',
-                      style: context.textTheme.bodyLarge,
-                    ),
-                    Text(
-                      'Passcode: ${_meeting.passcode}',
-                      style: context.textTheme.bodyLarge,
-                    ),
-                    Text(
-                      'Organizer: ${_meeting.organizer.name}',
-                      style: context.textTheme.bodyLarge,
-                    ),
-                    Container(
-                      margin: const EdgeInsets.only(top: 20),
-                      child: ElevatedButton(
-                          onPressed: () => {},
-                          style: ButtonStyle(
-                            backgroundColor: MaterialStateProperty.all(
-                                ColorConstants.kStateSuccess),
-                          ),
-                          child: Text(
-                            'Join Meeting',
-                            style: context.textTheme.labelLarge
-                                ?.copyWith(color: Colors.white),
-                          )),
-                    ),
-                  ],
-                ),
+            ),
+            Container(
+              padding: const EdgeInsets.all(48),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    _meeting.name,
+                    style: context.textTheme.displayLarge,
+                  ),
+                  Text(
+                    '${_meeting.start.hour}:${_meeting.start.minute} - ${_meeting.end.hour}:${_meeting.end.minute}',
+                    style: context.textTheme.bodyLarge,
+                  ),
+                  Text(
+                    'Meeting ID: ${_meeting.id}',
+                    style: context.textTheme.bodyLarge,
+                  ),
+                  Text(
+                    'Passcode: ${_meeting.passcode}',
+                    style: context.textTheme.bodyLarge,
+                  ),
+                  Text(
+                    'Organizer: ${_meeting.organizer.name}',
+                    style: context.textTheme.bodyLarge,
+                  ),
+                  Container(
+                    margin: const EdgeInsets.only(top: 20),
+                    child: ElevatedButton(
+                        onPressed: () => {},
+                        style: ButtonStyle(
+                          backgroundColor: MaterialStateProperty.all(
+                              ColorConstants.kStateSuccess),
+                        ),
+                        child: Text(
+                          'Join Meeting',
+                          style: context.textTheme.labelLarge
+                              ?.copyWith(color: Colors.white),
+                        )),
+                  ),
+                ],
               ),
-            ],
-          ),
+            ),
+          ],
         ),
       ),
     );

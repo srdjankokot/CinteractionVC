@@ -1,3 +1,4 @@
+import 'package:cinteraction_vc/core/extension/context.dart';
 import 'package:cinteraction_vc/features/groups/ui/groups_page.dart';
 import 'package:cinteraction_vc/features/users/ui/users_page.dart';
 import 'package:flutter/cupertino.dart';
@@ -11,16 +12,22 @@ import '../../features/roles/ui/roles_page.dart';
 import '../navigation/route.dart';
 
 class MenuItem {
-  const MenuItem({
+   MenuItem({
     required this.label,
     required this.assetName,
-    required this.builder,
+    required this.body,
     this.route,
-  });
+  }
+  );
 
   final String label;
   final String assetName;
-  final WidgetBuilder builder;
+  final Widget body;
+
+  late WidgetBuilder builder = (context) => DefaultTextStyle(
+  style: context.textTheme.bodySmall!.copyWith(),
+  child: body);
+
   final AppRoute? route;
 }
 
@@ -28,42 +35,42 @@ final home = MenuItem(
   route: null,
   label: 'Home',
   assetName: 'menu_home',
-  builder: (context) => const HomeTab(),
+  body:  const HomeTab(),
 );
 
 final dashboard = MenuItem(
   route: null,
   label: 'Dashboard',
   assetName: 'menu_dashboard',
-  builder: (context) => const DashboardScreen(),
+  body: const DashboardScreen(),
 );
 
 final meetings = MenuItem(
   route: null,
   label: 'Meetings',
   assetName: 'menu_meetings',
-  builder: (context) => const MeetingsPage(),
+  body: const MeetingsPage(),
 );
 
 final insights = MenuItem(
   route: null,
   label: 'Insights',
   assetName: 'menu_insights',
-  builder: (context) => const InsightsScreen(),
+  body: const InsightsScreen(),
 );
 
 final profile = MenuItem(
   route: null,
   label: 'Profile',
   assetName: 'menu_profile',
-  builder: (context) => const ProfileTab(),
+  body: const ProfileTab(),
 );
 
 final users = MenuItem(
   route: AppRoute.users,
   label: 'Users',
   assetName: 'menu_profile',
-  builder: (context) => const UsersPage(
+  body:  const UsersPage(
     groupId: '',
   ),
 );
@@ -72,42 +79,42 @@ final groups = MenuItem(
   route: AppRoute.groups,
   label: 'Groups',
   assetName: 'menu_groups',
-  builder: (context) => const GroupsPage(),
+  body:  const GroupsPage(),
 );
 
 final tags = MenuItem(
   route: null,
   label: 'Tags',
   assetName: 'menu_tags',
-  builder: (context) => const Center(child: Text('Tags')),
+  body: const Center(child: Text('Tags')),
 );
 
 final roles = MenuItem(
   route: AppRoute.roles,
   label: 'Roles',
   assetName: 'menu_roles',
-  builder: (context) => const RolesPage(),
+  body:  const RolesPage(),
 );
 
 final permissions = MenuItem(
   route: null,
   label: 'Permissions',
   assetName: 'menu_permissions',
-  builder: (context) => const Center(child: Text('Permissions')),
+  body:  const Center(child: Text('Permissions')),
 );
 
 final settings = MenuItem(
   route: null,
   label: 'Settings',
   assetName: 'menu_settings',
-  builder: (context) => const Center(child: Text('Settings')),
+  body:  const Center(child: Text('Settings')),
 );
 
 final notifications = MenuItem(
   route: null,
   label: 'Notifications',
   assetName: 'menu_notifications',
-  builder: (context) => const Center(child: Text('Notifications')),
+  body:  const Center(child: Text('Notifications')),
 );
 
 final mobileBottomMenu = <MenuItem>[

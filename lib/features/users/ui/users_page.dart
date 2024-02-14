@@ -40,12 +40,10 @@ class UsersPageState extends State<UsersPage> {
     return BlocConsumer<UsersCubit, UsersState>(
         builder: (context, state) {
           final Widget body;
-          body = Material(
-            child: Column(
+          body = Column(
               children: [
                 UserListLayout(users: userList!),
               ],
-            ),
           );
 
           return LoadingOverlay(

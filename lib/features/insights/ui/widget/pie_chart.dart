@@ -106,10 +106,13 @@ class PieChartStats extends StatelessWidget {
                                       ),
                                       const SizedBox(width: 10,),
 
-                                      Text(
-                                        '${item.value}% ${item.name}',
-                                        style: context.textTheme.bodySmall?.copyWith(
-                                          color: ColorConstants.kGray2
+                                      Expanded(
+                                        child: Text(
+                                          '${item.value}% ${item.name}',
+                                          style: context.textTheme.bodySmall?.copyWith(
+                                            color: ColorConstants.kGray2
+                                          ),
+                                          overflow: TextOverflow.clip,
                                         ),
                                       )
 

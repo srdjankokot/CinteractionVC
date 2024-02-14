@@ -4,6 +4,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../../core/logger/loggy_types.dart';
+import '../../../core/util/local_storage.dart';
 import '../../profile/model/user.dart';
 import '../../profile/repository/profile_repository.dart';
 import '../repository/auth_repository.dart';
@@ -15,10 +16,24 @@ class AuthCubit extends Cubit<AuthState> with BlocLoggy {
   AuthCubit({
     required this.authRepository,
     required this.userRepository,
-  }) : super(const AuthInitial());
+  }) : super(const AuthInitial()){
+    _load();
+  }
 
   final AuthRepository authRepository;
   final ProfileRepository userRepository;
+
+
+  StreamSubscription<String>? _errorSubscription;
+
+  void _load() {
+    _errorSubscription = authRepository.getErrorStream().listen(_onError);
+  }
+
+
+  void _onError(String error) {
+    emit(AuthFailure(errorMessage: error));
+  }
 
   Future<void> signUpWithEmailAndPassword({
     required String email,
@@ -33,6 +48,8 @@ class AuthCubit extends Cubit<AuthState> with BlocLoggy {
       );
 
       emit(AuthSuccess(user: user));
+
+
     } catch (e, s) {
       loggy.error('signUpWithEmailAndPassword error', e, s);
       emit(AuthFailure(errorMessage: e.toString()));
@@ -50,7 +67,11 @@ class AuthCubit extends Cubit<AuthState> with BlocLoggy {
         password: password,
       );
 
-      emit(AuthSuccess(user: user));
+      if(user!=null)
+      {
+        emit(AuthSuccess(user: user));
+      }
+
     } catch (e, s) {
       loggy.error('signInWithEmailAndPassword error', e, s);
       emit(AuthFailure(errorMessage: e.toString()));
@@ -82,6 +103,15 @@ class AuthCubit extends Cubit<AuthState> with BlocLoggy {
     } catch (e, s) {
       loggy.error('signInWithGoogle error', e, s);
       emit(AuthFailure(errorMessage: e.toString()));
+    }
+  }
+
+
+  Future<void> getAccess() async
+  {
+    var accessToken = await getAccessToken();
+    if(accessToken!=null) {
+      emit(const IsLogged());
     }
   }
 
