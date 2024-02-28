@@ -5,6 +5,7 @@
 import 'package:janus_client/janus_client.dart';
 
 String url = 'wss://vc.cinteraction.com:8088';
+// String url = 'http://localhost:8088/janus';
 // String url = 'wss://server.institutonline.ai:55624';
 bool withCredentials = false;
 String apiSecret = "";
@@ -21,10 +22,10 @@ List<RTCIceServer> iceServers = <RTCIceServer>[
   // RTCIceServer(url: "stun:stun.l.google.com:19302"),
   // RTCIceServer(url: "stun:server.institutonline.ai:55611"),
   // RTCIceServer(url: "stun:global.stun.twilio.com:3478"),
-  RTCIceServer(
-      urls: "turn:vc.cinteraction.com:80?transport=udp",
-      username: mixTurnServerUsername,
-      credential: mixTurnServerCredential),
+  // RTCIceServer(
+  //     urls: "turn:vc.cinteraction.com:80?transport=udp",
+  //     username: mixTurnServerUsername,
+  //     credential: mixTurnServerCredential),
   RTCIceServer(
       urls: "turn:vc.cinteraction.com:3478?transport=udp",
       username: mixTurnServerUsername,
@@ -33,14 +34,14 @@ List<RTCIceServer> iceServers = <RTCIceServer>[
       urls: "turn:vc.cinteraction.com:3478?transport=tcp",
       username: mixTurnServerUsername,
       credential: mixTurnServerCredential),
-  RTCIceServer(
-      urls: "turn:vc.cinteraction.com:80?transport=tcp",
-      username: mixTurnServerUsername,
-      credential: mixTurnServerCredential),
-  RTCIceServer(
-      urls: "turns:vc.cinteraction.com:443?transport=tcp",
-      username: mixTurnServerUsername,
-      credential: mixTurnServerCredential),
+  // RTCIceServer(
+  //     urls: "turn:vc.cinteraction.com:80?transport=tcp",
+  //     username: mixTurnServerUsername,
+  //     credential: mixTurnServerCredential),
+  // RTCIceServer(
+  //     urls: "turns:vc.cinteraction.com:443?transport=tcp",
+  //     username: mixTurnServerUsername,
+  //     credential: mixTurnServerCredential),
   // RTCIceServer(
   //     url: "turns:vc.cinteraction.com:5349?transport=tcp",
   //     username: mixTurnServerUsername,

@@ -1,3 +1,7 @@
+import 'package:cinteraction_vc/core/extension/context_user.dart';
+import 'package:cinteraction_vc/features/conference/bloc/conference_cubit.dart';
+import 'package:cinteraction_vc/features/conference/provider/conference_provider.dart';
+import 'package:cinteraction_vc/features/conference/repository/conference_repository.dart';
 import 'package:cinteraction_vc/features/groups/bloc/groups_cubit.dart';
 import 'package:cinteraction_vc/features/groups/provider/groups_provider.dart';
 import 'package:cinteraction_vc/features/groups/repository/groups_repository.dart';
@@ -67,6 +71,10 @@ class _ProviderDI extends StatelessWidget {
         RepositoryProvider<MeetingProvider>(
           create: (context) => MeetingProvider(),
         ),
+
+        RepositoryProvider<ConferenceProvider>(
+          create: (context) => ConferenceProvider(),
+        ),
       ],
       child: child,
     );
@@ -112,6 +120,12 @@ class _RepositoryDI extends StatelessWidget {
         RepositoryProvider<MeetingRepository>(
           create: (context) => MeetingRepository(
             meetingProvider: context.read<MeetingProvider>(),
+          ),
+        ),
+
+        RepositoryProvider<ConferenceRepository>(
+          create: (context) => ConferenceRepository(
+            provider: context.read<ConferenceProvider>(),
           ),
         ),
 
@@ -162,6 +176,12 @@ class _BlocDI extends StatelessWidget {
         BlocProvider<MeetingCubit>(
           create: (context) => MeetingCubit(
             meetingRepository: context.read<MeetingRepository>(),
+          ),
+        ),
+
+        BlocProvider<ConferenceCubit>(
+          create: (context) => ConferenceCubit(
+            conferenceRepository: context.read<ConferenceRepository>(),
           ),
         ),
       ],

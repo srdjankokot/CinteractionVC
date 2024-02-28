@@ -1,7 +1,10 @@
+import 'dart:math';
+
 import 'package:cinteraction_vc/core/navigation/route.dart';
 import 'package:cinteraction_vc/features/auth/ui/page/auth_page.dart';
 import 'package:cinteraction_vc/features/auth/ui/page/splash_page.dart';
 import 'package:cinteraction_vc/features/conference/bloc/conference_cubit.dart';
+import 'package:cinteraction_vc/features/conference/repository/conference_repository.dart';
 import 'package:cinteraction_vc/features/conference/video_room.dart';
 import 'package:cinteraction_vc/features/groups/bloc/groups_cubit.dart';
 import 'package:cinteraction_vc/features/groups/repository/groups_repository.dart';
@@ -65,8 +68,10 @@ final GoRouter router = GoRouter(
       path: AppRoute.meeting.path,
       // builder: (context, state) => const VideoRoomPage(room: 123456, displayName: 'Srdjan'),
       builder: (context, state) => BlocProvider(
-        create: (context) => ConferenceCubit(),
-        child: const VideoRoomPage(room: 6108560605, displayName: 'Srdjan'),
+        create: (context) => ConferenceCubit(
+          conferenceRepository:  context.read<ConferenceRepository>(),
+        ),
+        child:  VideoRoomPage(room: 6108560605),
         // child: const VideoRoomPage(room: 280298784, displayName: 'Srdjan'),
       ),
     ),
