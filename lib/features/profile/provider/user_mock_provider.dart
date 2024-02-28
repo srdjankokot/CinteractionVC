@@ -33,7 +33,7 @@ class ProfileProvider {
 
   final GoogleSignIn _googleSignIn = GoogleSignIn(
     // Optional clientId
-    // clientId: '86369065781-opekj9mf25mr923bg7mm7fe535istken.apps.googleusercontent.com',
+    // clientId: '86369065781-lpajm2ln4bu8ds7vlb6780rmq0evae3o.apps.googleusercontent.com',
     scopes: scopes,
   );
 

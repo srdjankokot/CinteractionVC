@@ -25,8 +25,7 @@ class LoginPage extends StatelessWidget {
           MaterialPageRoute(
               builder: (BuildContext context) =>
                   VideoRoomPage(
-                      room: state.roomId,
-                      displayName: state.displayName)));
+                      room: state.roomId)));
     }
 
     LoginBloc bloc = BlocProvider.of<LoginBloc>(context);

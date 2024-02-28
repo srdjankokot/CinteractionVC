@@ -164,10 +164,10 @@ class _HomePageState extends State<HomePage> {
                     if (user != null)
                       Row(
                         children: [
-                          CallButtonShape(
-                              image: imageSVGAsset('menu_notifications') as Widget,
-                              bgColor: ColorConstants.kGrey100,
-                              onClickAction: () => {}),
+                          // CallButtonShape(
+                          //     image: imageSVGAsset('menu_notifications') as Widget,
+                          //     bgColor: ColorConstants.kGrey100,
+                          //     onClickAction: () => {}),
                           const SizedBox(
                             width: 10,
                           ),
