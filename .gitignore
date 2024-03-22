@@ -33,3 +33,6 @@ google-services.json
 *.hprof
 
 .dart_tool/
+
+# FVM Version Cache
+.fvm/

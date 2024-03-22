@@ -1,3 +1,4 @@
+import 'package:cinteraction_vc/core/io/network/models/participant.dart';
 import 'package:equatable/equatable.dart';
 import 'package:flutter/cupertino.dart';
 
@@ -7,6 +8,7 @@ class ConferenceState extends Equatable {
   final bool isInitial;
   final bool isEnded;
   final Map<dynamic, StreamRenderer>? streamRenderers;
+  final List<Participant>? streamSubscribers;
   final bool audioMuted;
   final bool videoMuted;
   final int? numberOfStreams;
@@ -17,6 +19,7 @@ class ConferenceState extends Equatable {
     required this.isInitial,
     required this.isEnded,
     this.streamRenderers,
+    this.streamSubscribers,
     required this.audioMuted,
     required this.videoMuted,
     this.numberOfStreams,
@@ -49,6 +52,7 @@ class ConferenceState extends Equatable {
     bool? isInitial,
     bool? isEnded,
     Map<dynamic, StreamRenderer>? streamRenderers,
+    List<Participant>? streamSubscribers,
     int? numberOfStreams,
     int? numberOfStreamsCopy,
     bool? audioMuted,
@@ -59,6 +63,7 @@ class ConferenceState extends Equatable {
       isInitial: isInitial ?? this.isInitial,
       isEnded: isEnded ?? this.isEnded,
       streamRenderers: streamRenderers ?? this.streamRenderers,
+      streamSubscribers: streamSubscribers ?? this.streamSubscribers,
       numberOfStreams: numberOfStreams ?? this.numberOfStreams,
       audioMuted: audioMuted ?? this.audioMuted,
       videoMuted: videoMuted ?? this.videoMuted,
@@ -68,7 +73,7 @@ class ConferenceState extends Equatable {
   }
 
   @override
-  List<Object?> get props => [isInitial, isEnded, streamRenderers, numberOfStreams, audioMuted, videoMuted, numberOfStreamsCopy, isGridLayout];
+  List<Object?> get props => [isInitial, isEnded, streamRenderers, streamSubscribers, numberOfStreams, audioMuted, videoMuted, numberOfStreamsCopy, isGridLayout];
 }
 
 // @immutable

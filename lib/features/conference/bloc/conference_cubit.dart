@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:math';
 
+import 'package:cinteraction_vc/core/io/network/models/participant.dart';
 import 'package:cinteraction_vc/features/conference/bloc/conference_state.dart';
 import 'package:cinteraction_vc/features/conference/repository/conference_repository.dart';
 import 'package:cinteraction_vc/util.dart';
@@ -18,16 +19,21 @@ class ConferenceCubit extends Cubit<ConferenceState> with BlocLoggy {
   final ConferenceRepository conferenceRepository;
   StreamSubscription<Map<dynamic, StreamRenderer>>? _conferenceSubscription;
   StreamSubscription<String>? _conferenceEndedStream;
+  StreamSubscription<List<Participant>>? _subscribersStream;
 
   void _load() {
     conferenceRepository.initialize();
     _conferenceSubscription = conferenceRepository.getStreamRendererStream().listen(_onConference);
     _conferenceEndedStream = conferenceRepository.getConferenceEndedStream().listen(_onConferenceEnded);
+    _subscribersStream = conferenceRepository.getSubscribersStream().listen(_onSubscribers);
   }
 
   @override
   Future<void> close() {
     _conferenceSubscription?.cancel();
+    _conferenceEndedStream?.cancel();
+    _subscribersStream?.cancel();
+
     return super.close();
   }
 
@@ -64,13 +70,18 @@ class ConferenceCubit extends Cubit<ConferenceState> with BlocLoggy {
   //Listening streams methods
   void _onConference(Map<dynamic, StreamRenderer> streams) {
     loggy.info('list of streams: ${streams.length}');
-    Map<dynamic, StreamRenderer> s = streams;
-    emit(state.copyWith(isInitial: false, streamRenderers: s, numberOfStreams: Random().nextInt(10000)));
+    // Map<dynamic, StreamRenderer> s = streams;
+    emit(state.copyWith(isInitial: false, streamRenderers: streams, numberOfStreams: Random().nextInt(10000)));
+    conferenceRepository.getParticipants();
   }
 
   void _onConferenceEnded(String reason) {
     loggy.info('call ended with reason: $reason');
     emit(const ConferenceState.ended());
+  }
+
+  void _onSubscribers(List<Participant> subscribers){
+    emit(state.copyWith(isInitial: false, streamSubscribers: subscribers, numberOfStreams: Random().nextInt(10000)));
   }
 
   Future<void> increaseNumberOfCopies() async{
@@ -100,6 +111,10 @@ class ConferenceCubit extends Cubit<ConferenceState> with BlocLoggy {
     conferenceRepository.unpublish();
   }
 
+  Future<void> ping(String msg) async{
+    conferenceRepository.ping(msg);
+  }
+
   Future<void> publish() async{
     conferenceRepository.publish();
   }
@@ -107,5 +122,18 @@ class ConferenceCubit extends Cubit<ConferenceState> with BlocLoggy {
     conferenceRepository.getParticipants();
   }
 
+  Future<void> switchCamera() async{
+    conferenceRepository.switchCamera();
+  }
+
+
+  Future<void> unPublishById(String id) async{
+    conferenceRepository.unPublishById(id);
+
+  }
+
+  Future<void> publishById(String id) async{
+    conferenceRepository.publishById(id);
+  }
 
 }

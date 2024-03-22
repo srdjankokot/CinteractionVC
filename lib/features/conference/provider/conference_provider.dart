@@ -1,18 +1,18 @@
 import 'dart:async';
-import 'dart:html';
+import 'dart:convert';
 import 'dart:math';
 
+import 'package:cinteraction_vc/core/io/network/models/data_channel_command.dart';
 import 'package:cinteraction_vc/util.dart';
 import 'package:janus_client/janus_client.dart';
 import 'package:logging/logging.dart';
 import 'package:webrtc_interface/webrtc_interface.dart';
 import 'package:flutter_webrtc/flutter_webrtc.dart';
 
-
 import '../../../conf.dart';
+import '../../../core/io/network/models/participant.dart';
 
 class ConferenceProvider {
-
   ConferenceProvider();
 
   JanusClient? client;
@@ -41,20 +41,21 @@ class ConferenceProvider {
   VideoRoomPluginStateManager videoState = VideoRoomPluginStateManager();
 
   // int room = 6108560605;
-  // int room = 1234;
-  int room = 7956726554;
+  // int room = 12344321;
+  int room = 1234;
+
+  // int room = 7956726554;
   final String displayName = 'User ${Random().nextInt(100)}';
-
-
 
   final _conferenceStream = StreamController<Map<dynamic, StreamRenderer>>.broadcast();
   final _conferenceEndedStream = StreamController<String>.broadcast();
+  final _participantsStream = StreamController<List<Participant>>.broadcast();
 
   Stream<Map<dynamic, StreamRenderer>> getConferenceStream() => _conferenceStream.stream;
   Stream<String> getConferenceEndedStream() => _conferenceEndedStream.stream;
+  Stream<List<Participant>> getParticipantStream() => _participantsStream.stream;
 
-  Future<void> initialize() async
-  {
+  Future<void> initialize() async {
     ws = WebSocketJanusTransport(url: url);
     client = JanusClient(
         transport: ws!,
@@ -66,6 +67,7 @@ class ConferenceProvider {
     session = await client?.createSession();
     initLocalMediaRenderer();
 
+    await configureConnection();
     await joinRoom();
   }
 
@@ -75,21 +77,32 @@ class ConferenceProvider {
     localVideoRenderer = StreamRenderer('local');
   }
 
-
-  changeSubstream(String remoteStreamId, int substream) async
-  {
+  changeSubstream(String remoteStreamId, int substream) async {
     print('changedSubstream for mid=$remoteStreamId to $substream');
-    await remotePlugin?.send(data: {'request': "configure", 'mid': remoteStreamId, 'substream': substream});
+    await remotePlugin?.send(data: {
+      'request': "configure",
+      'mid': remoteStreamId,
+      'substream': substream
+    });
   }
 
   joinRoom() async {
+    await checkRoom();
+  }
 
+  configureConnection() async {
     // myId = DateTime.now().millisecondsSinceEpoch;
     videoPlugin = await attachPlugin(pop: true);
     // initLocalMediaRenderer();
     eventMessagesHandler();
+    await configureLocalVideoRenderer();
+  }
+
+  configureLocalVideoRenderer() async {
     await localVideoRenderer.init();
-    localVideoRenderer.mediaStream = await videoPlugin?.initializeMediaDevices(simulcastSendEncodings: [
+
+    localVideoRenderer.mediaStream =
+        await videoPlugin?.initializeMediaDevices(simulcastSendEncodings: [
       // RTCRtpEncoding(active: true, rid: '0',scalabilityMode: 'L1T2',maxBitrate: 2000000, numTemporalLayers: 0, minBitrate: 1000000),
       // RTCRtpEncoding(active: true, rid: '1',scalabilityMode: 'L1T2', maxBitrate: 1000000, scaleResolutionDownBy: 2),
       // RTCRtpEncoding(active: true, rid: '2',scalabilityMode: 'L1T2', maxBitrate: 524288,  scaleResolutionDownBy: 3),
@@ -97,10 +110,7 @@ class ConferenceProvider {
       // RTCRtpEncoding(active: true, rid: '4',scalabilityMode: 'L1T2', maxBitrate: 128000,  scaleResolutionDownBy: 5),
       // RTCRtpEncoding(active: true, rid: '5',scalabilityMode: 'L1T2', maxBitrate: 96000,  scaleResolutionDownBy: 8),
     ], mediaConstraints: {
-      'video': {
-        'width': {'ideal': 640},
-        'height': {'ideal': 360}
-      },
+      'video': {'width': 640, 'height': 360},
       'audio': true
     });
     localVideoRenderer.videoRenderer.srcObject = localVideoRenderer.mediaStream;
@@ -108,30 +118,38 @@ class ConferenceProvider {
     localVideoRenderer.publisherId = myId.toString();
     localVideoRenderer.videoRenderer.onResize = () {
       // to update widthxheight when it renders
-
     };
-    videoState.streamsToBeRendered.putIfAbsent('local', () => localVideoRenderer);
-    _conferenceStream.add(videoState.streamsToBeRendered);
-    await checkRoom();
-  }
 
+    Map<dynamic, StreamRenderer> renderers = {};
+    renderers.addAll(videoState.streamsToBeRendered);
+
+    videoState.streamsToBeRendered.clear();
+    videoState.streamsToBeRendered.putIfAbsent('local', () => localVideoRenderer);
+    videoState.streamsToBeRendered.addAll(renderers);
+
+
+    _conferenceStream.add(videoState.streamsToBeRendered);
+  }
 
   attachPlugin({bool pop = false}) async {
     JanusVideoRoomPlugin? videoPlugin =
-    await session?.attach<JanusVideoRoomPlugin>();
+        await session?.attach<JanusVideoRoomPlugin>();
+
     videoPlugin?.typedMessages?.listen((event) async {
       Object data = event.event.plugindata?.data;
       if (data is VideoRoomJoinedEvent) {
+        await videoPlugin.initDataChannel();
+
         myPvtId = data.privateId;
         if (pop) {
           // Navigator.of(context).pop(joiningDialog);
         }
         {
-          var offer = await videoPlugin.createOffer(audioRecv: false, videoRecv: false);
-
-          print("offer: ${offer.sdp}");
-          await videoPlugin.configure(
-              bitrate: 128000, sessionDescription: offer);
+          canBePublished().then((value) async {
+            if(value){
+              await _publishMyOwn();
+            }
+          });
         }
       }
       if (data is VideoRoomLeavingEvent) {
@@ -142,9 +160,9 @@ class ConferenceProvider {
       }
       videoPlugin.handleRemoteJsep(event.jsep);
     });
+
     return videoPlugin;
   }
-
 
   Future<void> unSubscribeTo(int id) async {
     var feed = videoState.feedIdToDisplayStreamsMap[id];
@@ -167,138 +185,6 @@ class ConferenceProvider {
     _conferenceStream.add(videoState.streamsToBeRendered);
   }
 
-
-  subscribeToj(List<List<Map>> sources) async {
-    if (sources.isEmpty) {
-      return;
-    }
-    if (remotePlugin == null) {
-      remotePlugin = await session?.attach<JanusVideoRoomPlugin>();
-      remotePlugin?.messages?.listen((payload) async {
-        JanusEvent event = JanusEvent.fromJson(payload.event);
-        List<dynamic>? streams = event.plugindata?.data['streams'];
-        streams?.forEach((element) {
-          videoState.subStreamsToFeedIdMap[element['mid']] = element;
-          // to avoid duplicate subscriptions
-          if (videoState.feedIdToMidSubscriptionMap[element['feed_id']] == null)
-            videoState.feedIdToMidSubscriptionMap[element['feed_id']] = {};
-          videoState.feedIdToMidSubscriptionMap[element['feed_id']]
-          [element['mid']] = true;
-        });
-        if (payload.jsep != null) {
-          await remotePlugin?.handleRemoteJsep(payload.jsep);
-          await remotePlugin?.start(room);
-        }
-      });
-
-      remotePlugin?.remoteTrack?.listen((event) async {
-        print({
-          'mid': event.mid,
-          'flowing': event.flowing,
-          'id': event.track?.id,
-          'kind': event.track?.kind
-        });
-        int? feedId = videoState.subStreamsToFeedIdMap[event.mid]?['feed_id'];
-        String? displayName =
-        videoState.feedIdToDisplayStreamsMap[feedId]?['display'];
-        if (feedId != null) {
-          if (videoState.streamsToBeRendered.containsKey(feedId.toString()) &&
-              event.flowing == true &&
-              event.track?.kind == "audio") {
-            var existingRenderer =
-            videoState.streamsToBeRendered[feedId.toString()];
-            existingRenderer?.mediaStream?.addTrack(event.track!);
-            existingRenderer?.videoRenderer.srcObject =
-                existingRenderer.mediaStream;
-            existingRenderer?.videoRenderer.muted = false;
-            // setState(() {});
-          }
-          if (!videoState.streamsToBeRendered.containsKey(feedId.toString()) &&
-              event.flowing == true &&
-              event.track?.kind == "video") {
-            var localStream = StreamRenderer(feedId.toString());
-            await localStream.init();
-            localStream.mediaStream =
-            await createLocalMediaStream(feedId.toString());
-            localStream.mediaStream?.addTrack(event.track!);
-            localStream.videoRenderer.srcObject = localStream.mediaStream;
-            localStream.videoRenderer.onResize = () => {
-              // setState(() {})
-            };
-            localStream.publisherName = displayName;
-            localStream.publisherId = feedId.toString();
-            localStream.mid = event.mid;
-            // setState(() {
-              videoState.streamsToBeRendered
-                  .putIfAbsent(feedId.toString(), () => localStream);
-              _conferenceStream.add(videoState.streamsToBeRendered);
-            // });
-          }
-        }
-      });
-      List<PublisherStream> streams = sources
-          .map((e) => e.map((e) => PublisherStream(
-          feed: e['id'], mid: e['mid'], simulcast: e['simulcast'])))
-          .expand((element) => element)
-          .toList();
-      await remotePlugin?.joinSubscriber(room, streams: streams, pin: "");
-      return;
-    }
-    List<Map>? added, removed;
-    for (var streams in sources) {
-      for (var stream in streams) {
-        // If the publisher is VP8/VP9 and this is an older Safari, let's avoid video
-        if (stream['disabled'] != null) {
-          print("Disabled stream:");
-          // Unsubscribe
-          if (removed == null) removed = [];
-          removed.add({
-            'feed': stream['id'], // This is mandatory
-            'mid': stream['mid'] // This is optional (all streams, if missing)
-          });
-          videoState.feedIdToMidSubscriptionMap[stream['id']]
-              ?.remove(stream['mid']);
-          videoState.feedIdToMidSubscriptionMap.remove(stream['id']);
-          continue;
-        }
-        if (videoState.feedIdToMidSubscriptionMap[stream['id']] != null &&
-            videoState.feedIdToMidSubscriptionMap[stream['id']]
-            [stream['mid']] ==
-                true) {
-          print("Already subscribed to stream, skipping:");
-          continue;
-        }
-
-        // Subscribe
-        if (added == null) added = [];
-
-        added.add({
-          'feed': stream['id'], // This is mandatory
-          'mid': stream['mid'] // This is optional (all streams, if missing)
-        });
-
-        if (videoState.feedIdToMidSubscriptionMap[stream['id']] == null)
-          videoState.feedIdToMidSubscriptionMap[stream['id']] = {};
-        videoState.feedIdToMidSubscriptionMap[stream['id']][stream['mid']] =
-        true;
-      }
-    }
-    if ((added == null || added.length == 0) &&
-        (removed == null || removed.length == 0)) {
-      // Nothing to do
-      return;
-    }
-    await remotePlugin?.update(
-        subscribe: added
-            ?.map((e) => SubscriberUpdateStream(
-            feed: e['feed'], mid: e['mid'], crossrefid: null))
-            .toList(),
-        unsubscribe: removed
-            ?.map((e) => SubscriberUpdateStream(
-            feed: e['feed'], mid: e['mid'], crossrefid: null))
-            .toList());
-  }
-
   subscribeTo(List<List<Map>> sources) async {
     if (sources.isEmpty) {
       return;
@@ -314,13 +200,49 @@ class ConferenceProvider {
           if (videoState.feedIdToMidSubscriptionMap[element['feed_id']] == null)
             videoState.feedIdToMidSubscriptionMap[element['feed_id']] = {};
           videoState.feedIdToMidSubscriptionMap[element['feed_id']]
-          [element['mid']] = true;
+              [element['mid']] = true;
         });
         if (payload.jsep != null) {
+          await remotePlugin?.initDataChannel();
           await remotePlugin?.handleRemoteJsep(payload.jsep);
           await remotePlugin?.start(room);
         }
       });
+
+      remotePlugin?.webRTCHandle!.peerConnection!.onDataChannel = (channel) {
+        print("LISTEN CHANNNEL: ${channel.label} ");
+        channel.onBufferedAmountLow = (currentAmount) {
+          print("onBufferedAmountLow ${currentAmount.toString()}");
+        };
+
+        channel.onBufferedAmountChange = (currentAmount, changedAmount) {
+          print("onBufferedAmountChange ${currentAmount.toString()}");
+        };
+
+        channel.onMessage = (data) {
+          print("onMessage ${data.text}");
+
+          try {
+            Map<String, dynamic> result = jsonDecode(data.text);
+            var command = DataChannelCommand.fromJson(result);
+            renderCommand(command);
+          } on Exception catch (_) {
+            print(data.text);
+          }
+        };
+
+        channel.onDataChannelState = (state) {
+          print("onDataChannelState ${state.name}");
+        };
+
+        channel.stateChangeStream.listen((state) {
+          print("stateChangeStream ${state.name}");
+        });
+
+        channel.messageStream.listen((message) {
+          print("messageStream ${message.text}");
+        });
+      };
 
       remotePlugin?.remoteTrack?.listen((event) async {
         // print(event);
@@ -334,14 +256,14 @@ class ConferenceProvider {
         // manageMuteUIEvents(event.mid!, event.track!.kind!, !event.flowing!);
 
         int? feedId = videoState.subStreamsToFeedIdMap[event.mid]?['feed_id'];
-        String? displayName = videoState.feedIdToDisplayStreamsMap[feedId]?['display'];
+        String? displayName =
+            videoState.feedIdToDisplayStreamsMap[feedId]?['display'];
         if (feedId != null) {
-
           if (videoState.streamsToBeRendered.containsKey(feedId.toString()) &&
               event.flowing == true &&
               event.track?.kind == "audio") {
             var existingRenderer =
-            videoState.streamsToBeRendered[feedId.toString()];
+                videoState.streamsToBeRendered[feedId.toString()];
             existingRenderer?.mediaStream?.addTrack(event.track!);
             existingRenderer?.videoRenderer.srcObject =
                 existingRenderer.mediaStream;
@@ -354,18 +276,20 @@ class ConferenceProvider {
               event.track?.kind == "video") {
             var localStream = StreamRenderer(feedId.toString());
             await localStream.init();
-            localStream.mediaStream = await createLocalMediaStream(feedId.toString());
+            localStream.mediaStream =
+                await createLocalMediaStream(feedId.toString());
             localStream.mediaStream?.addTrack(event.track!);
             localStream.videoRenderer.srcObject = localStream.mediaStream;
             localStream.videoRenderer.onResize = () => {
-              // setState(() {})
-              // _conferenceStream.add(videoState.streamsToBeRendered)
-            };
+                  // setState(() {})
+                  // _conferenceStream.add(videoState.streamsToBeRendered)
+                };
             localStream.publisherName = displayName;
             localStream.publisherId = feedId.toString();
             localStream.mid = event.mid;
             // setState(() {
-            videoState.streamsToBeRendered.putIfAbsent(feedId.toString(), () => localStream);
+            videoState.streamsToBeRendered
+                .putIfAbsent(feedId.toString(), () => localStream);
             _conferenceStream.add(videoState.streamsToBeRendered);
             // });
           }
@@ -375,7 +299,7 @@ class ConferenceProvider {
       });
       List<PublisherStream> streams = sources
           .map((e) => e.map((e) => PublisherStream(
-          feed: e['id'], mid: e['mid'], simulcast: e['simulcast'])))
+              feed: e['id'], mid: e['mid'], simulcast: e['simulcast'])))
           .expand((element) => element)
           .toList();
 
@@ -401,7 +325,7 @@ class ConferenceProvider {
         }
         if (videoState.feedIdToMidSubscriptionMap[stream['id']] != null &&
             videoState.feedIdToMidSubscriptionMap[stream['id']]
-            [stream['mid']] ==
+                    [stream['mid']] ==
                 true) {
           print("Already subscribed to stream, skipping:");
           continue;
@@ -418,7 +342,7 @@ class ConferenceProvider {
         if (videoState.feedIdToMidSubscriptionMap[stream['id']] == null)
           videoState.feedIdToMidSubscriptionMap[stream['id']] = {};
         videoState.feedIdToMidSubscriptionMap[stream['id']][stream['mid']] =
-        true;
+            true;
       }
     }
     if ((added == null || added.length == 0) &&
@@ -429,16 +353,15 @@ class ConferenceProvider {
     await remotePlugin?.update(
         subscribe: added
             ?.map((e) => SubscriberUpdateStream(
-            feed: e['feed'], mid: e['mid'], crossrefid: null))
+                feed: e['feed'], mid: e['mid'], crossrefid: null))
             .toList(),
         unsubscribe: removed
             ?.map((e) => SubscriberUpdateStream(
-            feed: e['feed'], mid: e['mid'], crossrefid: null))
+                feed: e['feed'], mid: e['mid'], crossrefid: null))
             .toList());
   }
 
   eventMessagesHandler() async {
-
     videoPlugin?.messages?.listen((payload) async {
       print('eventMessagesHandlerTest: $payload');
 
@@ -446,27 +369,30 @@ class ConferenceProvider {
       List<dynamic>? publishers = event.plugindata?.data['publishers'];
       await attachSubscriberOnPublisherChange(publishers);
 
-
       var kicked = event.plugindata?.data['kicked'];
-      if(kicked!=null)
-      {
+      if (kicked != null) {
         unSubscribeTo(kicked);
       }
 
+      var unpublished = event.plugindata?.data['unpublished'];
+      if (unpublished != null) {
+        if (unpublished == 'ok') {
+          cleanupWebRTC();
+        }
+      }
+
       var leaving = event.plugindata?.data['leaving'];
-      if(leaving == 'ok')
-      {
-          // callEnd(event.plugindata?.data['reason']);
+      if (leaving == 'ok') {
+        callEnd(event.plugindata?.data['reason']);
       }
 
       var id = event.plugindata?.data['id'];
-      if(id!=null)
-        {
-          StreamRenderer? renderer = videoState.streamsToBeRendered[id.toString()];
-          renderer?.publisherName = event.plugindata?.data['display'];
-          _conferenceStream.add(videoState.streamsToBeRendered);
-        }
-
+      if (id != null) {
+        StreamRenderer? renderer =
+            videoState.streamsToBeRendered[id.toString()];
+        renderer?.publisherName = event.plugindata?.data['display'];
+        _conferenceStream.add(videoState.streamsToBeRendered);
+      }
     });
 
     screenPlugin?.messages?.listen((payload) async {
@@ -484,31 +410,28 @@ class ConferenceProvider {
         videoRecv: false,
       );
       await videoPlugin?.configure(sessionDescription: offer);
-
     });
     screenPlugin?.renegotiationNeeded?.listen((event) async {
       if (screenPlugin?.webRTCHandle?.peerConnection?.signalingState !=
           RTCSignalingState.RTCSignalingStateStable) return;
       print('retrying to connect publisher');
       var offer =
-      await screenPlugin?.createOffer(audioRecv: false, videoRecv: false);
+          await screenPlugin?.createOffer(audioRecv: false, videoRecv: false);
       await screenPlugin?.configure(sessionDescription: offer);
     });
+
+    videoPlugin?.peerConnection?.onConnectionState = (state) {
+      print('peerConnection state: ${state.name}');
+    };
   }
 
 
-  getListOfParticipants() async {
-    await videoPlugin?.getRoomParticipants(room);
-    // print('rooms participants: ${list}');
-  }
-
-  listRooms() async
-  {
+  listRooms() async {
     // "request" : "list"
-  await videoPlugin?.getRooms();
+    await videoPlugin?.getRooms();
   }
 
-  kick(String id) async{
+  kick(String id) async {
     listRooms();
     var payload = {
       "request": "kick",
@@ -546,28 +469,106 @@ class ConferenceProvider {
     await videoPlugin?.joinPublisher(room, displayName: displayName, id: myId);
   }
 
-  unpublish() async {
+  ping(String msg) async {
+    await videoPlugin?.sendData(msg);
+  }
+
+  unPublishById(String id) async {
+
+
+
+    await videoPlugin?.sendData(jsonEncode(
+        DataChannelCommand(command: DataChannelCmd.unPublish, id: id)
+            .toJson()));
+  }
+
+
+
+  publishById(String id) async {
+    await videoPlugin?.sendData(
+        jsonEncode(DataChannelCommand(command: DataChannelCmd.publish, id: id)
+            .toJson()));
+  }
+
+  unPublish() async {
     await videoPlugin?.unpublish();
   }
 
-  getParticipants() async {
-    await videoPlugin?.getRoomParticipants(room);
-  }
-
-  publish() async {
+  cleanupWebRTC() async {
 
     StreamRenderer? rendererRemoved;
     rendererRemoved = videoState.streamsToBeRendered.remove(localVideoRenderer.id);
     await rendererRemoved?.dispose();
 
-    await videoPlugin?.hangup();
-    videoPlugin = null;
+    localVideoRenderer.dispose();
 
-    initLocalMediaRenderer();
-    await  joinRoom();
+    var config = videoPlugin?.webRTCHandle;
+    if (config!.localStream != null) {
+        config.localStream?.getAudioTracks().forEach((element) async {
+          await element.stop();
+        });
 
+        config.localStream?.getVideoTracks().forEach((element) async {
+          await element.stop();
+        });
+    }
+
+    if (config != null) {
+      await config.peerConnection?.close();
+      config.peerConnection = null;
+      config.localStream?.dispose();
+    }
+
+
+
+    _conferenceStream.add(videoState.streamsToBeRendered);
+
+  }
+
+  Future<List<Participant>> getParticipants() async {
+
+    var payload = {"request": "listparticipants", "room": room};
+    Map participants = await videoPlugin?.send(data: payload);
+    JanusEvent event = JanusEvent.fromJson(participants);
+
+    List<Participant> subscribers = [];
+
+    for (var par in event.plugindata?.data['participants']) {
+
+      var participant = Participant.fromJson(par as Map<String, dynamic>);
+      // if(!participant.publisher){
+        subscribers.add(participant);
+      // }
+    }
+
+    _participantsStream.add(subscribers);
+    //
+    // for(var par in subscribers){
+    //   print(par.display);
+    // }
+
+    return subscribers;
+
+  }
+
+  publish() async {
+    canBePublished().then((value) async {
+      if(value){
+        await videoPlugin?.initializeWebRTCStack();
+        await configureLocalVideoRenderer();
+        await _publishMyOwn();
+        await videoPlugin?.initDataChannel();
+      }
+    });
+  }
+
+  _publishMyOwn() async
+  {
     // await videoPlugin?.publishMedia();
 
+    var offer = await videoPlugin?.createOffer(audioRecv: false, videoRecv: false);
+    await videoPlugin?.configure(
+        bitrate: 256000, sessionDescription: offer);
   }
 
   attachSubscriberOnPublisherChange(List<dynamic>? publishers) async {
@@ -591,7 +592,7 @@ class ConferenceProvider {
           }
           if (videoState.feedIdToMidSubscriptionMap[publisher['id']] != null &&
               videoState.feedIdToMidSubscriptionMap[publisher['id']]
-              ?[stream['mid']] ==
+                      ?[stream['mid']] ==
                   true) {
             continue;
           }
@@ -606,21 +607,20 @@ class ConferenceProvider {
     }
   }
 
-
-
   manageMuteUIEvents(String mid, String kind, bool muted) async {
     int? feedId = videoState.subStreamsToFeedIdMap[mid]?['feed_id'];
     if (feedId == null) {
       return;
     }
-    StreamRenderer? renderer = videoState.streamsToBeRendered[feedId.toString()];
-    print('mid: $mid muted: $muted $kind' );
+    StreamRenderer? renderer =
+        videoState.streamsToBeRendered[feedId.toString()];
+    print('mid: $mid muted: $muted $kind');
     // setState(() {
-      if (kind == 'audio') {
-        renderer?.isAudioMuted = muted;
-      } else {
-        renderer?.isVideoMuted = muted;
-      }
+    if (kind == 'audio') {
+      renderer?.isAudioMuted = muted;
+    } else {
+      renderer?.isVideoMuted = muted;
+    }
     // });
     _conferenceStream.add(videoState.streamsToBeRendered);
   }
@@ -645,9 +645,8 @@ class ConferenceProvider {
     if (transceivers?.isEmpty == true) {
       return;
     }
-    await transceivers?.first.setDirection(!muted
-        ? TransceiverDirection.SendOnly
-        : TransceiverDirection.Inactive);
+    await transceivers?.first.setDirection(
+        !muted ? TransceiverDirection.SendOnly : TransceiverDirection.Inactive);
   }
 
   Future<dynamic> callEnd(String reason) async {
@@ -658,12 +657,12 @@ class ConferenceProvider {
       await value.dispose();
     });
     // setState(() {
-      videoState.streamsToBeRendered.clear();
-      videoState.feedIdToDisplayStreamsMap.clear();
-      videoState.subStreamsToFeedIdMap.clear();
-      videoState.feedIdToMidSubscriptionMap.clear();
-      joined = false;
-      screenSharing = false;
+    videoState.streamsToBeRendered.clear();
+    videoState.feedIdToDisplayStreamsMap.clear();
+    videoState.subStreamsToFeedIdMap.clear();
+    videoState.feedIdToMidSubscriptionMap.clear();
+    joined = false;
+    screenSharing = false;
     // });
 
     await videoPlugin?.hangup();
@@ -680,6 +679,35 @@ class ConferenceProvider {
     _conferenceEndedStream.add(reason);
   }
 
+
+ Future<bool> canBePublished() async
+  {
+
+    var participants = await getParticipants();
+
+    List<Participant> publishers = [];
+
+    for(var participant in participants){
+      if(participant.publisher)
+        {
+          publishers.add(participant);
+        }
+    }
+    print('Number of publishers ${publishers.length}');
+
+    // if(publishers.length < 3)
+    //   {
+    //     var offer =
+    //     await videoPlugin?.createOffer(audioRecv: false, videoRecv: false);
+    //
+    //     print("offer: ${offer?.sdp}");
+    //     await videoPlugin?.configure(
+    //         bitrate: 128000, sessionDescription: offer);
+    //   };
+
+    return publishers.length < 3;
+  }
+
   screenShare() async {
     // setState(() {
     //   screenSharing = true;
@@ -689,10 +717,12 @@ class ConferenceProvider {
       Object data = event.event.plugindata?.data;
       if (data is VideoRoomJoinedEvent) {
         myPvtId = data.privateId;
-        (await screenPlugin?.configure(
-            // bitrate: 3000000,
-            sessionDescription: await screenPlugin?.createOffer(
-                audioRecv: false, videoRecv: false)));
+
+        canBePublished();
+        // (await screenPlugin?.configure(
+        //     // bitrate: 3000000,
+        //     sessionDescription: await screenPlugin?.createOffer(
+        //         audioRecv: false, videoRecv: false)));
       }
       if (data is VideoRoomLeavingEvent) {
         unSubscribeTo(data.leaving!);
@@ -706,13 +736,14 @@ class ConferenceProvider {
     localScreenSharingRenderer.publisherId = myId.toString();
     localScreenSharingRenderer.mediaStream = await screenPlugin
         ?.initializeMediaDevices(
-        mediaConstraints: {'video': true, 'audio': true},
-        useDisplayMediaDevices: true);
+            mediaConstraints: {'video': true, 'audio': true},
+            useDisplayMediaDevices: true);
     localScreenSharingRenderer.videoRenderer.srcObject =
         localScreenSharingRenderer.mediaStream;
     localScreenSharingRenderer.publisherName = "Your Screenshare";
     // setState(() {
-      videoState.streamsToBeRendered.putIfAbsent(localScreenSharingRenderer.id, () => localScreenSharingRenderer);
+    videoState.streamsToBeRendered.putIfAbsent(
+        localScreenSharingRenderer.id, () => localScreenSharingRenderer);
     _conferenceStream.add(videoState.streamsToBeRendered);
     // });
     await screenPlugin?.joinPublisher(room,
@@ -726,8 +757,8 @@ class ConferenceProvider {
     await screenPlugin?.unpublish();
     StreamRenderer? rendererRemoved;
     // setState(() {
-      rendererRemoved =
-          videoState.streamsToBeRendered.remove(localScreenSharingRenderer.id);
+    rendererRemoved =
+        videoState.streamsToBeRendered.remove(localScreenSharingRenderer.id);
     // });
     await rendererRemoved?.dispose();
     await screenPlugin?.hangup();
@@ -741,7 +772,7 @@ class ConferenceProvider {
     videoState.feedIdToDisplayStreamsMap.remove(id.toString());
     await videoState.streamsToBeRendered[id]?.dispose();
     // setState(() {
-      videoState.streamsToBeRendered.remove(id.toString());
+    videoState.streamsToBeRendered.remove(id.toString());
     // });
     var unsubscribeStreams = (feed['streams'] as List<dynamic>).map((stream) {
       return SubscriberUpdateStream(
@@ -764,7 +795,7 @@ class ConferenceProvider {
 
   switchCamera() async {
     // setState(() {
-      front = !front;
+    front = !front;
     // });
     await videoPlugin?.switchCamera(deviceId: await getCameraDeviceId(front));
     localVideoRenderer = StreamRenderer('local');
@@ -773,8 +804,26 @@ class ConferenceProvider {
         videoPlugin?.webRTCHandle!.localStream;
     localVideoRenderer.publisherName = "My Camera";
     // setState(() {
-      videoState.streamsToBeRendered['local'] = localVideoRenderer;
+    videoState.streamsToBeRendered['local'] = localVideoRenderer;
     // });
   }
 
+  renderCommand(DataChannelCommand command) {
+    print('render command');
+
+    switch (command.command) {
+      case DataChannelCmd.unPublish:
+        if (command.id == myId.toString()) {
+          unPublish();
+        }
+        break;
+
+      case DataChannelCmd.publish:
+        if (command.id == myId.toString()) {
+          print('publish myself');
+          publish();
+        }
+        break;
+    }
+  }
 }

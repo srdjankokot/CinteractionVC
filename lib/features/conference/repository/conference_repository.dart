@@ -1,3 +1,4 @@
+import 'package:cinteraction_vc/core/io/network/models/participant.dart';
 import 'package:cinteraction_vc/features/conference/provider/conference_provider.dart';
 import 'package:cinteraction_vc/util.dart';
 
@@ -22,6 +23,11 @@ class ConferenceRepository
     return provider.getConferenceEndedStream();
   }
 
+  Stream<List<Participant>> getSubscribersStream()
+  {
+    return provider.getParticipantStream();
+  }
+
   Future<void> finishCall() async
   {
     return provider.callEnd('User hanged');
@@ -43,14 +49,30 @@ class ConferenceRepository
   }
 
   Future<void> unpublish() async{
-    provider.unpublish();
+    provider.unPublish();
   }
 
   Future<void> publish() async{
     provider.publish();
   }
 
+  Future<void> ping(String msg) async{
+    provider.ping(msg);
+  }
+
   Future<void> getParticipants() async{
     provider.getParticipants();
+  }
+
+  Future<void> switchCamera() async{
+    provider.switchCamera();
+  }
+
+  Future<void> unPublishById(String id) async{
+    provider.unPublishById(id);
+  }
+
+  Future<void> publishById(String id) async{
+    provider.publishById(id);
   }
 }
