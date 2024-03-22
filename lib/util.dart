@@ -24,6 +24,7 @@ class StreamRenderer {
     mediaStream = await createLocalMediaStream('mediaStream_$id');
     isAudioMuted = false;
     isVideoMuted = false;
+    videoRenderer = RTCVideoRenderer();
     await videoRenderer.initialize();
     videoRenderer.srcObject = mediaStream;
   }
