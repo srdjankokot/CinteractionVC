@@ -1,6 +1,7 @@
 import 'package:cinteraction_vc/core/io/network/models/participant.dart';
 import 'package:cinteraction_vc/features/conference/provider/conference_provider.dart';
 import 'package:cinteraction_vc/util.dart';
+import 'package:janus_client/janus_client.dart';
 
 class ConferenceRepository
 {
@@ -9,8 +10,8 @@ class ConferenceRepository
   final ConferenceProvider provider;
 
 
-  Future<void> initialize() async{
-    provider.initialize();
+  Future<void> initialize(int roomId, String displayName) async{
+    provider.initialize(roomId, displayName);
   }
 
   Stream<Map<dynamic, StreamRenderer>> getStreamRendererStream()
@@ -75,4 +76,10 @@ class ConferenceRepository
   Future<void> publishById(String id) async{
     provider.publishById(id);
   }
+
+  Future<void> changeSubStream(ConfigureStreamQuality quality) async
+  {
+    provider.changeSubStreamToAll(quality);
+  }
+
 }

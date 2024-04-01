@@ -7,22 +7,25 @@ import 'package:cinteraction_vc/features/conference/repository/conference_reposi
 import 'package:cinteraction_vc/util.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:janus_client/janus_client.dart';
 
 import '../../../core/logger/loggy_types.dart';
 
 class ConferenceCubit extends Cubit<ConferenceState> with BlocLoggy {
 
-  ConferenceCubit({required this.conferenceRepository,}) : super( const ConferenceState.initial()) {
+  ConferenceCubit({required this.conferenceRepository, required this.roomId, required this.displayName}) : super( const ConferenceState.initial()) {
     _load();
   }
 
+  final int roomId;
+  final String displayName;
   final ConferenceRepository conferenceRepository;
   StreamSubscription<Map<dynamic, StreamRenderer>>? _conferenceSubscription;
   StreamSubscription<String>? _conferenceEndedStream;
   StreamSubscription<List<Participant>>? _subscribersStream;
 
   void _load() {
-    conferenceRepository.initialize();
+    conferenceRepository.initialize(roomId, displayName);
     _conferenceSubscription = conferenceRepository.getStreamRendererStream().listen(_onConference);
     _conferenceEndedStream = conferenceRepository.getConferenceEndedStream().listen(_onConferenceEnded);
     _subscribersStream = conferenceRepository.getSubscribersStream().listen(_onSubscribers);
@@ -134,6 +137,11 @@ class ConferenceCubit extends Cubit<ConferenceState> with BlocLoggy {
 
   Future<void> publishById(String id) async{
     conferenceRepository.publishById(id);
+  }
+
+  Future<void> changeSubStream(ConfigureStreamQuality quality) async
+  {
+    conferenceRepository.changeSubStream(quality);
   }
 
 }

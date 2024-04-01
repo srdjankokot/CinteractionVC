@@ -65,16 +65,25 @@ final GoRouter router = GoRouter(
     ),
 
     GoRoute(
-      path: AppRoute.meeting.path,
-      // builder: (context, state) => const VideoRoomPage(room: 123456, displayName: 'Srdjan'),
-      builder: (context, state) => BlocProvider(
-        create: (context) => ConferenceCubit(
-          conferenceRepository:  context.read<ConferenceRepository>(),
-        ),
-        child:  VideoRoomPage(room: 6108560605),
-        // child: const VideoRoomPage(room: 280298784, displayName: 'Srdjan'),
-      ),
-    ),
+        path: AppRoute.meeting.path,
+        name: 'meeting',
+
+        // builder: (context, state) => const VideoRoomPage(room: 123456, displayName: 'Srdjan'),
+        builder: (context, state) {
+          // final roomId = state.extra ?? '1234';
+          final display = state.extra ?? 'displayName';
+          final roomId = state.pathParameters['roomId'] ?? '1234';
+          // final display =  state.pathParameters['displayName'] ?? 'displayName';
+
+          // final roomId = state.pathParameters['roomId'];
+          return BlocProvider(
+            create: (context) => ConferenceCubit(
+                conferenceRepository: context.read<ConferenceRepository>(),
+                roomId: int.parse(roomId.toString()), displayName: display.toString()),
+            child: const VideoRoomPage(),
+            // child: const VideoRoomPage(room: 280298784, displayName: 'Srdjan'),
+          );
+        }),
 
     GoRoute(
       path: AppRoute.users.path,

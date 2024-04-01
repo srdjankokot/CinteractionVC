@@ -4,7 +4,7 @@ import 'package:go_router/go_router.dart';
 enum AppRoute {
   splash('/'),
   home('/home'),
-  meeting('/home/meeting'),
+  meeting('/home/meeting/:roomId'),
   users('/home/users/:groupId'),
   groups('/home/groups'),
   roles('/home/roles'),

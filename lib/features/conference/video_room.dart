@@ -11,13 +11,14 @@ import 'package:cinteraction_vc/features/conference/bloc/conference_state.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_webrtc/flutter_webrtc.dart';
+import 'package:janus_client/janus_client.dart';
 import '../../core/ui/images/image.dart';
 import '../../util.dart';
 
 class VideoRoomPage extends StatelessWidget {
-  final int room;
 
-  const VideoRoomPage({super.key, required this.room});
+
+  const VideoRoomPage({super.key});
 
   // @override
   // State<VideoRoomPage> createState() => _VideoRoomPage();
@@ -116,7 +117,28 @@ class VideoRoomPage extends StatelessWidget {
                                               // setState(() {
                                               //   _isGridLayout = !_isGridLayout;
                                               // })
-                                            })
+                                            }),
+
+                                    ElevatedButton(onPressed: (){
+                                      context
+                                          .read<ConferenceCubit>()
+                                          .changeSubStream(ConfigureStreamQuality.HIGH);
+                                    }, child: Text('High')),
+
+
+                                    ElevatedButton(onPressed: (){
+                                      context
+                                          .read<ConferenceCubit>()
+                                          .changeSubStream(ConfigureStreamQuality.MEDIUM);
+                                    }, child: Text('Medium')),
+
+
+                                    ElevatedButton(onPressed: (){
+                                      context
+                                          .read<ConferenceCubit>()
+                                          .changeSubStream(ConfigureStreamQuality.LOW);
+                                    }, child: Text('Low')),
+
                                   ],
                                 )),
                             Positioned.fill(
@@ -528,6 +550,8 @@ class VideoRoomPage extends StatelessWidget {
                 mirror: true,
               ),
             ),
+
+            Text('${remoteStream.videoRenderer.videoWidth}:${remoteStream.videoRenderer.videoHeight}'),
 
             Positioned(
                 top: 20,
