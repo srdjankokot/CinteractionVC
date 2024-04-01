@@ -182,6 +182,8 @@ class _BlocDI extends StatelessWidget {
         BlocProvider<ConferenceCubit>(
           create: (context) => ConferenceCubit(
             conferenceRepository: context.read<ConferenceRepository>(),
+            roomId: 1234,
+            displayName: ''
           ),
         ),
       ],

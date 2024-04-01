@@ -18,15 +18,15 @@ class LoginPage extends StatelessWidget {
 
     return  LoginView();
 
-
-    void entryVideoRoom({required LoginStates state}) {
-      Navigator.push(
-          context,
-          MaterialPageRoute(
-              builder: (BuildContext context) =>
-                  VideoRoomPage(
-                      room: state.roomId)));
-    }
+    //
+    // void entryVideoRoom({required LoginStates state}) {
+    //   Navigator.push(
+    //       context,
+    //       MaterialPageRoute(
+    //           builder: (BuildContext context) =>
+    //               VideoRoomPage(
+    //                   room: state.roomId)));
+    // }
 
     LoginBloc bloc = BlocProvider.of<LoginBloc>(context);
 
@@ -66,10 +66,10 @@ class LoginPage extends StatelessWidget {
                             FilteringTextInputFormatter.digitsOnly
                           ]), // Only numbers can be entered),
 
-                      TextButton(
-                        onPressed: () => entryVideoRoom(state: state),
-                        child:  Text(Strings.getText(StringKey.enterVideoRoomButton, context)),
-                      ),
+                      // TextButton(
+                      //   onPressed: () => entryVideoRoom(state: state),
+                      //   child:  Text(Strings.getText(StringKey.enterVideoRoomButton, context)),
+                      // ),
 
                       Text(state.displayName ?? ""),
                       Text(state.roomId.toString())

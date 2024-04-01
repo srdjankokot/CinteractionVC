@@ -6,18 +6,20 @@ import 'package:cinteraction_vc/core/io/network/models/data_channel_command.dart
 import 'package:cinteraction_vc/util.dart';
 import 'package:janus_client/janus_client.dart';
 import 'package:logging/logging.dart';
-import 'package:webrtc_interface/webrtc_interface.dart';
 import 'package:flutter_webrtc/flutter_webrtc.dart';
 
 import '../../../conf.dart';
 import '../../../core/io/network/models/participant.dart';
+
+import 'package:http/http.dart' as http;
 
 class ConferenceProvider {
   ConferenceProvider();
 
   JanusClient? client;
   WebSocketJanusTransport? ws;
-  RestJanusTransport? http;
+
+  // RestJanusTransport? http;
   JanusSession? session;
 
   late StreamRenderer localVideoRenderer;
@@ -41,21 +43,28 @@ class ConferenceProvider {
   VideoRoomPluginStateManager videoState = VideoRoomPluginStateManager();
 
   // int room = 6108560605;
-  // int room = 12344321;
-  int room = 1234;
+  int room = 12344321;
+  late JanusVideoRoom roomDetails;
 
   // int room = 7956726554;
-  final String displayName = 'User ${Random().nextInt(100)}';
+  String displayName = 'User ${Random().nextInt(100)}';
 
-  final _conferenceStream = StreamController<Map<dynamic, StreamRenderer>>.broadcast();
+  final _conferenceStream =
+      StreamController<Map<dynamic, StreamRenderer>>.broadcast();
   final _conferenceEndedStream = StreamController<String>.broadcast();
   final _participantsStream = StreamController<List<Participant>>.broadcast();
 
-  Stream<Map<dynamic, StreamRenderer>> getConferenceStream() => _conferenceStream.stream;
-  Stream<String> getConferenceEndedStream() => _conferenceEndedStream.stream;
-  Stream<List<Participant>> getParticipantStream() => _participantsStream.stream;
+  Stream<Map<dynamic, StreamRenderer>> getConferenceStream() =>
+      _conferenceStream.stream;
 
-  Future<void> initialize() async {
+  Stream<String> getConferenceEndedStream() => _conferenceEndedStream.stream;
+
+  Stream<List<Participant>> getParticipantStream() =>
+      _participantsStream.stream;
+
+  Future<void> initialize(int roomId, String displayName) async {
+    room = roomId;
+    this.displayName = displayName;
     ws = WebSocketJanusTransport(url: url);
     client = JanusClient(
         transport: ws!,
@@ -98,17 +107,117 @@ class ConferenceProvider {
     await configureLocalVideoRenderer();
   }
 
+  List<RTCRtpEncoding> getSimulcastSendEncodings() {
+    List<RTCRtpEncoding> list = List.empty(growable: true);
+
+    // [
+    // RTCRtpEncoding(active: true, rid: '0',scalabilityMode: 'L1T2',maxBitrate: 2000000, numTemporalLayers: 0, minBitrate: 1000000),
+    // RTCRtpEncoding(active: true, rid: '1',scalabilityMode: 'L1T2', maxBitrate: 1000000, scaleResolutionDownBy: 2),
+    // RTCRtpEncoding(active: true, rid: '2',scalabilityMode: 'L1T2', maxBitrate: 524288,  scaleResolutionDownBy: 3),
+    // RTCRtpEncoding(active: true, rid: '3',scalabilityMode: 'L1T2', maxBitrate: 256000,  scaleResolutionDownBy: 4),
+    // RTCRtpEncoding(active: true, rid: '4',scalabilityMode: 'L1T2', maxBitrate: 128000,  scaleResolutionDownBy: 5),
+    // RTCRtpEncoding(active: true, rid: '5',scalabilityMode: 'L1T2', maxBitrate: 96000,  scaleResolutionDownBy: 8),
+    // ]
+
+    if (true) //check does platform support
+    {
+      list.add(RTCRtpEncoding(
+        rid: "h",
+        minBitrate: 128000,
+        maxBitrate: 128000,
+        active: true,
+        scalabilityMode: 'L1T2',
+        scaleResolutionDownBy: 8,
+      ));
+
+      list.add(RTCRtpEncoding(
+          rid: "m",
+          minBitrate: 512000,
+          maxBitrate: 512000,
+          active: true,
+          scalabilityMode: 'L1T2'));
+
+      list.add(RTCRtpEncoding(
+        rid: "l",
+        minBitrate: 256000,
+        maxBitrate: 256000,
+        active: true,
+        scalabilityMode: 'L1T2',
+        scaleResolutionDownBy: 6,
+      ));
+    }
+
+    return list;
+  }
+
+  changeSubStream() async {
+    var numberOfPublishers = videoState.streamsToBeRendered.length;
+    // ConfigureStreamQuality.values[index];
+    var streamQuality = ConfigureStreamQuality.HIGH;
+    if (numberOfPublishers > 2) {
+      streamQuality = ConfigureStreamQuality.MEDIUM;
+    }
+
+    if (numberOfPublishers > 3) {
+      streamQuality = ConfigureStreamQuality.LOW;
+    }
+
+    for (var remoteStream in videoState.streamsToBeRendered.entries
+        .map((e) => e.value)
+        .toList()) {
+      remoteStream.mediaStream?.getVideoTracks();
+
+      await remotePlugin?.configure(
+        streams: [
+          ConfigureStream(mid: remoteStream.mid, substream: streamQuality)
+        ],
+      );
+    }
+  }
+
+  changeSubStreamToAll(ConfigureStreamQuality quality) async {
+    for (var remoteStream in videoState.streamsToBeRendered.entries
+        .map((e) => e.value)
+        .toList()) {
+
+      await remotePlugin?.configure(
+        streams: [
+          ConfigureStream(mid: remoteStream.mid, substream: quality)
+        ],
+      );
+    }
+  }
+
   configureLocalVideoRenderer() async {
     await localVideoRenderer.init();
+    print("media constraints");
 
-    localVideoRenderer.mediaStream =
-        await videoPlugin?.initializeMediaDevices(simulcastSendEncodings: [
-      // RTCRtpEncoding(active: true, rid: '0',scalabilityMode: 'L1T2',maxBitrate: 2000000, numTemporalLayers: 0, minBitrate: 1000000),
-      // RTCRtpEncoding(active: true, rid: '1',scalabilityMode: 'L1T2', maxBitrate: 1000000, scaleResolutionDownBy: 2),
-      // RTCRtpEncoding(active: true, rid: '2',scalabilityMode: 'L1T2', maxBitrate: 524288,  scaleResolutionDownBy: 3),
-      // RTCRtpEncoding(active: true, rid: '3',scalabilityMode: 'L1T2', maxBitrate: 256000,  scaleResolutionDownBy: 4),
-      // RTCRtpEncoding(active: true, rid: '4',scalabilityMode: 'L1T2', maxBitrate: 128000,  scaleResolutionDownBy: 5),
-      // RTCRtpEncoding(active: true, rid: '5',scalabilityMode: 'L1T2', maxBitrate: 96000,  scaleResolutionDownBy: 8),
+    // localVideoRenderer.mediaStream = await videoPlugin?.initializeMediaDevices(
+    //     simulcastSendEncodings: getSimulcastSendEncodings(),
+    //     mediaConstraints: {
+    //       'video': {'width': 640, 'height': 360},
+    //       'audio': true
+    //     });
+
+
+    localVideoRenderer.mediaStream = await videoPlugin?.initializeMediaDevices(simulcastSendEncodings: [
+      RTCRtpEncoding(rid: "h", minBitrate: 256000, maxBitrate: 512000, active: true, scalabilityMode: 'L1T2'),
+      RTCRtpEncoding(
+        rid: "m",
+        minBitrate: 128000,
+        maxBitrate: 256000,
+        active: true,
+        scalabilityMode: 'L1T2',
+        scaleResolutionDownBy: 2,
+      ),
+      RTCRtpEncoding(
+        rid: "l",
+        minBitrate: 96000,
+        maxBitrate: 128000,
+        active: true,
+        scalabilityMode: 'L1T2',
+        scaleResolutionDownBy: 4,
+      ),
     ], mediaConstraints: {
       'video': {'width': 640, 'height': 360},
       'audio': true
@@ -124,11 +233,12 @@ class ConferenceProvider {
     renderers.addAll(videoState.streamsToBeRendered);
 
     videoState.streamsToBeRendered.clear();
-    videoState.streamsToBeRendered.putIfAbsent('local', () => localVideoRenderer);
+    videoState.streamsToBeRendered
+        .putIfAbsent('local', () => localVideoRenderer);
     videoState.streamsToBeRendered.addAll(renderers);
 
-
-    _conferenceStream.add(videoState.streamsToBeRendered);
+    // _conferenceStream.add(videoState.streamsToBeRendered);
+    refreshStreams();
   }
 
   attachPlugin({bool pop = false}) async {
@@ -146,7 +256,7 @@ class ConferenceProvider {
         }
         {
           canBePublished().then((value) async {
-            if(value){
+            if (value) {
               await _publishMyOwn();
             }
           });
@@ -182,7 +292,8 @@ class ConferenceProvider {
     }
     videoState.feedIdToMidSubscriptionMap.remove(id);
 
-    _conferenceStream.add(videoState.streamsToBeRendered);
+    // _conferenceStream.add(videoState.streamsToBeRendered);
+    refreshStreams();
   }
 
   subscribeTo(List<List<Map>> sources) async {
@@ -290,7 +401,8 @@ class ConferenceProvider {
             // setState(() {
             videoState.streamsToBeRendered
                 .putIfAbsent(feedId.toString(), () => localStream);
-            _conferenceStream.add(videoState.streamsToBeRendered);
+            // _conferenceStream.add(videoState.streamsToBeRendered);
+            refreshStreams();
             // });
           }
 
@@ -391,7 +503,8 @@ class ConferenceProvider {
         StreamRenderer? renderer =
             videoState.streamsToBeRendered[id.toString()];
         renderer?.publisherName = event.plugindata?.data['display'];
-        _conferenceStream.add(videoState.streamsToBeRendered);
+        // _conferenceStream.add(videoState.streamsToBeRendered);
+        refreshStreams();
       }
     });
 
@@ -425,14 +538,16 @@ class ConferenceProvider {
     };
   }
 
-
-  listRooms() async {
+  Future<List<JanusVideoRoom>?> listRooms() async {
     // "request" : "list"
-    await videoPlugin?.getRooms();
+    var rooms = await videoPlugin?.getRooms();
+    return rooms?.list;
   }
 
   kick(String id) async {
-    listRooms();
+    // listRooms();
+
+    // videoPlugin?.editRoom(room, newPublisher: 9);
     var payload = {
       "request": "kick",
       "room": room,
@@ -466,6 +581,10 @@ class ConferenceProvider {
   }
 
   joinPublisher() async {
+    var rooms = await listRooms();
+    roomDetails = rooms!.firstWhere((r) => r.room == room);
+    print('roomDetails: ${roomDetails.toJson().toString()}');
+
     await videoPlugin?.joinPublisher(room, displayName: displayName, id: myId);
   }
 
@@ -474,20 +593,14 @@ class ConferenceProvider {
   }
 
   unPublishById(String id) async {
-
-
-
     await videoPlugin?.sendData(jsonEncode(
         DataChannelCommand(command: DataChannelCmd.unPublish, id: id)
             .toJson()));
   }
 
-
-
   publishById(String id) async {
-    await videoPlugin?.sendData(
-        jsonEncode(DataChannelCommand(command: DataChannelCmd.publish, id: id)
-            .toJson()));
+    await videoPlugin?.sendData(jsonEncode(
+        DataChannelCommand(command: DataChannelCmd.publish, id: id).toJson()));
   }
 
   unPublish() async {
@@ -495,22 +608,22 @@ class ConferenceProvider {
   }
 
   cleanupWebRTC() async {
-
     StreamRenderer? rendererRemoved;
-    rendererRemoved = videoState.streamsToBeRendered.remove(localVideoRenderer.id);
+    rendererRemoved =
+        videoState.streamsToBeRendered.remove(localVideoRenderer.id);
     await rendererRemoved?.dispose();
 
     localVideoRenderer.dispose();
 
     var config = videoPlugin?.webRTCHandle;
     if (config!.localStream != null) {
-        config.localStream?.getAudioTracks().forEach((element) async {
-          await element.stop();
-        });
+      config.localStream?.getAudioTracks().forEach((element) async {
+        await element.stop();
+      });
 
-        config.localStream?.getVideoTracks().forEach((element) async {
-          await element.stop();
-        });
+      config.localStream?.getVideoTracks().forEach((element) async {
+        await element.stop();
+      });
     }
 
     if (config != null) {
@@ -519,14 +632,13 @@ class ConferenceProvider {
       config.localStream?.dispose();
     }
 
-
-
-    _conferenceStream.add(videoState.streamsToBeRendered);
-
+    // _conferenceStream.add(videoState.streamsToBeRendered);
+    refreshStreams();
   }
 
   Future<List<Participant>> getParticipants() async {
-
+    // var participantss = await  videoPlugin?.getRoomParticipants(room);
+    // print('srdjan ${participantss?.participants?.first.display}');
     var payload = {"request": "listparticipants", "room": room};
     Map participants = await videoPlugin?.send(data: payload);
     JanusEvent event = JanusEvent.fromJson(participants);
@@ -534,26 +646,25 @@ class ConferenceProvider {
     List<Participant> subscribers = [];
 
     for (var par in event.plugindata?.data['participants']) {
-
       var participant = Participant.fromJson(par as Map<String, dynamic>);
       // if(!participant.publisher){
-        subscribers.add(participant);
+      subscribers.add(participant);
       // }
     }
 
     _participantsStream.add(subscribers);
-    //
-    // for(var par in subscribers){
-    //   print(par.display);
-    // }
 
     return subscribers;
+  }
 
+  refreshStreams() {
+    // changeSubStream();
+    _conferenceStream.add(videoState.streamsToBeRendered);
   }
 
   publish() async {
     canBePublished().then((value) async {
-      if(value){
+      if (value) {
         await videoPlugin?.initializeWebRTCStack();
         await configureLocalVideoRenderer();
         await _publishMyOwn();
@@ -562,13 +673,39 @@ class ConferenceProvider {
     });
   }
 
-  _publishMyOwn() async
-  {
+  _publishMyOwn() async {
     // await videoPlugin?.publishMedia();
 
-    var offer = await videoPlugin?.createOffer(audioRecv: false, videoRecv: false);
-    await videoPlugin?.configure(
-        bitrate: 256000, sessionDescription: offer);
+    var offer =
+        await videoPlugin?.createOffer(audioRecv: false, videoRecv: false);
+    await videoPlugin?.configure(bitrate: 2000000, sessionDescription: offer);
+  }
+
+  // Function to check network speed(Future Method)
+  Future<void> checkNetworkSpeed() async {
+    const url =
+        'https://drive.google.com/file/d/1lEn1DtJQW6-nTcoS_FG7-EB3Kamy0147/view?usp=sharing';
+    final stopwatch = Stopwatch()..start();
+    try {
+      Map<String, String> headers = {"Accept": "text/html,application/xml"};
+      final response = await http.get(Uri.parse(url), headers: headers);
+
+      if (response.statusCode == 200) {
+        final elapsed = stopwatch.elapsedMilliseconds;
+        final speedInKbps =
+            ((response.bodyBytes.length / 1024) / (elapsed / 1000)) *
+                8; // Calculate download speed in Kbps
+
+        print('Download speed: ${speedInKbps.toStringAsFixed(2)} Kbps');
+        // Show download speed in an AlertDialog
+      } else {
+        // Show an error dialog if the download failed
+        print("checkNetworkSpeed error");
+      }
+    } catch (e) {
+      // Show an error dialog in case of an exception
+      print("checkNetworkSpeed ${e.toString()}");
+    }
   }
 
   attachSubscriberOnPublisherChange(List<dynamic>? publishers) async {
@@ -622,7 +759,8 @@ class ConferenceProvider {
       renderer?.isVideoMuted = muted;
     }
     // });
-    _conferenceStream.add(videoState.streamsToBeRendered);
+    // _conferenceStream.add(videoState.streamsToBeRendered);
+    refreshStreams();
   }
 
   setBitrate(RTCPeerConnection? peerConnection, int bitrate) async {
@@ -679,33 +817,11 @@ class ConferenceProvider {
     _conferenceEndedStream.add(reason);
   }
 
-
- Future<bool> canBePublished() async
-  {
-
+  Future<bool> canBePublished() async {
     var participants = await getParticipants();
-
-    List<Participant> publishers = [];
-
-    for(var participant in participants){
-      if(participant.publisher)
-        {
-          publishers.add(participant);
-        }
-    }
+    var publishers = participants.where((element) => element.publisher);
     print('Number of publishers ${publishers.length}');
-
-    // if(publishers.length < 3)
-    //   {
-    //     var offer =
-    //     await videoPlugin?.createOffer(audioRecv: false, videoRecv: false);
-    //
-    //     print("offer: ${offer?.sdp}");
-    //     await videoPlugin?.configure(
-    //         bitrate: 128000, sessionDescription: offer);
-    //   };
-
-    return publishers.length < 3;
+    return publishers.length < roomDetails.maxPublishers!.toInt();
   }
 
   screenShare() async {
@@ -744,7 +860,8 @@ class ConferenceProvider {
     // setState(() {
     videoState.streamsToBeRendered.putIfAbsent(
         localScreenSharingRenderer.id, () => localScreenSharingRenderer);
-    _conferenceStream.add(videoState.streamsToBeRendered);
+    // _conferenceStream.add(videoState.streamsToBeRendered);
+    refreshStreams();
     // });
     await screenPlugin?.joinPublisher(room,
         displayName: "${displayName}_screenshare", id: screenShareId, pin: "");

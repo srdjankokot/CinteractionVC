@@ -85,6 +85,7 @@ class ProfileProvider {
       var googleUser = await _googleSignIn.signIn();
       bool isAuthorized = googleUser != null;
       // However, on web...
+
       if (kIsWeb && googleUser != null) {
         isAuthorized = await _googleSignIn.canAccessScopes(scopes);
       }

@@ -4,6 +4,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_facebook_auth/flutter_facebook_auth.dart';
+import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'core/app/app.dart';
 import 'package:loggy/loggy.dart';
@@ -14,6 +15,9 @@ Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   _initLoggy();
   _initGoogleFonts();
+
+
+  GoRouter.optionURLReflectsImperativeAPIs = true;
 
   if (kIsWeb || defaultTargetPlatform == TargetPlatform.macOS) {
     // initialiaze the facebook javascript SDK

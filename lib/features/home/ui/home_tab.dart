@@ -2,8 +2,10 @@ import 'dart:math';
 
 import 'package:cinteraction_vc/core/app/style.dart';
 import 'package:cinteraction_vc/core/extension/context.dart';
+import 'package:cinteraction_vc/core/extension/context_user.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 import 'package:slide_digital_clock/slide_digital_clock.dart';
 
@@ -18,6 +20,43 @@ class HomeTab extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    TextEditingController _textFieldController = TextEditingController();
+
+    Future<void> _displayRoomIdInputDialog(BuildContext context) async {
+      return showDialog(
+        context: context,
+        builder: (context) {
+          return AlertDialog(
+            title: const Text('Enter room ID'),
+            content: TextField(
+              controller: _textFieldController,
+              decoration: const InputDecoration(hintText: "Room ID"),
+            ),
+            actions: <Widget>[
+              ElevatedButton(
+                child: const Text('Cancel'),
+                onPressed: () {
+                  Navigator.pop(context);
+                },
+              ),
+              ElevatedButton(
+                child: const Text('Join'),
+                onPressed: () {
+                  // print(_textFieldController.text);
+                  Navigator.pop(context);
+                  context.pushNamed('meeting', pathParameters: {
+                    'roomId': _textFieldController.text,
+                  }, extra: context.getCurrentUser?.name);
+
+                  // context.go("${AppRoute.meeting.path}/${_textFieldController.text}");
+                },
+              ),
+            ],
+          );
+        },
+      );
+    }
+
     if (context.isWide) {
       return Center(
           child: Column(
@@ -51,7 +90,18 @@ class HomeTab extends StatelessWidget {
                           image: const Image(
                             image: ImageAsset('stand.png'),
                           ),
-                          onClickAction: () => {AppRoute.meeting.push(context)},
+                          onClickAction: () {
+                            // AppRoute.meeting.push(context);
+                            context.pushNamed('meeting', pathParameters: {
+                              'roomId': '1234',
+                            }, extra: context.getCurrentUser?.name);
+                            // context.push(Uri(
+                            //   path: AppRoute.meeting.path,
+                            //   queryParameters: {
+                            //     'displayName': context.getCurrentUser?.name
+                            //   },
+                            // ).toString());
+                          },
                           label: 'Start Meeting',
                           textStyle: context.textTheme.labelMedium,
                         ),
@@ -78,8 +128,10 @@ class HomeTab extends StatelessWidget {
                               image: ImageAsset('add_user.png'),
                             ),
                             bgColor: ColorConstants.kStateSuccess,
-                            onClickAction: () =>
-                                {AppRoute.meeting.push(context)},
+                            onClickAction: () => {
+                                  // AppRoute.meeting.push(context)
+                                  _displayRoomIdInputDialog(context)
+                                },
                             label: 'Join',
                             textStyle: context.textTheme.labelMedium),
                         const SizedBox(
@@ -99,8 +151,9 @@ class HomeTab extends StatelessWidget {
                 ),
                 Spacer(),
                 const Visibility(
-                    visible: true,
-                    child: NextMeetingWidget(),),
+                  visible: true,
+                  child: NextMeetingWidget(),
+                ),
                 Spacer(),
               ],
             ),
@@ -140,7 +193,13 @@ class HomeTab extends StatelessWidget {
                             image: ImageAsset('stand.png'),
                             fit: BoxFit.fill,
                           ),
-                          onClickAction: () => {AppRoute.meeting.push(context)},
+                          onClickAction: ()  {
+                            // AppRoute.meeting.push(context)
+
+                          context.pushNamed('meeting', pathParameters: {
+                          'roomId': '1234',
+                          }, extra: context.getCurrentUser?.name);
+                          },
                           label: 'Start Meeting')),
                   Expanded(
                       flex: 1,
@@ -308,7 +367,6 @@ class NextMeetingWidget extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             Container(
-
               padding: const EdgeInsets.only(
                   top: 20, bottom: 20, left: 20, right: 20),
               decoration: const BoxDecoration(
