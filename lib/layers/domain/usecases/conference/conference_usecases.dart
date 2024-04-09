@@ -1,0 +1,58 @@
+import 'package:cinteraction_vc/layers/domain/usecases/conference/conference_end_stream.dart';
+import 'package:cinteraction_vc/layers/domain/usecases/conference/conference_subscribers_stream.dart';
+
+import '../../../../core/app/injector.dart';
+import '../../repos/conference_repo.dart';
+import 'conference_change_substream.dart';
+import 'conference_finish_call.dart';
+import 'conference_get_participants.dart';
+import 'conference_get_renderer_stream.dart';
+import 'conference_initialize.dart';
+import 'conference_kick.dart';
+import 'conference_mute.dart';
+import 'conference_ping.dart';
+import 'conference_publish.dart';
+import 'conference_publish_by_id.dart';
+import 'conference_switch_camera.dart';
+import 'conference_toggle_engagement.dart';
+import 'conference_unpublish.dart';
+import 'conference_unpublish_by_id.dart';
+
+class ConferenceUseCases {
+  ConferenceUseCases({required this.repo})
+      : conferenceInitialize = ConferenceInitialize(repo: repo),
+        getRendererStream = GetRendererStream(repo: repo),
+        getEndStream = GetEndStream(repo: repo),
+        getSubscriberStream = GetSubscriberStream(repo: repo),
+        finishCall = ConferenceFinishCall(repo: repo),
+        mute = ConferenceMute(repo: repo),
+        changeSubStream = ConferenceChangeSubStream(repo: repo),
+        getParticipants = ConferenceGetParticipants(repo: repo),
+        kick = ConferenceKick(repo: repo),
+        unPublish = ConferenceUnPublish(repo: repo),
+        ping = ConferencePing(repo: repo),
+        toggleEngagement = ConferenceToggleEngagement(repo: repo),
+        publish = ConferencePublish(repo: repo),
+        switchCamera = ConferenceSwitchCamera(repo: repo),
+        unPublishById = ConferenceUnPublishById(repo: repo),
+        publishById = ConferencePublishById(repo: repo);
+
+  final ConferenceRepo repo;
+
+  ConferenceInitialize conferenceInitialize;
+  GetRendererStream getRendererStream;
+  GetEndStream getEndStream;
+  GetSubscriberStream getSubscriberStream;
+  ConferenceFinishCall finishCall;
+  ConferenceMute mute;
+  ConferenceChangeSubStream changeSubStream;
+  ConferenceGetParticipants getParticipants;
+  ConferenceKick kick;
+  ConferenceUnPublish unPublish;
+  ConferencePing ping;
+  ConferenceToggleEngagement toggleEngagement;
+  ConferencePublish publish;
+  ConferenceSwitchCamera switchCamera;
+  ConferenceUnPublishById unPublishById;
+  ConferencePublishById publishById;
+}

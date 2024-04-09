@@ -6,8 +6,15 @@ import 'package:flutter/services.dart';
 import 'package:flutter_facebook_auth/flutter_facebook_auth.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'core/app/app.dart';
 import 'package:loggy/loggy.dart';
+
+import 'core/app/injector.dart';
+
+
+
+late SharedPreferences sharedPref;
 
 Future<void> main() async {
   HttpOverrides.global = MyHttpOverrides();
@@ -16,6 +23,7 @@ Future<void> main() async {
   _initLoggy();
   _initGoogleFonts();
 
+  await initializeGetIt();
 
   GoRouter.optionURLReflectsImperativeAPIs = true;
 
@@ -28,6 +36,8 @@ Future<void> main() async {
       version: "v15.0",
     );
   }
+
+  sharedPref = await SharedPreferences.getInstance();
 
   runApp(const CinteractionFlutterApp());
 }

@@ -9,10 +9,8 @@ part of 'participant.dart';
 Participant _$ParticipantFromJson(Map<String, dynamic> json) => Participant(
       id: json['id'] as int,
       display: json['display'] as String,
-      // publisher: json['publisher'] as bool,
-      publisher : json.containsKey('publisher')?  json['publisher'] as bool : false,
-      talking: json.containsKey('talking')?  json['talking'] as bool : false,
-
+      publisher: json['publisher'] as bool? ?? false,
+      talking: json['talking'] as bool? ?? false,
     );
 
 Map<String, dynamic> _$ParticipantToJson(Participant instance) =>
