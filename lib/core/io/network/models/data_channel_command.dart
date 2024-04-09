@@ -3,7 +3,8 @@ part 'data_channel_command.g.dart';
 
 enum DataChannelCmd {
   publish('publish'),
-  unPublish('unPublish');
+  unPublish('unPublish'),
+  engagement('engagement');
 
   const DataChannelCmd(this.value);
   final String value;
@@ -15,13 +16,18 @@ class DataChannelCommand{
 
   DataChannelCommand({
     required this.command,
-    required this.id,});
+    required this.id,
+    this.data
+  });
 
   @JsonKey(name: 'cmd')
   DataChannelCmd command;
 
   @JsonKey(name: 'id')
   String id;
+
+  @JsonKey(name: 'data')
+  dynamic data;
 
 
   @override

@@ -1,141 +1,114 @@
 import 'dart:math';
 
+import 'package:cinteraction_vc/core/app/injector.dart';
 import 'package:cinteraction_vc/core/navigation/route.dart';
-import 'package:cinteraction_vc/features/auth/ui/page/auth_page.dart';
-import 'package:cinteraction_vc/features/auth/ui/page/splash_page.dart';
-import 'package:cinteraction_vc/features/conference/bloc/conference_cubit.dart';
-import 'package:cinteraction_vc/features/conference/repository/conference_repository.dart';
-import 'package:cinteraction_vc/features/conference/video_room.dart';
-import 'package:cinteraction_vc/features/groups/bloc/groups_cubit.dart';
-import 'package:cinteraction_vc/features/groups/repository/groups_repository.dart';
-import 'package:cinteraction_vc/features/groups/ui/groups_page.dart';
-import 'package:cinteraction_vc/features/meetings/bloc/meetings_cubit.dart';
-import 'package:cinteraction_vc/features/meetings/repository/meetings_repository.dart';
-import 'package:cinteraction_vc/features/roles/bloc/roles_cubit.dart';
-import 'package:cinteraction_vc/features/roles/repository/roles_repository.dart';
-import 'package:cinteraction_vc/features/roles/ui/roles_page.dart';
-import 'package:cinteraction_vc/features/users/ui/users_page.dart';
+import 'package:cinteraction_vc/layers/domain/usecases/conference/conference_usecases.dart';
+import 'package:cinteraction_vc/layers/presentation/cubit/profile/profile_cubit.dart';
+import 'package:flutter/cupertino.dart';
+
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 
-import '../../features/auth/bloc/auth_cubit.dart';
-import '../../features/auth/repository/auth_repository.dart';
-import '../../features/auth/ui/page/forgot_pass_page.dart';
-import '../../features/auth/ui/page/reset_pass_send_email.dart';
-import '../../features/landing/ui/page/home_page.dart';
-import '../../features/profile/repository/profile_repository.dart';
-import '../../features/users/bloc/users_cubit.dart';
-import '../../features/users/repository/users_repository.dart';
+import '../../layers/domain/usecases/auth/auth_usecases.dart';
+import '../../layers/presentation/cubit/auth/auth_cubit.dart';
+import '../../layers/presentation/cubit/conference/conference_cubit.dart';
+import '../../layers/presentation/cubit/groups/groups_cubit.dart';
+import '../../layers/presentation/cubit/meetings/meetings_cubit.dart';
+import '../../layers/presentation/cubit/roles/roles_cubit.dart';
+import '../../layers/presentation/cubit/users/users_cubit.dart';
+import '../../layers/presentation/ui/auth/auth_page.dart';
+import '../../layers/presentation/ui/auth/forgot_pass_page.dart';
+import '../../layers/presentation/ui/auth/reset_pass_send_email.dart';
+import '../../layers/presentation/ui/auth/splash_page.dart';
+import '../../layers/presentation/ui/conference/video_room.dart';
+import '../../layers/presentation/ui/groups/repository/groups_repository.dart';
+import '../../layers/presentation/ui/groups/ui/groups_page.dart';
+import '../../layers/presentation/ui/landing/ui/page/home_page.dart';
+import '../../layers/presentation/ui/meetings/repository/meetings_repository.dart';
+import '../../layers/presentation/ui/profile/repository/profile_repository.dart';
+import '../../layers/presentation/ui/roles/repository/roles_repository.dart';
+import '../../layers/presentation/ui/roles/ui/roles_page.dart';
+import '../../layers/presentation/ui/users/repository/users_repository.dart';
+import '../../layers/presentation/ui/users/ui/users_page.dart';
+import '../util/menu_items.dart';
 
 final GoRouter router = GoRouter(
   routes: [
+    // Splash
     GoRoute(
       path: AppRoute.splash.path,
       builder: (context, state) => const SplashPage(),
     ),
-    GoRoute(
-      path: AppRoute.home.path,
-      builder: (context, state) => const HomePage(),
-    ),
-
-    // GoRoute(
-    //   path: AppRoute.settings.path,
-    //   builder: (context, state) => const SettingsPage(),
-    // ),
+    // Auth
     GoRoute(
       path: AppRoute.auth.path,
       builder: (context, state) {
         return BlocProvider(
           create: (context) => AuthCubit(
-            userRepository: context.read<ProfileRepository>(),
-            authRepository: context.read<AuthRepository>(),
+            authUseCases: getIt.get<AuthUseCases>(),
           ),
           child: const AuthPage(),
         );
       },
     ),
-
+    // Forgot Password
     GoRoute(
       path: AppRoute.forgotPassword.path,
       builder: (context, state) => const ForgotPasswordPage(),
     ),
+    // Forgot Password Success
     GoRoute(
       path: AppRoute.forgotPasswordSuccess.path,
       builder: (context, state) => const ResetPassEmailPage(),
     ),
-
+    // Home
+    GoRoute(
+      path: AppRoute.home.path,
+      builder: (context, state) {
+        return const HomePage();
+      },
+    ),
+    // Meeting
     GoRoute(
         path: AppRoute.meeting.path,
         name: 'meeting',
-
-        // builder: (context, state) => const VideoRoomPage(room: 123456, displayName: 'Srdjan'),
         builder: (context, state) {
           // final roomId = state.extra ?? '1234';
           final display = state.extra ?? 'displayName';
-          final roomId = state.pathParameters['roomId'] ?? '1234';
+          final roomId = state.pathParameters['roomId'] ?? Random().nextInt(999999);
           // final display =  state.pathParameters['displayName'] ?? 'displayName';
 
           // final roomId = state.pathParameters['roomId'];
           return BlocProvider(
             create: (context) => ConferenceCubit(
-                conferenceRepository: context.read<ConferenceRepository>(),
-                roomId: int.parse(roomId.toString()), displayName: display.toString()),
+                conferenceUseCases: getIt.get<ConferenceUseCases>(),
+                roomId: int.parse(roomId.toString()),
+                displayName: display.toString()),
             child: const VideoRoomPage(),
-            // child: const VideoRoomPage(room: 280298784, displayName: 'Srdjan'),
           );
         }),
-
+    // Users
     GoRoute(
       path: AppRoute.users.path,
       builder: (context, state) {
-        // var id = '';
-        // if (state.extra != null) id = state.extra! as String;
-
         final id = state.extra ?? '';
-        // final name = state.pageKey['name']!;
-        return BlocProvider(
-          create: (context) => UsersCubit(
-            groupRepository: context.read<GroupsRepository>(),
-            usersRepository: context.read<UsersRepository>(),
-          ),
-          child: UsersPage(groupId: id as String),
-        );
+        return UsersScreen(id: id as String).builder(context);
       },
     ),
-
+    // Groups
     GoRoute(
       path: AppRoute.groups.path,
       builder: (context, state) {
-        return BlocProvider(
-          create: (context) => GroupsCubit(
-            groupRepository: context.read<GroupsRepository>(),
-          ),
-          child: const GroupsPage(),
-        );
+        return groups.builder(context);
       },
     ),
-
+    // Roles
     GoRoute(
       path: AppRoute.roles.path,
       builder: (context, state) {
-        return BlocProvider(
-          create: (context) => RolesCubit(
-            roleRepository: context.read<RolesRepository>(),
-          ),
-          child: const RolesPage(),
-        );
+        return roles.builder(context);
       },
     ),
-    GoRoute(
-      path: AppRoute.meeting.path,
-      builder: (context, state) {
-        return BlocProvider(
-          create: (context) => MeetingCubit(
-            meetingRepository: context.read<MeetingRepository>(),
-          ),
-          child: const GroupsPage(),
-        );
-      },
-    ),
+
   ],
 );

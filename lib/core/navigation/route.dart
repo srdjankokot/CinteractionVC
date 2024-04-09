@@ -5,14 +5,14 @@ enum AppRoute {
   splash('/'),
   home('/home'),
   meeting('/home/meeting/:roomId'),
+
   users('/home/users/:groupId'),
   groups('/home/groups'),
   roles('/home/roles'),
   settings('/settings'),
   auth('/auth'),
   forgotPassword('/auth/forgot_password'),
-  forgotPasswordSuccess('/auth/forgot_password/success'),
-  ;
+  forgotPasswordSuccess('/auth/forgot_password/success');
 
   const AppRoute(this.path);
 
