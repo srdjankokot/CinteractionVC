@@ -34,14 +34,12 @@ class ConferenceRepoImpl extends ConferenceRepo {
   late StreamRenderer localVideoRenderer;
   late StreamRenderer localScreenSharingRenderer;
 
-
   int? myPvtId;
 
   bool joined = true;
   bool screenSharing = false;
   bool front = true;
   dynamic fullScreenDialog;
-
 
   JanusVideoRoomPlugin? videoPlugin;
   JanusVideoRoomPlugin? remotePlugin;
@@ -52,10 +50,11 @@ class ConferenceRepoImpl extends ConferenceRepo {
   int room = 12344321;
   late JanusVideoRoom roomDetails;
 
-  final _conferenceStream = StreamController<
-      Map<dynamic, StreamRenderer>>.broadcast();
+  final _conferenceStream =
+      StreamController<Map<dynamic, StreamRenderer>>.broadcast();
   final _conferenceEndedStream = StreamController<String>.broadcast();
   final _participantsStream = StreamController<List<Participant>>.broadcast();
+  final _avgEngagementStream = StreamController<int>.broadcast();
 
   User? user = getIt.get<LocalStorage>().loadLoggedUser();
 
@@ -103,6 +102,10 @@ class ConferenceRepoImpl extends ConferenceRepo {
     return _conferenceEndedStream.stream;
   }
 
+  @override
+  Stream<int> getAvgEngagementStream() {
+    return _avgEngagementStream.stream;
+  }
 
   _initLocalMediaRenderer() {
     print('initLocalMediaRenderer');
@@ -118,7 +121,7 @@ class ConferenceRepoImpl extends ConferenceRepo {
 
   _attachPlugin({bool pop = false}) async {
     JanusVideoRoomPlugin? videoPlugin =
-    await session?.attach<JanusVideoRoomPlugin>();
+        await session?.attach<JanusVideoRoomPlugin>();
 
     videoPlugin?.typedMessages?.listen((event) async {
       Object data = event.event.plugindata?.data;
@@ -171,7 +174,7 @@ class ConferenceRepoImpl extends ConferenceRepo {
           }
           if (videoState.feedIdToMidSubscriptionMap[publisher['id']] != null &&
               videoState.feedIdToMidSubscriptionMap[publisher['id']]
-              ?[stream['mid']] ==
+                      ?[stream['mid']] ==
                   true) {
             continue;
           }
@@ -214,7 +217,7 @@ class ConferenceRepoImpl extends ConferenceRepo {
       var id = event.plugindata?.data['id'];
       if (id != null) {
         StreamRenderer? renderer =
-        videoState.streamsToBeRendered[id.toString()];
+            videoState.streamsToBeRendered[id.toString()];
         renderer?.publisherName = event.plugindata?.data['display'];
         // _conferenceStream.add(videoState.streamsToBeRendered);
         _refreshStreams();
@@ -242,7 +245,7 @@ class ConferenceRepoImpl extends ConferenceRepo {
           RTCSignalingState.RTCSignalingStateStable) return;
       print('retrying to connect publisher');
       var offer =
-      await screenPlugin?.createOffer(audioRecv: false, videoRecv: false);
+          await screenPlugin?.createOffer(audioRecv: false, videoRecv: false);
       await screenPlugin?.configure(sessionDescription: offer);
     });
 
@@ -257,7 +260,7 @@ class ConferenceRepoImpl extends ConferenceRepo {
       return;
     }
     StreamRenderer? renderer =
-    videoState.streamsToBeRendered[feedId.toString()];
+        videoState.streamsToBeRendered[feedId.toString()];
     print('mid: $mid muted: $muted $kind');
     // setState(() {
     if (kind == 'audio') {
@@ -281,7 +284,7 @@ class ConferenceRepoImpl extends ConferenceRepo {
     //     });
 
     localVideoRenderer.mediaStream =
-    await videoPlugin?.initializeMediaDevices(simulcastSendEncodings: [
+        await videoPlugin?.initializeMediaDevices(simulcastSendEncodings: [
       RTCRtpEncoding(
           rid: "h",
           minBitrate: 256000,
@@ -342,7 +345,7 @@ class ConferenceRepoImpl extends ConferenceRepo {
           if (videoState.feedIdToMidSubscriptionMap[element['feed_id']] == null)
             videoState.feedIdToMidSubscriptionMap[element['feed_id']] = {};
           videoState.feedIdToMidSubscriptionMap[element['feed_id']]
-          [element['mid']] = true;
+              [element['mid']] = true;
         });
         if (payload.jsep != null) {
           await remotePlugin?.initDataChannel();
@@ -399,13 +402,13 @@ class ConferenceRepoImpl extends ConferenceRepo {
 
         int? feedId = videoState.subStreamsToFeedIdMap[event.mid]?['feed_id'];
         String? displayName =
-        videoState.feedIdToDisplayStreamsMap[feedId]?['display'];
+            videoState.feedIdToDisplayStreamsMap[feedId]?['display'];
         if (feedId != null) {
           if (videoState.streamsToBeRendered.containsKey(feedId.toString()) &&
               event.flowing == true &&
               event.track?.kind == "audio") {
             var existingRenderer =
-            videoState.streamsToBeRendered[feedId.toString()];
+                videoState.streamsToBeRendered[feedId.toString()];
             existingRenderer?.mediaStream?.addTrack(event.track!);
             existingRenderer?.videoRenderer.srcObject =
                 existingRenderer.mediaStream;
@@ -419,14 +422,13 @@ class ConferenceRepoImpl extends ConferenceRepo {
             var localStream = StreamRenderer(feedId.toString());
             await localStream.init();
             localStream.mediaStream =
-            await createLocalMediaStream(feedId.toString());
+                await createLocalMediaStream(feedId.toString());
             localStream.mediaStream?.addTrack(event.track!);
             localStream.videoRenderer.srcObject = localStream.mediaStream;
-            localStream.videoRenderer.onResize = () =>
-            {
-              // setState(() {})
-              // _conferenceStream.add(videoState.streamsToBeRendered)
-            };
+            localStream.videoRenderer.onResize = () => {
+                  // setState(() {})
+                  // _conferenceStream.add(videoState.streamsToBeRendered)
+                };
             localStream.publisherName = displayName;
             localStream.publisherId = feedId.toString();
             localStream.mid = event.mid;
@@ -442,10 +444,8 @@ class ConferenceRepoImpl extends ConferenceRepo {
         }
       });
       List<PublisherStream> streams = sources
-          .map((e) =>
-          e.map((e) =>
-              PublisherStream(
-                  feed: e['id'], mid: e['mid'], simulcast: e['simulcast'])))
+          .map((e) => e.map((e) => PublisherStream(
+              feed: e['id'], mid: e['mid'], simulcast: e['simulcast'])))
           .expand((element) => element)
           .toList();
 
@@ -471,7 +471,7 @@ class ConferenceRepoImpl extends ConferenceRepo {
         }
         if (videoState.feedIdToMidSubscriptionMap[stream['id']] != null &&
             videoState.feedIdToMidSubscriptionMap[stream['id']]
-            [stream['mid']] ==
+                    [stream['mid']] ==
                 true) {
           print("Already subscribed to stream, skipping:");
           continue;
@@ -488,7 +488,7 @@ class ConferenceRepoImpl extends ConferenceRepo {
         if (videoState.feedIdToMidSubscriptionMap[stream['id']] == null)
           videoState.feedIdToMidSubscriptionMap[stream['id']] = {};
         videoState.feedIdToMidSubscriptionMap[stream['id']][stream['mid']] =
-        true;
+            true;
       }
     }
     if ((added == null || added.length == 0) &&
@@ -498,13 +498,11 @@ class ConferenceRepoImpl extends ConferenceRepo {
     }
     await remotePlugin?.update(
         subscribe: added
-            ?.map((e) =>
-            SubscriberUpdateStream(
+            ?.map((e) => SubscriberUpdateStream(
                 feed: e['feed'], mid: e['mid'], crossrefid: null))
             .toList(),
         unsubscribe: removed
-            ?.map((e) =>
-            SubscriberUpdateStream(
+            ?.map((e) => SubscriberUpdateStream(
                 feed: e['feed'], mid: e['mid'], crossrefid: null))
             .toList());
   }
@@ -531,7 +529,6 @@ class ConferenceRepoImpl extends ConferenceRepo {
     _refreshStreams();
   }
 
-
   ///
   /// InCall actions
   ///
@@ -555,10 +552,10 @@ class ConferenceRepoImpl extends ConferenceRepo {
         ?.where((element) => element.sender.track?.kind == kind)
         .toList();
     if (transceivers?.isEmpty == true) {
-    return;
+      return;
     }
     await transceivers?.first.setDirection(
-    !muted ? TransceiverDirection.SendOnly : TransceiverDirection.Inactive);
+        !muted ? TransceiverDirection.SendOnly : TransceiverDirection.Inactive);
   }
 
   @override
@@ -615,18 +612,15 @@ class ConferenceRepoImpl extends ConferenceRepo {
     _conferenceEndedStream.add(reason);
   }
 
-  _startCall() async
-  {
+  _startCall() async {
     callId = await _api.startCall(streamId: room.toString(), userId: user?.id);
   }
 
-  Future<bool> _endCall() async
-  {
+  Future<bool> _endCall() async {
     return await _api.endCall(callId: callId, userId: user?.id);
   }
 
   /// End InCall actions
-
 
   ///
   /// Stream actions
@@ -671,7 +665,7 @@ class ConferenceRepoImpl extends ConferenceRepo {
 
   _publishMyOwn() async {
     var offer =
-    await videoPlugin?.createOffer(audioRecv: false, videoRecv: false);
+        await videoPlugin?.createOffer(audioRecv: false, videoRecv: false);
     await videoPlugin?.configure(bitrate: 2000000, sessionDescription: offer);
   }
 
@@ -738,7 +732,6 @@ class ConferenceRepoImpl extends ConferenceRepo {
 
   ///End Stream actions
 
-
   _refreshStreams() {
     _conferenceStream.add(videoState.streamsToBeRendered);
   }
@@ -803,7 +796,6 @@ class ConferenceRepoImpl extends ConferenceRepo {
       });
     }
 
-
     await config.peerConnection?.close();
     config.peerConnection = null;
     config.localStream?.dispose();
@@ -829,15 +821,18 @@ class ConferenceRepoImpl extends ConferenceRepo {
         break;
 
       case DataChannelCmd.engagement:
-        videoState.streamsToBeRendered[command.id]?.engagement = command.data['engagement'] as int;
+        videoState.streamsToBeRendered[command.id]?.engagement =
+            command.data['engagement'] as int;
         _refreshStreams();
         break;
     }
   }
 
   _getEngagement() async {
+    print("get engagement");
 
-    if(engagementEnabled){
+    if (engagementEnabled && !engagementInProgress) {
+      engagementInProgress = true;
       var image = await localVideoRenderer.mediaStream
           ?.getVideoTracks()
           .first
@@ -852,38 +847,54 @@ class ConferenceRepoImpl extends ConferenceRepo {
           participantId: user?.id);
 
       if (engagement! > 0) {
-        var eng = ((engagement ?? 0) * 100).toInt();
+        var eng = ((engagement) * 100).toInt();
         videoState.streamsToBeRendered['local']?.engagement = eng;
         _refreshStreams();
+        _calculateAverageEngagement();
         _sendMyEngagementToOthers(eng);
       }
-      else{
-        var eng = Random().nextInt(100);
-        videoState.streamsToBeRendered['local']?.engagement = eng;
-        _refreshStreams();
-        _sendMyEngagementToOthers(eng);
-      }
-
+      // else{
+      //   var eng = Random().nextInt(100);
+      //   videoState.streamsToBeRendered['local']?.engagement = eng;
+      //   _refreshStreams();
+      //   _sendMyEngagementToOthers(eng);
+      // }
 
       print('My engagement: $engagement');
-      await Future.delayed(const Duration(seconds: 5));
+      await Future.delayed(const Duration(seconds: 3));
+      engagementInProgress = false;
       _getEngagement();
     }
-
   }
 
   _sendMyEngagementToOthers(int engagement) async {
-
     var data = {'engagement': engagement};
 
-    await videoPlugin
-    ?.sendData(jsonEncode(
-    DataChannelCommand(command: DataChannelCmd.engagement, id: user!.id.toString(), data: data).toJson())
-    );
+    await videoPlugin?.sendData(jsonEncode(DataChannelCommand(
+            command: DataChannelCmd.engagement,
+            id: user!.id.toString(),
+            data: data)
+        .toJson()));
   }
 
+  _calculateAverageEngagement() {
+    var sum = 0;
+    var avgInclude = 0;
+    for (var videoStream in videoState.streamsToBeRendered.values) {
+      if (videoStream.engagement != null) {
+        if (videoStream.engagement! > 0) {
+          avgInclude++;
+          sum = sum + videoStream.engagement!;
+        }
+      }
+    }
+    var avg = sum / avgInclude;
+    _avgEngagementStream.add(avg as int);
+  }
 
   bool engagementEnabled = true;
+  bool engagementInProgress = false;
+
   @override
   Future<void> toggleEngagement({required bool enabled}) async {
     engagementEnabled = enabled;

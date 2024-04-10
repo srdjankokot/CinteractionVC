@@ -5,6 +5,7 @@ import '../../../../core/app/injector.dart';
 import '../../repos/conference_repo.dart';
 import 'conference_change_substream.dart';
 import 'conference_finish_call.dart';
+import 'conference_get_engagement_stream.dart';
 import 'conference_get_participants.dart';
 import 'conference_get_renderer_stream.dart';
 import 'conference_initialize.dart';
@@ -35,7 +36,8 @@ class ConferenceUseCases {
         publish = ConferencePublish(repo: repo),
         switchCamera = ConferenceSwitchCamera(repo: repo),
         unPublishById = ConferenceUnPublishById(repo: repo),
-        publishById = ConferencePublishById(repo: repo);
+        publishById = ConferencePublishById(repo: repo),
+        getAvgEngagementStream = GetAvgEngagementStream(repo: repo);
 
   final ConferenceRepo repo;
 
@@ -55,4 +57,5 @@ class ConferenceUseCases {
   ConferenceSwitchCamera switchCamera;
   ConferenceUnPublishById unPublishById;
   ConferencePublishById publishById;
+  GetAvgEngagementStream getAvgEngagementStream;
 }

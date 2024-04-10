@@ -13,6 +13,7 @@ class ConferenceState extends Equatable {
   final bool videoMuted;
   final bool engagementEnabled;
   final int? numberOfStreams;
+  final int? avgEngagement;
   final int numberOfStreamsCopy;
   final bool isGridLayout;
 
@@ -25,6 +26,7 @@ class ConferenceState extends Equatable {
     required this.videoMuted,
     required this.engagementEnabled,
     this.numberOfStreams,
+    this.avgEngagement,
     required this.numberOfStreamsCopy,
     required this.isGridLayout,
   });
@@ -39,7 +41,8 @@ class ConferenceState extends Equatable {
     bool engagementEnabled = true,
     int? numberOfStreamsCopy,
     int? isGridLayout,
-  }) : this(isInitial: isInitial, isEnded: isEnded, audioMuted: audioMuted, videoMuted: videoMuted, numberOfStreamsCopy: 1, isGridLayout: true, engagementEnabled: engagementEnabled);
+    int? avgEngagement = 0,
+  }) : this(isInitial: isInitial, isEnded: isEnded, audioMuted: audioMuted, videoMuted: videoMuted, numberOfStreamsCopy: 1, isGridLayout: true, engagementEnabled: engagementEnabled, avgEngagement: avgEngagement);
 
 
   const ConferenceState.ended({
@@ -59,6 +62,7 @@ class ConferenceState extends Equatable {
     List<Participant>? streamSubscribers,
     int? numberOfStreams,
     int? numberOfStreamsCopy,
+    int? avgEngagement,
     bool? audioMuted,
     bool? videoMuted,
     bool? engagementEnabled,
@@ -74,12 +78,13 @@ class ConferenceState extends Equatable {
       videoMuted: videoMuted ?? this.videoMuted,
       engagementEnabled: engagementEnabled ?? this.engagementEnabled,
       numberOfStreamsCopy: numberOfStreamsCopy ?? this.numberOfStreamsCopy,
+      avgEngagement: avgEngagement ?? this.avgEngagement,
       isGridLayout: isGridLayout ?? this.isGridLayout,
     );
   }
 
   @override
-  List<Object?> get props => [isInitial, isEnded, streamRenderers, streamSubscribers, numberOfStreams, audioMuted, videoMuted, numberOfStreamsCopy, isGridLayout, engagementEnabled];
+  List<Object?> get props => [isInitial, isEnded, streamRenderers, streamSubscribers, numberOfStreams, audioMuted, videoMuted, numberOfStreamsCopy, isGridLayout, engagementEnabled, avgEngagement];
 }
 
 // @immutable

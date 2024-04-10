@@ -19,6 +19,7 @@ class EngagementProgress extends StatelessWidget {
     var engagementText = getEngagementText(context, engagement);
     var isVisible = engagement > 25;
 
+
     return Stack(
       children: [
         Container(
@@ -39,17 +40,27 @@ class EngagementProgress extends StatelessWidget {
           ),
           child: LayoutBuilder(
               builder: (BuildContext context, BoxConstraints constraint) {
-            return Container(
-              width: constraint.maxWidth * engagement / 100,
-              height: double.maxFinite,
-              color: getProgressColor(engagement),
-              alignment: Alignment.centerRight,
-              padding: const EdgeInsets.only(left: 3, right: 3),
-              child: Visibility(
-                visible: isVisible,
-                child: engagementText,
-              ),
-            );
+               return TweenAnimationBuilder<double>(
+                  duration: const Duration(milliseconds: 250),
+                  curve: Curves.easeInOut,
+                  tween: Tween<double>(
+                    begin: 0,
+                    end: constraint.maxWidth * engagement / 100,
+                  ),
+                  builder: (context, value, _) {
+                    return Container(
+                      width: value,
+                      height: double.maxFinite,
+                      color: getProgressColor(engagement),
+                      alignment: Alignment.centerRight,
+                      padding: const EdgeInsets.only(left: 3, right: 3),
+                      child: Visibility(
+                        visible: isVisible,
+                        child: engagementText,
+                      ),
+                    );
+                    },
+                );
           }),
         ),
         Visibility(
@@ -59,7 +70,7 @@ class EngagementProgress extends StatelessWidget {
               child: Align(
                 alignment: Alignment.centerRight,
                 child: Text(
-                  '${engagement / 100}',
+                  ((engagement / 100)).toStringAsFixed(2),
                   textAlign: TextAlign.center,
                   style: context.textTheme.labelMedium,
                 ),
@@ -84,7 +95,7 @@ Color getProgressColor(int engagement) {
 
 Text getEngagementText(BuildContext context, int engagement) {
   return Text(
-    '${engagement / 100}',
+    ((engagement / 100)).toStringAsFixed(2),
     maxLines: 1,
     textAlign: TextAlign.center,
     style: context.textTheme.labelMedium?.copyWith(color: Colors.white),

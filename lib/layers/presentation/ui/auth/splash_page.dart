@@ -29,19 +29,6 @@ class SplashPage extends StatelessWidget {
         ),
     );
 
-
-    return BlocListener<ProfileCubit, ProfileState>(
-      listener: _onUserState,
-      child: Scaffold(
-        body: Center(
-          child: Text(
-            'Cinteraction\nFlutter\nApp',
-            textAlign: TextAlign.center,
-            style: context.textTheme.headlineLarge,
-          ),
-        ),
-      ),
-    );
   }
 
   void _onUserState(BuildContext context, ProfileState userState) {

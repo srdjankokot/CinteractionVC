@@ -20,9 +20,6 @@ class VideoRoomPage extends StatelessWidget {
 
   const VideoRoomPage({super.key});
 
-  // @override
-  // State<VideoRoomPage> createState() => _VideoRoomPage();
-
   void _onConferenceState(BuildContext context, ConferenceState state) {
     if (state.isEnded) {
       Navigator.of(context).pop();
@@ -31,17 +28,12 @@ class VideoRoomPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // int _numberOfStream = 1;
-    // bool _isGridLayout = true;
-    //
 
     return BlocConsumer<ConferenceCubit, ConferenceState>(
         builder: (context, state) {
           if (state.isInitial) {
             return Container();
           }
-          // if(state is ConferenceInProgress)
-          //   {
 
           if (state.streamRenderers == null) {
             return Container();
@@ -80,67 +72,67 @@ class VideoRoomPage extends StatelessWidget {
                         return Stack(
                           children: [
                             getLayout(context, items, state.isGridLayout),
-                            Positioned(
-                                top: 20,
-                                left: 20,
-                                child: Row(
-                                  children: [
-                                    IconButton(
-                                        icon: const Icon(
-                                          Icons.add,
-                                          color: Colors.white,
-                                        ),
-                                        onPressed: () async {
-                                          await context
-                                              .read<ConferenceCubit>()
-                                              .increaseNumberOfCopies();
-                                        }),
-                                    IconButton(
-                                        icon: const Icon(
-                                          Icons.remove,
-                                          color: Colors.white,
-                                        ),
-                                        onPressed: () async {
-                                          await context
-                                              .read<ConferenceCubit>()
-                                              .decreaseNumberOfCopies();
-                                        }),
-                                    IconButton(
-                                        icon: const Icon(
-                                          Icons.layers_outlined,
-                                          color: Colors.white,
-                                        ),
-                                        onPressed: () => {
-                                              context
-                                                  .read<ConferenceCubit>()
-                                                  .changeLayout()
-                                              // setState(() {
-                                              //   _isGridLayout = !_isGridLayout;
-                                              // })
-                                            }),
-
-                                    ElevatedButton(onPressed: (){
-                                      context
-                                          .read<ConferenceCubit>()
-                                          .changeSubStream(ConfigureStreamQuality.HIGH);
-                                    }, child: Text('High')),
-
-
-                                    ElevatedButton(onPressed: (){
-                                      context
-                                          .read<ConferenceCubit>()
-                                          .changeSubStream(ConfigureStreamQuality.MEDIUM);
-                                    }, child: Text('Medium')),
-
-
-                                    ElevatedButton(onPressed: (){
-                                      context
-                                          .read<ConferenceCubit>()
-                                          .changeSubStream(ConfigureStreamQuality.LOW);
-                                    }, child: Text('Low')),
-
-                                  ],
-                                )),
+                            // Positioned(
+                            //     top: 20,
+                            //     left: 20,
+                            //     child: Row(
+                            //       children: [
+                            //         IconButton(
+                            //             icon: const Icon(
+                            //               Icons.add,
+                            //               color: Colors.white,
+                            //             ),
+                            //             onPressed: () async {
+                            //               await context
+                            //                   .read<ConferenceCubit>()
+                            //                   .increaseNumberOfCopies();
+                            //             }),
+                            //         IconButton(
+                            //             icon: const Icon(
+                            //               Icons.remove,
+                            //               color: Colors.white,
+                            //             ),
+                            //             onPressed: () async {
+                            //               await context
+                            //                   .read<ConferenceCubit>()
+                            //                   .decreaseNumberOfCopies();
+                            //             }),
+                            //         IconButton(
+                            //             icon: const Icon(
+                            //               Icons.layers_outlined,
+                            //               color: Colors.white,
+                            //             ),
+                            //             onPressed: () => {
+                            //                   context
+                            //                       .read<ConferenceCubit>()
+                            //                       .changeLayout()
+                            //                   // setState(() {
+                            //                   //   _isGridLayout = !_isGridLayout;
+                            //                   // })
+                            //                 }),
+                            //
+                            //         ElevatedButton(onPressed: (){
+                            //           context
+                            //               .read<ConferenceCubit>()
+                            //               .changeSubStream(ConfigureStreamQuality.HIGH);
+                            //         }, child: Text('High')),
+                            //
+                            //
+                            //         ElevatedButton(onPressed: (){
+                            //           context
+                            //               .read<ConferenceCubit>()
+                            //               .changeSubStream(ConfigureStreamQuality.MEDIUM);
+                            //         }, child: Text('Medium')),
+                            //
+                            //
+                            //         ElevatedButton(onPressed: (){
+                            //           context
+                            //               .read<ConferenceCubit>()
+                            //               .changeSubStream(ConfigureStreamQuality.LOW);
+                            //         }, child: Text('Low')),
+                            //
+                            //       ],
+                            //     )),
                             Positioned.fill(
                               bottom: 20,
                               child: Row(
@@ -285,7 +277,11 @@ class VideoRoomPage extends StatelessWidget {
                                 ],
                               ),
                             ),
-
+                            Positioned(
+                              bottom: 20,
+                              right: 24,
+                              child: EngagementProgress(engagement: state.avgEngagement??0, width: 266, height: 28,),
+                            )
                           ],
                         );
                       } else {
@@ -554,7 +550,7 @@ class VideoRoomPage extends StatelessWidget {
               ),
             ),
 
-            Text('${remoteStream.videoRenderer.videoWidth}:${remoteStream.videoRenderer.videoHeight}'),
+            // Text('${remoteStream.videoRenderer.videoWidth}:${remoteStream.videoRenderer.videoHeight}'),
 
             Positioned(
                 top: 20,

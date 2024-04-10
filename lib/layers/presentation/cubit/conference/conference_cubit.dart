@@ -26,6 +26,7 @@ class ConferenceCubit extends Cubit<ConferenceState> with BlocLoggy {
   StreamSubscription<Map<dynamic, StreamRenderer>>? _conferenceSubscription;
   StreamSubscription<String>? _conferenceEndedStream;
   StreamSubscription<List<Participant>>? _subscribersStream;
+  StreamSubscription<int>? _avgEngagementStream;
 
   void _load() async {
     await conferenceUseCases.conferenceInitialize
@@ -36,6 +37,8 @@ class ConferenceCubit extends Cubit<ConferenceState> with BlocLoggy {
         conferenceUseCases.getEndStream().listen(_onConferenceEnded);
     _subscribersStream =
         conferenceUseCases.getSubscriberStream().listen(_onSubscribers);
+
+    _avgEngagementStream = conferenceUseCases.getAvgEngagementStream().listen(_onEngagementChanged);
   }
 
   @override
@@ -94,6 +97,12 @@ class ConferenceCubit extends Cubit<ConferenceState> with BlocLoggy {
         isInitial: false,
         streamSubscribers: subscribers,
         numberOfStreams: Random().nextInt(10000)));
+  }
+
+  void _onEngagementChanged(int avgEngagement) {
+    emit(state.copyWith(
+        isInitial: false,
+        avgEngagement: avgEngagement));
   }
 
   Future<void> increaseNumberOfCopies() async {
