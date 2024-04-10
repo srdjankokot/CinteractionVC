@@ -17,6 +17,8 @@ abstract class ConferenceRepo{
 
   Stream<List<Participant>> getSubscribersStream();
 
+  Stream<int> getAvgEngagementStream();
+
   Future<void> finishCall();
 
   Future<void> mute({required String kind, required bool muted});
