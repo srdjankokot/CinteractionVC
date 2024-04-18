@@ -7,11 +7,11 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../../../../core/ui/images/image.dart';
 import '../../../../../../core/ui/widget/content_layout_web.dart';
 import '../../../../../../core/ui/widget/engagement_progress.dart';
+import '../../../../../domain/entities/meeting.dart';
 import '../../../../cubit/roles/roles_cubit.dart';
 import '../../../groups/ui/widget/memebers_widget.dart';
 import '../../../profile/ui/widget/user_image.dart';
 import '../../../../cubit/meetings/meetings_cubit.dart';
-import '../../model/meeting.dart';
 
 class MeetingListLayout extends StatefulWidget {
 
@@ -275,7 +275,7 @@ class MeetingListLayoutState extends State<MeetingListLayout> {
                             verticalAlignment:
                             TableCellVerticalAlignment.middle,
                             child: Text(
-                              meeting.name,
+                              meeting.callId.toString(),
                               overflow: TextOverflow.clip,
                             ),
                           ),
@@ -287,8 +287,7 @@ class MeetingListLayoutState extends State<MeetingListLayout> {
                                   crossAxisAlignment: CrossAxisAlignment
                                       .center,
                                   children: [
-                                    UserImage.medium(
-                                        meeting.organizer.imageUrl),
+                                    // UserImage.medium(meeting.organizer.imageUrl),
                                     Padding(
                                       padding: const EdgeInsets.only(
                                           left: 12.0),
@@ -297,11 +296,11 @@ class MeetingListLayoutState extends State<MeetingListLayout> {
                                         CrossAxisAlignment.start,
                                         children: [
                                           Text(
-                                            meeting.organizer.name,
+                                            meeting.organizer?? '',
                                             style: context.textTheme
                                                 .displaySmall,
                                           ),
-                                          Text(meeting.organizer.email)
+                                          Text('')
                                         ],
                                       ),
                                     )
@@ -314,26 +313,25 @@ class MeetingListLayoutState extends State<MeetingListLayout> {
                                 verticalAlignment:
                                 TableCellVerticalAlignment.middle,
                                 child: EngagementProgress(
-                                  engagement: meeting.avgEngagement,
+                                  engagement: (meeting.averageEngagement * 100).toInt() ,
                                   width: double.maxFinite,
                                 )),
                           ),
                           TableCell(
                               verticalAlignment:
                               TableCellVerticalAlignment.middle,
-                              child: isShowingPastMeetings
-                                  ? Center(
-                                  child: Text('${meeting.users.length}'))
-                                  : Center(
-                                  child:
-                                  MembersWidget(users: meeting.users))),
+                          child:  Center(child: Text('${meeting.totalNumberOfUsers}'))),
+                          //     child: isShowingPastMeetings
+                          //         ? Center(child: Text('${meeting.users.length}'))
+                          //         : Center(child: MembersWidget(users: meeting.users)))
+                          // ,
                           Visibility(
                             visible: isShowingPastMeetings,
                             child: TableCell(
                                 verticalAlignment:
                                 TableCellVerticalAlignment.middle,
                                 child: Center(
-                                    child: imageSVGAsset(meeting.recorded
+                                    child: imageSVGAsset(meeting.recorded??false
                                         ? 'badge_approved'
                                         : 'badge_waiting'))),
                           ),
@@ -341,16 +339,39 @@ class MeetingListLayoutState extends State<MeetingListLayout> {
                               verticalAlignment:
                               TableCellVerticalAlignment.middle,
                               child: Center(
-                                  child: Text(
-                                      '${meeting.start.day}/${meeting
-                                          .start.month}/${meeting.start
-                                          .year}'))),
+                                  child: Column(
+                                      children: [
+                                  Text(
+                                  '${meeting.meetingStart.day}.${meeting
+                                      .meetingStart.month}.${meeting.meetingStart
+                                      .year}'),
+                                        Text(
+                                            '${meeting.meetingStart.hour}:${meeting
+                                                .meetingStart.minute}'),
+
+                                      ],
+                                  ))),
+
+
                           TableCell(
                               verticalAlignment:
                               TableCellVerticalAlignment.middle,
-                              child: Text(
-                                  '${meeting.end.day}/${meeting.end
-                                      .month}/${meeting.end.year}')),
+                              child: Visibility(
+                                  visible: meeting.meetingEnd != null,
+                                 child: Column(
+                                    children: [
+                                      Text('${meeting.meetingEnd?.day}.${meeting.meetingEnd?.month}.${meeting.meetingEnd?.year}'),
+                                      Text(
+                                          '${meeting.meetingEnd?.hour}:${meeting
+                                              .meetingEnd?.minute}'),
+
+                                    ],
+                                  )
+
+
+
+
+                                  )),
                         ]),
                     ],
                   ),
@@ -497,7 +518,7 @@ class MeetingListLayoutState extends State<MeetingListLayout> {
                                           ),
                                           Expanded(
                                             child: Text(
-                                                meetings![index].name,
+                                                meetings![index].callId.toString(),
                                                 style: context.textTheme
                                                     .titleSmall),
                                           ),
@@ -506,11 +527,8 @@ class MeetingListLayoutState extends State<MeetingListLayout> {
                                               visible: !isShowingPastMeetings,
                                               child: Text(
                                                   '${meetings![index]
-                                                      .start
-                                                      .day}.${meetings?[index]
-                                                      .start
-                                                      .month}.${meetings![index]
-                                                      .start.year}')),
+                                                      .meetingStart?.day}.${meetings?[index]
+                                                      .meetingStart?.month}.${meetings![index].meetingStart?.year}')),
                                         ],
                                       ),
                                       const SizedBox(height: 10,),
@@ -522,8 +540,7 @@ class MeetingListLayoutState extends State<MeetingListLayout> {
                                               .start,
                                           children: [
                                             Text(
-                                                meetings![index].organizer
-                                                    .name),
+                                                meetings![index].organizer??''),
                                             const SizedBox(height: 10,),
 
                                             Visibility(
@@ -542,7 +559,7 @@ class MeetingListLayoutState extends State<MeetingListLayout> {
                                                           'Recorded: '),
                                                       imageSVGAsset(
                                                           meetings![index]
-                                                              .recorded
+                                                              .recorded??false
                                                               ? 'badge_approved'
                                                               : 'badge_waiting') as Widget
                                                     ],
@@ -550,8 +567,7 @@ class MeetingListLayoutState extends State<MeetingListLayout> {
                                                   const SizedBox(
                                                     height: 10,),
                                                   EngagementProgress(
-                                                    engagement: meetings![index]
-                                                        .avgEngagement,
+                                                    engagement: (meetings![index].averageEngagement! * 100) as int,
                                                     width: double
                                                         .maxFinite,
                                                   )
@@ -566,17 +582,12 @@ class MeetingListLayoutState extends State<MeetingListLayout> {
                                                 children: [
                                                   Text(
                                                       'Start: ${meetings![index]
-                                                          .start
-                                                          .hour}:${meetings![index]
-                                                          .start
-                                                          .minute}'),
+                                                          .meetingStart?.hour}:${meetings![index].meetingStart?.minute}'),
                                                   const SizedBox(
                                                     height: 10,),
                                                   Text(
                                                       'Start: ${meetings![index]
-                                                          .end
-                                                          .hour}:${meetings![index]
-                                                          .end.minute}'),
+                                                          .meetingEnd?.hour}:${meetings![index].meetingEnd?.minute}'),
                                                 ],
                                               ),
                                             ),

@@ -1,45 +1,46 @@
 import 'dart:async';
 
 import 'package:cinteraction_vc/core/logger/loggy_types.dart';
+import 'package:cinteraction_vc/layers/domain/usecases/meeting/meeting_use_cases.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
-import '../../ui/meetings/model/meeting.dart';
-import '../../ui/meetings/repository/meetings_repository.dart';
+import '../../../domain/entities/meeting.dart';
 
 part 'meetings_state.dart';
 
 class MeetingCubit extends Cubit<MeetingState> with BlocLoggy{
   MeetingCubit({
-    required this.meetingRepository,
+    required this.meetingUseCases,
   }) : super(const InitialRoleState()) {
     _load();
   }
 
-  final MeetingRepository meetingRepository;
+  final MeetingUseCases meetingUseCases;
 
-  StreamSubscription<List<Meeting>?>? _meetingSubscription;
+  // StreamSubscription<List<Meeting>?>? _meetingSubscription;
 
 
   @override
   Future<void> close() {
-    _meetingSubscription?.cancel();
+    // _meetingSubscription?.cancel();
     return super.close();
   }
 
 
   void _load() {
-    _meetingSubscription = meetingRepository.getMeetingStream().listen(_onGroups);
+    // _meetingSubscription = meetingUseCases.getMeetingStream().listen(_onGroups);
   }
 
-  void loadMeetings() {
+  void loadMeetings() async{
     emit(const MeetingsIsLoading());
-    meetingRepository.getListOfMeetings();
+    var meetings = await meetingUseCases.getPastMeetingsUseCase();
+    emit(MeetingLoaded(meetings: meetings?? List.empty()));
   }
 
   void loadScheduledMeetings() {
     emit(const MeetingsIsLoading());
-    meetingRepository.getListOfScheduledMeetings();
+    meetingUseCases.getScheduleMeetings();
   }
 
 
@@ -49,8 +50,8 @@ class MeetingCubit extends Cubit<MeetingState> with BlocLoggy{
   }
 
   Future<void> addRole() async {
-    emit(const MeetingsIsLoading());
-    meetingRepository.addMeeting();
+    // emit(const MeetingsIsLoading());
+    // meetingRepository.addMeeting();
   }
 
 

@@ -1,5 +1,6 @@
 import 'package:cinteraction_vc/core/extension/context.dart';
-import 'package:cinteraction_vc/layers/presentation/ui/meetings/repository/meetings_repository.dart';
+import 'package:cinteraction_vc/layers/domain/repos/meetings_repo.dart';
+import 'package:cinteraction_vc/layers/domain/usecases/meeting/meeting_use_cases.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
@@ -103,7 +104,7 @@ final meetings = MenuItem(
   assetName: 'menu_meetings',
   body: BlocProvider(
     create: (context) => MeetingCubit(
-      meetingRepository: getIt.get<MeetingRepository>(),
+      meetingUseCases: getIt.get<MeetingUseCases>(),
     ),
     child: const MeetingsPage(),
   )

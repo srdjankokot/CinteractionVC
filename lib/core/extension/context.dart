@@ -25,7 +25,7 @@ extension Context on BuildContext {
       foregroundColor = theme.colorScheme.onError;
       backgroundColor = theme.colorScheme.error;
     } else {
-      foregroundColor = null;
+      foregroundColor = Colors.white;
       backgroundColor = null;
     }
 
@@ -37,7 +37,9 @@ extension Context on BuildContext {
           style: TextStyle(color: foregroundColor),
         ),
       ),
-    );
+    ).closed
+    .then((reason) => print('------------ $reason'));
+
   }
 
   bool get isWide {

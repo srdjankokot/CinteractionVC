@@ -15,15 +15,15 @@ import '../../../../../assets/colors/Colors.dart';
 import '../../../../../core/app/injector.dart';
 import '../../../../../core/ui/images/image.dart';
 import '../../../../data/source/local/local_storage.dart';
+import '../../../../domain/entities/meeting.dart';
 import '../../../../domain/entities/user.dart';
-import '../../meetings/model/meeting.dart';
 
 class HomeTab extends StatelessWidget {
   const HomeTab({super.key});
 
   @override
   Widget build(BuildContext context) {
-    User? user = getIt.get<LocalStorage>().loadLoggedUser();
+
 
     Future<void> displayJoinRoomPopup(BuildContext context) async {
       return showDialog(
@@ -326,15 +326,15 @@ class NextMeetingWidget extends StatelessWidget {
       );
 
   Meeting get _meeting => Meeting(
-      id: 2,
-      passcode: '123456',
-      name: 'Digital Photography',
-      organizer: _organizer,
-      users: [_organizer, _organizer, _organizer, _organizer],
-      avgEngagement: Random().nextInt(100),
+      callId: 2,
+      organizer: '_organizer',
+      organizerId: 23,
+      averageEngagement: Random().nextDouble(),
       recorded: false,
-      start: DateTime.now().add(const Duration(hours: 2)),
-      end: DateTime.now().add(const Duration(hours: 3, minutes: 30)));
+      meetingStart: DateTime.now().add(const Duration(hours: 2)),
+      meetingEnd: DateTime.now().add(const Duration(hours: 3, minutes: 30)),
+      totalNumberOfUsers: 3,
+      );
 
   @override
   Widget build(BuildContext context) {
@@ -389,23 +389,23 @@ class NextMeetingWidget extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    _meeting.name,
+                    'Digital Photography',
                     style: context.textTheme.displayLarge,
                   ),
                   Text(
-                    '${_meeting.start.hour}:${_meeting.start.minute} - ${_meeting.end.hour}:${_meeting.end.minute}',
+                    '${_meeting.meetingStart?.hour}:${_meeting.meetingStart?.minute} - ${_meeting.meetingEnd?.hour}:${_meeting.meetingEnd?.minute}',
                     style: context.textTheme.bodyLarge,
                   ),
                   Text(
-                    'Meeting ID: ${_meeting.id}',
+                    'Meeting ID: ${_meeting.callId}',
                     style: context.textTheme.bodyLarge,
                   ),
                   Text(
-                    'Passcode: ${_meeting.passcode}',
+                    'Passcode: 123456',
                     style: context.textTheme.bodyLarge,
                   ),
                   Text(
-                    'Organizer: ${_meeting.organizer.name}',
+                    'Organizer: ${_meeting.organizer}',
                     style: context.textTheme.bodyLarge,
                   ),
                   Container(

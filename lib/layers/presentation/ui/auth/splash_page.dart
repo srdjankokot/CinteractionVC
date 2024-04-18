@@ -1,5 +1,6 @@
 import 'package:cinteraction_vc/core/app/injector.dart';
 import 'package:cinteraction_vc/core/extension/context.dart';
+import 'package:cinteraction_vc/core/ui/images/image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
@@ -19,11 +20,16 @@ class SplashPage extends StatelessWidget {
           listener: _onUserState,
           child: Scaffold(
             body: Center(
-              child: Text(
-                'Cinteraction\nFlutter\nApp',
-                textAlign: TextAlign.center,
-                style: context.textTheme.headlineLarge,
-              ),
+
+
+              child: imageSVGAsset('original_long_logo') as Widget
+
+
+              // Text(
+              //   'Cinteraction\nFlutter\nApp',
+              //   textAlign: TextAlign.center,
+              //   style: context.textTheme.headlineLarge,
+              // ),
             ),
           ),
         ),

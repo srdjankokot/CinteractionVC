@@ -1,4 +1,5 @@
 import 'package:cinteraction_vc/core/io/network/models/participant.dart';
+import 'package:cinteraction_vc/layers/domain/entities/api_error.dart';
 import 'package:equatable/equatable.dart';
 
 import '../../../../core/util/util.dart';
@@ -11,11 +12,13 @@ class ConferenceState extends Equatable {
   final List<Participant>? streamSubscribers;
   final bool audioMuted;
   final bool videoMuted;
+  final bool screenShared;
   final bool engagementEnabled;
   final int? numberOfStreams;
   final int? avgEngagement;
   final int numberOfStreamsCopy;
   final bool isGridLayout;
+  final String? error;
 
   const ConferenceState({
     required this.isInitial,
@@ -24,11 +27,14 @@ class ConferenceState extends Equatable {
     this.streamSubscribers,
     required this.audioMuted,
     required this.videoMuted,
+    required this.screenShared,
     required this.engagementEnabled,
     this.numberOfStreams,
     this.avgEngagement,
     required this.numberOfStreamsCopy,
     required this.isGridLayout,
+    this.error,
+
   });
 
 
@@ -38,11 +44,12 @@ class ConferenceState extends Equatable {
     Map<dynamic, StreamRenderer>? streamRenderers,
     bool audioMuted = false,
     bool videoMuted = false,
+    bool screenShared = false,
     bool engagementEnabled = true,
     int? numberOfStreamsCopy,
     int? isGridLayout,
     int? avgEngagement = 0,
-  }) : this(isInitial: isInitial, isEnded: isEnded, audioMuted: audioMuted, videoMuted: videoMuted, numberOfStreamsCopy: 1, isGridLayout: true, engagementEnabled: engagementEnabled, avgEngagement: avgEngagement);
+  }) : this(isInitial: isInitial, isEnded: isEnded, audioMuted: audioMuted, videoMuted: videoMuted, numberOfStreamsCopy: 1, isGridLayout: true, engagementEnabled: engagementEnabled, avgEngagement: avgEngagement, screenShared:screenShared);
 
 
   const ConferenceState.ended({
@@ -51,8 +58,23 @@ class ConferenceState extends Equatable {
     Map<dynamic, StreamRenderer>? streamRenderers,
     bool audioMuted = false,
     bool videoMuted = false,
+    bool screenShared = false,
     bool engagementEnabled = true,
-  }) : this(isInitial: isInitial, isEnded: isEnded, audioMuted: audioMuted, videoMuted: videoMuted, numberOfStreamsCopy: 1, isGridLayout: true, engagementEnabled : engagementEnabled);
+  }) : this(isInitial: isInitial, isEnded: isEnded, audioMuted: audioMuted, videoMuted: videoMuted, numberOfStreamsCopy: 1, isGridLayout: true, engagementEnabled : engagementEnabled, screenShared:screenShared);
+
+
+  const ConferenceState.error({
+    bool isInitial = false,
+    bool isEnded = true,
+    Map<dynamic, StreamRenderer>? streamRenderers,
+    bool audioMuted = false,
+    bool videoMuted = false,
+    bool screenShared = false,
+    bool engagementEnabled = true,
+    required String error,
+  }) : this(isInitial: isInitial, isEnded: isEnded, audioMuted: audioMuted, videoMuted: videoMuted, numberOfStreamsCopy: 1, isGridLayout: true, engagementEnabled : engagementEnabled, screenShared:screenShared, error: error);
+
+
 
 
   ConferenceState copyWith({
@@ -65,6 +87,7 @@ class ConferenceState extends Equatable {
     int? avgEngagement,
     bool? audioMuted,
     bool? videoMuted,
+    bool? screenShared,
     bool? engagementEnabled,
     bool? isGridLayout,
   }) {
@@ -76,6 +99,7 @@ class ConferenceState extends Equatable {
       numberOfStreams: numberOfStreams ?? this.numberOfStreams,
       audioMuted: audioMuted ?? this.audioMuted,
       videoMuted: videoMuted ?? this.videoMuted,
+      screenShared: screenShared ?? this.screenShared,
       engagementEnabled: engagementEnabled ?? this.engagementEnabled,
       numberOfStreamsCopy: numberOfStreamsCopy ?? this.numberOfStreamsCopy,
       avgEngagement: avgEngagement ?? this.avgEngagement,
@@ -84,7 +108,7 @@ class ConferenceState extends Equatable {
   }
 
   @override
-  List<Object?> get props => [isInitial, isEnded, streamRenderers, streamSubscribers, numberOfStreams, audioMuted, videoMuted, numberOfStreamsCopy, isGridLayout, engagementEnabled, avgEngagement];
+  List<Object?> get props => [isInitial, isEnded, streamRenderers, streamSubscribers, numberOfStreams, audioMuted, videoMuted, numberOfStreamsCopy, isGridLayout, engagementEnabled, avgEngagement, screenShared];
 }
 
 // @immutable

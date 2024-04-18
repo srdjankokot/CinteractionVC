@@ -4,7 +4,9 @@ import 'dart:math';
 
 import 'package:cinteraction_vc/core/io/network/models/participant.dart';
 import 'package:cinteraction_vc/core/util/util.dart';
+import 'package:cinteraction_vc/layers/domain/entities/api_response.dart';
 import 'package:cinteraction_vc/layers/domain/repos/conference_repo.dart';
+import 'package:dio/dio.dart';
 import 'package:janus_client/janus_client.dart';
 import 'package:logging/logging.dart';
 import 'package:webrtc_interface/webrtc_interface.dart';
@@ -82,9 +84,15 @@ class ConferenceRepoImpl extends ConferenceRepo {
     session = await client?.createSession();
     _initLocalMediaRenderer();
 
-    await _startCall();
     await _configureConnection();
     await _joinRoom();
+  }
+
+  @override
+  Future<ApiResponse<int>> startCall() async{
+    var res = await _api.startCall(streamId: room.toString(), userId: user?.id);
+    callId = res.response;
+    return res;
   }
 
   @override
@@ -576,6 +584,84 @@ class ConferenceRepoImpl extends ConferenceRepo {
   }
 
   @override
+  Future<void> shareScreen(MediaStream? mediaStream) async {
+    if(mediaStream==null) {
+      _disposeScreenSharing();
+      return;
+    }
+
+    screenSharing = true;
+    // _initLocalMediaRenderer();
+    screenPlugin = await session?.attach<JanusVideoRoomPlugin>();
+    screenPlugin?.typedMessages?.listen((event) async {
+      Object data = event.event.plugindata?.data;
+      if (data is VideoRoomJoinedEvent) {
+        myPvtId = data.privateId;
+        (await screenPlugin?.configure(
+            bitrate: 3000000,
+            sessionDescription: await screenPlugin?.createOffer(
+                audioRecv: false, videoRecv: false)));
+      }
+      if (data is VideoRoomLeavingEvent) {
+        _unSubscribeTo(data.leaving!);
+      }
+      if (data is VideoRoomUnPublishedEvent) {
+        _unSubscribeTo(data.unpublished);
+      }
+      screenPlugin?.handleRemoteJsep(event.jsep);
+    });
+    await localScreenSharingRenderer.init();
+    localScreenSharingRenderer.publisherId = myId.toString();
+
+    // localScreenSharingRenderer.mediaStream = await screenPlugin
+    //     ?.initializeMediaDevices(
+    //         mediaConstraints: {'video': true, 'audio': true},
+    //         useDisplayMediaDevices: true);
+
+    //safari require action from a user gesture
+    localScreenSharingRenderer.mediaStream = mediaStream;
+    screenPlugin?.webRTCHandle!.localStream = mediaStream;
+    screenPlugin?.webRTCHandle!.localStream!.getTracks().forEach((element) async {
+        await  screenPlugin?.webRTCHandle!.peerConnection!.addTrack(element,  screenPlugin!.webRTCHandle!.localStream!);
+    });
+
+    localScreenSharingRenderer.videoRenderer.srcObject =
+        localScreenSharingRenderer.mediaStream;
+    localScreenSharingRenderer.publisherName = "Your Screenshare";
+
+    //stop sharing from chrome interface
+    localScreenSharingRenderer.mediaStream?.getVideoTracks()[0].onEnded = () {
+      _disposeScreenSharing();
+    };
+
+    videoState.streamsToBeRendered.putIfAbsent(
+        localScreenSharingRenderer.id, () => localScreenSharingRenderer);
+
+    _refreshStreams();
+
+    await screenPlugin?.joinPublisher(room,
+        displayName: "${displayName}_screenshare", id: screenShareId, pin: "");
+
+  }
+
+
+  _disposeScreenSharing() async {
+    // setState(() {
+    screenSharing = false;
+    // });
+    await screenPlugin?.unpublish();
+    StreamRenderer? rendererRemoved;
+    // setState(() {
+    rendererRemoved =
+        videoState.streamsToBeRendered.remove(localScreenSharingRenderer.id);
+    // });
+    await rendererRemoved?.dispose();
+    await screenPlugin?.hangup();
+    screenPlugin = null;
+    _refreshStreams();
+  }
+
+  @override
   Future<void> finishCall() async {
     _closeCall('User hanged');
   }
@@ -595,7 +681,8 @@ class ConferenceRepoImpl extends ConferenceRepo {
     videoState.subStreamsToFeedIdMap.clear();
     videoState.feedIdToMidSubscriptionMap.clear();
     joined = false;
-    screenSharing = false;
+    // screenSharing = false;
+    engagementEnabled = false;
     // });
 
     await videoPlugin?.hangup();
@@ -612,9 +699,6 @@ class ConferenceRepoImpl extends ConferenceRepo {
     _conferenceEndedStream.add(reason);
   }
 
-  _startCall() async {
-    callId = await _api.startCall(streamId: room.toString(), userId: user?.id);
-  }
 
   Future<bool> _endCall() async {
     return await _api.endCall(callId: callId, userId: user?.id);
@@ -821,6 +905,7 @@ class ConferenceRepoImpl extends ConferenceRepo {
         break;
 
       case DataChannelCmd.engagement:
+        print('engagement received ${command.data['engagement']}');
         videoState.streamsToBeRendered[command.id]?.engagement =
             command.data['engagement'] as int;
         _refreshStreams();
@@ -829,41 +914,41 @@ class ConferenceRepoImpl extends ConferenceRepo {
   }
 
   _getEngagement() async {
-    print("get engagement");
+    // if (true) return;
+    engagementIsRunning = true;
 
-    if (engagementEnabled && !engagementInProgress) {
-      engagementInProgress = true;
-      var image = await localVideoRenderer.mediaStream
-          ?.getVideoTracks()
-          .first
-          .captureFrame();
+    try {
+      if (engagementEnabled) {
+        var image = await localVideoRenderer.mediaStream
+            ?.getVideoTracks()
+            .first
+            .captureFrame();
 
-      // print(base64Encode(image!.asUint8List().toList()).toString());
+        // print(base64Encode(image!.asUint8List().toList()).toString());
 
-      final engagement = await _api.engagement(
-          averageAttention: 0,
-          callId: callId,
-          image: base64Encode(image!.asUint8List().toList()).toString(),
-          participantId: user?.id);
+        // final engagement = await _api.engagement(
+        //     averageAttention: 0,
+        //     callId: callId,
+        //     image: base64Encode(image!.asUint8List().toList()).toString(),
+        //     participantId: user?.id);
 
-      if (engagement! > 0) {
-        var eng = ((engagement) * 100).toInt();
-        videoState.streamsToBeRendered['local']?.engagement = eng;
-        _refreshStreams();
-        _calculateAverageEngagement();
-        _sendMyEngagementToOthers(eng);
+        var engagement = Random().nextDouble() * (0.85 - 0.4) + 0.4;
+
+        if (engagement! > 0) {
+          var eng = ((engagement) * 100).toInt();
+          videoState.streamsToBeRendered['local']?.engagement = eng;
+          _refreshStreams();
+          _calculateAverageEngagement();
+          _sendMyEngagementToOthers(eng);
+        }
+        print('My engagement: $engagement');
       }
-      // else{
-      //   var eng = Random().nextInt(100);
-      //   videoState.streamsToBeRendered['local']?.engagement = eng;
-      //   _refreshStreams();
-      //   _sendMyEngagementToOthers(eng);
-      // }
-
-      print('My engagement: $engagement');
-      await Future.delayed(const Duration(seconds: 3));
-      engagementInProgress = false;
-      _getEngagement();
+    } finally {
+      engagementIsRunning = false;
+      if (engagementEnabled) {
+        await Future.delayed(const Duration(seconds: 3));
+        _getEngagement();
+      }
     }
   }
 
@@ -888,18 +973,16 @@ class ConferenceRepoImpl extends ConferenceRepo {
         }
       }
     }
-    var avg = sum / avgInclude;
-    _avgEngagementStream.add(avg as int);
+    double avg = sum / avgInclude;
+    _avgEngagementStream.add(avg.toInt());
   }
 
   bool engagementEnabled = true;
-  bool engagementInProgress = false;
+  bool engagementIsRunning = false;
 
   @override
   Future<void> toggleEngagement({required bool enabled}) async {
     engagementEnabled = enabled;
     _getEngagement();
   }
-
-
 }

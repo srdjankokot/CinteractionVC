@@ -9,6 +9,7 @@ class User {
     required this.email,
     required this.imageUrl,
     required this.createdAt,
+    this.emailVerifiedAt,
   });
 
   int id;
@@ -20,6 +21,9 @@ class User {
 
   @JsonKey(name: 'created_at')
   final DateTime createdAt;
+
+  @JsonKey(name: 'email_verified_at')
+  DateTime? emailVerifiedAt;
 
   int? groups = Random().nextInt(10);
   int? avgEngagement = Random().nextInt(100);
