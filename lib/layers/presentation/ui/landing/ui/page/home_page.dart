@@ -39,19 +39,11 @@ class _HomePageState extends State<HomePage> {
 
     context.textTheme.labelSmall;
 
-    void logOut()
-    {
-      saveAccessToken(null);
-      getIt.get<LocalStorage>().clearUser();
-
-      GoRouter.of(context).clearStackAndNavigate('/auth');
-
-    }
 
     void handleClick(BuildContext context, String value) {
       switch (value) {
         case 'LogOut':
-          logOut();
+          context.logOut();
           break;
       }
     }

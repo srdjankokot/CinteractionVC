@@ -1,9 +1,15 @@
 
 import 'package:cinteraction_vc/core/app/style.dart';
+import 'package:cinteraction_vc/core/extension/router.dart';
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 
+import '../../layers/data/source/local/local_storage.dart';
+import '../app/injector.dart';
 import '../ui/widget/responsive.dart';
 import 'package:flutter/foundation.dart';
+
+import '../util/secure_local_storage.dart';
 
 extension Context on BuildContext {
   TextTheme get textTheme => Theme.of(this).textTheme;
@@ -50,6 +56,14 @@ extension Context on BuildContext {
 
     final maxWidth = MediaQuery.sizeOf(this).width;
     return maxWidth > desktopWidthBreakpoint;
+  }
+
+
+  void logOut()
+  {
+    saveAccessToken(null);
+    getIt.get<LocalStorage>().clearUser();
+    GoRouter.of(this).clearStackAndNavigate('/auth');
   }
 }
 

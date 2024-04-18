@@ -1,16 +1,15 @@
 import 'package:cinteraction_vc/core/extension/context.dart';
 import 'package:cinteraction_vc/core/extension/context_user.dart';
+import 'package:cinteraction_vc/core/extension/router.dart';
 import 'package:cinteraction_vc/core/util/menu_items.dart';
 import 'package:cinteraction_vc/layers/presentation/ui/profile/ui/widget/user_image.dart';
 
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/svg.dart';
+import 'package:go_router/go_router.dart';
 
 import '../../../../../core/navigation/route.dart';
 import '../../../../../core/ui/images/image.dart';
-
-
-
-
 
 class ProfileTab extends StatelessWidget {
   const ProfileTab({super.key});
@@ -23,11 +22,10 @@ class ProfileTab extends StatelessWidget {
       return Center(
         child: ElevatedButton(
           onPressed: () => AppRoute.auth.push(context),
-          child: const Text('Sign In'),
+          child: const Text('Log In'),
         ),
       );
     }
-
 
     return Scaffold(
       appBar: PreferredSize(
@@ -65,37 +63,20 @@ class ProfileTab extends StatelessWidget {
                 ],
               ),
             ),
-
             const  Spacer(),
             const Divider(),
           ],),
         ),
       ),
-      body: Center(
-        child: Column(
-          children: [
 
-            for (final (index, item) in mobileProfileMenu.indexed)
-              Stack(
-                children: [
-                  Container(
-                    height: 50,
-                    margin: const EdgeInsets.only( left: 20),
-                    child: ListTile(
-                      title: Text(item.label, style: context.textTheme.labelMedium),
-                      leading:  imageSVGAsset(item.assetName),
-                      onTap: () => {
-                        item.route?.push(context)
+      bottomNavigationBar: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: ElevatedButton(
 
-                      },
-                    ),
-                  ),
-                ],
-              )
-
-
-
-          ],
+          onPressed: () {
+            context.logOut();
+          },
+          child: const Text('Log out'),
         ),
       ),
     );
