@@ -1,4 +1,5 @@
 import 'package:cinteraction_vc/layers/domain/usecases/conference/conference_end_stream.dart';
+import 'package:cinteraction_vc/layers/domain/usecases/conference/conference_share_screen.dart';
 import 'package:cinteraction_vc/layers/domain/usecases/conference/conference_subscribers_stream.dart';
 
 import '../../../../core/app/injector.dart';
@@ -14,6 +15,7 @@ import 'conference_mute.dart';
 import 'conference_ping.dart';
 import 'conference_publish.dart';
 import 'conference_publish_by_id.dart';
+import 'conference_start_call.dart';
 import 'conference_switch_camera.dart';
 import 'conference_toggle_engagement.dart';
 import 'conference_unpublish.dart';
@@ -37,7 +39,9 @@ class ConferenceUseCases {
         switchCamera = ConferenceSwitchCamera(repo: repo),
         unPublishById = ConferenceUnPublishById(repo: repo),
         publishById = ConferencePublishById(repo: repo),
-        getAvgEngagementStream = GetAvgEngagementStream(repo: repo);
+        shareScreen = ConferenceShareScreen(repo: repo),
+        getAvgEngagementStream = GetAvgEngagementStream(repo: repo),
+        startCall = ConferenceStartCall(repo: repo);
 
   final ConferenceRepo repo;
 
@@ -58,4 +62,6 @@ class ConferenceUseCases {
   ConferenceUnPublishById unPublishById;
   ConferencePublishById publishById;
   GetAvgEngagementStream getAvgEngagementStream;
+  ConferenceShareScreen shareScreen;
+  ConferenceStartCall startCall;
 }

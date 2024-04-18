@@ -1,14 +1,14 @@
 import 'dart:async';
 
 import 'package:cinteraction_vc/core/app/injector.dart';
+import 'package:cinteraction_vc/core/util/secure_local_storage.dart';
 import 'package:cinteraction_vc/layers/data/dto/user_dto.dart';
-import 'package:flutter/foundation.dart';
+import 'package:cinteraction_vc/layers/domain/entities/api_response.dart';
+import 'package:equatable/equatable.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../../../../core/logger/loggy_types.dart';
-import '../../../../../core/util/secure_local_storage.dart';
 import '../../../data/source/local/local_storage.dart';
-import '../../../domain/entities/user.dart';
 import '../../../domain/usecases/auth/auth_usecases.dart';
 
 part 'auth_state.dart';
@@ -17,51 +17,119 @@ class AuthCubit extends Cubit<AuthState> with BlocLoggy {
   AuthCubit({
     required AuthUseCases authUseCases,
   })  : _authUseCases = authUseCases,
-        super(const AuthInitial());
-
+        super(const AuthState.initial()) {
+    _init();
+  }
 
   final AuthUseCases _authUseCases;
 
 
-  Future<void> signUpWithEmailAndPassword({
-    required String email,
-    required String password,
-  }) async {
-      emit(const AuthFailure(errorMessage: 'Not implemented yet'));
+  void _init() async
+  {
+    var accessToken = await getAccessToken();
+
+
+    if(accessToken!=null)
+      {
+        print('access token: ${accessToken}');
+        var response = await _authUseCases.getUserDetails(accessToken);
+        _successLogin(response);
+      }
+
+  }
+
+  Future<void> signUpWithEmailAndPassword(
+      {required String email,
+      required String password,
+      required String name,
+      required bool terms}) async {
+
+
+    emit(state.copyWith(loading : true));
+
+    final response = await _authUseCases.signUpWithEmailAndPassword(
+        email, password, name, true);
+    if (response.response ?? false) {
+      emit(const AuthState.registerSuccess());
+    } else {
+      emit(state.error(errorMessage: response.error!.errorMessage));
+    }
   }
 
   Future<void> signInWithEmailAndPassword({
     required String email,
     required String password,
   }) async {
-    emit(const AuthLoading());
+    emit(state.copyWith(loading : true));
 
     try {
-      final user = await _authUseCases.signUpWithEmailAndPassword(email, password);
-      if (user != null) {
-        getIt.get<LocalStorage>().saveLoggedUser(user: user);
-        emit(AuthSuccess(user: user));
-      } else {
-        emit(const AuthFailure(errorMessage: 'errorMessage'));
-      }
+      final response =
+          await _authUseCases.signInWithEmailAndPassword(email, password);
+      _successLogin(response);
     } catch (e, s) {
-      emit(AuthFailure(errorMessage: 'errorMessage ${e.toString()}'));
+      emit(state.error(errorMessage: 'errorMessage ${e.toString()}'));
+    }
+  }
+
+  _successLogin(ApiResponse<UserDto?> response) {
+    if (response.error != null) {
+      emit(state.error(errorMessage: response.error!.errorMessage));
+      return;
+    }
+    var user = response.response;
+    if (user == null) {
+      emit(state.error(errorMessage: 'User is null'));
+      return;
+    }
+    if (user.emailVerifiedAt == null) {
+      emit(state.error(errorMessage: 'Email is not verified'));
+      return;
     }
 
+    getIt.get<LocalStorage>().saveLoggedUser(user: user);
+    emit(const AuthState.loginSuccess());
   }
 
   Future<void> signInWithGoogle() async {
-    emit(const AuthLoading());
+    emit(state.copyWith(loading : true));
     try {
-      final user = await _authUseCases.signUpWithGoogle();
-      emit(AuthSuccess(user: user));
+      final response = await _authUseCases.signUpWithGoogle();
+
+      _successLogin(response);
     } catch (e, s) {
       loggy.error('signInWithGoogle error', e, s);
-      emit(AuthFailure(errorMessage: e.toString()));
+      emit(state.error(errorMessage:  e.toString()));
+
     }
   }
 
   Future<void> signInWithFacebook() async {
-      emit(const AuthFailure(errorMessage: 'Not implemented yet'));
+    emit(state.error(errorMessage: 'Not implemented yet'));
+  }
+
+  void checkboxChangedState()
+  {
+    emit(state.copyWith(isChecked: !state.isChecked));
+  }
+
+  void changeLayout() {
+    if (state.isSignUp) {
+      emit(const AuthState.initial());
+    } else {
+      emit(const AuthState.register());
+    }
+  }
+
+  void submit(String mail, String password, String name, bool terms)
+  {
+    if (state.isSignUp) {
+      signUpWithEmailAndPassword(
+          email: mail, password: password, name: name, terms: terms);
+    } else {
+      signInWithEmailAndPassword(
+        email: mail,
+        password: password,
+      );
+    }
   }
 }

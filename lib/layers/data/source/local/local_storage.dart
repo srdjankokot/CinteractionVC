@@ -8,6 +8,7 @@ import '../../dto/user_dto.dart';
 abstract class LocalStorage {
   Future<bool> saveLoggedUser({required UserDto user});
   User? loadLoggedUser();
+  Future<void> clearUser();
 }
 
 class LocalStorageImpl extends LocalStorage{
@@ -21,7 +22,7 @@ class LocalStorageImpl extends LocalStorage{
 
   @override
   User? loadLoggedUser() {
-    final jsonString = _sharedPref.getString('key');
+    final jsonString = _sharedPref.getString('user');
     var userMap = json.decode(jsonString!);
 
     return UserDto.fromJson(userMap);
@@ -30,7 +31,12 @@ class LocalStorageImpl extends LocalStorage{
 
   @override
   Future<bool> saveLoggedUser({required UserDto user}) {
-    return _sharedPref.setString('key', json.encode(user.toJson()));
+    return _sharedPref.setString('user', json.encode(user.toJson()));
+  }
+
+  @override
+  Future<void> clearUser() async {
+    _sharedPref.remove('user');
   }
 
 }

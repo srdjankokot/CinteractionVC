@@ -7,7 +7,7 @@ import 'package:cinteraction_vc/core/ui/widget/engagement_progress.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_webrtc/flutter_webrtc.dart';
-import 'package:janus_client/janus_client.dart';
+
 
 import '../../../../core/ui/images/image.dart';
 import '../../../../core/util/util.dart';
@@ -21,6 +21,10 @@ class VideoRoomPage extends StatelessWidget {
   const VideoRoomPage({super.key});
 
   void _onConferenceState(BuildContext context, ConferenceState state) {
+    if(state.error != null){
+      context.showSnackBarMessage(state.error?? 'Error', isError: true);
+    }
+
     if (state.isEnded) {
       Navigator.of(context).pop();
     }
@@ -153,7 +157,7 @@ class VideoRoomPage extends StatelessWidget {
                                       }),
                                   const SizedBox(width: 20),
                                   CallButtonShape(
-                                      image: !state.videoMuted!
+                                      image: !state.videoMuted
                                           ? imageSVGAsset('icon_video_recorder')
                                               as Widget
                                           : imageSVGAsset(
@@ -163,29 +167,23 @@ class VideoRoomPage extends StatelessWidget {
                                         await context
                                             .read<ConferenceCubit>()
                                             .videoMute();
-                                        // setState(() {
-                                        //   audioEnabled = !audioEnabled;
-                                        // });
-                                        // await mute(videoPlugin?.webRTCHandle?.peerConnection, 'audio', audioEnabled);
-                                        // setState(() {
-                                        //   localVideoRenderer.isAudioMuted =
-                                        //       !audioEnabled;
-                                        // });
                                       }),
                                   const SizedBox(width: 20),
-                                  // CallButtonShape(
-                                  //     image: imageSVGAsset('icon_arrow_square_up')
-                                  //     as Widget,
-                                  //     onClickAction: joined
-                                  //         ? () async {
-                                  //       // if (screenSharing) {
-                                  //       //   await disposeScreenSharing();
-                                  //       //   return;
-                                  //       // }
-                                  //       // await screenShare();
-                                  //     }
-                                  //         : null),
-                                  // const SizedBox(width: 20),
+                                  CallButtonShape(
+                                      image: imageSVGAsset('icon_arrow_square_up') as Widget,
+                                      bgColor: state.screenShared? ColorConstants.kPrimaryColor : ColorConstants.kWhite30,
+                                      onClickAction:  () async {
+                                        if(state.screenShared)
+                                          {
+                                            await context.read<ConferenceCubit>().shareScreen(null);
+                                          }
+                                        else
+                                          {
+                                            await context.read<ConferenceCubit>().shareScreen(await navigator.mediaDevices.getDisplayMedia({'video': true, 'audio': true}));
+                                          }
+
+                                      }),
+                                  const SizedBox(width: 20),
                                   // CallButtonShape(
                                   //     image: imageSVGAsset('icon_user') as Widget,
                                   //     // onClickAction: joined ? switchCamera : null),
@@ -202,18 +200,18 @@ class VideoRoomPage extends StatelessWidget {
                                     },
                                   ),
 
-                                  const SizedBox(width: 20),
+                                  // const SizedBox(width: 20),
 
-                                  CallButtonShape(
-                                      image: state.engagementEnabled
-                                          ? const Icon(Icons.image)
-                                          : const Icon(Icons.image_not_supported),
-                                      onClickAction: () async {
-                                        await context
-                                            .read<ConferenceCubit>()
-                                            .toggleEngagement();
-                                      }),
-
+                                  // CallButtonShape(
+                                  //     image: state.engagementEnabled
+                                  //         ? const Icon(Icons.image)
+                                  //         : const Icon(Icons.image_not_supported),
+                                  //     onClickAction: () async {
+                                  //       await context
+                                  //           .read<ConferenceCubit>()
+                                  //           .toggleEngagement();
+                                  //     }),
+                                  //
 
                                   const SizedBox(width: 20),
 
@@ -428,8 +426,29 @@ class VideoRoomPage extends StatelessWidget {
         listener: _onConferenceState);
   }
 
-  Widget getLayout(
-      BuildContext context, List<StreamRenderer> items, bool isGrid) {
+  Widget getLayout(BuildContext context, List<StreamRenderer> items, bool isGrid) {
+    StreamRenderer? screenshared;
+
+    try{
+      if(items.isNotEmpty)
+        {
+          for(var stream in items)
+            {
+              if(stream.publisherName!.toLowerCase().contains('screenshare'))
+                {
+                  screenshared = stream;
+                  items.remove(screenshared);
+                  break;
+                }
+            }
+        }
+    }
+     on Exception catch(e){
+        print(e);
+    }
+
+    // print(screenshared?.publisherName);
+
     var numberStream = items.length;
     var row = sqrt(numberStream).round();
     var col = ((numberStream) / row).ceil();
@@ -438,7 +457,8 @@ class VideoRoomPage extends StatelessWidget {
     // final double itemHeight = (size.height - kToolbarHeight - 24) / row;
 
     if (context.isWide) {
-      if (isGrid) {
+      // if (isGrid) {
+      if (screenshared==null) {
         // desktop grid layout
         final double itemHeight = (size.height) / row;
         final double itemWidth = size.width / col;
@@ -455,20 +475,20 @@ class VideoRoomPage extends StatelessWidget {
       } else {
         //desktop list layout
 
-        const double itemHeight = 89;
-        const double itemWidth = 92;
+        const double itemHeight = 182;
+        const double itemWidth = 189;
 
         return Stack(
           children: [
             Container(
-              child: getRendererItem(context, items.first,
+              child: getRendererItem(context, screenshared,
                    double.maxFinite, double.maxFinite),
             ),
             Container(
               alignment: Alignment.centerRight,
               margin: const EdgeInsets.only(right: 55),
               child: SizedBox(
-                width: 100,
+                width: itemWidth + 20,
                 height: MediaQuery.of(context).size.height - 156,
                 child: ListView.builder(
                   shrinkWrap: true,
@@ -528,7 +548,7 @@ class VideoRoomPage extends StatelessWidget {
   }
 
   Widget getRendererItem(BuildContext context, StreamRenderer remoteStream, double height, double width) {
-    // debugPrint('getRendererItem: ${remoteStream.publisherName!} $engagement');
+    var screenShare = remoteStream.publisherName!.toLowerCase().contains('screenshare');
 
     if (context.isWide) {
       return SizedBox(
@@ -545,19 +565,19 @@ class VideoRoomPage extends StatelessWidget {
               child: RTCVideoView(
                 remoteStream.videoRenderer,
                 filterQuality: FilterQuality.none,
-                objectFit: RTCVideoViewObjectFit.RTCVideoViewObjectFitCover,
-                mirror: true,
+                objectFit: screenShare? RTCVideoViewObjectFit.RTCVideoViewObjectFitContain:  RTCVideoViewObjectFit.RTCVideoViewObjectFitCover,
+                mirror: !screenShare,
               ),
             ),
-
             // Text('${remoteStream.videoRenderer.videoWidth}:${remoteStream.videoRenderer.videoHeight}'),
-
             Positioned(
                 top: 20,
                 right: 24,
                 child: Row(
                   children: [
-                    EngagementProgress(engagement: remoteStream.engagement?? 0),
+                    Visibility(
+                      visible: width>200,
+                      child: EngagementProgress(engagement: remoteStream.engagement?? 0),),
                     Visibility(
                       visible: remoteStream.publisherName != 'You',
                       child: PopupMenuButton<String>(
@@ -578,18 +598,13 @@ class VideoRoomPage extends StatelessWidget {
                 )),
 
             // Positioned(
-            //     top: 20,
+            //     bottom: 20,
             //     right: 24,
-            //     child: EngagementProgress(engagement: engagement)),
-
-            Positioned(
-                bottom: 20,
-                right: 24,
-                child: Text(
-                  remoteStream.publisherName!,
-                  style: context.textTheme.labelSmall
-                      ?.copyWith(color: Colors.white),
-                )),
+            //     child: Text(
+            //       remoteStream.publisherName!,
+            //       style: context.textTheme.labelSmall
+            //           ?.copyWith(color: Colors.white),
+            //     )),
 
             Visibility(
                 visible: remoteStream.isAudioMuted == true,
@@ -599,17 +614,17 @@ class VideoRoomPage extends StatelessWidget {
                     child:
                         imageSVGAsset('icon_microphone_disabled') as Widget)),
 
-            //
-            // Positioned(
-            //     bottom: 60,
-            //     left: 24,
-            //     child: ElevatedButton(
-            //       onPressed: () {
-            //         context.read<ConferenceCubit>().unPublishById(remoteStream.id);
-            //       },
-            //       child: const Text('UnPublish'),
-            //
-            //     ),),
+            Visibility(
+              visible: width<200,
+              child: Positioned.fill(
+                bottom: 20,
+                  child:
+                  Align(
+                      alignment: Alignment.bottomCenter,
+                      child: EngagementProgress(engagement: remoteStream.engagement?? 0)
+                  ),
+              )
+              ),
           ],
         ),
       );

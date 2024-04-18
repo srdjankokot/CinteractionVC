@@ -1,10 +1,19 @@
+import 'dart:convert';
+import 'dart:html';
+
 import 'package:cinteraction_vc/core/app/injector.dart';
+import 'package:cinteraction_vc/core/extension/context.dart';
 import 'package:cinteraction_vc/core/io/network/models/login_response.dart';
+import 'package:cinteraction_vc/core/navigation/router.dart';
+import 'package:cinteraction_vc/layers/data/dto/api_error_dto.dart';
 import 'package:cinteraction_vc/layers/data/dto/user_dto.dart';
 import 'package:cinteraction_vc/layers/domain/source/api.dart';
 import 'package:dio/dio.dart';
+import 'package:flutter/material.dart';
 
 import '../../../../core/io/network/urls.dart';
+import '../../../domain/entities/api_response.dart';
+import '../../dto/meeting_dto.dart';
 
 class ApiImpl extends Api {
   T? _parseResponseData<T>(
@@ -12,66 +21,32 @@ class ApiImpl extends Api {
     return fromJson(data);
   }
 
-  void _parseException(e) {
-    // The request was made and the server responded with a status code
-    // that falls out of the range of 2xx and is also not 304.
-    if (e.response != null) {
-      print(e.response?.data);
-      print(e.response?.headers);
-      print(e.response?.requestOptions);
-
-      //  API responds with 404 when reached the end
-      if (e.response?.statusCode == 404) return null;
-    } else {
-      // Something happened in setting up or sending the request that triggered an Error
-      print(e.requestOptions);
-      print(e.message);
-    }
-  }
-
   @override
-  Future<LoginResponse?> signInEmailPass({required email, required pass}) async {
+  Future<ApiResponse<LoginResponse?>> signInEmailPass(
+      {required email, required pass}) async {
     try {
       var formData = FormData.fromMap({'email': email, 'password': pass});
       Dio dio = await getIt.getAsync<Dio>();
       Response response = await dio.post(Urls.loginEndpoint, data: formData);
-      LoginResponse? login = _parseResponseData(response.data, LoginResponse.fromJson);
+      LoginResponse? login =
+      _parseResponseData(response.data, LoginResponse.fromJson);
 
-      return login;
+      return ApiResponse(response: login);
       // return login;
     } on DioException catch (e) {
-      _parseException(e);
+      return ApiResponse(error: ApiErrorDto.fromDioException(e));
     }
-    return null;
   }
-
   @override
-  Future<LoginResponse?> getMeetings() {
-    // TODO: implement getMeetings
-    throw UnimplementedError();
-  }
-
-  @override
-  Future<LoginResponse?> startCallHandler(
-      {required streamId,
-      required timezone,
-      required recording,
-      required userId}) {
-    // TODO: implement startCallHandler
-    throw UnimplementedError();
-  }
-
-  @override
-  Future<UserDto?> getUserDetails() async {
+  Future<ApiResponse<UserDto?>> getUserDetails() async {
     try {
       Dio dio = await getIt.getAsync<Dio>();
       Response response = await dio.get(Urls.getUserDetails);
       print(response);
-      return _parseResponseData(response.data, UserDto.fromJson);
+      return ApiResponse(response: _parseResponseData(response.data, UserDto.fromJson));
     } on DioException catch (e) {
-      _parseException(e);
+     return ApiResponse(error: ApiErrorDto.fromDioException(e));
     }
-    return null;
   }
 
   @override
@@ -83,7 +58,6 @@ class ApiImpl extends Api {
         await dio.post(Urls.socialLoginEndpoint, data: formData);
     var accessToken = response.data['Access-Token'] as String;
 
-
     return accessToken;
   }
 
@@ -93,7 +67,6 @@ class ApiImpl extends Api {
       required callId,
       required image,
       required participantId}) async {
-
     var formData = {
       'average_attention': 0,
       'call_id': callId,
@@ -103,38 +76,43 @@ class ApiImpl extends Api {
     };
 
     Dio dio = await getIt.getAsync<Dio>();
-    try{
+    try {
       dio.options.headers['Authorization'] = Urls.IVIAccessToken;
       var response = await dio.post(Urls.engagement, data: formData);
 
       return response.data['engagements'][0]['engagement_rank'];
 
-      // {"engagements":[{"call_id":1473,"engagement_rank":0.8191,"participant_id":36}]}
-    }
-    on  DioException catch (e, s){
+    } on DioException catch (e, s) {
       print(e);
     }
-
 
     return 0;
   }
 
-
   @override
-  Future<int?> startCall({required streamId, required userId}) async{
+  Future<ApiResponse<int>> startCall({required streamId, required userId}) async {
     Dio dio = await getIt.getAsync<Dio>();
+    try {
+      var formData = {
+        'streamId': streamId,
+        'user_id': userId,
+        'timezone': 'Europe/Belgrade',
+        'recording': false
+      };
 
+      Response response = await dio.post(Urls.startCall, data: formData);
+      var callId = response.data['call_id'] as int;
 
-    var formData = {'streamId': streamId, 'user_id': userId, 'timezone': 'Europe/Belgrade', 'recording' : false};
+      return ApiResponse(response: callId);
+      // return login;
+    } on DioException catch (e) {
+      return ApiResponse(error: ApiErrorDto.fromDioException(e));
+    }
 
-    Response response = await dio.post(Urls.startCall, data: formData);
-    var callId = response.data['call_id'] as int;
-
-    return callId;
   }
 
   @override
-  Future<bool> endCall({required callId, required userId}) async{
+  Future<bool> endCall({required callId, required userId}) async {
     Dio dio = await getIt.getAsync<Dio>();
 
     var formData = FormData.fromMap({'call_id': callId, 'user_id': userId});
@@ -143,5 +121,47 @@ class ApiImpl extends Api {
     return response.statusCode == 200;
   }
 
+  @override
+  Future<List<MeetingDto>?> getMeetings() async {
+    Dio dio = await getIt.getAsync<Dio>();
+    Response response = await dio.get(Urls.meetings);
 
+    List<MeetingDto> meetings = [];
+
+    for (var par in response.data['data']) {
+      var participant = MeetingDto.fromJson(par as Map<String, dynamic>);
+      meetings.add(participant);
+    }
+
+    // PastMeetingResponseDto? responseDto = _parseResponseData(response.data, PastMeetingResponseDto.fromJson);
+
+    return meetings;
+  }
+
+  @override
+  Future<ApiResponse<bool>> signUpEmailPass(
+      {required email, required pass, required name, required terms}) async {
+    Dio dio = await getIt.getAsync<Dio>();
+
+    var formData = {
+      'name': name,
+      'email': email,
+      'password': pass,
+      'password_confirmation': pass,
+      'terms': terms
+    };
+
+    try {
+      Response response = await dio.post(Urls.registerEndpoint, data: formData);
+      return ApiResponse(response: response.statusCode! > 200 && response.statusCode! < 300);
+
+    } on DioException catch (e, s) {
+      return ApiResponse(error: ApiErrorDto.fromDioException(e));
+    }
+
+  }
 }
+
+
+
+

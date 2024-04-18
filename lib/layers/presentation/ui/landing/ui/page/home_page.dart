@@ -3,9 +3,14 @@ import 'package:cinteraction_vc/assets/colors/Colors.dart';
 import 'package:cinteraction_vc/core/extension/context.dart';
 import 'package:cinteraction_vc/core/extension/context_user.dart';
 import 'package:cinteraction_vc/core/extension/image.dart';
+import 'package:cinteraction_vc/core/extension/router.dart';
+import 'package:cinteraction_vc/core/navigation/router.dart';
+import 'package:cinteraction_vc/core/util/secure_local_storage.dart';
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 
 import '../../../../../../core/app/injector.dart';
+import '../../../../../../core/navigation/route.dart';
 import '../../../../../../core/ui/images/image.dart';
 import '../../../../../../core/util/menu_items.dart';
 import '../../../../../data/source/local/local_storage.dart';
@@ -27,13 +32,29 @@ class _HomePageState extends State<HomePage> {
     final tabs = context.isWide ? desktopMenu : mobileBottomMenu;
 
     final user = context.getCurrentUser;
-    // User? user = getIt.get<LocalStorage>().loadLoggedUser();
 
     final Widget body;
     final Widget? bottomNavigationBar;
     final content = tabs[_selectedIndex].builder(context);
 
     context.textTheme.labelSmall;
+
+    void logOut()
+    {
+      saveAccessToken(null);
+      getIt.get<LocalStorage>().clearUser();
+
+      GoRouter.of(context).clearStackAndNavigate('/auth');
+
+    }
+
+    void handleClick(BuildContext context, String value) {
+      switch (value) {
+        case 'LogOut':
+          logOut();
+          break;
+      }
+    }
 
     if (context.isWide) {
       body = Row(
@@ -172,36 +193,53 @@ class _HomePageState extends State<HomePage> {
                     imageSVGAsset('original_long_logo') as Widget,
                     const Spacer(),
                     if (user != null)
-                      Row(
-                        children: [
-                          // CallButtonShape(
-                          //     image: imageSVGAsset('menu_notifications') as Widget,
-                          //     bgColor: ColorConstants.kGrey100,
-                          //     onClickAction: () => {}),
-                          const SizedBox(
-                            width: 10,
-                          ),
-                          UserImage.medium(user.imageUrl),
-                          const SizedBox(
-                            width: 10,
-                          ),
-                          Column(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                user.name,
-                                textAlign: TextAlign.center,
-                                style: context.textTheme.titleSmall,
-                              ),
-                              Text(
-                                'Participant',
-                                textAlign: TextAlign.center,
-                                style: context.textTheme.labelSmall,
-                              ),
-                            ],
-                          ),
-                        ],
+
+                      PopupMenuButton<String>(
+                        tooltip: '',
+                        child:  Row(
+                          children: [
+                            // CallButtonShape(
+                            //     image: imageSVGAsset('menu_notifications') as Widget,
+                            //     bgColor: ColorConstants.kGrey100,
+                            //     onClickAction: () => {}),
+                            const SizedBox(
+                              width: 10,
+                            ),
+                            UserImage.medium(user.imageUrl),
+                            const SizedBox(
+                              width: 10,
+                            ),
+
+
+                            Column(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  user.name,
+                                  textAlign: TextAlign.center,
+                                  style: context.textTheme.titleSmall,
+                                ),
+                                Text(
+                                  'Participant',
+                                  textAlign: TextAlign.center,
+                                  style: context.textTheme.labelSmall,
+                                ),
+                              ],
+                            ),
+                          ],
+                        ),
+                        onSelected: (item) {
+                          handleClick(context, item);
+                        },
+                        itemBuilder: (BuildContext context) {
+                          return {'LogOut'}.map((String choice) {
+                            return PopupMenuItem<String>(
+                              value: choice,
+                              child: Text(choice),
+                            );
+                          }).toList();
+                        },
                       )
                   ],
                 ),

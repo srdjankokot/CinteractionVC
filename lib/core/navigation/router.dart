@@ -3,8 +3,6 @@ import 'dart:math';
 import 'package:cinteraction_vc/core/app/injector.dart';
 import 'package:cinteraction_vc/core/navigation/route.dart';
 import 'package:cinteraction_vc/layers/domain/usecases/conference/conference_usecases.dart';
-import 'package:cinteraction_vc/layers/presentation/cubit/profile/profile_cubit.dart';
-import 'package:flutter/cupertino.dart';
 
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
@@ -12,24 +10,12 @@ import 'package:go_router/go_router.dart';
 import '../../layers/domain/usecases/auth/auth_usecases.dart';
 import '../../layers/presentation/cubit/auth/auth_cubit.dart';
 import '../../layers/presentation/cubit/conference/conference_cubit.dart';
-import '../../layers/presentation/cubit/groups/groups_cubit.dart';
-import '../../layers/presentation/cubit/meetings/meetings_cubit.dart';
-import '../../layers/presentation/cubit/roles/roles_cubit.dart';
-import '../../layers/presentation/cubit/users/users_cubit.dart';
 import '../../layers/presentation/ui/auth/auth_page.dart';
 import '../../layers/presentation/ui/auth/forgot_pass_page.dart';
 import '../../layers/presentation/ui/auth/reset_pass_send_email.dart';
 import '../../layers/presentation/ui/auth/splash_page.dart';
 import '../../layers/presentation/ui/conference/video_room.dart';
-import '../../layers/presentation/ui/groups/repository/groups_repository.dart';
-import '../../layers/presentation/ui/groups/ui/groups_page.dart';
 import '../../layers/presentation/ui/landing/ui/page/home_page.dart';
-import '../../layers/presentation/ui/meetings/repository/meetings_repository.dart';
-import '../../layers/presentation/ui/profile/repository/profile_repository.dart';
-import '../../layers/presentation/ui/roles/repository/roles_repository.dart';
-import '../../layers/presentation/ui/roles/ui/roles_page.dart';
-import '../../layers/presentation/ui/users/repository/users_repository.dart';
-import '../../layers/presentation/ui/users/ui/users_page.dart';
 import '../util/menu_items.dart';
 
 final GoRouter router = GoRouter(
@@ -47,7 +33,7 @@ final GoRouter router = GoRouter(
           create: (context) => AuthCubit(
             authUseCases: getIt.get<AuthUseCases>(),
           ),
-          child: const AuthPage(),
+          child:  AuthPage(),
         );
       },
     ),

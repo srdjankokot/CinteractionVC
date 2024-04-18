@@ -11,4 +11,5 @@ extension BuildContextUserExt on BuildContext {
     User? user = getIt.get<LocalStorage>().loadLoggedUser();
     return user;
   }
+
 }

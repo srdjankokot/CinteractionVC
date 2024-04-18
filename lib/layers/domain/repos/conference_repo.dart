@@ -1,9 +1,12 @@
 import 'dart:async';
 
 import 'package:janus_client/janus_client.dart';
+import 'package:webrtc_interface/webrtc_interface.dart';
 
 import '../../../core/io/network/models/participant.dart';
 import '../../../core/util/util.dart';
+import '../entities/api_response.dart';
+
 
 abstract class ConferenceRepo{
   const ConferenceRepo();
@@ -43,5 +46,8 @@ abstract class ConferenceRepo{
   Future<void> publishById({required String id});
 
   Future<void> changeSubStream({required ConfigureStreamQuality quality});
+  Future<void> shareScreen(MediaStream? mediaStream);
+
+  Future<ApiResponse<int>> startCall();
 
 }

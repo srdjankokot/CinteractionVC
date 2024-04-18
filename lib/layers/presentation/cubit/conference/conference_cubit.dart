@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:js';
 import 'dart:math';
 
 import 'package:cinteraction_vc/core/io/network/models/participant.dart';
@@ -6,6 +7,7 @@ import 'package:cinteraction_vc/core/util/util.dart';
 import 'package:cinteraction_vc/layers/domain/usecases/conference/conference_usecases.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:janus_client/janus_client.dart';
+import 'package:webrtc_interface/webrtc_interface.dart';
 
 import '../../../../core/logger/loggy_types.dart';
 import 'conference_state.dart';
@@ -29,8 +31,15 @@ class ConferenceCubit extends Cubit<ConferenceState> with BlocLoggy {
   StreamSubscription<int>? _avgEngagementStream;
 
   void _load() async {
-    await conferenceUseCases.conferenceInitialize
-        .call(displayName: displayName, roomId: roomId);
+    var startCall = await conferenceUseCases.startCall();
+
+    if (startCall.error != null) {
+      emit(ConferenceState.error(error: startCall.error!.errorMessage));
+      return;
+    }
+
+    await conferenceUseCases.conferenceInitialize(
+        displayName: displayName, roomId: roomId);
     _conferenceSubscription =
         conferenceUseCases.getRendererStream().listen(_onConference);
     _conferenceEndedStream =
@@ -38,7 +47,9 @@ class ConferenceCubit extends Cubit<ConferenceState> with BlocLoggy {
     _subscribersStream =
         conferenceUseCases.getSubscriberStream().listen(_onSubscribers);
 
-    _avgEngagementStream = conferenceUseCases.getAvgEngagementStream().listen(_onEngagementChanged);
+    _avgEngagementStream = conferenceUseCases
+        .getAvgEngagementStream()
+        .listen(_onEngagementChanged);
   }
 
   @override
@@ -81,9 +92,7 @@ class ConferenceCubit extends Cubit<ConferenceState> with BlocLoggy {
   void _onConference(Map<dynamic, StreamRenderer> streams) {
     loggy.info('list of streams: ${streams.length}');
     // Map<dynamic, StreamRenderer> s = streams;
-    emit(state.copyWith(
-        isInitial: false,
-        streamRenderers: streams));
+    emit(state.copyWith(isInitial: false, streamRenderers: streams));
     conferenceUseCases.getParticipants();
   }
 
@@ -100,9 +109,7 @@ class ConferenceCubit extends Cubit<ConferenceState> with BlocLoggy {
   }
 
   void _onEngagementChanged(int avgEngagement) {
-    emit(state.copyWith(
-        isInitial: false,
-        avgEngagement: avgEngagement));
+    emit(state.copyWith(isInitial: false, avgEngagement: avgEngagement));
   }
 
   Future<void> increaseNumberOfCopies() async {
@@ -143,6 +150,14 @@ class ConferenceCubit extends Cubit<ConferenceState> with BlocLoggy {
     conferenceUseCases.getParticipants();
   }
 
+  Future<void> shareScreen(MediaStream? mediaStream) async {
+    var screenShared = state.screenShared;
+
+    conferenceUseCases.shareScreen(mediaStream);
+
+    emit(state.copyWith(screenShared: !screenShared));
+  }
+
   Future<void> switchCamera() async {
     conferenceUseCases.switchCamera();
   }
@@ -158,6 +173,4 @@ class ConferenceCubit extends Cubit<ConferenceState> with BlocLoggy {
   Future<void> changeSubStream(ConfigureStreamQuality quality) async {
     conferenceUseCases.changeSubStream(quality);
   }
-
-
 }
