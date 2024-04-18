@@ -1,16 +1,11 @@
 import 'package:cinteraction_vc/core/extension/context.dart';
-import 'package:cinteraction_vc/layers/domain/repos/meetings_repo.dart';
 import 'package:cinteraction_vc/layers/domain/usecases/meeting/meeting_use_cases.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-
-import '../../layers/domain/usecases/auth/auth_usecases.dart';
-import '../../layers/presentation/cubit/auth/auth_cubit.dart';
 import '../../layers/presentation/cubit/groups/groups_cubit.dart';
 import '../../layers/presentation/cubit/meetings/meetings_cubit.dart';
 import '../../layers/presentation/cubit/roles/roles_cubit.dart';
 import '../../layers/presentation/cubit/users/users_cubit.dart';
-import '../../layers/presentation/ui/auth/auth_page.dart';
 import '../../layers/presentation/ui/dashboard/ui/dashboard_screen.dart';
 import '../../layers/presentation/ui/groups/repository/groups_repository.dart';
 import '../../layers/presentation/ui/groups/ui/groups_page.dart';
@@ -35,25 +30,25 @@ final mobileBottomMenu = <MenuItem>[
   profile
 ];
 final mobileProfileMenu = <MenuItem>[
-  users,
-  groups,
-  notifications,
-  tags,
-  roles,
-  permissions,
-  settings
+  // users,
+  // groups,
+  // notifications,
+  // tags,
+  // roles,
+  // permissions,
+  // settings
 ];
 final desktopMenu = <MenuItem>[
   home,
   dashboard,
   meetings,
   insights,
-  users,
-  groups,
-  tags,
-  roles,
-  permissions,
-  settings
+  // users,
+  // groups,
+  // tags,
+  // roles,
+  // permissions,
+  // settings
 ];
 
 

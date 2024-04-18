@@ -1,5 +1,6 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/svg.dart';
 
 enum UrlImageShape {
   circle,
@@ -41,16 +42,31 @@ class UrlImage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final Widget image = CachedNetworkImage(
+    Widget image = CachedNetworkImage(
       imageUrl: url,
       width: width,
       height: height,
       fit: fit,
+      errorWidget: (context, url, error) {
+
+        Widget image = SvgPicture.network(
+            url,
+            width: width,
+            height: height,
+            fit: fit,);
+
+        return switch (shape) {
+          UrlImageShape.circle => ClipOval(child: image),
+          UrlImageShape.rectangle => image,
+        };
+
+      },
     );
 
-    return switch (shape) {
-      UrlImageShape.circle => ClipOval(child: image),
-      UrlImageShape.rectangle => image,
-    };
-  }
+      return switch (shape) {
+        UrlImageShape.circle => ClipOval(child: image),
+        UrlImageShape.rectangle => image,
+      };
+    }
+
 }

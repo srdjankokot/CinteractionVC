@@ -553,8 +553,8 @@ class MeetingListLayoutState extends State<MeetingListLayout> {
                                                     children: [
                                                       const Expanded(
                                                           child:
-                                                          Text(
-                                                              'Duration: XX min}')),
+                                                          Text('Duration: XX min')
+                                                      ),
                                                       const Text(
                                                           'Recorded: '),
                                                       imageSVGAsset(
@@ -567,7 +567,7 @@ class MeetingListLayoutState extends State<MeetingListLayout> {
                                                   const SizedBox(
                                                     height: 10,),
                                                   EngagementProgress(
-                                                    engagement: (meetings![index].averageEngagement! * 100) as int,
+                                                    engagement: (meetings![index].averageEngagement! * 100).toInt(),
                                                     width: double
                                                         .maxFinite,
                                                   )
