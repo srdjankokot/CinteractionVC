@@ -1,5 +1,4 @@
 import 'dart:async';
-import 'dart:js';
 import 'dart:math';
 
 import 'package:cinteraction_vc/core/io/network/models/participant.dart';

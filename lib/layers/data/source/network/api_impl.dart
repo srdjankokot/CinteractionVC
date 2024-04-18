@@ -1,15 +1,11 @@
-import 'dart:convert';
-import 'dart:html';
+
 
 import 'package:cinteraction_vc/core/app/injector.dart';
-import 'package:cinteraction_vc/core/extension/context.dart';
 import 'package:cinteraction_vc/core/io/network/models/login_response.dart';
-import 'package:cinteraction_vc/core/navigation/router.dart';
 import 'package:cinteraction_vc/layers/data/dto/api_error_dto.dart';
 import 'package:cinteraction_vc/layers/data/dto/user_dto.dart';
 import 'package:cinteraction_vc/layers/domain/source/api.dart';
 import 'package:dio/dio.dart';
-import 'package:flutter/material.dart';
 
 import '../../../../core/io/network/urls.dart';
 import '../../../domain/entities/api_response.dart';

@@ -66,6 +66,13 @@ class _SchedulePopupState extends State<SchedulePopup> {
 
                   SizedBox(width: 50,),
 
+
+                ],
+              ),
+
+              const SizedBox(height: 20,),
+              Row(
+                children: [
                   Text('Time: '),
 
                   ElevatedButton(onPressed: () async {
@@ -79,6 +86,9 @@ class _SchedulePopupState extends State<SchedulePopup> {
 
                 ],
               )
+
+
+
 
 
             ],
