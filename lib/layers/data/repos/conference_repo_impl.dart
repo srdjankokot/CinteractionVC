@@ -5,6 +5,7 @@ import 'dart:math';
 import 'package:cinteraction_vc/core/io/network/models/participant.dart';
 import 'package:cinteraction_vc/core/util/util.dart';
 import 'package:cinteraction_vc/layers/domain/entities/api_response.dart';
+import 'package:cinteraction_vc/layers/domain/entities/chat_message.dart';
 import 'package:cinteraction_vc/layers/domain/repos/conference_repo.dart';
 import 'package:janus_client/janus_client.dart';
 import 'package:logging/logging.dart';
@@ -54,6 +55,7 @@ class ConferenceRepoImpl extends ConferenceRepo {
   final _conferenceStream =
       StreamController<Map<dynamic, StreamRenderer>>.broadcast();
   final _conferenceEndedStream = StreamController<String>.broadcast();
+  final _conferenceChatStream = StreamController<List<ChatMessage>>.broadcast();
   final _participantsStream = StreamController<List<Participant>>.broadcast();
   final _avgEngagementStream = StreamController<int>.broadcast();
 
@@ -65,6 +67,9 @@ class ConferenceRepoImpl extends ConferenceRepo {
   get screenShareId => myId + int.parse("1");
 
   int? callId;
+
+
+  List<ChatMessage> messages = [];
 
   @override
   Future<void> initialize(
@@ -112,6 +117,11 @@ class ConferenceRepoImpl extends ConferenceRepo {
   @override
   Stream<int> getAvgEngagementStream() {
     return _avgEngagementStream.stream;
+  }
+
+  @override
+  Stream<List<ChatMessage>> getConferenceMessagesStream() {
+    return _conferenceChatStream.stream;
   }
 
   _initLocalMediaRenderer() {
@@ -912,6 +922,8 @@ class ConferenceRepoImpl extends ConferenceRepo {
 
       case DataChannelCmd.message:
         print('message received ${command.data['message']}');
+        messages.add(ChatMessage(message: command.data['message'], displayName: command.data['displayName'], time: DateTime.parse(command.data['time']), avatarUrl: command.data['avatarUrl']));
+        _conferenceChatStream.add(messages);
         break;
     }
   }
@@ -972,8 +984,13 @@ class ConferenceRepoImpl extends ConferenceRepo {
   }
 
   _broadcastMessage(String msg) async {
-    var data = {"message" : msg};
-    await videoPlugin?.sendData(jsonEncode(DataChannelCommand(command: DataChannelCmd.message, id:  user!.id.toString(), data: data)));
+    var data = {"message" : msg, 'displayName':  user!.name, 'time':DateTime.now().toIso8601String(), 'avatarUrl':  user!.imageUrl};
+
+    await videoPlugin?.sendData(jsonEncode(DataChannelCommand(
+        command: DataChannelCmd.message,
+        id: user!.id.toString(),
+        data: data)
+        .toJson()));
   }
 
   _calculateAverageEngagement() {
@@ -998,5 +1015,13 @@ class ConferenceRepoImpl extends ConferenceRepo {
   Future<void> toggleEngagement({required bool enabled}) async {
     engagementEnabled = enabled;
     _getEngagement();
+  }
+
+  @override
+  Future<ApiResponse<bool>> sendMessage(String msg) async{
+    messages.add(ChatMessage(message: msg, displayName: 'Me', time: DateTime.now(), avatarUrl: user!.imageUrl));
+    _conferenceChatStream.add(messages);
+    await _broadcastMessage(msg);
+    return ApiResponse(response: true);
   }
 }

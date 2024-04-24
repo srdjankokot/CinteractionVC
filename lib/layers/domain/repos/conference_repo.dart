@@ -6,6 +6,7 @@ import 'package:webrtc_interface/webrtc_interface.dart';
 import '../../../core/io/network/models/participant.dart';
 import '../../../core/util/util.dart';
 import '../entities/api_response.dart';
+import '../entities/chat_message.dart';
 
 
 abstract class ConferenceRepo{
@@ -17,6 +18,7 @@ abstract class ConferenceRepo{
   Stream<Map<dynamic, StreamRenderer>> getStreamRendererStream();
 
   Stream<String> getConferenceEndedStream();
+  Stream<List<ChatMessage>> getConferenceMessagesStream();
 
   Stream<List<Participant>> getSubscribersStream();
 
@@ -49,5 +51,7 @@ abstract class ConferenceRepo{
   Future<void> shareScreen(MediaStream? mediaStream);
 
   Future<ApiResponse<int>> startCall();
+
+  Future<ApiResponse<bool>> sendMessage(String msg);
 
 }
