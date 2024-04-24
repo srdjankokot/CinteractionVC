@@ -30,13 +30,6 @@ class ConferenceCubit extends Cubit<ConferenceState> with BlocLoggy {
   StreamSubscription<int>? _avgEngagementStream;
 
   void _load() async {
-    var startCall = await conferenceUseCases.startCall();
-
-    if (startCall.error != null) {
-      emit(ConferenceState.error(error: startCall.error!.errorMessage));
-      return;
-    }
-
     await conferenceUseCases.conferenceInitialize(
         displayName: displayName, roomId: roomId);
     _conferenceSubscription =
@@ -49,6 +42,13 @@ class ConferenceCubit extends Cubit<ConferenceState> with BlocLoggy {
     _avgEngagementStream = conferenceUseCases
         .getAvgEngagementStream()
         .listen(_onEngagementChanged);
+
+    var startCall = await conferenceUseCases.startCall();
+
+    if (startCall.error != null) {
+      emit(ConferenceState.error(error: startCall.error!.errorMessage));
+      return;
+    }
   }
 
   @override

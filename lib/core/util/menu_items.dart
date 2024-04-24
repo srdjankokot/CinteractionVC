@@ -1,8 +1,10 @@
 import 'package:cinteraction_vc/core/extension/context.dart';
 import 'package:cinteraction_vc/layers/domain/usecases/meeting/meeting_use_cases.dart';
+import 'package:cinteraction_vc/layers/presentation/ui/landing/ui/page/home_page.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../layers/presentation/cubit/groups/groups_cubit.dart';
+import '../../layers/presentation/cubit/home/home_cubit.dart';
 import '../../layers/presentation/cubit/meetings/meetings_cubit.dart';
 import '../../layers/presentation/cubit/roles/roles_cubit.dart';
 import '../../layers/presentation/cubit/users/users_cubit.dart';
@@ -19,8 +21,6 @@ import '../../layers/presentation/ui/users/repository/users_repository.dart';
 import '../../layers/presentation/ui/users/ui/users_page.dart';
 import '../app/injector.dart';
 import '../navigation/route.dart';
-
-
 
 final mobileBottomMenu = <MenuItem>[
   home,
@@ -85,7 +85,11 @@ final home = MenuItem(
   route: AppRoute.home,
   label: 'Home',
   assetName: 'menu_home',
-  body: const HomeTab(),
+  body:
+  BlocProvider(
+    create: (context) => getIt.get<HomeCubit>(),
+    child: const HomeTab(),
+  )
 );
 final dashboard = MenuItem(
   route: null,
@@ -98,9 +102,7 @@ final meetings = MenuItem(
   label: 'Meetings',
   assetName: 'menu_meetings',
   body: BlocProvider(
-    create: (context) => MeetingCubit(
-      meetingUseCases: getIt.get<MeetingUseCases>(),
-    ),
+    create: (context) => getIt.get<MeetingCubit>(),
     child: const MeetingsPage(),
   )
 );

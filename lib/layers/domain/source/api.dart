@@ -10,10 +10,18 @@ abstract class Api {
   Future<String?> socialLogin({required provider, required token});
   Future<ApiResponse<UserDto?>> getUserDetails();
 
-  Future<double?> engagement({required averageAttention, required callId, required image, required participantId});
+  Future<double?> getEngagement({required averageAttention, required callId, required image, required participantId});
+  Future<ApiResponse<bool>> sendEngagement({required engagement, required userId, required callId});
 
   Future<ApiResponse<int>> startCall({required streamId, required userId});
   Future<bool> endCall({required callId, required userId});
 
   Future<List<MeetingDto>?> getMeetings();
+  Future<ApiResponse<List<MeetingDto>?>> getScheduledMeetings();
+  Future<ApiResponse<MeetingDto?>> getNextMeeting();
+
+  Future<ApiResponse<bool?>> scheduleMeeting({required String name, required String description, required String tag, required DateTime date});
+
+  Future<ApiResponse<bool?>> sendMessage({required String userId, required String message, required String callId});
+
 }

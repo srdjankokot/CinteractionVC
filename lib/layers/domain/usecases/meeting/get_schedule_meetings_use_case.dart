@@ -1,3 +1,4 @@
+import '../../entities/api_response.dart';
 import '../../entities/meeting.dart';
 import '../../repos/meetings_repo.dart';
 
@@ -5,7 +6,7 @@ class GetScheduleMeetings{
   final MeetingRepo repo;
   GetScheduleMeetings({required this.repo});
 
-  Future<List<Meeting>?> call() {
+  Future<ApiResponse<List<Meeting>?>>  call() {
     return repo.getListOfScheduledMeetings();
   }
 }

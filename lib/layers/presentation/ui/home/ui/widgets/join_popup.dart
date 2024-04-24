@@ -9,12 +9,12 @@ class JoinPopup extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
 
-    TextEditingController _textFieldController = TextEditingController();
+    TextEditingController textFieldController = TextEditingController();
 
         return AlertDialog(
           title: const Text('Enter room ID'),
           content: TextField(
-            controller: _textFieldController,
+            controller: textFieldController,
             decoration: const InputDecoration(hintText: "Room ID"),
           ),
           actions: <Widget>[
@@ -31,7 +31,7 @@ class JoinPopup extends StatelessWidget {
                 Navigator.pop(context);
                 context.pushNamed('meeting',
                     pathParameters: {
-                      'roomId': _textFieldController.text,
+                      'roomId': textFieldController.text,
                     },
                     extra: context.getCurrentUser?.name);
 

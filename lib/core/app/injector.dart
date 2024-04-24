@@ -3,10 +3,13 @@ import 'package:cinteraction_vc/layers/data/repos/conference_repo_impl.dart';
 import 'package:cinteraction_vc/layers/data/repos/meetings_repo_impl.dart';
 import 'package:cinteraction_vc/layers/data/source/network/api_impl.dart';
 import 'package:cinteraction_vc/layers/domain/repos/conference_repo.dart';
+import 'package:cinteraction_vc/layers/domain/repos/home_repo.dart';
+import 'package:cinteraction_vc/layers/domain/usecases/home/home_use_cases.dart';
 import 'package:dio/dio.dart';
 import 'package:get_it/get_it.dart';
 
 import '../../layers/data/repos/auth_repo_impl.dart';
+import '../../layers/data/repos/home_repo_impl.dart';
 import '../../layers/data/source/local/local_storage.dart';
 import '../../layers/domain/repos/auth_repo.dart';
 import '../../layers/domain/repos/meetings_repo.dart';
@@ -14,6 +17,8 @@ import '../../layers/domain/source/api.dart';
 import '../../layers/domain/usecases/auth/auth_usecases.dart';
 import '../../layers/domain/usecases/conference/conference_usecases.dart';
 import '../../layers/domain/usecases/meeting/meeting_use_cases.dart';
+import '../../layers/presentation/cubit/home/home_cubit.dart';
+import '../../layers/presentation/cubit/meetings/meetings_cubit.dart';
 import '../../layers/presentation/cubit/profile/profile_cubit.dart';
 import '../../layers/presentation/cubit/users/users_cubit.dart';
 import '../../layers/presentation/ui/groups/provider/groups_provider.dart';
@@ -86,6 +91,8 @@ Future<void> initializeGetIt() async {
   getIt.registerFactory<AuthRepo>(() => AuthRepoImpl(api: getIt()),);
   getIt.registerFactory<ConferenceRepo>(() => ConferenceRepoImpl(api: getIt()));
   getIt.registerFactory<MeetingRepo>(() => MeetingRepoImpl(api: getIt()));
+  getIt.registerFactory<HomeRepo>(() => HomeRepoImpl(api: getIt()));
+
 
   getIt.registerFactory<UsersProvider>(() => UsersProvider());
   getIt.registerFactory<GroupsProvider>(() => GroupsProvider());
@@ -99,6 +106,7 @@ Future<void> initializeGetIt() async {
   getIt.registerFactory(() => AuthUseCases());
   getIt.registerFactory(() => ConferenceUseCases(repo: getIt()));
   getIt.registerFactory(() => MeetingUseCases(repo: getIt()));
+  getIt.registerFactory(() => HomeUseCases(repo: getIt()));
 
   getIt.registerSingleton<ProfileProvider>(ProfileProvider());
   // getIt.registerFactory<UsersProvider>(() => UsersProvider());
@@ -109,6 +117,8 @@ Future<void> initializeGetIt() async {
 
 
   getIt.registerSingleton<ProfileCubit>(ProfileCubit(userRepository: getIt()));
+  getIt.registerFactory<HomeCubit>(()=>HomeCubit(homeUseCases: getIt()));
+  getIt.registerFactory<MeetingCubit>(()=>MeetingCubit(meetingUseCases: getIt()));
 
 
   Map<String, dynamic>? getHeader()
