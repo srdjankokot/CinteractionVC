@@ -21,6 +21,7 @@ class ColorConstants {
   static const kGray3 = Color(0xFF828282);
   static const kGray4 = Color(0xFFBDBDBD);
   static const kGray5 = Color(0xFFE0E0E0);
+  static const kGray600 = Color(0xFF475466);
 
 
 

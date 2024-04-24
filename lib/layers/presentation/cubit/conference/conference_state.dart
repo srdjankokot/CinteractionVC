@@ -3,6 +3,7 @@ import 'package:cinteraction_vc/layers/domain/entities/api_error.dart';
 import 'package:equatable/equatable.dart';
 
 import '../../../../core/util/util.dart';
+import '../../../domain/entities/chat_message.dart';
 
 
 class ConferenceState extends Equatable {
@@ -10,10 +11,12 @@ class ConferenceState extends Equatable {
   final bool isEnded;
   final Map<dynamic, StreamRenderer>? streamRenderers;
   final List<Participant>? streamSubscribers;
+  final List<ChatMessage>? messages;
   final bool audioMuted;
   final bool videoMuted;
   final bool screenShared;
   final bool engagementEnabled;
+  final bool showingChat;
   final int? numberOfStreams;
   final int? avgEngagement;
   final int numberOfStreamsCopy;
@@ -25,10 +28,12 @@ class ConferenceState extends Equatable {
     required this.isEnded,
     this.streamRenderers,
     this.streamSubscribers,
+    this.messages,
     required this.audioMuted,
     required this.videoMuted,
     required this.screenShared,
     required this.engagementEnabled,
+    required this.showingChat,
     this.numberOfStreams,
     this.avgEngagement,
     required this.numberOfStreamsCopy,
@@ -46,10 +51,11 @@ class ConferenceState extends Equatable {
     bool videoMuted = false,
     bool screenShared = false,
     bool engagementEnabled = true,
+    bool showingChat = false,
     int? numberOfStreamsCopy,
     int? isGridLayout,
     int? avgEngagement = 0,
-  }) : this(isInitial: isInitial, isEnded: isEnded, audioMuted: audioMuted, videoMuted: videoMuted, numberOfStreamsCopy: 1, isGridLayout: true, engagementEnabled: engagementEnabled, avgEngagement: avgEngagement, screenShared:screenShared);
+  }) : this(isInitial: isInitial, isEnded: isEnded, audioMuted: audioMuted, videoMuted: videoMuted, numberOfStreamsCopy: 1, isGridLayout: true, engagementEnabled: engagementEnabled, avgEngagement: avgEngagement, screenShared:screenShared, showingChat: showingChat);
 
 
   const ConferenceState.ended({
@@ -60,7 +66,8 @@ class ConferenceState extends Equatable {
     bool videoMuted = false,
     bool screenShared = false,
     bool engagementEnabled = true,
-  }) : this(isInitial: isInitial, isEnded: isEnded, audioMuted: audioMuted, videoMuted: videoMuted, numberOfStreamsCopy: 1, isGridLayout: true, engagementEnabled : engagementEnabled, screenShared:screenShared);
+    bool showingChat = false,
+  }) : this(isInitial: isInitial, isEnded: isEnded, audioMuted: audioMuted, videoMuted: videoMuted, numberOfStreamsCopy: 1, isGridLayout: true, engagementEnabled : engagementEnabled, screenShared:screenShared, showingChat:showingChat);
 
 
   const ConferenceState.error({
@@ -71,8 +78,9 @@ class ConferenceState extends Equatable {
     bool videoMuted = false,
     bool screenShared = false,
     bool engagementEnabled = true,
+    bool showingChat = false,
     required String error,
-  }) : this(isInitial: isInitial, isEnded: isEnded, audioMuted: audioMuted, videoMuted: videoMuted, numberOfStreamsCopy: 1, isGridLayout: true, engagementEnabled : engagementEnabled, screenShared:screenShared, error: error);
+  }) : this(isInitial: isInitial, isEnded: isEnded, audioMuted: audioMuted, videoMuted: videoMuted, numberOfStreamsCopy: 1, isGridLayout: true, engagementEnabled : engagementEnabled, screenShared:screenShared, error: error, showingChat:showingChat);
 
 
 
@@ -82,6 +90,7 @@ class ConferenceState extends Equatable {
     bool? isEnded,
     Map<dynamic, StreamRenderer>? streamRenderers,
     List<Participant>? streamSubscribers,
+    List<ChatMessage>? messages,
     int? numberOfStreams,
     int? numberOfStreamsCopy,
     int? avgEngagement,
@@ -89,6 +98,7 @@ class ConferenceState extends Equatable {
     bool? videoMuted,
     bool? screenShared,
     bool? engagementEnabled,
+    bool? showingChat,
     bool? isGridLayout,
   }) {
     return ConferenceState(
@@ -104,9 +114,11 @@ class ConferenceState extends Equatable {
       numberOfStreamsCopy: numberOfStreamsCopy ?? this.numberOfStreamsCopy,
       avgEngagement: avgEngagement ?? this.avgEngagement,
       isGridLayout: isGridLayout ?? this.isGridLayout,
+      showingChat: showingChat ?? this.showingChat,
+      messages: messages ?? this.messages,
     );
   }
 
   @override
-  List<Object?> get props => [isInitial, isEnded, streamRenderers, streamSubscribers, numberOfStreams, audioMuted, videoMuted, numberOfStreamsCopy, isGridLayout, engagementEnabled, avgEngagement, screenShared];
+  List<Object?> get props => [isInitial, isEnded, streamRenderers, streamSubscribers, numberOfStreams, audioMuted, videoMuted, numberOfStreamsCopy, isGridLayout, engagementEnabled, avgEngagement, screenShared, showingChat, messages];
 }

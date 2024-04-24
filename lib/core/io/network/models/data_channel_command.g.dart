@@ -24,4 +24,5 @@ const _$DataChannelCmdEnumMap = {
   DataChannelCmd.publish: 'publish',
   DataChannelCmd.unPublish: 'unPublish',
   DataChannelCmd.engagement: 'engagement',
+  DataChannelCmd.message: 'message',
 };

@@ -9,6 +9,7 @@ import 'package:janus_client/janus_client.dart';
 import 'package:webrtc_interface/webrtc_interface.dart';
 
 import '../../../../core/logger/loggy_types.dart';
+import '../../../domain/entities/chat_message.dart';
 import 'conference_state.dart';
 
 class ConferenceCubit extends Cubit<ConferenceState> with BlocLoggy {
@@ -26,6 +27,7 @@ class ConferenceCubit extends Cubit<ConferenceState> with BlocLoggy {
 
   StreamSubscription<Map<dynamic, StreamRenderer>>? _conferenceSubscription;
   StreamSubscription<String>? _conferenceEndedStream;
+  StreamSubscription<List<ChatMessage>>? _conferenceMessageStream;
   StreamSubscription<List<Participant>>? _subscribersStream;
   StreamSubscription<int>? _avgEngagementStream;
 
@@ -38,6 +40,9 @@ class ConferenceCubit extends Cubit<ConferenceState> with BlocLoggy {
         conferenceUseCases.getEndStream().listen(_onConferenceEnded);
     _subscribersStream =
         conferenceUseCases.getSubscriberStream().listen(_onSubscribers);
+
+    _conferenceMessageStream =
+        conferenceUseCases.getMessageStream().listen(_onMessageReceived);
 
     _avgEngagementStream = conferenceUseCases
         .getAvgEngagementStream()
@@ -64,6 +69,11 @@ class ConferenceCubit extends Cubit<ConferenceState> with BlocLoggy {
     loggy.info('finish call button clicked');
     // conferenceRepository.finishCall().then((value) =>  emit(const ConferenceState.ended()));
     conferenceUseCases.finishCall();
+  }
+
+  Future<void> toggleChatWindow()
+  async {
+    emit(state.copyWith(showingChat: !state.showingChat));
   }
 
   // bool audioMuted = false;
@@ -105,6 +115,10 @@ class ConferenceCubit extends Cubit<ConferenceState> with BlocLoggy {
         isInitial: false,
         streamSubscribers: subscribers,
         numberOfStreams: Random().nextInt(10000)));
+  }
+
+  void _onMessageReceived(List<ChatMessage> chat) {
+    emit(state.copyWith(messages: chat, numberOfStreams: Random().nextInt(10000)));
   }
 
   void _onEngagementChanged(int avgEngagement) {
@@ -171,5 +185,10 @@ class ConferenceCubit extends Cubit<ConferenceState> with BlocLoggy {
 
   Future<void> changeSubStream(ConfigureStreamQuality quality) async {
     conferenceUseCases.changeSubStream(quality);
+  }
+
+
+  Future<void> sendMessage(String msg) async {
+    conferenceUseCases.sendMessage(msg);
   }
 }

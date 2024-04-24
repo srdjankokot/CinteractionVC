@@ -11,10 +11,12 @@ import 'conference_get_participants.dart';
 import 'conference_get_renderer_stream.dart';
 import 'conference_initialize.dart';
 import 'conference_kick.dart';
+import 'conference_messages_stream.dart';
 import 'conference_mute.dart';
 import 'conference_ping.dart';
 import 'conference_publish.dart';
 import 'conference_publish_by_id.dart';
+import 'conference_send_message.dart';
 import 'conference_start_call.dart';
 import 'conference_switch_camera.dart';
 import 'conference_toggle_engagement.dart';
@@ -41,7 +43,9 @@ class ConferenceUseCases {
         publishById = ConferencePublishById(repo: repo),
         shareScreen = ConferenceShareScreen(repo: repo),
         getAvgEngagementStream = GetAvgEngagementStream(repo: repo),
-        startCall = ConferenceStartCall(repo: repo);
+        startCall = ConferenceStartCall(repo: repo),
+        sendMessage = ConferenceSendMessage(repo: repo),
+        getMessageStream = ConferenceMessageStream(repo: repo);
 
   final ConferenceRepo repo;
 
@@ -64,4 +68,6 @@ class ConferenceUseCases {
   GetAvgEngagementStream getAvgEngagementStream;
   ConferenceShareScreen shareScreen;
   ConferenceStartCall startCall;
+  ConferenceSendMessage sendMessage;
+  ConferenceMessageStream getMessageStream;
 }
