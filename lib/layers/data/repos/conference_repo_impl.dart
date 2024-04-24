@@ -6,7 +6,6 @@ import 'package:cinteraction_vc/core/io/network/models/participant.dart';
 import 'package:cinteraction_vc/core/util/util.dart';
 import 'package:cinteraction_vc/layers/domain/entities/api_response.dart';
 import 'package:cinteraction_vc/layers/domain/repos/conference_repo.dart';
-import 'package:dio/dio.dart';
 import 'package:janus_client/janus_client.dart';
 import 'package:logging/logging.dart';
 import 'package:webrtc_interface/webrtc_interface.dart';
@@ -910,15 +909,19 @@ class ConferenceRepoImpl extends ConferenceRepo {
             command.data['engagement'] as int;
         _refreshStreams();
         break;
+
+      case DataChannelCmd.message:
+        print('message received ${command.data['message']}');
+        break;
     }
   }
 
   _getEngagement() async {
-    // if (true) return;
+    if (engagementIsRunning) return;
     engagementIsRunning = true;
 
     try {
-      if (engagementEnabled) {
+
         var image = await localVideoRenderer.mediaStream
             ?.getVideoTracks()
             .first
@@ -926,13 +929,13 @@ class ConferenceRepoImpl extends ConferenceRepo {
 
         // print(base64Encode(image!.asUint8List().toList()).toString());
 
-        // final engagement = await _api.engagement(
-        //     averageAttention: 0,
-        //     callId: callId,
-        //     image: base64Encode(image!.asUint8List().toList()).toString(),
-        //     participantId: user?.id);
+        final engagement = await _api.getEngagement(
+            averageAttention: 0,
+            callId: callId,
+            image: base64Encode(image!.asUint8List().toList()).toString(),
+            participantId: user?.id);
 
-        var engagement = Random().nextDouble() * (0.85 - 0.4) + 0.4;
+        // var engagement = Random().nextDouble() * (0.85 - 0.4) + 0.4;
 
         if (engagement! > 0) {
           var eng = ((engagement) * 100).toInt();
@@ -940,9 +943,10 @@ class ConferenceRepoImpl extends ConferenceRepo {
           _refreshStreams();
           _calculateAverageEngagement();
           _sendMyEngagementToOthers(eng);
+         await _sendMyEngagementToServer(engagement);
         }
         print('My engagement: $engagement');
-      }
+
     } finally {
       engagementIsRunning = false;
       if (engagementEnabled) {
@@ -950,6 +954,11 @@ class ConferenceRepoImpl extends ConferenceRepo {
         _getEngagement();
       }
     }
+  }
+
+  _sendMyEngagementToServer(double engagement) async
+  {
+    await _api.sendEngagement(engagement: engagement, userId: user!.id.toString(), callId: callId);
   }
 
   _sendMyEngagementToOthers(int engagement) async {
@@ -960,6 +969,11 @@ class ConferenceRepoImpl extends ConferenceRepo {
             id: user!.id.toString(),
             data: data)
         .toJson()));
+  }
+
+  _broadcastMessage(String msg) async {
+    var data = {"message" : msg};
+    await videoPlugin?.sendData(jsonEncode(DataChannelCommand(command: DataChannelCmd.message, id:  user!.id.toString(), data: data)));
   }
 
   _calculateAverageEngagement() {

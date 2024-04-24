@@ -3,6 +3,7 @@ import 'dart:math';
 import 'package:cinteraction_vc/core/app/injector.dart';
 import 'package:cinteraction_vc/core/navigation/route.dart';
 import 'package:cinteraction_vc/layers/domain/usecases/conference/conference_usecases.dart';
+import 'package:cinteraction_vc/layers/presentation/cubit/home/home_cubit.dart';
 
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
@@ -33,7 +34,7 @@ final GoRouter router = GoRouter(
           create: (context) => AuthCubit(
             authUseCases: getIt.get<AuthUseCases>(),
           ),
-          child:  AuthPage(),
+          child: AuthPage(),
         );
       },
     ),
@@ -50,9 +51,7 @@ final GoRouter router = GoRouter(
     // Home
     GoRoute(
       path: AppRoute.home.path,
-      builder: (context, state) {
-        return const HomePage();
-      },
+      builder: (context, state) => const HomePage(),
     ),
     // Meeting
     GoRoute(
@@ -61,7 +60,8 @@ final GoRouter router = GoRouter(
         builder: (context, state) {
           // final roomId = state.extra ?? '1234';
           final display = state.extra ?? 'displayName';
-          final roomId = state.pathParameters['roomId'] ?? Random().nextInt(999999);
+          final roomId =
+              state.pathParameters['roomId'] ?? Random().nextInt(999999);
           // final display =  state.pathParameters['displayName'] ?? 'displayName';
 
           // final roomId = state.pathParameters['roomId'];
@@ -95,6 +95,5 @@ final GoRouter router = GoRouter(
         return roles.builder(context);
       },
     ),
-
   ],
 );

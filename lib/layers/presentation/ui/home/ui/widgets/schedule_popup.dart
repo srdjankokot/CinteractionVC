@@ -1,127 +1,114 @@
-import 'package:flutter/cupertino.dart';
+import 'package:cinteraction_vc/layers/presentation/cubit/home/home_cubit.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart';
 
-class SchedulePopup extends StatefulWidget {
-  const SchedulePopup({Key? key}) : super(key: key);
+import '../../../../../../core/ui/input/input_field.dart';
 
-
-
+class SchedulePopup extends StatelessWidget {
+  const SchedulePopup({super.key, required this.context});
+  final BuildContext context;
   @override
-  State<SchedulePopup> createState() => _SchedulePopupState();
+  Widget build(BuildContext innerContext) {
 
+    TextEditingController nameFieldController = TextEditingController();
+    TextEditingController descFieldController = TextEditingController();
+    TextEditingController tagNameFieldController = TextEditingController();
+    final formKey = GlobalKey<FormState>();
 
-}
+    return BlocProvider.value(
+      value: context.watch<HomeCubit>(),
+      child: BlocConsumer<HomeCubit, HomeState>(
+        listener: (c, s){
+            print('state');
+        },
+          builder: (context, state) => AlertDialog(
+            content: AlertDialog(
+              title: const Text('Schedule a meeting'),
+              content:  Form(
+                key: formKey,
+                child: Wrap(
+                  children: [
+                    Column(
+                      children: [
+                        InputField.name(
+                            label: 'Enter your full name',
+                            controller: nameFieldController,
+                            textInputAction:
+                            TextInputAction.next),
+                        // TextField(
+                        //   controller: nameFieldController,
+                        //   decoration: const InputDecoration(hintText: "Event Name"),
+                        // ),
 
-class _SchedulePopupState extends State<SchedulePopup> {
-  DateTime date = DateTime.now();
-  TimeOfDay time = const TimeOfDay(hour: 12, minute: 0);
+                        const SizedBox(height: 20,),
+                        TextField(
+                          controller: descFieldController,
+                          decoration: const InputDecoration(hintText: "Event Description"),
+                        ),
+                        const SizedBox(height: 20,),
+                        TextField(
+                          controller: tagNameFieldController,
+                          decoration: const InputDecoration(hintText: "Tag Name"),
+                        ),
 
-  @override
-  void initState() {
-    date.add(const Duration(days: 1));
-  }
+                        const SizedBox(height: 20,),
 
-  @override
-  Widget build(BuildContext context) {
+                        Row(
+                          children: [
+                            const Text('Date: '),
+                            ElevatedButton(onPressed: () async {
+                              await showDatePicker(context: context, firstDate: DateTime.now().add(const Duration(hours: 1)), lastDate: DateTime.now().add(const Duration(days: 90)), ).then((selectedDate)
+                              {
+                                context.read<HomeCubit>().setScheduleDate(selectedDate!);
+                              });
+                            }, child: Text(DateFormat('dd/MM/yyyy').format(state.scheduleStartDateTime?? DateTime.now()))),
+                            const SizedBox(width: 50,),
+                          ],
+                        ),
 
-    TextEditingController _textFieldController = TextEditingController();
+                        const SizedBox(height: 20,),
+                        Row(
+                          children: [
+                            const Text('Time: '),
 
-    return AlertDialog(
-      title: const Text('Schedule a meeting'),
-      content:  Wrap(
-        children: [
-          Column(
-            children: [
-              TextField(
-                controller: _textFieldController,
-                decoration: const InputDecoration(hintText: "Event Name"),
+                            ElevatedButton(onPressed: () async {
+
+                              await showTimePicker(context: context, initialTime: TimeOfDay.fromDateTime(state.scheduleStartDateTime!)).then((selectedTime)  {
+                                context.read<HomeCubit>().setScheduleTime(selectedTime);
+                              });
+                            }, child: Text(DateFormat('HH:mm').format(state.scheduleStartDateTime!)))
+                          ],
+                        )
+                      ],
+                    ),
+                  ],
+                ),
               ),
 
-              const SizedBox(height: 20,),
-              TextField(
-                controller: _textFieldController,
-                decoration: const InputDecoration(hintText: "Event Description"),
-              ),
-              const SizedBox(height: 20,),
-              TextField(
-                controller: _textFieldController,
-                decoration: const InputDecoration(hintText: "Tag Name"),
-              ),
+              actions: <Widget>[
+                ElevatedButton(
+                  child: const Text('Cancel'),
+                  onPressed: () {
+                    Navigator.pop(context);
+                  },
+                ),
+                ElevatedButton(
+                  child: const Text('Schedule'),
+                  onPressed: () {
+                    if (!formKey.currentState!.validate()) {
+                      return;
+                    }
+                    // print(_textFieldController.text);
+                    Navigator.pop(context);
+                    context.read<HomeCubit>().scheduleMeeting(nameFieldController.value.text, descFieldController.value.text, tagNameFieldController.value.text);
 
-              const SizedBox(height: 20,),
-
-              Row(
-                children: [
-                  Text('Date: '),
-
-                  ElevatedButton(onPressed: () async {
-                    await showDatePicker(context: context, firstDate: DateTime(2024), lastDate: DateTime(2025), ).then((selectedDate)
-                    {
-                      setState(() {
-                        date = selectedDate!;
-                      });
-                    });
-                  }, child: Text(DateFormat('dd/MM/yyyy').format(date))),
-
-                  SizedBox(width: 50,),
-
-
-                ],
-              ),
-
-              const SizedBox(height: 20,),
-              Row(
-                children: [
-                  Text('Time: '),
-
-                  ElevatedButton(onPressed: () async {
-
-                    await showTimePicker(context: context, initialTime: time).then((selectedTime)  {
-                      setState(() {
-                        time = selectedTime!;
-                      });
-                    });
-                  }, child: Text('${time.hour}:${time.minute}'))
-
-                ],
-              )
-
-
-
-
-
-            ],
+                  },
+                ),
+              ],
+            ),
           ),
-        ],
-      ),
-
-      actions: <Widget>[
-        ElevatedButton(
-          child: const Text('Cancel'),
-          onPressed: () {
-            Navigator.pop(context);
-          },
         ),
-        ElevatedButton(
-          child: const Text('Schedule'),
-          onPressed: () {
-            // print(_textFieldController.text);
-            Navigator.pop(context);
-            // context.pushNamed('meeting',
-            //     pathParameters: {
-            //       'roomId': _textFieldController.text,
-            //     },
-            //     extra: context.getCurrentUser?.name);
-
-            // context.go("${AppRoute.meeting.path}/${_textFieldController.text}");
-          },
-        ),
-      ],
     );
   }
-
-
 }
-
-

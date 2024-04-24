@@ -1,5 +1,6 @@
 import 'package:cinteraction_vc/layers/domain/entities/meeting.dart';
 
+import '../../domain/entities/api_response.dart';
 import '../../domain/repos/meetings_repo.dart';
 import '../../domain/source/api.dart';
 
@@ -18,9 +19,9 @@ class MeetingRepoImpl extends MeetingRepo{
   }
 
   @override
-  Future<List<Meeting>> getListOfScheduledMeetings() {
-    // TODO: implement getListOfScheduledMeetings
-    throw UnimplementedError();
+  Future<ApiResponse<List<Meeting>?>>  getListOfScheduledMeetings() async{
+    final meetings = await _api.getScheduledMeetings();
+    return meetings;
   }
 
 }

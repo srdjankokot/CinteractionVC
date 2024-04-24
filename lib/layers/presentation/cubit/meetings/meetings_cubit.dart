@@ -38,9 +38,12 @@ class MeetingCubit extends Cubit<MeetingState> with BlocLoggy{
     emit(MeetingLoaded(meetings: meetings?? List.empty()));
   }
 
-  void loadScheduledMeetings() {
+  void loadScheduledMeetings() async {
     emit(const MeetingsIsLoading());
-    meetingUseCases.getScheduleMeetings();
+    var meetings = await meetingUseCases.getScheduleMeetings();
+
+
+    emit(MeetingLoaded(meetings: meetings.response?? List.empty()));
   }
 
 

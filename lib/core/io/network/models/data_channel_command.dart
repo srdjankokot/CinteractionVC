@@ -4,7 +4,8 @@ part 'data_channel_command.g.dart';
 enum DataChannelCmd {
   publish('publish'),
   unPublish('unPublish'),
-  engagement('engagement');
+  engagement('engagement'),
+  message('message');
 
   const DataChannelCmd(this.value);
   final String value;

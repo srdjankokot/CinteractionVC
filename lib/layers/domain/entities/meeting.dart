@@ -2,15 +2,15 @@ import 'package:json_annotation/json_annotation.dart';
 
 class Meeting {
   Meeting(
-      {
-        required this.callId,
+      {required this.callId,
       required this.organizerId,
       required this.organizer,
-      required this.averageEngagement,
-      required this.totalNumberOfUsers,
-      required this.recorded,
+      this.averageEngagement,
+      this.totalNumberOfUsers,
+      this.recorded,
       required this.meetingStart,
-       this.meetingEnd});
+      this.meetingEnd,
+      this.streamId});
 
   @JsonKey(name: 'call_id')
   int callId;
@@ -20,13 +20,16 @@ class Meeting {
 
   String organizer;
 
+  @JsonKey(name: 'stream_id')
+  String? streamId;
+
   @JsonKey(name: 'average_engagement')
-  double averageEngagement;
+  double? averageEngagement;
 
   @JsonKey(name: 'total_number_of_users')
-  int totalNumberOfUsers;
+  int? totalNumberOfUsers;
 
-  bool recorded;
+  bool? recorded;
 
   @JsonKey(name: 'meeting_start')
   DateTime meetingStart;

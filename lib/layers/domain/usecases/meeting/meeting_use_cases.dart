@@ -13,5 +13,4 @@ class MeetingUseCases{
   MeetingUseCases({required this.repo}):
     getPastMeetingsUseCase = GetPastMeetingsUseCase(repo: repo),
     getScheduleMeetings = GetScheduleMeetings(repo: repo);
-
 }

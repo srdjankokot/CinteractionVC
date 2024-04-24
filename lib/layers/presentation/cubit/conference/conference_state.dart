@@ -110,30 +110,3 @@ class ConferenceState extends Equatable {
   @override
   List<Object?> get props => [isInitial, isEnded, streamRenderers, streamSubscribers, numberOfStreams, audioMuted, videoMuted, numberOfStreamsCopy, isGridLayout, engagementEnabled, avgEngagement, screenShared];
 }
-
-// @immutable
-// sealed class ConferenceState{
-//   const ConferenceState({this.audioMuted = false});
-//   final bool? audioMuted;
-//
-//   bool? get audioMute => audioMuted;
-// }
-//
-//
-// class ConferenceInitial extends ConferenceState{
-//   const ConferenceInitial();
-// }
-//
-// class ConferenceEnd extends ConferenceState{
-//   const ConferenceEnd();
-// }
-//
-//
-// class ConferenceInProgress extends ConferenceState{
-//   @override
-//   final bool audioMuted;
-//
-//   final Map<dynamic, StreamRenderer>? streamRenderers;
-//
-//   const ConferenceInProgress({required this.streamRenderers, required this.audioMuted});
-// }
