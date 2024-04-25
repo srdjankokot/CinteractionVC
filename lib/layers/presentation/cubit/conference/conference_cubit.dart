@@ -118,7 +118,7 @@ class ConferenceCubit extends Cubit<ConferenceState> with BlocLoggy {
   }
 
   void _onMessageReceived(List<ChatMessage> chat) {
-    emit(state.copyWith(messages: chat, numberOfStreams: Random().nextInt(10000)));
+    emit(state.copyWith(messages: chat, numberOfStreams: Random().nextInt(10000), unreadMessages: chat.where((element) => !element.seen).length));
   }
 
   void _onEngagementChanged(int avgEngagement) {

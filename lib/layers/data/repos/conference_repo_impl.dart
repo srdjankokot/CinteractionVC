@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:convert';
+import 'dart:html';
 import 'dart:math';
 
 import 'package:cinteraction_vc/core/io/network/models/participant.dart';
@@ -68,7 +69,6 @@ class ConferenceRepoImpl extends ConferenceRepo {
 
   int? callId;
 
-
   List<ChatMessage> messages = [];
 
   @override
@@ -93,7 +93,7 @@ class ConferenceRepoImpl extends ConferenceRepo {
   }
 
   @override
-  Future<ApiResponse<int>> startCall() async{
+  Future<ApiResponse<int>> startCall() async {
     var res = await _api.startCall(streamId: room.toString(), userId: user?.id);
     callId = res.response;
     return res;
@@ -450,9 +450,11 @@ class ConferenceRepoImpl extends ConferenceRepo {
             localStream.publisherId = feedId.toString();
             localStream.mid = event.mid;
             // setState(() {
+
             videoState.streamsToBeRendered
                 .putIfAbsent(feedId.toString(), () => localStream);
             // _conferenceStream.add(videoState.streamsToBeRendered);
+
             _refreshStreams();
             // });
           }
@@ -594,7 +596,7 @@ class ConferenceRepoImpl extends ConferenceRepo {
 
   @override
   Future<void> shareScreen(MediaStream? mediaStream) async {
-    if(mediaStream==null) {
+    if (mediaStream == null) {
       _disposeScreenSharing();
       return;
     }
@@ -630,8 +632,11 @@ class ConferenceRepoImpl extends ConferenceRepo {
     //safari require action from a user gesture
     localScreenSharingRenderer.mediaStream = mediaStream;
     screenPlugin?.webRTCHandle!.localStream = mediaStream;
-    screenPlugin?.webRTCHandle!.localStream!.getTracks().forEach((element) async {
-        await  screenPlugin?.webRTCHandle!.peerConnection!.addTrack(element,  screenPlugin!.webRTCHandle!.localStream!);
+    screenPlugin?.webRTCHandle!.localStream!
+        .getTracks()
+        .forEach((element) async {
+      await screenPlugin?.webRTCHandle!.peerConnection!
+          .addTrack(element, screenPlugin!.webRTCHandle!.localStream!);
     });
 
     localScreenSharingRenderer.videoRenderer.srcObject =
@@ -650,9 +655,7 @@ class ConferenceRepoImpl extends ConferenceRepo {
 
     await screenPlugin?.joinPublisher(room,
         displayName: "${displayName}_screenshare", id: screenShareId, pin: "");
-
   }
-
 
   _disposeScreenSharing() async {
     // setState(() {
@@ -708,7 +711,6 @@ class ConferenceRepoImpl extends ConferenceRepo {
     _conferenceEndedStream.add(reason);
   }
 
-
   Future<bool> _endCall() async {
     return await _api.endCall(callId: callId, userId: user?.id);
   }
@@ -760,6 +762,35 @@ class ConferenceRepoImpl extends ConferenceRepo {
     var offer =
         await videoPlugin?.createOffer(audioRecv: false, videoRecv: false);
     await videoPlugin?.configure(bitrate: 2000000, sessionDescription: offer);
+
+    for (var audioTrack in localVideoRenderer.mediaStream!.getAudioTracks()) {
+      print('${audioTrack.id} audio track');
+      _addOnEndedToTrack(audioTrack);
+    }
+
+  }
+
+
+  _addOnEndedToTrack(MediaStreamTrack track){
+    track.onEnded ??= () =>_replaceAudioTrack();
+  }
+
+  _replaceAudioTrack() async {
+    print('track is ended');
+    var stream = await navigator.mediaDevices.getUserMedia({'audio': true});
+    var audioTrack = stream.getAudioTracks()[0];
+
+    // audioTrack.onEnded = () =>_replaceAudioTrack();
+    _addOnEndedToTrack(audioTrack);
+
+    List<RTCRtpSender>? senders = await videoPlugin?.webRTCHandle?.peerConnection?.senders;
+    senders?.forEach((sender) async {
+      if (sender.track?.kind == 'audio') {
+        await sender.replaceTrack(audioTrack);
+        print('${sender.track?.label} track is replaced');
+      }
+    });
+
   }
 
   _unPublish() async {
@@ -922,43 +953,47 @@ class ConferenceRepoImpl extends ConferenceRepo {
 
       case DataChannelCmd.message:
         print('message received ${command.data['message']}');
-        messages.add(ChatMessage(message: command.data['message'], displayName: command.data['displayName'], time: DateTime.parse(command.data['time']), avatarUrl: command.data['avatarUrl']));
+        messages.add(ChatMessage(
+            message: command.data['message'],
+            displayName: command.data['displayName'],
+            time: DateTime.parse(command.data['time']),
+            avatarUrl: command.data['avatarUrl'],
+           seen: false));
         _conferenceChatStream.add(messages);
         break;
     }
   }
 
   _getEngagement() async {
+    return;
     if (engagementIsRunning) return;
     engagementIsRunning = true;
 
     try {
+      var image = await localVideoRenderer.mediaStream
+          ?.getVideoTracks()
+          .first
+          .captureFrame();
 
-        var image = await localVideoRenderer.mediaStream
-            ?.getVideoTracks()
-            .first
-            .captureFrame();
+      // print(base64Encode(image!.asUint8List().toList()).toString());
 
-        // print(base64Encode(image!.asUint8List().toList()).toString());
+      final engagement = await _api.getEngagement(
+          averageAttention: 0,
+          callId: callId,
+          image: base64Encode(image!.asUint8List().toList()).toString(),
+          participantId: user?.id);
 
-        final engagement = await _api.getEngagement(
-            averageAttention: 0,
-            callId: callId,
-            image: base64Encode(image!.asUint8List().toList()).toString(),
-            participantId: user?.id);
+      // var engagement = Random().nextDouble() * (0.85 - 0.4) + 0.4;
 
-        // var engagement = Random().nextDouble() * (0.85 - 0.4) + 0.4;
-
-        if (engagement! > 0) {
-          var eng = ((engagement) * 100).toInt();
-          videoState.streamsToBeRendered['local']?.engagement = eng;
-          _refreshStreams();
-          _calculateAverageEngagement();
-          _sendMyEngagementToOthers(eng);
-         await _sendMyEngagementToServer(engagement);
-        }
-        print('My engagement: $engagement');
-
+      if (engagement! > 0) {
+        var eng = ((engagement) * 100).toInt();
+        videoState.streamsToBeRendered['local']?.engagement = eng;
+        _refreshStreams();
+        _calculateAverageEngagement();
+        _sendMyEngagementToOthers(eng);
+        await _sendMyEngagementToServer(engagement);
+      }
+      print('My engagement: $engagement');
     } finally {
       engagementIsRunning = false;
       if (engagementEnabled) {
@@ -968,9 +1003,9 @@ class ConferenceRepoImpl extends ConferenceRepo {
     }
   }
 
-  _sendMyEngagementToServer(double engagement) async
-  {
-    await _api.sendEngagement(engagement: engagement, userId: user!.id.toString(), callId: callId);
+  _sendMyEngagementToServer(double engagement) async {
+    await _api.sendEngagement(
+        engagement: engagement, userId: user!.id.toString(), callId: callId);
   }
 
   _sendMyEngagementToOthers(int engagement) async {
@@ -984,12 +1019,17 @@ class ConferenceRepoImpl extends ConferenceRepo {
   }
 
   _broadcastMessage(String msg) async {
-    var data = {"message" : msg, 'displayName':  user!.name, 'time':DateTime.now().toIso8601String(), 'avatarUrl':  user!.imageUrl};
+    var data = {
+      "message": msg,
+      'displayName': user!.name,
+      'time': DateTime.now().toIso8601String(),
+      'avatarUrl': user!.imageUrl
+    };
 
     await videoPlugin?.sendData(jsonEncode(DataChannelCommand(
-        command: DataChannelCmd.message,
-        id: user!.id.toString(),
-        data: data)
+            command: DataChannelCmd.message,
+            id: user!.id.toString(),
+            data: data)
         .toJson()));
   }
 
@@ -1018,8 +1058,13 @@ class ConferenceRepoImpl extends ConferenceRepo {
   }
 
   @override
-  Future<ApiResponse<bool>> sendMessage(String msg) async{
-    messages.add(ChatMessage(message: msg, displayName: 'Me', time: DateTime.now(), avatarUrl: user!.imageUrl));
+  Future<ApiResponse<bool>> sendMessage(String msg) async {
+    messages.add(ChatMessage(
+        message: msg,
+        displayName: 'Me',
+        time: DateTime.now(),
+        avatarUrl: user!.imageUrl,
+        seen: true));
     _conferenceChatStream.add(messages);
     await _broadcastMessage(msg);
     return ApiResponse(response: true);
