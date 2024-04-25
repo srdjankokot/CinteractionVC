@@ -19,6 +19,7 @@ class ConferenceState extends Equatable {
   final bool showingChat;
   final int? numberOfStreams;
   final int? avgEngagement;
+  final int? unreadMessages;
   final int numberOfStreamsCopy;
   final bool isGridLayout;
   final String? error;
@@ -36,6 +37,7 @@ class ConferenceState extends Equatable {
     required this.showingChat,
     this.numberOfStreams,
     this.avgEngagement,
+    this.unreadMessages,
     required this.numberOfStreamsCopy,
     required this.isGridLayout,
     this.error,
@@ -55,6 +57,7 @@ class ConferenceState extends Equatable {
     int? numberOfStreamsCopy,
     int? isGridLayout,
     int? avgEngagement = 0,
+    int? unreadMessages = 0,
   }) : this(isInitial: isInitial, isEnded: isEnded, audioMuted: audioMuted, videoMuted: videoMuted, numberOfStreamsCopy: 1, isGridLayout: true, engagementEnabled: engagementEnabled, avgEngagement: avgEngagement, screenShared:screenShared, showingChat: showingChat);
 
 
@@ -94,6 +97,7 @@ class ConferenceState extends Equatable {
     int? numberOfStreams,
     int? numberOfStreamsCopy,
     int? avgEngagement,
+    int? unreadMessages,
     bool? audioMuted,
     bool? videoMuted,
     bool? screenShared,
@@ -116,9 +120,10 @@ class ConferenceState extends Equatable {
       isGridLayout: isGridLayout ?? this.isGridLayout,
       showingChat: showingChat ?? this.showingChat,
       messages: messages ?? this.messages,
+      unreadMessages: unreadMessages ?? this.unreadMessages,
     );
   }
 
   @override
-  List<Object?> get props => [isInitial, isEnded, streamRenderers, streamSubscribers, numberOfStreams, audioMuted, videoMuted, numberOfStreamsCopy, isGridLayout, engagementEnabled, avgEngagement, screenShared, showingChat, messages];
+  List<Object?> get props => [isInitial, isEnded, streamRenderers, streamSubscribers, numberOfStreams, audioMuted, videoMuted, numberOfStreamsCopy, isGridLayout, engagementEnabled, avgEngagement, screenShared, showingChat, messages, unreadMessages];
 }

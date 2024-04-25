@@ -210,6 +210,7 @@ class VideoRoomPage extends StatelessWidget {
                                       }),
 
                                   const SizedBox(width: 20),
+                                  Text('${state.unreadMessages}'),
                                   CallButtonShape(
                                     image: imageSVGAsset('icon_message') as Widget,
                                     bgColor: ColorConstants.kPrimaryColor.withOpacity(0.4),
