@@ -13,7 +13,7 @@ class MeetingRepoImpl extends MeetingRepo{
   final Api _api;
 
   @override
-  Future<List<Meeting>?> getListOfPastMeetings() async{
+  Future<ApiResponse<List<Meeting>?>> getListOfPastMeetings() async{
     final meetings = await _api.getMeetings();
     return meetings;
   }

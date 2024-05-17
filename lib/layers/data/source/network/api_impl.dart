@@ -76,10 +76,12 @@ class ApiImpl extends Api {
     try {
       dio.options.headers['Authorization'] = Urls.IVIAccessToken;
       var response = await dio.post(Urls.engagement, data: formData);
-
-      return response.data['engagements'][0]['engagement_rank'];
-
+      return double.parse(response.data['engagements'][0]['engagement_rank'].toString());
+        return -1;
     } on DioException catch (e, s) {
+      print(e);
+    }
+    on Exception catch(e){
       print(e);
     }
     return 0;
@@ -119,17 +121,23 @@ class ApiImpl extends Api {
   }
 
   @override
-  Future<List<MeetingDto>?> getMeetings() async {
+  Future<ApiResponse<List<MeetingDto>?>> getMeetings() async {
     Dio dio = await getIt.getAsync<Dio>();
-    Response response = await dio.get(Urls.meetings);
+    try{
+      Response response = await dio.get(Urls.meetings);
 
-    List<MeetingDto> meetings = [];
+      List<MeetingDto> meetings = [];
 
-    for (var par in response.data['data']) {
-      var participant = MeetingDto.fromJson(par as Map<String, dynamic>);
-      meetings.add(participant);
+      for (var par in response.data['data']) {
+        var participant = MeetingDto.fromJson(par as Map<String, dynamic>);
+        meetings.add(participant);
+      }
+
+      return ApiResponse(response: meetings);
     }
-    return meetings;
+    on DioException catch(e){
+      return ApiResponse(error: ApiErrorDto.fromDioException(e));
+    }
   }
 
   @override

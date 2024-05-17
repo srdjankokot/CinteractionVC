@@ -1,7 +1,10 @@
+import 'dart:convert';
+
 import 'package:cinteraction_vc/layers/presentation/cubit/home/home_cubit.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 import '../../../../../../core/ui/input/input_field.dart';
 
@@ -95,13 +98,35 @@ class SchedulePopup extends StatelessWidget {
                 ),
                 ElevatedButton(
                   child: const Text('Schedule'),
-                  onPressed: () {
+                  onPressed: () async{
                     if (!formKey.currentState!.validate()) {
                       return;
                     }
                     // print(_textFieldController.text);
                     Navigator.pop(context);
+
                     context.read<HomeCubit>().scheduleMeeting(nameFieldController.value.text, descFieldController.value.text, tagNameFieldController.value.text);
+
+                    var startDateTime = state.scheduleStartDateTime?.toUtc();
+                    var endDateTime = startDateTime?.add(const Duration(hours: 1));
+
+                    var startDateTimeFormated = DateFormat('yyyyMMddThhmma').format(startDateTime!);
+                    var endDateTimeFormated = DateFormat('yyyyMMddThhmma').format(endDateTime!);
+
+                    // https://cinteractionvc.web.app/home/meeting/1234
+                    // https://cinteractionvc.web.app/home/meeting/1234
+
+                    var url = Uri.parse("https://cinteractionvc.web.app/home/meeting/1234");
+                    var roomId = '1234';
+                    // https:\\calendar.google.com\calendar\render?action=TEMPLATE&dates=20240423T180000Z\20240423T190000Z&ctz=UTC&text=Test+event+adsf+a&details=https%3A%2F%2Fvc.cinteraction.com%2Fstreaming%2F3366765263%0APlease+click+on+the+above+link+to+join+a+video+call
+                    // http://localhost:51367/#/home/meeting/1234
+                    // if (!await launchUrl(Uri.parse('https://calendar.google.com/calendar/u/0/r/eventedit?dates=$startDateTimeFormated/$endDateTimeFormated&ctz=UTC&location&text=Schedule event&details=https%3A%2F%2Fcinteractionvc.web.app%2Fhome%2Fmeeting%2F$roomId%0APlease+click+on+the+above+link+to+join+a+video+call'))) {
+                    //   throw Exception('Could not launch');
+                    // }
+
+                    if (!await launchUrl(Uri.parse('https://calendar.google.com/calendar/u/0/r/eventedit?dates=$startDateTimeFormated/$endDateTimeFormated&ctz=UTC&location&text=Schedule event&details=$url'))) {
+                      throw Exception('Could not launch');
+                    }
 
                   },
                 ),

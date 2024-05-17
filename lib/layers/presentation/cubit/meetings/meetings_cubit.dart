@@ -9,7 +9,7 @@ import '../../../domain/entities/meeting.dart';
 
 part 'meetings_state.dart';
 
-class MeetingCubit extends Cubit<MeetingState> with BlocLoggy{
+class MeetingCubit extends Cubit<MeetingState> with BlocLoggy {
   MeetingCubit({
     required this.meetingUseCases,
   }) : super(const InitialRoleState()) {
@@ -20,32 +20,37 @@ class MeetingCubit extends Cubit<MeetingState> with BlocLoggy{
 
   // StreamSubscription<List<Meeting>?>? _meetingSubscription;
 
-
   @override
   Future<void> close() {
     // _meetingSubscription?.cancel();
     return super.close();
   }
 
-
   void _load() {
     // _meetingSubscription = meetingUseCases.getMeetingStream().listen(_onGroups);
   }
 
-  void loadMeetings() async{
+  void loadMeetings() async {
     emit(const MeetingsIsLoading());
     var meetings = await meetingUseCases.getPastMeetingsUseCase();
-    emit(MeetingLoaded(meetings: meetings?? List.empty()));
+    if (meetings.error == null) {
+      emit(MeetingLoaded(meetings: meetings.response ?? List.empty()));
+    } else {
+      emit(MeetingLoaded(meetings: List.empty()));
+
+    }
   }
 
   void loadScheduledMeetings() async {
     emit(const MeetingsIsLoading());
     var meetings = await meetingUseCases.getScheduleMeetings();
 
-
-    emit(MeetingLoaded(meetings: meetings.response?? List.empty()));
+    if (meetings.error == null) {
+      emit(MeetingLoaded(meetings: meetings.response ?? List.empty()));
+    } else {
+      emit(MeetingLoaded(meetings: List.empty()));
+    }
   }
-
 
   void _onGroups(List<Meeting> meetings) {
     loggy.info('list of meetings: ${meetings?.length}');
@@ -56,6 +61,4 @@ class MeetingCubit extends Cubit<MeetingState> with BlocLoggy{
     // emit(const MeetingsIsLoading());
     // meetingRepository.addMeeting();
   }
-
-
 }

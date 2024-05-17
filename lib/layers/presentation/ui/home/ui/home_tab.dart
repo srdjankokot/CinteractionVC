@@ -11,6 +11,7 @@ import 'package:cinteraction_vc/layers/presentation/ui/home/ui/widgets/schedule_
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
+import 'package:url_launcher/url_launcher.dart';
 import '../../../../../assets/colors/Colors.dart';
 import '../../../../../core/ui/images/image.dart';
 
@@ -82,9 +83,8 @@ class HomeTab extends StatelessWidget {
             image: ImageAsset('calendar-date.png'),
           ),
           bgColor: ColorConstants.kStateInfo,
-          onClickAction: () => {
-            // AppRoute.meeting.push(context)
-            displayAddScheduleMeetingPopup(context)
+          onClickAction: () async  {
+            displayAddScheduleMeetingPopup(context);
           },
           label: 'Schedule',
           textStyle: context.textTheme.labelMedium);
@@ -231,6 +231,7 @@ class HomeTab extends StatelessWidget {
                   height: 30,
                 ),
                 Visibility(
+                    visible: state.nextMeeting!=null,
                     child: Column(
                       children: [
                         Text(
@@ -241,9 +242,11 @@ class HomeTab extends StatelessWidget {
                         const SizedBox(
                           height: 30,
                         ),
-                        Container(
-                            margin: const EdgeInsets.only(right: 20, left: 20),
-                            child:  NextMeetingWidget(meeting: state.nextMeeting!)),
+                        state.nextMeeting==null? Container():NextMeetingWidget(meeting: state.nextMeeting!)
+
+                        // Container(
+                        //     margin: const EdgeInsets.only(right: 20, left: 20),
+                        //     child:  NextMeetingWidget(meeting: state.nextMeeting!)),
                       ],
                     )),
                 const SizedBox(height: 20),

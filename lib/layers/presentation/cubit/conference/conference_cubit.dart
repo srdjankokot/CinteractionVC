@@ -76,6 +76,13 @@ class ConferenceCubit extends Cubit<ConferenceState> with BlocLoggy {
     emit(state.copyWith(showingChat: !state.showingChat));
   }
 
+  Future<void> chatMessageSeen(int index)
+  async {
+
+    state.messages![index].seen = true;
+    emit(state.copyWith(unreadMessages: state.messages!.where((element) => !(element.seen?? true)).length));
+  }
+
   // bool audioMuted = false;
   // final Map<dynamic, StreamRenderer> streamRenderers = {};
 
@@ -99,7 +106,7 @@ class ConferenceCubit extends Cubit<ConferenceState> with BlocLoggy {
 
   //Listening streams methods
   void _onConference(Map<dynamic, StreamRenderer> streams) {
-    loggy.info('list of streams: ${streams.length}');
+    // loggy.info('list of streams: ${streams.length}');
     // Map<dynamic, StreamRenderer> s = streams;
     emit(state.copyWith(isInitial: false, streamRenderers: streams));
     conferenceUseCases.getParticipants();
@@ -118,7 +125,7 @@ class ConferenceCubit extends Cubit<ConferenceState> with BlocLoggy {
   }
 
   void _onMessageReceived(List<ChatMessage> chat) {
-    emit(state.copyWith(messages: chat, numberOfStreams: Random().nextInt(10000), unreadMessages: chat.where((element) => !element.seen).length));
+    emit(state.copyWith(messages: chat, numberOfStreams: Random().nextInt(10000), unreadMessages: chat.where((element) => !(element.seen?? true)).length));
   }
 
   void _onEngagementChanged(int avgEngagement) {

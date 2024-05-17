@@ -16,6 +16,7 @@ Future<String?> getAccessToken() async {
   // print(storage.read(key: keyAccessToken));
   var accessToken = await storage.read(key: keyAccessToken);
   if (accessToken != null) {
+    // print('Bearer $accessToken');
     return 'Bearer $accessToken';
   }
   return null;

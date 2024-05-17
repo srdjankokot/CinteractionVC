@@ -8,7 +8,7 @@ class GetUserDetails{
 
   final AuthRepo _repo = getIt.get<AuthRepo>();
 
-  Future<ApiResponse<UserDto?>> call(String token) async{
-    return await _repo.getUserDetails(token);
+  Future<ApiResponse<UserDto?>> call() async{
+    return await _repo.getUserDetails();
   }
 }

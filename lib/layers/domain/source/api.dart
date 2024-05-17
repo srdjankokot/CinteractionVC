@@ -16,7 +16,7 @@ abstract class Api {
   Future<ApiResponse<int>> startCall({required streamId, required userId});
   Future<bool> endCall({required callId, required userId});
 
-  Future<List<MeetingDto>?> getMeetings();
+  Future<ApiResponse<List<MeetingDto>?>> getMeetings();
   Future<ApiResponse<List<MeetingDto>?>> getScheduledMeetings();
   Future<ApiResponse<MeetingDto?>> getNextMeeting();
 
