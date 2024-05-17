@@ -9,6 +9,9 @@ abstract class LocalStorage {
   Future<bool> saveLoggedUser({required UserDto user});
   User? loadLoggedUser();
   Future<void> clearUser();
+  Future<bool> saveRoomId({required String roomId});
+  String? getRoomId();
+  Future<void> clearRoomId();
 }
 
 class LocalStorageImpl extends LocalStorage{
@@ -23,10 +26,11 @@ class LocalStorageImpl extends LocalStorage{
   @override
   User? loadLoggedUser() {
     final jsonString = _sharedPref.getString('user');
-    var userMap = json.decode(jsonString!);
-
-    return UserDto.fromJson(userMap);
-
+    if(jsonString!=null){
+      var userMap = json.decode(jsonString);
+      return UserDto.fromJson(userMap);
+    }
+    return null;
   }
 
   @override
@@ -37,6 +41,22 @@ class LocalStorageImpl extends LocalStorage{
   @override
   Future<void> clearUser() async {
     _sharedPref.remove('user');
+  }
+
+
+  @override
+  String? getRoomId() {
+    return _sharedPref.getString('roomId');
+  }
+
+  @override
+  Future<bool> saveRoomId({required String roomId}) {
+    return _sharedPref.setString('roomId', roomId);
+  }
+
+  @override
+  Future<void> clearRoomId() async {
+    _sharedPref.remove('roomId');
   }
 
 }

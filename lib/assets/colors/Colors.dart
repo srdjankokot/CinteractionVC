@@ -4,6 +4,8 @@ class ColorConstants {
   static const kPrimaryColor = Color(0xFFF1471C);
   static const kSecondaryColor = Color(0xFF403736);
 
+  static const kStateColors = [ kEngProgress30];
+
   static const kStateInfo = Color(0xFF56A0D6);
   static const kStateSuccess = Color(0xFF1CBC96);
   static const kStateWarning = Color(0xFFEFBA32);
@@ -33,3 +35,4 @@ class ColorConstants {
 
   static const kWhite50 = Color(0xFFF1F1F1);
 }
+

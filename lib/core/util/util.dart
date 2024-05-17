@@ -6,7 +6,7 @@ class StreamRenderer {
   MediaStream? mediaStream;
   String id;
   String? publisherId;
-  String? publisherName;
+  String publisherName;
   int? engagement;
   String? mid;
   bool? isAudioMuted;
@@ -19,7 +19,7 @@ class StreamRenderer {
     await videoRenderer.dispose();
   }
 
-  StreamRenderer(this.id);
+  StreamRenderer(this.id, this.publisherName);
 
   Future<void> init() async {
     mediaStream = await createLocalMediaStream('mediaStream_$id');

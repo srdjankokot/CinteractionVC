@@ -11,7 +11,7 @@ import 'core/app/app.dart';
 import 'package:loggy/loggy.dart';
 
 import 'core/app/injector.dart';
-
+import 'core/util/nonweb_url_strategy.dart' if (dart.library.html) 'core/util/web_url_strategy.dart';
 
 
 late SharedPreferences sharedPref;
@@ -39,6 +39,7 @@ Future<void> main() async {
 
   sharedPref = await SharedPreferences.getInstance();
 
+  configureUrl();
   runApp(const CinteractionFlutterApp());
 }
 

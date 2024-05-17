@@ -1,3 +1,4 @@
+import '../../entities/api_response.dart';
 import '../../entities/meeting.dart';
 import '../../repos/meetings_repo.dart';
 
@@ -7,7 +8,7 @@ class GetPastMeetingsUseCase{
   final MeetingRepo repo;
 
 
-  Future<List<Meeting>?> call() {
+  Future<ApiResponse<List<Meeting>?>> call() {
     return repo.getListOfPastMeetings();
   }
 }

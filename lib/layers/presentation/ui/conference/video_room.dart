@@ -2,6 +2,7 @@ import 'dart:math';
 
 import 'package:cinteraction_vc/assets/colors/Colors.dart';
 import 'package:cinteraction_vc/core/extension/context.dart';
+import 'package:cinteraction_vc/core/extension/string.dart';
 import 'package:cinteraction_vc/core/ui/widget/call_button_shape.dart';
 import 'package:cinteraction_vc/core/ui/widget/engagement_progress.dart';
 import 'package:cinteraction_vc/layers/presentation/ui/conference/widget/chat_message_widget.dart';
@@ -9,7 +10,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_webrtc/flutter_webrtc.dart';
+import 'package:go_router/go_router.dart';
+import 'package:visibility_detector/visibility_detector.dart';
 
+import '../../../../core/navigation/route.dart';
 import '../../../../core/ui/images/image.dart';
 import '../../../../core/util/util.dart';
 import '../../cubit/conference/conference_cubit.dart';
@@ -24,7 +28,8 @@ class VideoRoomPage extends StatelessWidget {
     }
 
     if (state.isEnded) {
-      Navigator.of(context).pop();
+      // Navigator.of(context).pop();
+      AppRoute.home.pushReplacement(context);
     }
   }
 
@@ -36,9 +41,13 @@ class VideoRoomPage extends StatelessWidget {
     FocusNode messageFocusNode = FocusNode();
 
     void sendMessage() {
-      context.read<ConferenceCubit>().sendMessage(messageFieldController.text);
-      messageFieldController.clear();
-      messageFocusNode.requestFocus();
+      if (messageFieldController.text.isNotEmpty) {
+        context
+            .read<ConferenceCubit>()
+            .sendMessage(messageFieldController.text);
+        messageFieldController.clear();
+        messageFocusNode.requestFocus();
+      }
     }
 
     return BlocConsumer<ConferenceCubit, ConferenceState>(
@@ -210,17 +219,52 @@ class VideoRoomPage extends StatelessWidget {
                                       }),
 
                                   const SizedBox(width: 20),
-                                  Text('${state.unreadMessages}'),
-                                  CallButtonShape(
-                                    image: imageSVGAsset('icon_message') as Widget,
-                                    bgColor: ColorConstants.kPrimaryColor.withOpacity(0.4),
-                                    onClickAction: () async {
-                                      await context
-                                          .read<ConferenceCubit>()
-                                          .toggleChatWindow();
-                                    },
-                                  ),
 
+                                  Stack(children: [
+                                    CallButtonShape(
+                                      image: imageSVGAsset('icon_message')
+                                          as Widget,
+                                      bgColor: ColorConstants.kPrimaryColor
+                                          .withOpacity(0.4),
+                                      onClickAction: () async {
+                                        await context
+                                            .read<ConferenceCubit>()
+                                            .toggleChatWindow();
+                                      },
+                                    ),
+                                    Positioned(
+                                      right: 0,
+                                      top: 0,
+                                      child: AnimatedOpacity(
+                                        opacity:
+                                            (state.unreadMessages != null &&
+                                                    state.unreadMessages! > 0)
+                                                ? 1
+                                                : 0,
+                                        duration:
+                                            const Duration(milliseconds: 250),
+                                        child: Container(
+                                          width: 12,
+                                          height: 12,
+                                          decoration: const ShapeDecoration(
+                                            color: Colors.white,
+                                            shape: OvalBorder(),
+                                          ),
+                                          // child: Text(
+                                          //   '1',
+                                          //   style: context
+                                          //       .primaryTextTheme.labelSmall
+                                          //       ?.copyWith(
+                                          //           fontSize: 8,
+                                          //           fontWeight:
+                                          //               FontWeight.w700),
+                                          // )
+                                        ),
+                                      ),
+                                    ),
+                                    // child: Text('${state.unreadMessages}', style: context.primaryTextTheme.labelSmall,)),
+                                    //   child: Text('1', style: context.primaryTextTheme.labelSmall?.copyWith(fontSize: 8, fontWeight: FontWeight.w700),)),,
+                                  ]),
 
                                   const SizedBox(width: 20),
                                   // CallButtonShape(
@@ -286,13 +330,11 @@ class VideoRoomPage extends StatelessWidget {
                                     },
                                   ),
 
-
                                   // CallButtonShape(
                                   //     image: imageSVGAsset('icon_user') as Widget,
                                   //     // onClickAction: joined ? switchCamera : null),
                                   //     onClickAction: joined ? null : null),
                                   // const SizedBox(width: 20),
-
 
                                   // ElevatedButton(
                                   //   onPressed: () {
@@ -333,7 +375,8 @@ class VideoRoomPage extends StatelessWidget {
                             AnimatedPositioned(
                               top: 0,
                               bottom: 0,
-                              right: state.showingChat ? 0 : -chatContainedWidth,
+                              right:
+                                  state.showingChat ? 0 : -chatContainedWidth,
                               duration: const Duration(milliseconds: 250),
                               child: Container(
                                 width: chatContainedWidth,
@@ -344,23 +387,25 @@ class VideoRoomPage extends StatelessWidget {
                                   child: Column(
                                     // crossAxisAlignment: CrossAxisAlignment.start,
                                     children: [
-                                       Row(
-                                         children: [
-                                           Expanded(
-                                             child: Text(
+                                      Row(
+                                        children: [
+                                          Expanded(
+                                            child: Text(
                                               'Chat messages',
-                                              style: context.titleTheme.titleMedium,
-                                                                                   ),
-                                           ),
-
-                                           IconButton(icon: const Icon(Icons.close),
-                                           onPressed: (){
-                                             context.read<ConferenceCubit>().toggleChatWindow();
-                                           },)
-                                         ],
-                                       ),
-
-
+                                              style: context
+                                                  .titleTheme.titleMedium,
+                                            ),
+                                          ),
+                                          IconButton(
+                                            icon: const Icon(Icons.close),
+                                            onPressed: () {
+                                              context
+                                                  .read<ConferenceCubit>()
+                                                  .toggleChatWindow();
+                                            },
+                                          )
+                                        ],
+                                      ),
                                       Expanded(
                                         child: Container(
                                           child: state.messages == null
@@ -373,7 +418,23 @@ class VideoRoomPage extends StatelessWidget {
                                                   itemBuilder:
                                                       (BuildContext context,
                                                           int index) {
-                                                    return ChatMessageWidget(message: state.messages![index]);
+                                                    return VisibilityDetector(
+                                                        key: Key(
+                                                            index.toString()),
+                                                        onVisibilityChanged:
+                                                            (VisibilityInfo
+                                                                info) {
+                                                          // print('${state.messages![int.parse('${(info.key as ValueKey).value}')]} (message seen)');
+                                                          context
+                                                              .read<
+                                                                  ConferenceCubit>()
+                                                              .chatMessageSeen(
+                                                                  index);
+                                                        },
+                                                        child: ChatMessageWidget(
+                                                            message:
+                                                                state.messages![
+                                                                    index]));
                                                   },
                                                 ),
                                         ),
@@ -385,9 +446,10 @@ class VideoRoomPage extends StatelessWidget {
                                         children: [
                                           Expanded(
                                             child: TextField(
-                                              textInputAction: TextInputAction.go,
+                                              textInputAction:
+                                                  TextInputAction.go,
                                               focusNode: messageFocusNode,
-                                              onSubmitted: (value){
+                                              onSubmitted: (value) {
                                                 sendMessage();
                                               },
                                               controller:
@@ -395,10 +457,11 @@ class VideoRoomPage extends StatelessWidget {
                                               decoration: InputDecoration(
                                                   hintText: "Send a message",
                                                   suffixIcon: IconButton(
-                                                    onPressed: (){
+                                                    onPressed: () {
                                                       sendMessage();
                                                     },
-                                                    icon: imageSVGAsset('icon_send') as Widget,
+                                                    icon: imageSVGAsset(
+                                                        'icon_send') as Widget,
                                                   )),
                                             ),
                                           )
@@ -418,33 +481,33 @@ class VideoRoomPage extends StatelessWidget {
                               children: [
                                 Row(
                                   children: [
-                                    IconButton(
-                                        icon: const Icon(
-                                          Icons.add,
-                                          color: Colors.white,
-                                        ),
-                                        onPressed: () async {
-                                          await context
-                                              .read<ConferenceCubit>()
-                                              .increaseNumberOfCopies();
-                                          // setState(() {
-                                          //   _numberOfStream++;
-                                          // })
-                                        }),
-                                    IconButton(
-                                        icon: const Icon(
-                                          Icons.remove,
-                                          color: Colors.white,
-                                        ),
-                                        onPressed: () async {
-                                          await context
-                                              .read<ConferenceCubit>()
-                                              .decreaseNumberOfCopies();
-
-                                          // setState(() {
-                                          //   _numberOfStream--;
-                                          // })
-                                        }),
+                                    // IconButton(
+                                    //     icon: const Icon(
+                                    //       Icons.add,
+                                    //       color: Colors.white,
+                                    //     ),
+                                    //     onPressed: () async {
+                                    //       await context
+                                    //           .read<ConferenceCubit>()
+                                    //           .increaseNumberOfCopies();
+                                    //       // setState(() {
+                                    //       //   _numberOfStream++;
+                                    //       // })
+                                    //     }),
+                                    // IconButton(
+                                    //     icon: const Icon(
+                                    //       Icons.remove,
+                                    //       color: Colors.white,
+                                    //     ),
+                                    //     onPressed: () async {
+                                    //       await context
+                                    //           .read<ConferenceCubit>()
+                                    //           .decreaseNumberOfCopies();
+                                    //
+                                    //       // setState(() {
+                                    //       //   _numberOfStream--;
+                                    //       // })
+                                    //     }),
                                     IconButton(
                                         icon:
                                             imageSVGAsset('icon_switch_camera')
@@ -495,7 +558,7 @@ class VideoRoomPage extends StatelessWidget {
 
                                       const SizedBox(width: 20),
                                       CallButtonShape(
-                                          image: !state.audioMuted!
+                                          image: !state.audioMuted
                                               ? imageSVGAsset('icon_microphone')
                                                   as Widget
                                               : imageSVGAsset(
@@ -508,7 +571,7 @@ class VideoRoomPage extends StatelessWidget {
                                           }),
                                       const SizedBox(width: 20),
                                       CallButtonShape(
-                                          image: !state.videoMuted!
+                                          image: !state.videoMuted
                                               ? imageSVGAsset(
                                                       'icon_video_recorder')
                                                   as Widget
@@ -562,7 +625,7 @@ class VideoRoomPage extends StatelessWidget {
     try {
       if (items.isNotEmpty) {
         for (var stream in items) {
-          if (stream.publisherName!.toLowerCase().contains('screenshare')) {
+          if (stream.publisherName.toLowerCase().contains('screenshare')) {
             screenshared = stream;
             items.remove(screenshared);
             break;
@@ -603,11 +666,48 @@ class VideoRoomPage extends StatelessWidget {
         const double itemHeight = 182;
         const double itemWidth = 189;
 
+        return Row(
+          children: <Widget>[
+            Expanded(
+              child: Container(
+                child: getRendererItem(context, screenshared, double.maxFinite,
+                    double.maxFinite - 500),
+              ),
+            ),
+            Container(
+              alignment: Alignment.centerRight,
+              margin: const EdgeInsets.only(right: 30, left: 30),
+              child: SizedBox(
+                width: itemWidth + 20,
+                height: MediaQuery.of(context).size.height - 156,
+                child: ListView.builder(
+                  shrinkWrap: true,
+                  itemCount: items.length,
+                  itemBuilder: (context, index) {
+                    return Container(
+                      clipBehavior: Clip.hardEdge,
+                      margin: const EdgeInsets.all(3),
+                      decoration: ShapeDecoration(
+                        shape: RoundedRectangleBorder(
+                          side: const BorderSide(width: 2, color: Colors.white),
+                          borderRadius: BorderRadius.circular(6),
+                        ),
+                      ),
+                      child: getRendererItem(
+                          context, items[index], itemHeight, itemWidth),
+                    );
+                  },
+                ),
+              ),
+            ),
+          ],
+        );
+
         return Stack(
           children: [
             Container(
-              child: getRendererItem(
-                  context, screenshared, double.maxFinite, double.maxFinite),
+              child: getRendererItem(context, screenshared, double.maxFinite,
+                  double.maxFinite - 500),
             ),
             Container(
               alignment: Alignment.centerRight,
@@ -675,7 +775,7 @@ class VideoRoomPage extends StatelessWidget {
   Widget getRendererItem(BuildContext context, StreamRenderer remoteStream,
       double height, double width) {
     var screenShare =
-        remoteStream.publisherName!.toLowerCase().contains('screenshare');
+        remoteStream.publisherName.toLowerCase().contains('screenshare');
 
     if (context.isWide) {
       return SizedBox(
@@ -686,11 +786,24 @@ class VideoRoomPage extends StatelessWidget {
             Visibility(
               visible: remoteStream.isVideoMuted == false,
               replacement: Center(
-                child: Text("Video Paused By ${remoteStream.publisherName!}",
-                    style: const TextStyle(color: Colors.white)),
-              ),
+                  child: CircleAvatar(
+                backgroundColor:
+                    ([...ColorConstants.kStateColors]..shuffle()).first,
+                radius: [width, height].reduce(min) / 4,
+                child: Text(remoteStream.publisherName.getInitials(),
+                    style: context.primaryTextTheme.titleLarge?.copyWith(
+                        fontSize: [width, height].reduce(min) / 8,
+                        fontWeight: FontWeight.bold)),
+              )
+
+                  // Text("Video Paused By ${remoteStream.publisherName!}",
+                  //     style: const TextStyle(color: Colors.white)),
+                  ),
               child: RTCVideoView(
                 remoteStream.videoRenderer,
+                placeholderBuilder: (context) {
+                  return Text('data');
+                },
                 filterQuality: FilterQuality.none,
                 objectFit: screenShare
                     ? RTCVideoViewObjectFit.RTCVideoViewObjectFitContain
@@ -728,15 +841,6 @@ class VideoRoomPage extends StatelessWidget {
                   ],
                 )),
 
-            // Positioned(
-            //     bottom: 20,
-            //     right: 24,
-            //     child: Text(
-            //       remoteStream.publisherName!,
-            //       style: context.textTheme.labelSmall
-            //           ?.copyWith(color: Colors.white),
-            //     )),
-
             Visibility(
                 visible: remoteStream.isAudioMuted == true,
                 child: Positioned(
@@ -744,7 +848,6 @@ class VideoRoomPage extends StatelessWidget {
                     left: 24,
                     child:
                         imageSVGAsset('icon_microphone_disabled') as Widget)),
-
             Visibility(
                 visible: width < 200,
                 child: Positioned.fill(
@@ -774,16 +877,47 @@ class VideoRoomPage extends StatelessWidget {
           children: [
             ClipRRect(
               borderRadius: BorderRadius.circular(6),
-              child: RTCVideoView(
-                remoteStream.videoRenderer,
-                filterQuality: FilterQuality.none,
-                objectFit: RTCVideoViewObjectFit.RTCVideoViewObjectFitCover,
-                mirror: true,
+              child:     Visibility(
+                visible: remoteStream.isVideoMuted == false,
+                replacement: Center(
+                    child: CircleAvatar(
+                      backgroundColor:
+                      ([...ColorConstants.kStateColors]..shuffle()).first,
+                      radius: [width, height].reduce(min) / 4,
+                      child: Text(remoteStream.publisherName.getInitials(),
+                          style: context.primaryTextTheme.titleLarge?.copyWith(
+                              fontSize: [width, height].reduce(min) / 8,
+                              fontWeight: FontWeight.bold)),
+                    )
+
+                  // Text("Video Paused By ${remoteStream.publisherName!}",
+                  //     style: const TextStyle(color: Colors.white)),
+                ),
+                child: RTCVideoView(
+                  remoteStream.videoRenderer,
+                  placeholderBuilder: (context) {
+                    return Text('data');
+                  },
+                  filterQuality: FilterQuality.none,
+                  objectFit: screenShare
+                      ? RTCVideoViewObjectFit.RTCVideoViewObjectFitContain
+                      : RTCVideoViewObjectFit.RTCVideoViewObjectFitCover,
+                  mirror: !screenShare,
+                ),
               ),
             ),
-            Positioned.fill(
-                bottom: 10,
-                right: 10,
+
+            // ClipRRect(
+            //   borderRadius: BorderRadius.circular(6),
+            //   child: RTCVideoView(
+            //     remoteStream.videoRenderer,
+            //     filterQuality: FilterQuality.none,
+            //     objectFit: RTCVideoViewObjectFit.RTCVideoViewObjectFitCover,
+            //     mirror: true,
+            //   ),
+            // ),
+            Positioned(
+              right: 0,
                 child: Row(
                   children: [
                     EngagementProgress(

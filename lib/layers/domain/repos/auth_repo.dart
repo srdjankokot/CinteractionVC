@@ -23,5 +23,5 @@ abstract class AuthRepo
   Future<ApiResponse<UserDto?>> signWithGoogleAccount();
 
   Future<ApiResponse<UserDto?>> signWithFacebookAccount();
-  Future<ApiResponse<UserDto?>> getUserDetails(String token);
+  Future<ApiResponse<UserDto?>> getUserDetails();
 }

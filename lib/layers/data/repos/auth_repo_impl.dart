@@ -14,6 +14,19 @@ import '../../domain/source/api.dart';
 import '../dto/user_dto.dart';
 import '../source/local/local_storage.dart';
 
+
+/// The scopes required by this application.
+const List<String> scopes = <String>[
+  'email','profile','openid'
+];
+
+GoogleSignIn _googleSignIn = GoogleSignIn(
+  // Optional clientId
+  // clientId: '86369065781-lpajm2ln4bu8ds7vlb6780rmq0evae3o.apps.googleusercontent.com',
+  scopes: scopes,
+);
+
+
 class AuthRepoImpl extends AuthRepo {
   AuthRepoImpl({
     required Api api,
@@ -21,24 +34,15 @@ class AuthRepoImpl extends AuthRepo {
 
   final Api _api;
 
-  final GoogleSignIn _googleSignIn = GoogleSignIn(
-    // Optional clientId
-    // clientId: '86369065781-lpajm2ln4bu8ds7vlb6780rmq0evae3o.apps.googleusercontent.com',
-    scopes: scopes,
-  );
 
-  /// The scopes required by this application.
-  static const List<String> scopes = <String>[
-    'email',
-    'https://www.googleapis.com/auth/contacts.readonly',
-  ];
 
   @override
   Future<ApiResponse<UserDto?>> signInWithEmailAndPassword(
       {required String email, required String password}) async {
     var response = await _api.signInEmailPass(email: email, pass: password);
     if (response.error == null) {
-      return getUserDetails(response.response!.accessToken);
+      await saveAccessToken(response.response!.accessToken);
+      return getUserDetails();
     }
     return ApiResponse(error: response.error);
   }
@@ -84,9 +88,9 @@ Future<ApiResponse<UserDto?>> signWithGoogleAccount() async {
   }
 
   if (isAuthorized && googleUser != null) {
-    String? accessToken = await _api.socialLogin(
-        provider: 'google', token: googleAuth?.accessToken);
-    return getUserDetails(accessToken!);
+    String? accessToken = await _api.socialLogin(provider: 'google', token: googleAuth?.accessToken);
+    await saveAccessToken(accessToken!);
+    return getUserDetails();
   }
 
   return ApiResponse(error: ApiError(errorCode: 0, errorMessage: 'Unknown Error'));
@@ -106,8 +110,8 @@ Future<ApiResponse<bool>> signUpWithEmailAndPassword({required String email,
 }
 
   @override
-  Future<ApiResponse<UserDto?>> getUserDetails(String token) async {
-    await saveAccessToken(token);
+  Future<ApiResponse<UserDto?>> getUserDetails() async {
+    // await saveAccessToken(token);
 
     final response = await _api.getUserDetails();
 

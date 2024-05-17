@@ -1,49 +1,33 @@
-import 'package:cinteraction_vc/core/app/injector.dart';
-import 'package:cinteraction_vc/core/extension/context.dart';
+import 'dart:async';
+
 import 'package:cinteraction_vc/core/ui/images/image.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../../../../core/navigation/route.dart';
-import '../../cubit/profile/profile_cubit.dart';
 
-
-class SplashPage extends StatelessWidget {
+class SplashPage extends StatefulWidget {
   const SplashPage({super.key});
+
+  @override
+  State<StatefulWidget> createState() => _SplashPageState();
+}
+
+class _SplashPageState extends State<SplashPage> {
+  @override
+  void initState() {
+    super.initState();
+    Timer(const Duration(seconds: 1), () {
+      AppRoute.auth.go(context);
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
 
-    return BlocProvider<ProfileCubit>(
-        create: (context) => getIt.get<ProfileCubit>(),
-        child: BlocListener<ProfileCubit, ProfileState>(
-          listener: _onUserState,
-          child: Scaffold(
-            body: Center(
-
-
-              child: imageSVGAsset('original_long_logo') as Widget
-
-
-              // Text(
-              //   'Cinteraction\nFlutter\nApp',
-              //   textAlign: TextAlign.center,
-              //   style: context.textTheme.headlineLarge,
-              // ),
-            ),
-          ),
-        ),
+    return  Container(
+      decoration:  BoxDecoration(color: Colors.white),
+      child: Center(child: imageSVGAsset('original_long_logo') as Widget)
     );
 
-  }
-
-  void _onUserState(BuildContext context, ProfileState userState) {
-    if (userState is! ProfileLoaded) {
-      // User not loaded yet
-      return;
-    }
-
-    // AppRoute.home.go(context);
-    AppRoute.auth.go(context);
   }
 }
