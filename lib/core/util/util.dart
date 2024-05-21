@@ -12,6 +12,7 @@ class StreamRenderer {
   bool? isAudioMuted;
   // List<bool> selectedQuality = [false, false, true];
   bool? isVideoMuted;
+  ConfigureStreamQuality subStreamQuality = ConfigureStreamQuality.HIGH;
 
   Future<void> dispose() async {
     await stopAllTracksAndDispose(mediaStream);

@@ -1,5 +1,6 @@
 import 'package:janus_client/janus_client.dart';
 
+import '../../../../core/util/util.dart';
 import '../../repos/conference_repo.dart';
 
 class ConferenceChangeSubStream {
@@ -9,7 +10,7 @@ class ConferenceChangeSubStream {
   final ConferenceRepo repo;
 
 
-  call( ConfigureStreamQuality quality) {
-    repo.changeSubStream(quality: quality);
+  call( ConfigureStreamQuality quality, StreamRenderer remoteStream) {
+    repo.changeSubStream(quality: quality, remoteStream: remoteStream);
   }
 }

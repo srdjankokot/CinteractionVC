@@ -367,7 +367,7 @@ class ConferenceRepoImpl extends ConferenceRepo {
         maxBitrate: 128000,
         active: true,
         scalabilityMode: 'L1T2',
-        scaleResolutionDownBy: 4,
+        scaleResolutionDownBy: 8,
       ),
     ], mediaConstraints: {
       'video': {'width': 640, 'height': 360},
@@ -891,29 +891,29 @@ class ConferenceRepoImpl extends ConferenceRepo {
 
   @override
   Future<void> changeSubStream(
-      {required ConfigureStreamQuality quality}) async {
-    var numberOfPublishers = videoState.streamsToBeRendered.length;
+      {required ConfigureStreamQuality quality, required StreamRenderer remoteStream}) async {
+    // var numberOfPublishers = videoState.streamsToBeRendered.length;
     // ConfigureStreamQuality.values[index];
-    var streamQuality = ConfigureStreamQuality.HIGH;
-    if (numberOfPublishers > 2) {
-      streamQuality = ConfigureStreamQuality.MEDIUM;
-    }
+    // var streamQuality = ConfigureStreamQuality.HIGH;
+    // if (numberOfPublishers > 2) {
+    //   streamQuality = ConfigureStreamQuality.MEDIUM;
+    // }
+    //
+    // if (numberOfPublishers > 3) {
+    //   streamQuality = ConfigureStreamQuality.LOW;
+    // }
 
-    if (numberOfPublishers > 3) {
-      streamQuality = ConfigureStreamQuality.LOW;
-    }
-
-    for (var remoteStream in videoState.streamsToBeRendered.entries
-        .map((e) => e.value)
-        .toList()) {
-      remoteStream.mediaStream?.getVideoTracks();
-
-      await remotePlugin?.configure(
-        streams: [
-          ConfigureStream(mid: remoteStream.mid, substream: streamQuality)
-        ],
-      );
-    }
+    // for (var remoteStream in videoState.streamsToBeRendered.entries
+    //     .map((e) => e.value)
+    //     .toList()) {
+    //   await remotePlugin?.configure(
+    //     streams: [
+    //       ConfigureStream(mid: remoteStream.mid, substream: quality)
+    //     ],
+    //   );
+      changeSubstream(remoteStreamId: remoteStream.id,  substream: 1);
+      remoteStream.subStreamQuality = quality;
+    // }
   }
 
   @override

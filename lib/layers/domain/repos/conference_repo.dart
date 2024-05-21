@@ -47,7 +47,7 @@ abstract class ConferenceRepo{
 
   Future<void> publishById({required String id});
 
-  Future<void> changeSubStream({required ConfigureStreamQuality quality});
+  Future<void> changeSubStream({required ConfigureStreamQuality quality, required StreamRenderer remoteStream});
   Future<void> shareScreen(MediaStream? mediaStream);
 
   Future<ApiResponse<int>> startCall();
