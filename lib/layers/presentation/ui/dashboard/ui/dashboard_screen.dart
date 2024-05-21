@@ -1,8 +1,10 @@
 
+import 'package:cinteraction_vc/layers/presentation/cubit/dashboard/dashboard_cubit.dart';
 import 'package:cinteraction_vc/layers/presentation/ui/dashboard/ui/widget/metric_chart.dart';
 import 'package:cinteraction_vc/layers/presentation/ui/dashboard/ui/widget/new_groups_widget.dart';
 import 'package:cinteraction_vc/layers/presentation/ui/dashboard/ui/widget/new_users_widget.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../../../../assets/colors/Colors.dart';
 import '../../insights/ui/widget/bar_chart.dart';
@@ -13,15 +15,20 @@ class DashboardScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-        backgroundColor: ColorConstants.kGrey100,
-        body: Padding(
-            padding: const EdgeInsets.only(left: 20.0, right: 20.0),
-            child: ListView(
-              children: [
-                const SizedBox(
-                  height: 20,
-                ),
+    return BlocConsumer<DashboardCubit, DashboardState>(
+        listener: (context, state) {
+
+        },
+        builder: (context, state) {
+            return Scaffold(
+          backgroundColor: ColorConstants.kGrey100,
+          body: Padding(
+              padding: const EdgeInsets.only(left: 20.0, right: 20.0),
+              child: ListView(
+                children: [
+                  const SizedBox(
+                    height: 20,
+                  ),
                   LayoutBuilder(builder: (context, constraints) {
 
                     var minWidth = 400;
@@ -43,37 +50,41 @@ class DashboardScreen extends StatelessWidget {
                       children: [
                         SizedBox(
                           width: containerWidth,
-                          child: const MetricGraph(
+                          child:  MetricGraph(
                               title: 'Meetings attended',
-                              values: [18, 15, 17, 13, 18, 20]),
+                              values: state.meetingAttended,
+                              mainValue: state.meetingAttendedSum??0),
                         ),
+
+                        // SizedBox(
+                        //   width: containerWidth,
+                        //   child: const MetricGraph(
+                        //       title: 'Meetings started',
+                        //       values: [6, 6.5, 8, 7.2, 6.8, 8],
+                        //       mainValue: 20),
+                        // ),
 
                         SizedBox(
                           width: containerWidth,
-                          child: const MetricGraph(
-                              title: 'Meetings started',
-                              values: [6, 6.5, 8, 7.2, 6.8, 8]),
-                        ),
-
-                        SizedBox(
-                          width: containerWidth,
-                          child: const MetricGraph(
+                          child:  MetricGraph(
                               title: 'Average users per meeting',
-                              values: [54, 53.2, 53, 52.5, 53.5, 52.4, 52]),
+                              values:  state.usersPerMeeting,
+                              mainValue: state.avgUsersPerMeeting??0),
                         ),
 
                         SizedBox(
                           width: containerWidth,
-                          child: const MetricGraph(
+                          child:  MetricGraph(
                               title: 'Session duration',
-                              values: [40, 48, 58, 55, 50, 59, 63]),
+                              values:  state.durationsPerSession,
+                              mainValue: state.avgDurationPerSession??0),
                         ),
                       ],
                     );
                   }),
-                const SizedBox(
-                  height: 20,
-                ),
+                  const SizedBox(
+                    height: 20,
+                  ),
                   LayoutBuilder(builder: (context, constraints){
                     var minWidth = 400;
                     var space = 20.0;
@@ -87,86 +98,92 @@ class DashboardScreen extends StatelessWidget {
                       children: [
                         SizedBox(
                           width: containerWidth,
-                          child: const PieChartStats(
-                            values: [NameValueClass(name: '(20) Realized meetings', value: 72), NameValueClass(name: '(8) Missed', value: 28)],
+                          child:  PieChartStats(
+                            values: [NameValueClass(name: 'Realized meetings', value: state.realizedMeetings??0), NameValueClass(name: 'Missed', value: state.missedMeetings??0)],
                             title: 'My realized meetings',
-                            colors: [
+                            colors: const [
                               ColorConstants.kStateSuccess,
                               ColorConstants.kGrey100
                             ],
                           ),
                         ),
 
-                        SizedBox(
-                          width: containerWidth,
-                          child: const PieChartStats(
-                              values: [NameValueClass(name: '(687) Realized meetings', value: 77), NameValueClass(name: '(158) Missed', value: 23)],
-                              title: 'Realized meetings by users',
-                              colors: [
-                                ColorConstants.kStateInfo,
-                                ColorConstants.kGrey100
-                              ]),
-                        ),
+                        // SizedBox(
+                        //   width: containerWidth,
+                        //   child: const PieChartStats(
+                        //       values: [NameValueClass(name: '(687) Realized meetings', value: 77), NameValueClass(name: '(158) Missed', value: 23)],
+                        //       title: 'Realized meetings by users',
+                        //       colors: [
+                        //         ColorConstants.kStateInfo,
+                        //         ColorConstants.kGrey100
+                        //       ]),
+                        // ),
                       ],
                     );
-    }),
+                  }),
 
-                const SizedBox(
-                  height: 20,
-                ),
+                  // const SizedBox(
+                  //   height: 20,
+                  // ),
+                  //
+                  // LayoutBuilder(builder: (context, constraints) {
+                  //   var minWidth = 400;
+                  //   var space = 20.0;
+                  //   var containerWidth = constraints.maxWidth * 1/2 - space/2;
+                  //   if(constraints.maxWidth <= minWidth * 2) {
+                  //     containerWidth = constraints.maxWidth;
+                  //   }
+                  //
+                  //   return Wrap(
+                  //     spacing: space,
+                  //     runSpacing: space,
+                  //     children: [
+                  //
+                  //       Container(
+                  //         height: 350,
+                  //         width: containerWidth,
+                  //         decoration: ShapeDecoration(
+                  //           color: Colors.white,
+                  //           shape: RoundedRectangleBorder(
+                  //             borderRadius: BorderRadius.circular(10),
+                  //           ),
+                  //         ),
+                  //
+                  //         child: const NewUsersWidget(),
+                  //       ),
+                  //
+                  //
+                  //       Container(
+                  //         height: 350,
+                  //         width: containerWidth,
+                  //         decoration: ShapeDecoration(
+                  //           color: Colors.white,
+                  //           shape: RoundedRectangleBorder(
+                  //             borderRadius: BorderRadius.circular(10),
+                  //           ),
+                  //         ),
+                  //         child: const  NewGroupsWidget(),
+                  //       ),
+                  //
+                  //     ],
+                  //   );
+                  // }),
 
-                LayoutBuilder(builder: (context, constraints) {
-                  var minWidth = 400;
-                  var space = 20.0;
-                  var containerWidth = constraints.maxWidth * 1/2 - space/2;
-                  if(constraints.maxWidth <= minWidth * 2) {
-                    containerWidth = constraints.maxWidth;
-                  }
-
-                  return Wrap(
-                    spacing: space,
-                    runSpacing: space,
-                    children: [
-
-                      Container(
-                        height: 350,
-                        width: containerWidth,
-                        decoration: ShapeDecoration(
-                          color: Colors.white,
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(10),
-                          ),
-                        ),
-
-                        child: const NewUsersWidget(),
-                      ),
+                  // const SizedBox(
+                  //   height: 20,
+                  // ),
+                  // const GetBarChart(
+                  //   title: 'Total Engagement',
+                  //   color: ColorConstants.kStateInfo,
+                  // )
+                ],
+              )));
+        });
 
 
-                      Container(
-                        height: 350,
-                        width: containerWidth,
-                        decoration: ShapeDecoration(
-                          color: Colors.white,
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(10),
-                          ),
-                        ),
-                        child: const  NewGroupsWidget(),
-                      ),
 
-                    ],
-                  );
-                }),
 
-                const SizedBox(
-                  height: 20,
-                ),
-                const GetBarChart(
-                  title: 'Total Engagement',
-                  color: ColorConstants.kStateInfo,
-                )
-              ],
-            )));
+
   }
 }
 

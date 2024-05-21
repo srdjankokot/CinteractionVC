@@ -1,4 +1,5 @@
 import 'package:cinteraction_vc/layers/data/dto/meeting_dto.dart';
+import 'package:cinteraction_vc/layers/domain/entities/dashboard/dashboard_response.dart';
 
 import '../../../core/io/network/models/login_response.dart';
 import '../../data/dto/user_dto.dart';
@@ -23,5 +24,9 @@ abstract class Api {
   Future<ApiResponse<bool?>> scheduleMeeting({required String name, required String description, required String tag, required DateTime date});
 
   Future<ApiResponse<bool?>> sendMessage({required String userId, required String message, required String callId});
+
+  Future<ApiResponse<DashboardResponse?>> getDashboardData();
+
+
 
 }
