@@ -11,6 +11,7 @@ import 'package:flutter/scheduler.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_webrtc/flutter_webrtc.dart';
 import 'package:go_router/go_router.dart';
+import 'package:janus_client/janus_client.dart';
 import 'package:visibility_detector/visibility_detector.dart';
 
 import '../../../../core/navigation/route.dart';
@@ -80,14 +81,23 @@ class VideoRoomPage extends StatelessWidget {
 
           var subscribers = state.streamSubscribers?.toList();
 
-          if (items.length > 2) {
-            for (var remoteStream in items) {
-              if (remoteStream.mid != null) {
-                //index 0 is the lowest
-                // context.read<ConferenceCubit>().changeSubstream(remoteStream.mid!, 0);
-              }
-            }
-          }
+          // if (!context.isWide) {
+          //   for (var remoteStream in items) {
+          //
+          //     if (remoteStream.mid != null) {
+          //       //index 0 is the lowest
+          //
+          //       // context.read<ConferenceCubit>().changeSubstream(remoteStream.mid!, 0);
+          //
+          //       if(remoteStream.subStreamQuality != ConfigureStreamQuality.LOW)
+          //         {
+          //           print('change remote substream');
+          //           context.read<ConferenceCubit>().changeSubStream(ConfigureStreamQuality.LOW, remoteStream);
+          //         }
+          //
+          //     }
+          //   }
+          // }
 
           return Material(
             child: Center(
@@ -476,136 +486,286 @@ class VideoRoomPage extends StatelessWidget {
                         );
                       } else {
                         return SafeArea(
-                          child: Container(
-                            child: Column(
-                              children: [
-                                Row(
-                                  children: [
-                                    // IconButton(
-                                    //     icon: const Icon(
-                                    //       Icons.add,
-                                    //       color: Colors.white,
-                                    //     ),
-                                    //     onPressed: () async {
-                                    //       await context
-                                    //           .read<ConferenceCubit>()
-                                    //           .increaseNumberOfCopies();
-                                    //       // setState(() {
-                                    //       //   _numberOfStream++;
-                                    //       // })
-                                    //     }),
-                                    // IconButton(
-                                    //     icon: const Icon(
-                                    //       Icons.remove,
-                                    //       color: Colors.white,
-                                    //     ),
-                                    //     onPressed: () async {
-                                    //       await context
-                                    //           .read<ConferenceCubit>()
-                                    //           .decreaseNumberOfCopies();
-                                    //
-                                    //       // setState(() {
-                                    //       //   _numberOfStream--;
-                                    //       // })
-                                    //     }),
-                                    IconButton(
-                                        icon:
-                                            imageSVGAsset('icon_switch_camera')
-                                                as Widget,
-                                        onPressed: () async {
-                                          await context
-                                              .read<ConferenceCubit>()
-                                              .switchCamera();
-                                        }),
-                                  ],
-                                ),
-                                Expanded(
-                                    child: getLayout(
-                                        context, items, state.isGridLayout)),
-                                Padding(
-                                  padding: const EdgeInsets.only(
-                                      top: 18.0, bottom: 18.0),
-                                  child: Row(
-                                    mainAxisAlignment: MainAxisAlignment.center,
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.center,
+                          child: Stack(
+                            children: [
+                              Column(
+                                children: [
+                                  Row(
                                     children: [
-                                      // ElevatedButton(
-                                      //   onPressed: () {
-                                      //     context.read<ConferenceCubit>().publish();
-                                      //   },
-                                      //   child: Text('Publish'),
+                                      // IconButton(
+                                      //     icon: const Icon(
+                                      //       Icons.add,
+                                      //       color: Colors.white,
+                                      //     ),
+                                      //     onPressed: () async {
+                                      //       await context
+                                      //           .read<ConferenceCubit>()
+                                      //           .increaseNumberOfCopies();
+                                      //       // setState(() {
+                                      //       //   _numberOfStream++;
+                                      //       // })
+                                      //     }),
+                                      // IconButton(
+                                      //     icon: const Icon(
+                                      //       Icons.remove,
+                                      //       color: Colors.white,
+                                      //     ),
+                                      //     onPressed: () async {
+                                      //       await context
+                                      //           .read<ConferenceCubit>()
+                                      //           .decreaseNumberOfCopies();
                                       //
-                                      // ),
-                                      //
-                                      // ElevatedButton(
-                                      //   onPressed: () {
-                                      //     context.read<ConferenceCubit>().unpublish();
-                                      //   },
-                                      //   child: Text('Unpublish'),
-                                      //
-                                      // ),
-                                      CallButtonShape(
-                                        image: imageSVGAsset('icon_phone')
-                                            as Widget,
-                                        bgColor: ColorConstants.kPrimaryColor,
-                                        onClickAction: () async {
-                                          await context
-                                              .read<ConferenceCubit>()
-                                              .finishCall();
-                                        },
-                                      ),
-
-                                      const SizedBox(width: 20),
-                                      CallButtonShape(
-                                          image: !state.audioMuted
-                                              ? imageSVGAsset('icon_microphone')
-                                                  as Widget
-                                              : imageSVGAsset(
-                                                      'icon_microphone_disabled')
+                                      //       // setState(() {
+                                      //       //   _numberOfStream--;
+                                      //       // })
+                                      //     }),
+                                      IconButton(
+                                          icon:
+                                              imageSVGAsset('icon_switch_camera')
                                                   as Widget,
-                                          onClickAction: () async {
+                                          onPressed: () async {
                                             await context
                                                 .read<ConferenceCubit>()
-                                                .audioMute();
+                                                .switchCamera();
                                           }),
-                                      const SizedBox(width: 20),
-                                      CallButtonShape(
-                                          image: !state.videoMuted
-                                              ? imageSVGAsset(
-                                                      'icon_video_recorder')
-                                                  as Widget
-                                              : imageSVGAsset(
-                                                      'icon_video_recorder_disabled')
-                                                  as Widget,
-                                          onClickAction: () async {
-                                            await context
-                                                .read<ConferenceCubit>()
-                                                .videoMute();
-                                          }),
-                                      // const SizedBox(width: 20),
-                                      // CallButtonShape(
-                                      //     image: imageSVGAsset('icon_arrow_square_up')
-                                      //     as Widget,
-                                      //     onClickAction: joined
-                                      //         ? () async {
-                                      //       // if (screenSharing) {
-                                      //       //   await disposeScreenSharing();
-                                      //       //   return;
-                                      //       // }
-                                      //       // await screenShare();
-                                      //     }
-                                      //         : null),
-                                      const SizedBox(width: 20),
-                                      // CallButtonShape(
-                                      //     image: imageSVGAsset('three_dots') as Widget,
-                                      //     // onClickAction: joined ? switchCamera : null),
-                                      //     onClickAction: joined ? null : null),
                                     ],
                                   ),
-                                ),
-                              ],
-                            ),
+                                  Expanded(
+                                        child: getLayout(context, items, state.isGridLayout),
+                                  ),
+                                  Padding(
+                                    padding: const EdgeInsets.only(
+                                        top: 18.0, bottom: 18.0),
+                                    child: Row(
+                                      mainAxisAlignment: MainAxisAlignment.center,
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.center,
+                                      children: [
+                                        // ElevatedButton(
+                                        //   onPressed: () {
+                                        //     context.read<ConferenceCubit>().publish();
+                                        //   },
+                                        //   child: Text('Publish'),
+                                        //
+                                        // ),
+                                        //
+                                        // ElevatedButton(
+                                        //   onPressed: () {
+                                        //     context.read<ConferenceCubit>().unpublish();
+                                        //   },
+                                        //   child: Text('Unpublish'),
+                                        //
+                                        // ),
+                                        CallButtonShape(
+                                          image: imageSVGAsset('icon_phone')
+                                              as Widget,
+                                          bgColor: ColorConstants.kPrimaryColor,
+                                          onClickAction: () async {
+                                            await context
+                                                .read<ConferenceCubit>()
+                                                .finishCall();
+                                          },
+                                        ),
+
+                                        const SizedBox(width: 20),
+                                        CallButtonShape(
+                                            image: !state.audioMuted
+                                                ? imageSVGAsset('icon_microphone')
+                                                    as Widget
+                                                : imageSVGAsset(
+                                                        'icon_microphone_disabled')
+                                                    as Widget,
+                                            onClickAction: () async {
+                                              await context
+                                                  .read<ConferenceCubit>()
+                                                  .audioMute();
+                                            }),
+                                        const SizedBox(width: 20),
+                                        CallButtonShape(
+                                            image: !state.videoMuted
+                                                ? imageSVGAsset(
+                                                        'icon_video_recorder')
+                                                    as Widget
+                                                : imageSVGAsset(
+                                                        'icon_video_recorder_disabled')
+                                                    as Widget,
+                                            onClickAction: () async {
+                                              await context
+                                                  .read<ConferenceCubit>()
+                                                  .videoMute();
+                                            }),
+                                        // const SizedBox(width: 20),
+                                        // CallButtonShape(
+                                        //     image: imageSVGAsset('icon_arrow_square_up')
+                                        //     as Widget,
+                                        //     onClickAction: joined
+                                        //         ? () async {
+                                        //       // if (screenSharing) {
+                                        //       //   await disposeScreenSharing();
+                                        //       //   return;
+                                        //       // }
+                                        //       // await screenShare();
+                                        //     }
+                                        //         : null),
+                                        const SizedBox(width: 20),
+
+                                        Stack(children: [
+                                          CallButtonShape(
+                                            image: imageSVGAsset('icon_message')
+                                                as Widget,
+                                            bgColor: ColorConstants.kPrimaryColor
+                                                .withOpacity(0.4),
+                                            onClickAction: () async {
+                                              await context
+                                                  .read<ConferenceCubit>()
+                                                  .toggleChatWindow();
+                                            },
+                                          ),
+                                          Positioned(
+                                            right: 0,
+                                            top: 0,
+                                            child: AnimatedOpacity(
+                                              opacity: (state.unreadMessages !=
+                                                          null &&
+                                                      state.unreadMessages! > 0)
+                                                  ? 1
+                                                  : 0,
+                                              duration: const Duration(
+                                                  milliseconds: 250),
+                                              child: Container(
+                                                width: 12,
+                                                height: 12,
+                                                decoration: const ShapeDecoration(
+                                                  color: Colors.white,
+                                                  shape: OvalBorder(),
+                                                ),
+                                                // child: Text(
+                                                //   '1',
+                                                //   style: context
+                                                //       .primaryTextTheme.labelSmall
+                                                //       ?.copyWith(
+                                                //           fontSize: 8,
+                                                //           fontWeight:
+                                                //               FontWeight.w700),
+                                                // )
+                                              ),
+                                            ),
+                                          ),
+                                          // child: Text('${state.unreadMessages}', style: context.primaryTextTheme.labelSmall,)),
+                                          //   child: Text('1', style: context.primaryTextTheme.labelSmall?.copyWith(fontSize: 8, fontWeight: FontWeight.w700),)),,
+                                        ]),
+
+                                        // CallButtonShape(
+                                        //     image: imageSVGAsset('three_dots') as Widget,
+                                        //     // onClickAction: joined ? switchCamera : null),
+                                        //     onClickAction: joined ? null : null),
+                                      ],
+                                    ),
+                                  ),
+                                ],
+                              ),
+                              AnimatedPositioned(
+                                bottom: state.showingChat ? 0 : -MediaQuery.of(context).size.height * 0.8,
+                                right: 0,
+                                left: 0,
+                                duration: const Duration(milliseconds: 250),
+
+                                  child: Container(
+                                    width: double.maxFinite,
+                                    height: MediaQuery.of(context).size.height * 0.8,
+                                    color: Colors.white,
+                                    child: Padding(
+                                      padding: EdgeInsets.only(bottom: MediaQuery.of(context).viewInsets.bottom + 23, top: 23, right: 23, left: 23),
+                                      child: Column(
+                                        // crossAxisAlignment: CrossAxisAlignment.start,
+                                        children: [
+                                          Row(
+                                            children: [
+                                              Expanded(
+                                                child: Text(
+                                                  'Chat messages',
+                                                  style: context
+                                                      .titleTheme.titleMedium,
+                                                ),
+                                              ),
+                                              IconButton(
+                                                icon: const Icon(Icons.close),
+                                                onPressed: () {
+                                                  context
+                                                      .read<ConferenceCubit>()
+                                                      .toggleChatWindow();
+                                                },
+                                              )
+                                            ],
+                                          ),
+                                          Expanded(
+                                            child: Container(
+                                              child: state.messages == null
+                                                  ? const Center(
+                                                  child: Text('No Messages'))
+                                                  : ListView.builder(
+                                                controller: chatController,
+                                                itemCount:
+                                                state.messages?.length,
+                                                itemBuilder:
+                                                    (BuildContext context,
+                                                    int index) {
+                                                  return VisibilityDetector(
+                                                      key: Key(
+                                                          index.toString()),
+                                                      onVisibilityChanged:
+                                                          (VisibilityInfo
+                                                      info) {
+                                                        // print('${state.messages![int.parse('${(info.key as ValueKey).value}')]} (message seen)');
+                                                        context
+                                                            .read<
+                                                            ConferenceCubit>()
+                                                            .chatMessageSeen(
+                                                            index);
+                                                      },
+                                                      child: ChatMessageWidget(
+                                                          message:
+                                                          state.messages![
+                                                          index]));
+                                                },
+                                              ),
+                                            ),
+                                          ),
+                                          const SizedBox(
+                                            height: 5,
+                                          ),
+                                          Row(
+                                            children: [
+                                              Expanded(
+                                                child: TextField(
+                                                  textInputAction:
+                                                  TextInputAction.go,
+                                                  focusNode: messageFocusNode,
+                                                  onSubmitted: (value) {
+                                                    sendMessage();
+                                                  },
+                                                  controller:
+                                                  messageFieldController,
+                                                  decoration: InputDecoration(
+                                                      hintText: "Send a message",
+                                                      suffixIcon: IconButton(
+                                                        onPressed: () {
+                                                          sendMessage();
+                                                        },
+                                                        icon: imageSVGAsset(
+                                                            'icon_send') as Widget,
+                                                      )),
+                                                ),
+                                              )
+                                            ],
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                  ),
+
+                              ),
+                            ],
                           ),
                         );
                       }
@@ -877,22 +1037,22 @@ class VideoRoomPage extends StatelessWidget {
           children: [
             ClipRRect(
               borderRadius: BorderRadius.circular(6),
-              child:     Visibility(
+              child: Visibility(
                 visible: remoteStream.isVideoMuted == false,
                 replacement: Center(
                     child: CircleAvatar(
-                      backgroundColor:
+                  backgroundColor:
                       ([...ColorConstants.kStateColors]..shuffle()).first,
-                      radius: [width, height].reduce(min) / 4,
-                      child: Text(remoteStream.publisherName.getInitials(),
-                          style: context.primaryTextTheme.titleLarge?.copyWith(
-                              fontSize: [width, height].reduce(min) / 8,
-                              fontWeight: FontWeight.bold)),
-                    )
+                  radius: [width, height].reduce(min) / 4,
+                  child: Text(remoteStream.publisherName.getInitials(),
+                      style: context.primaryTextTheme.titleLarge?.copyWith(
+                          fontSize: [width, height].reduce(min) / 8,
+                          fontWeight: FontWeight.bold)),
+                )
 
-                  // Text("Video Paused By ${remoteStream.publisherName!}",
-                  //     style: const TextStyle(color: Colors.white)),
-                ),
+                    // Text("Video Paused By ${remoteStream.publisherName!}",
+                    //     style: const TextStyle(color: Colors.white)),
+                    ),
                 child: RTCVideoView(
                   remoteStream.videoRenderer,
                   placeholderBuilder: (context) {
@@ -917,7 +1077,7 @@ class VideoRoomPage extends StatelessWidget {
             //   ),
             // ),
             Positioned(
-              right: 0,
+                right: 0,
                 child: Row(
                   children: [
                     EngagementProgress(

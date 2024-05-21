@@ -190,8 +190,8 @@ class ConferenceCubit extends Cubit<ConferenceState> with BlocLoggy {
     conferenceUseCases.publishById(id);
   }
 
-  Future<void> changeSubStream(ConfigureStreamQuality quality) async {
-    conferenceUseCases.changeSubStream(quality);
+  Future<void> changeSubStream(ConfigureStreamQuality quality, StreamRenderer remoteStream) async {
+    conferenceUseCases.changeSubStream(quality, remoteStream);
   }
 
 
