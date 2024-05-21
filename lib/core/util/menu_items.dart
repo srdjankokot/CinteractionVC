@@ -1,5 +1,6 @@
 import 'package:cinteraction_vc/core/extension/context.dart';
 import 'package:cinteraction_vc/layers/domain/usecases/meeting/meeting_use_cases.dart';
+import 'package:cinteraction_vc/layers/presentation/cubit/dashboard/dashboard_cubit.dart';
 import 'package:cinteraction_vc/layers/presentation/ui/landing/ui/page/home_page.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -42,7 +43,7 @@ final desktopMenu = <MenuItem>[
   home,
   dashboard,
   meetings,
-  insights,
+  // insights,
   // users,
   // groups,
   // tags,
@@ -95,7 +96,11 @@ final dashboard = MenuItem(
   route: null,
   label: 'Dashboard',
   assetName: 'menu_dashboard',
-  body: const DashboardScreen(),
+  body:
+  BlocProvider(
+    create: (context) => getIt.get<DashboardCubit>(),
+    child: const DashboardScreen(),
+  )
 );
 final meetings = MenuItem(
   route: null,

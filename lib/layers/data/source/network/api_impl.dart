@@ -4,12 +4,14 @@ import 'package:cinteraction_vc/core/app/injector.dart';
 import 'package:cinteraction_vc/core/io/network/models/login_response.dart';
 import 'package:cinteraction_vc/layers/data/dto/api_error_dto.dart';
 import 'package:cinteraction_vc/layers/data/dto/user_dto.dart';
+import 'package:cinteraction_vc/layers/domain/entities/dashboard/dashboard_response.dart';
 import 'package:cinteraction_vc/layers/domain/source/api.dart';
 import 'package:dio/dio.dart';
 import 'package:intl/intl.dart';
 
 import '../../../../core/io/network/urls.dart';
 import '../../../domain/entities/api_response.dart';
+import '../../dto/dashboard/dashboard_response_dto.dart';
 import '../../dto/meeting_dto.dart';
 
 class ApiImpl extends Api {
@@ -256,6 +258,22 @@ class ApiImpl extends Api {
   Future<ApiResponse<bool?>> sendMessage({required String userId, required String message, required String callId}) {
     // TODO: implement sendMessage
     throw UnimplementedError();
+  }
+
+  @override
+  Future<ApiResponse<DashboardResponseDto?>> getDashboardData() async {
+    Dio dio = await getIt.getAsync<Dio>();
+
+    try {
+      Response response = await dio.get(Urls.dashboard);
+      // print(response.data);
+      var dashboard = DashboardResponseDto.fromJson(response.data as Map<String, dynamic>);
+      return ApiResponse(response: dashboard);
+
+    } on DioException catch (e, s) {
+      print(e.response?.statusMessage);
+      return ApiResponse(error: ApiErrorDto.fromDioException(e));
+    }
   }
 }
 

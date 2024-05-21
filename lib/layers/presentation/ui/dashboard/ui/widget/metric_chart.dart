@@ -13,11 +13,17 @@ import '../../../../../../core/ui/images/image.dart';
 class MetricGraph extends StatelessWidget {
   final String title;
   final List<double> values;
+  final int mainValue;
 
-  const MetricGraph({super.key, required this.title, required this.values});
+  const MetricGraph({super.key, required this.title, required this.values, required this.mainValue});
 
   @override
   Widget build(BuildContext context) {
+
+    if(values.isEmpty) {
+      return const Text('no data');
+    }
+
     var statusColor = values.first < values.last
         ? ColorConstants.kStateSuccess
         : ColorConstants.kStateError;
@@ -58,29 +64,29 @@ class MetricGraph extends StatelessWidget {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
-                            '${values.last}',
+                            '$mainValue',
                             style: context.titleTheme.titleLarge,
                           ),
                           const Spacer(),
-                          Row(
-                            children: [
-                              if (values.first < values.last)
-                                imageSVGAsset('arrow_up') as Widget
-                              else
-                                imageSVGAsset('arrow_down') as Widget,
-                              Text(
-                                '${((values.last - values.first).abs() / values.last * 100).toInt()}%',
-                                textAlign: TextAlign.center,
-                                style: context.textTheme.labelMedium
-                                    ?.copyWith(color: statusColor),
-                              ),
-                              const SizedBox(
-                                width: 8,
-                              ),
-                              Text('vs last month',
-                                  style: context.textTheme.labelMedium)
-                            ],
-                          )
+                          // Row(
+                          //   children: [
+                          //     if (values.first < values.last)
+                          //       imageSVGAsset('arrow_up') as Widget
+                          //     else
+                          //       imageSVGAsset('arrow_down') as Widget,
+                          //     Text(
+                          //       '${((values.last - values.first).abs() / values.last * 100).toInt()}%',
+                          //       textAlign: TextAlign.center,
+                          //       style: context.textTheme.labelMedium
+                          //           ?.copyWith(color: statusColor),
+                          //     ),
+                          //     const SizedBox(
+                          //       width: 8,
+                          //     ),
+                          //     Text('vs last month',
+                          //         style: context.textTheme.labelMedium)
+                          //   ],
+                          // )
                         ],
                       ),
                     ),

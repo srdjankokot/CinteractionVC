@@ -20,4 +20,5 @@ class Urls{
 
   static String engagement = '$baseIviUrl/engagement/rank';
   static String sendEngagement = '$baseUrl/api/update-call-attention';
+  static String dashboard = '$baseUrl/api/dashboards';
 }

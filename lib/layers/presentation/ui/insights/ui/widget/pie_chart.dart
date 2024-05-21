@@ -22,8 +22,25 @@ class PieChartStats extends StatelessWidget {
       ColorConstants.kEngProgress65,
     ]});
 
+
+
   @override
   Widget build(BuildContext context) {
+
+    print('pie chart $values');
+
+
+    var sum = 0;
+    values.forEach((element) {
+      sum += element.value;
+    });
+
+
+    if(sum<=0)
+    {
+      return const Text('NO DATA');
+    }
+
     return Container(
       decoration: ShapeDecoration(
         color: Colors.white,
@@ -108,7 +125,7 @@ class PieChartStats extends StatelessWidget {
 
                                       Expanded(
                                         child: Text(
-                                          '${item.value}% ${item.name}',
+                                          '${((item.value/sum)*100).toInt()}%(${item.value}) ${item.name}',
                                           style: context.textTheme.bodySmall?.copyWith(
                                             color: ColorConstants.kGray2
                                           ),
@@ -147,7 +164,7 @@ class PieChartStats extends StatelessWidget {
                                         const SizedBox(width: 30,),
 
                                         Text(
-                                          '${item.value}% ${item.name}',
+                                          '${sum/item.value*100}%(${item.value}) ${item.name}',
                                           style: context.textTheme.bodySmall?.copyWith(
                                               color: ColorConstants.kGray2
                                           ),
