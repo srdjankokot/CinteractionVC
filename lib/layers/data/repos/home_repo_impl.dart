@@ -11,9 +11,9 @@ class HomeRepoImpl extends HomeRepo{
   final Api _api;
 
   @override
-  Future<ApiResponse<bool>> scheduleMeeting({required String name, required String description, required String tag, required DateTime date}) async {
-    await _api.scheduleMeeting(name: name, description: description, tag: tag, date: date);
-    return ApiResponse(response: true);
+  Future<ApiResponse<String>> scheduleMeeting({required String name, required String description, required String tag, required DateTime date}) async {
+    var response = await _api.scheduleMeeting(name: name, description: description, tag: tag, date: date);
+    return ApiResponse(response: response.response);
   }
 
   @override

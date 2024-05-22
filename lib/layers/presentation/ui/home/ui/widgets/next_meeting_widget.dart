@@ -71,7 +71,7 @@ class NextMeetingWidget extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    'Digital Photography',
+                    meeting.eventName?? "Next Meeting",
                     style: context.textTheme.displayLarge,
                   ),
 

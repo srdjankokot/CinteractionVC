@@ -27,7 +27,7 @@ final mobileBottomMenu = <MenuItem>[
   home,
   dashboard,
   meetings,
-  insights,
+  // insights,
   profile
 ];
 final mobileProfileMenu = <MenuItem>[

@@ -186,15 +186,18 @@ class MeetingListLayoutState extends State<MeetingListLayout> {
                             )
                           ],
                         )),
-                    ElevatedButton(
-                        onPressed: () =>
-                        {
-                          context.read<RolesCubit>().addRole()
-                        },
-                        child: const Text('Start a meeting'))
+                    // ElevatedButton(
+                    //     onPressed: () =>
+                    //     {
+                    //       context.read<RolesCubit>().addRole()
+                    //     },
+                    //     child: const Text('Start a meeting'))
                   ],
                 ),
               ),
+
+
+              
               Table(columnWidths: const {
                 1: FixedColumnWidth(200),
                   2: FixedColumnWidth(150),

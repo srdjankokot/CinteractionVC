@@ -11,7 +11,6 @@ import 'package:cinteraction_vc/layers/presentation/ui/home/ui/widgets/schedule_
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
-import 'package:url_launcher/url_launcher.dart';
 import '../../../../../assets/colors/Colors.dart';
 import '../../../../../core/ui/images/image.dart';
 

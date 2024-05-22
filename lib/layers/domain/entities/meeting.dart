@@ -10,7 +10,8 @@ class Meeting {
       this.recorded,
       required this.meetingStart,
       this.meetingEnd,
-      this.streamId});
+      this.streamId,
+      this.eventName});
 
   @JsonKey(name: 'call_id')
   int callId;
@@ -36,4 +37,7 @@ class Meeting {
 
   @JsonKey(name: 'meeting_end')
   DateTime? meetingEnd;
+
+  @JsonKey(name: 'event_name')
+  String? eventName;
 }

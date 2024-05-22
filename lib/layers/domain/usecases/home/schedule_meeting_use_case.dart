@@ -5,7 +5,7 @@ class ScheduleMeetingUseCase{
   ScheduleMeetingUseCase({required this.repo});
   final HomeRepo repo;
 
-  Future<ApiResponse<bool>> call(String name, String description, String tag, DateTime date) {
+  Future<ApiResponse<String>> call(String name, String description, String tag, DateTime date) {
     return repo.scheduleMeeting(name: name, description: description, tag: tag, date: date);
   }
 }

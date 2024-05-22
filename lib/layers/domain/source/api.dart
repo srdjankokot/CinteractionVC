@@ -21,7 +21,7 @@ abstract class Api {
   Future<ApiResponse<List<MeetingDto>?>> getScheduledMeetings();
   Future<ApiResponse<MeetingDto?>> getNextMeeting();
 
-  Future<ApiResponse<bool?>> scheduleMeeting({required String name, required String description, required String tag, required DateTime date});
+  Future<ApiResponse<String?>> scheduleMeeting({required String name, required String description, required String tag, required DateTime date});
 
   Future<ApiResponse<bool?>> sendMessage({required String userId, required String message, required String callId});
 
