@@ -3,7 +3,7 @@ import '../entities/meeting.dart';
 
 abstract class HomeRepo
 {
-  Future<ApiResponse<bool>> scheduleMeeting({
+  Future<ApiResponse<String>> scheduleMeeting({
     required String name,
     required String description,
     required String tag,

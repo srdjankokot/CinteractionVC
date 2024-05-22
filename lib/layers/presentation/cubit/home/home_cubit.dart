@@ -1,3 +1,4 @@
+import 'package:cinteraction_vc/layers/domain/entities/api_response.dart';
 import 'package:cinteraction_vc/layers/domain/usecases/home/home_use_cases.dart';
 import 'package:equatable/equatable.dart';
 import 'package:flutter/cupertino.dart';
@@ -34,10 +35,12 @@ class HomeCubit extends Cubit<HomeState> with BlocLoggy {
     emit(state.copyWith(scheduleDate: state.scheduleStartDateTime?.copyWith(hour: timeOfDay?.hour,  minute: timeOfDay?.minute)));
   }
 
-  Future<void> scheduleMeeting(String name, String desc, String tag) async {
+  Future<ApiResponse<String>> scheduleMeeting(String name, String desc, String tag) async {
     emit(state.copyWith(loading: true));
-    await homeUseCases.scheduleMeetingUseCase(name, desc, tag, state.scheduleStartDateTime!);
+    var response = await homeUseCases.scheduleMeetingUseCase(name, desc, tag, state.scheduleStartDateTime!);
     emit(state.copyWith(loading: false));
     getNextMeeting();
+
+    return response;
   }
 }

@@ -118,6 +118,7 @@ class ApiImpl extends Api {
 
     var formData = FormData.fromMap({'call_id': callId, 'user_id': userId});
     Response response = await dio.post(Urls.endCall, data: formData);
+    print('end call by user $response');
 
     return response.statusCode == 200;
   }
@@ -209,7 +210,7 @@ class ApiImpl extends Api {
   }
 
   @override
-  Future<ApiResponse<bool?>> scheduleMeeting({required String name, required String description, required String tag, required DateTime date}) async {
+  Future<ApiResponse<String?>> scheduleMeeting({required String name, required String description, required String tag, required DateTime date}) async {
     Dio dio = await getIt.getAsync<Dio>();
 
     var formData = {
@@ -225,7 +226,7 @@ class ApiImpl extends Api {
     try {
       Response response = await dio.post(Urls.scheduleMeeting, data: formData);
       print(response);
-      return ApiResponse(response: response.statusCode! > 200 && response.statusCode! < 300);
+      return ApiResponse(response: response.data['link']);
 
     } on DioException catch (e, s) {
       print(e.response?.statusMessage);

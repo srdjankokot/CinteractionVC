@@ -18,6 +18,7 @@ MeetingDto _$MeetingDtoFromJson(Map<String, dynamic> json) => MeetingDto(
           ? null
           : DateTime.parse(json['meeting_end'] as String),
       streamId: json['stream_id'] as String?,
+      eventName: json['event_name'] as String?,
     );
 
 Map<String, dynamic> _$MeetingDtoToJson(MeetingDto instance) =>
@@ -31,4 +32,5 @@ Map<String, dynamic> _$MeetingDtoToJson(MeetingDto instance) =>
       'recorded': instance.recorded,
       'meeting_start': instance.meetingStart.toIso8601String(),
       'meeting_end': instance.meetingEnd?.toIso8601String(),
+      'event_name': instance.eventName,
     };

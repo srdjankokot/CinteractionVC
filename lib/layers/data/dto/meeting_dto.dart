@@ -14,7 +14,8 @@ class MeetingDto extends Meeting {
       super.recorded,
       required super.meetingStart,
       super.meetingEnd,
-      super.streamId});
+      super.streamId,
+      super.eventName});
 
   @override
   factory MeetingDto.fromJson(Map<String, dynamic> json) =>
