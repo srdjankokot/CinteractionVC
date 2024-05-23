@@ -197,7 +197,7 @@ class MeetingListLayoutState extends State<MeetingListLayout> {
               ),
 
 
-              
+
               Table(columnWidths: const {
                 1: FixedColumnWidth(200),
                   2: FixedColumnWidth(150),
