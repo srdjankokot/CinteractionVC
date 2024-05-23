@@ -42,12 +42,15 @@ jobs:
       - name: Build Web Release
         run: flutter build web --release
 
-      - uses: FirebaseExtended/action-hosting-deploy@v0
+      - name: Deploy to Firebase
+        uses: sws2apps/firebase-deployment@main #consider using pin for dependabot auto update
         with:
-          repoToken: "${{ secrets.GITHUB_TOKEN }}"
-          firebaseServiceAccount: "${{ secrets.FIREBASE_SERVICE_ACCOUNT }}"
-          expires: 30d
-          projectId: cinteractionvc
+          workloadIdentityProvider: ${{ secrets.WORKLOAD_IDENTITY_PROVIDER }}
+          serviceAccount: ${{ secrets.SERVICE_ACCOUNT }}
+          config: 'firebase.json' #optional
+          function: true #optional & boolean
+          hosting: true #optional & boolean
+          project: cinteractionvc #required
 
       
       - name: Deploy to firebase
