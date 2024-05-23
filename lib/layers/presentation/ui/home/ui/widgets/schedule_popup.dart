@@ -140,32 +140,38 @@ class SchedulePopup extends StatelessWidget {
                           tagNameFieldController.value.text);
                   // print(link);
 
-                  var startDateTime = state.scheduleStartDateTime?.toUtc();
-                  var endDateTime =
-                      startDateTime?.add(const Duration(hours: 1));
+                  // var startDateTime = state.scheduleStartDateTime?.toUtc();
+                  // var endDateTime =
+                  //     startDateTime?.add(const Duration(hours: 1));
+                  //
+                  // var startDateTimeFormated =
+                  //     DateFormat('yyyyMMddThhmma').format(startDateTime!);
+                  // var endDateTimeFormated =
+                  //     DateFormat('yyyyMMddThhmma').format(endDateTime!);
+                  //
+                  // // String responseLink = "https://calendar.google.com/calendar/render?action=TEMPLATE&dates=20240522T080000Z/20240522T090000Z&ctz=UTC&location&text=Cinteraction+dev&details=https%3A%2F%2Fvc.cinteraction.com%2Fstreaming%2F9884343819%0APlease+click+on+the+above+link+to+join+a+video+call.";
+                  // var responseLink = response.response ?? '';
+                  // if (responseLink.isEmpty) {
+                  //   return;
+                  // }
+                  //
+                  // var startIndex = responseLink.indexOf(
+                  //     'https%3A%2F%2Fvc.cinteraction.com%2Fstreaming%2F');
+                  // var endIndex = responseLink.lastIndexOf('%');
+                  //
+                  // var roomIdFromLink =
+                  //     responseLink.substring(startIndex + 48, endIndex);
+                  // var url = Uri.parse(
+                  //     "https://cinteractionvc.web.app/home/meeting/$roomIdFromLink");
 
-                  var startDateTimeFormated =
-                      DateFormat('yyyyMMddThhmma').format(startDateTime!);
-                  var endDateTimeFormated =
-                      DateFormat('yyyyMMddThhmma').format(endDateTime!);
-
-                  // String responseLink = "https://calendar.google.com/calendar/render?action=TEMPLATE&dates=20240522T080000Z/20240522T090000Z&ctz=UTC&location&text=Cinteraction+dev&details=https%3A%2F%2Fvc.cinteraction.com%2Fstreaming%2F9884343819%0APlease+click+on+the+above+link+to+join+a+video+call.";
-                  var responseLink = response.response ?? '';
-                  if (responseLink.isEmpty) {
-                    return;
-                  }
-
-                  var startIndex = responseLink.indexOf(
-                      'https%3A%2F%2Fvc.cinteraction.com%2Fstreaming%2F');
-                  var endIndex = responseLink.lastIndexOf('%');
-
-                  var roomIdFromLink =
-                      responseLink.substring(startIndex + 48, endIndex);
-                  var url = Uri.parse(
-                      "https://cinteractionvc.web.app/home/meeting/$roomIdFromLink");
                   try {
-                    await launchUrl(Uri.parse(
-                        'https://calendar.google.com/calendar/u/0/r/eventedit?dates=$startDateTimeFormated/$endDateTimeFormated&ctz=UTC&location&text=${nameFieldController.text}&details=$url\nPlease click on the above link to join a video call.'));
+                    var link = response.response??'';
+                    // await launchUrl(Uri.parse('https://calendar.google.com/calendar/u/0/r/eventedit?dates=$startDateTimeFormated/$endDateTimeFormated&ctz=UTC&location&text=${nameFieldController.text}&details=$url\nPlease click on the above link to join a video call.'));
+                   if(link.isNotEmpty){
+                     await launchUrl(Uri.parse(link));
+                   }
+
+
                   } on Exception catch (e) {
                     print(e.toString());
                   }
