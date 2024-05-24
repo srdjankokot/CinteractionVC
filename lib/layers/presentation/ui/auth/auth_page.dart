@@ -298,30 +298,30 @@ class AuthPage extends StatelessWidget {
                                             child:
                                                 imageSVGAsset('google_logo')),
                                       ),
-                                      const SizedBox(width: 34),
-                                      SizedBox(
-                                        width: 70,
-                                        height: 60,
-                                        child: OutlinedButton(
-                                            onPressed: () => {
-                                                  context
-                                                      .read<AuthCubit>()
-                                                      .signInWithFacebook()
-                                                },
-                                            style: OutlinedButton.styleFrom(
-                                              side: const BorderSide(
-                                                  width: 1,
-                                                  color: Color(0xFFBDBDBD)),
-                                              shape: RoundedRectangleBorder(
-                                                side: const BorderSide(
-                                                    width: 1,
-                                                    color: Color(0xFFBDBDBD)),
-                                                borderRadius:
-                                                    BorderRadius.circular(18),
-                                              ),
-                                            ),
-                                            child: imageSVGAsset('fb_logo')),
-                                      )
+                                      // const SizedBox(width: 34),
+                                      // SizedBox(
+                                      //   width: 70,
+                                      //   height: 60,
+                                      //   child: OutlinedButton(
+                                      //       onPressed: () => {
+                                      //             context
+                                      //                 .read<AuthCubit>()
+                                      //                 .signInWithFacebook()
+                                      //           },
+                                      //       style: OutlinedButton.styleFrom(
+                                      //         side: const BorderSide(
+                                      //             width: 1,
+                                      //             color: Color(0xFFBDBDBD)),
+                                      //         shape: RoundedRectangleBorder(
+                                      //           side: const BorderSide(
+                                      //               width: 1,
+                                      //               color: Color(0xFFBDBDBD)),
+                                      //           borderRadius:
+                                      //               BorderRadius.circular(18),
+                                      //         ),
+                                      //       ),
+                                      //       child: imageSVGAsset('fb_logo')),
+                                      // )
                                     ],
                                   ),
 
@@ -498,27 +498,27 @@ class AuthPage extends StatelessWidget {
                               ),
                               child: imageSVGAsset('google_logo')),
                         ),
-                        const SizedBox(width: 34),
-                        SizedBox(
-                          width: 70,
-                          height: 60,
-                          child: OutlinedButton(
-                              onPressed: () => {
-                                    context
-                                        .read<AuthCubit>()
-                                        .signInWithFacebook()
-                                  },
-                              style: OutlinedButton.styleFrom(
-                                side: const BorderSide(
-                                    width: 1, color: Color(0xFFBDBDBD)),
-                                shape: RoundedRectangleBorder(
-                                  side: const BorderSide(
-                                      width: 1, color: Color(0xFFBDBDBD)),
-                                  borderRadius: BorderRadius.circular(18),
-                                ),
-                              ),
-                              child: imageSVGAsset('fb_logo')),
-                        )
+                        // const SizedBox(width: 34),
+                        // SizedBox(
+                        //   width: 70,
+                        //   height: 60,
+                        //   child: OutlinedButton(
+                        //       onPressed: () => {
+                        //             context
+                        //                 .read<AuthCubit>()
+                        //                 .signInWithFacebook()
+                        //           },
+                        //       style: OutlinedButton.styleFrom(
+                        //         side: const BorderSide(
+                        //             width: 1, color: Color(0xFFBDBDBD)),
+                        //         shape: RoundedRectangleBorder(
+                        //           side: const BorderSide(
+                        //               width: 1, color: Color(0xFFBDBDBD)),
+                        //           borderRadius: BorderRadius.circular(18),
+                        //         ),
+                        //       ),
+                        //       child: imageSVGAsset('fb_logo')),
+                        // )
                       ],
                     ),
 

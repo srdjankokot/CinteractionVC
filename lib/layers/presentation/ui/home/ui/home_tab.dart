@@ -63,15 +63,22 @@ class HomeTab extends StatelessWidget {
 
     Widget addUserWidget()
     {
-      return  HomeTabItem.getHomeTabItem(
-         context: context,
-          image: const Image(
-            image: ImageAsset('user-square.png'),
-          ),
-          bgColor: ColorConstants.kStateWarning,
-          onClickAction: null,
-          label: 'Add User',
-          textStyle: context.textTheme.labelMedium);
+          return SizedBox(
+        height: (context.isWide? 124: 52 )+ 40,
+        width: 50,
+      );
+
+
+      return HomeTabItem.getHomeTabItem(
+            context: context,
+            image: const Image(
+              image: ImageAsset('user-square.png'),
+            ),
+            bgColor: ColorConstants.kStateWarning.withAlpha(255),
+            onClickAction: null,
+            label: 'Add User',
+            textStyle: context.textTheme.labelMedium);
+
     }
 
     Widget scheduleMeetingWidget()
