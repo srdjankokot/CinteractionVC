@@ -18,34 +18,8 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      # Note: This workflow uses the latest stable version of the Dart SDK.
-      # You can specify other versions if desired, see documentation here:
-      # https://github.com/dart-lang/setup-dart/blob/main/README.md
-      # - uses: dart-lang/setup-dart@v1
-    #   - uses: actions/setup-java@v1
-    #     with:
-    #       java-version: '12.x'
-    # # Include the flutter action
-    #   - uses: subosito/flutter-action@v1
-    #     with:
-    #       flutter-version: 3.16.6
-      
-
-    #   - name: Install dependencies
-    #     run: flutter pub get
-
-    #   # Uncomment this step to verify the use of 'dart format' on each commit.
-    #   # - name: Verify formatting
-    #   #   run: dart format --output=none --set-exit-if-changed .
-
-    #   # Consider passing '--fatal-infos' for slightly stricter analysis.
-    #   - name: Build Web Release
-    #     run: flutter build web --release
-
-    - name: FTP Deploy
-  # You may pin to the exact commit or the version.
-  # uses: SamKirkland/FTP-Deploy-Action@8e83cea8672e3fbcbb9fdafff34debf6ae4c5f65
-      uses: SamKirkland/FTP-Deploy-Action@v4.3.5
+      - name: FTP Deploy
+        uses: SamKirkland/FTP-Deploy-Action@v4.3.5
         with:
     # ftp server
           server: ${{ secrets.FTP_SERVER }}
