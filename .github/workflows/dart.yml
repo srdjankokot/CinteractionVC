@@ -44,9 +44,9 @@ jobs:
       - name: FTP-Deploy
         uses: SamKirkland/FTP-Deploy-Action@3.1.1
         with:
-          ftp-server: ${{ secrets.FTP_SERVER }}
-          ftp-username: ${{ secrets.FTP_USERNAME}}
-          ftp-password: ${{ secrets.FTP_PASSWORD}}
+          ftp-server: fountain.mycity-hosting.com
+          ftp-username: rlab
+          ftp-password: kox2c123
           
 
 
