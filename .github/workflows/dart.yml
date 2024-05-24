@@ -41,14 +41,15 @@ jobs:
     #   # Consider passing '--fatal-infos' for slightly stricter analysis.
     #   - name: Build Web Release
     #     run: flutter build web --release
-
-      - name: Deploy to Firebase
-        uses: sws2apps/firebase-deployment@main #consider using pin for dependabot auto update
+      - name: FTP-Deploy
+        uses: SamKirkland/FTP-Deploy-Action@3.1.1
         with:
-          repoToken: "${{ secrets.GITHUB_TOKEN }}"
-          firebaseServiceAccount: "${{ secrets.FIREBASE_SERVICE_ACCOUNT }}"
-          projectId: cinteractionvc
-          channelId: live
-      
-      - name: Deploy to firebase
-        run: firebase deploy
+          ftp-server: ${{ secrets.FTP_SERVER }}
+          ftp-username: ${{ secrets.FTP_USERNAME}}
+          ftp-password: ${{ secrets.FTP_PASSWORD}}
+
+
+
+    
+
+
