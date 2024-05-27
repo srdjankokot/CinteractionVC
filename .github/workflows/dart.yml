@@ -48,7 +48,7 @@ jobs:
     # ftp password
           password: ${{ secrets.FTP_PASSWORD }}
           local-dir: build/web/
-          exclude: 
+          exclude: |
             build/web/index.html
             build/web/.htaccess
 
