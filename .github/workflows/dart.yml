@@ -50,7 +50,7 @@ jobs:
           local-dir: build/web/
           exclude: |
             index.html
-            build/web/.htaccess
+            .htaccess
 
 
     
