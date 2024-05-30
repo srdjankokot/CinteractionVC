@@ -8,10 +8,6 @@ class MeetingsPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return  Container(
-      child:
-        MeetingListLayout(),
-
-    );
+    return  const MeetingListLayout();
   }
 }

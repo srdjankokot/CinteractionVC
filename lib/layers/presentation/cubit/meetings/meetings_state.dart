@@ -1,21 +1,35 @@
 part of 'meetings_cubit.dart';
 
-@immutable
-sealed class MeetingState{
-  const MeetingState();
-}
+class MeetingState extends Equatable {
 
-class InitialRoleState extends MeetingState{
-  const InitialRoleState();
-}
+  const MeetingState(
+      {required this.meetings, required this.isLoading, required this.isShowingPastMeetings});
 
-class MeetingLoaded extends MeetingState{
-  const MeetingLoaded({required this.meetings});
+  @override
+  List<Object?> get props => [meetings, isLoading, isShowingPastMeetings];
   final List<Meeting> meetings;
-}
+  final bool isShowingPastMeetings;
+  final bool isLoading;
 
 
-class MeetingsIsLoading extends MeetingState{
-  const MeetingsIsLoading();
+  const MeetingState.initial
+      ({
+    List<Meeting> meetings = const [],
+    bool isShowingPastMeetings = true,
+    bool isLoading = false,
+  }) : this(
+      meetings: meetings,
+      isLoading: isLoading,
+      isShowingPastMeetings: isShowingPastMeetings
+  );
+
+  MeetingState copyWith(
+      {List<Meeting>? meetings, bool? isLoading, bool? isShowingPastMeetings}) {
+    return MeetingState(
+        meetings: meetings ?? this.meetings,
+        isLoading: isLoading ?? false,
+        isShowingPastMeetings: isShowingPastMeetings ??
+            this.isShowingPastMeetings);
+  }
 }
 

@@ -962,7 +962,9 @@ class ConferenceRepoImpl extends ConferenceRepo {
   }
 
   _joinPublisher() async {
+    print('join publisher start');
     var rooms = await _listRooms();
+    print('_listRooms ${rooms?.length}');
     roomDetails = rooms!.firstWhere((r) => r.room == room);
     print('roomDetails: ${roomDetails.toJson().toString()}');
 
@@ -970,7 +972,10 @@ class ConferenceRepoImpl extends ConferenceRepo {
   }
 
   Future<List<JanusVideoRoom>?> _listRooms() async {
+    print('_listRooms called');
     var rooms = await videoPlugin?.getRooms();
+    print('_listRooms plugin response');
+
     return rooms?.list;
   }
 
