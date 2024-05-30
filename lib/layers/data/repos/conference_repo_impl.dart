@@ -942,8 +942,10 @@ class ConferenceRepoImpl extends ConferenceRepo {
     JanusEvent event = JanusEvent.fromJson(exist);
     print('room is exist: ${event.plugindata}');
     if (event.plugindata?.data['exists'] == true) {
+      print('try to join publisher');
       await _joinPublisher();
     } else {
+      print('need to create the room');
       await _createRoom(room);
     }
   }
