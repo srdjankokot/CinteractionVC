@@ -964,7 +964,7 @@ class ConferenceRepoImpl extends ConferenceRepo {
   }
 
   _joinPublisher() async {
-    print('join publisher start');
+    print('join publisher started');
     var rooms = await _listRooms();
     print('_listRooms ${rooms?.length}');
     roomDetails = rooms!.firstWhere((r) => r.room == room);
