@@ -3,7 +3,7 @@
 # separate terms of service, privacy policy, and support
 # documentation.
 
-name: Dart
+name: Deploy to cinteraction.com
 
 on:
   push:
@@ -30,30 +30,19 @@ jobs:
       - name: Flutter version
         run: flutter --version
 
-    
-      - uses: FirebaseExtended/action-hosting-deploy@v0
+      - name: FTP Deploy
+        uses: SamKirkland/FTP-Deploy-Action@v4.3.5
         with:
-          firebaseServiceAccount: "${{ secrets.FIREBASE_SERVICE_ACCOUNT }}"
-          projectId: cinteractionvc
-          channelId: live
-                
-
-
-
-
-    #   - name: FTP Deploy
-    #     uses: SamKirkland/FTP-Deploy-Action@v4.3.5
-    #     with:
-    # # ftp server
-    #       server: ${{ secrets.FTP_SERVER }}
-    # # ftp username
-    #       username:  ${{ secrets.FTP_USERNAME }}
-    # # ftp password
-    #       password: ${{ secrets.FTP_PASSWORD }}
-    #       local-dir: build/web/
-    #       exclude: |
-    #         index.html
-    #         .htaccess
+     # ftp server
+          server: ${{ secrets.FTP_SERVER }}
+     # ftp username
+          username:  ${{ secrets.FTP_USERNAME }}
+     # ftp password
+          password: ${{ secrets.FTP_PASSWORD }}
+          local-dir: build/web/
+          exclude: |
+             index.html
+             .htaccess
 
 
     
