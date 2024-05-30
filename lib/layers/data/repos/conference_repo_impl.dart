@@ -966,19 +966,34 @@ class ConferenceRepoImpl extends ConferenceRepo {
   _joinPublisher() async {
     print('join publisher started');
     var rooms = await _listRooms();
-    print('_listRooms ${rooms?.length}');
-    roomDetails = rooms!.firstWhere((r) => r.room == room);
+    print('_listRooms ${rooms.length}');
+    roomDetails = rooms.firstWhere((r) => r.room == room);
     print('roomDetails: ${roomDetails.toJson().toString()}');
-
     await videoPlugin?.joinPublisher(room, displayName: displayName, id: myId);
   }
 
-  Future<List<JanusVideoRoom>?> _listRooms() async {
-    print('_listRooms called');
-    var rooms = await videoPlugin?.getRooms();
-    print('_listRooms plugin response');
+  Future<List<JanusVideoRoom>> _listRooms() async {
 
-    return rooms?.list;
+    var payload = {"request": "list"};
+    Map participants = await videoPlugin?.send(data: payload);
+    JanusEvent event = JanusEvent.fromJson(participants);
+
+    List<JanusVideoRoom> rooms = [];
+
+    for (var room in event.plugindata?.data['list']) {
+      var participant = JanusVideoRoom.fromJson(room as Map<String, dynamic>);
+      rooms.add(participant);
+    }
+
+
+    return rooms;
+
+
+    // print('_listRooms called');
+    // var rooms = await videoPlugin?.getRooms();
+    // print('_listRooms plugin response');
+    //
+    // return rooms?.list;
   }
 
   _cleanupWebRTC() async {
