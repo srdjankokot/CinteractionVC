@@ -29,20 +29,21 @@ jobs:
         run: flutter pub get
       - name: Build Web Release   
         run: flutter build web --release
-
-      - name: FTP Deploy
-        uses: SamKirkland/FTP-Deploy-Action@v4.3.5
-        with:
-    # ftp server
-          server: ${{ secrets.FTP_SERVER }}
-    # ftp username
-          username:  ${{ secrets.FTP_USERNAME }}
-    # ftp password
-          password: ${{ secrets.FTP_PASSWORD }}
-          local-dir: build/web/
-          exclude: |
-            index.html
-            .htaccess
+      - name: Flutter version
+        run: flutter --version
+    #   - name: FTP Deploy
+    #     uses: SamKirkland/FTP-Deploy-Action@v4.3.5
+    #     with:
+    # # ftp server
+    #       server: ${{ secrets.FTP_SERVER }}
+    # # ftp username
+    #       username:  ${{ secrets.FTP_USERNAME }}
+    # # ftp password
+    #       password: ${{ secrets.FTP_PASSWORD }}
+    #       local-dir: build/web/
+    #       exclude: |
+    #         index.html
+    #         .htaccess
 
 
     
