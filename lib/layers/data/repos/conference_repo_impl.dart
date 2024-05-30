@@ -50,7 +50,7 @@ class ConferenceRepoImpl extends ConferenceRepo {
   VideoRoomPluginStateManager videoState = VideoRoomPluginStateManager();
 
   int room = 12344321;
-  late JanusVideoRoom roomDetails;
+  late JanusVideoRoom? roomDetails;
 
   final _conferenceStream =
       StreamController<Map<dynamic, StreamRenderer>>.broadcast();
@@ -69,6 +69,7 @@ class ConferenceRepoImpl extends ConferenceRepo {
   int? callId;
 
   List<ChatMessage> messages = [];
+
 
   @override
   Future<void> initialize(
@@ -830,7 +831,10 @@ class ConferenceRepoImpl extends ConferenceRepo {
     var participants = await getParticipants();
     var publishers = participants.where((element) => element.publisher);
     print('Number of publishers ${publishers.length}');
-    return publishers.length < roomDetails.maxPublishers!.toInt();
+
+    var max = roomDetails?.maxPublishers!.toInt()?? maxPublishersDefault;
+
+    return publishers.length < max;
   }
 
   _publishMyOwn() async {
@@ -952,7 +956,7 @@ class ConferenceRepoImpl extends ConferenceRepo {
 
   _createRoom(int roomId) async {
     Map<String, dynamic>? extras ={
-      'publishers': 9
+      'publishers': maxPublishersDefault
     };
     var created = await videoPlugin?.createRoom(room, extras: extras);
     JanusEvent event = JanusEvent.fromJson(created);
@@ -964,25 +968,40 @@ class ConferenceRepoImpl extends ConferenceRepo {
   }
 
   _joinPublisher() async {
-    var rooms = await _listRooms();
-    roomDetails = rooms.firstWhere((r) => r.room == room);
+    roomDetails = await _getRoomDetails(room);
     await videoPlugin?.joinPublisher(room, displayName: displayName, id: myId);
   }
 
-  Future<List<JanusVideoRoom>> _listRooms() async {
-    print('get all rooms');
+  Future<JanusVideoRoom?> _getRoomDetails(int roomId) async{
     var payload = {"request": "list"};
-    Map participants = await videoPlugin?.send(data: payload);
-    JanusEvent event = JanusEvent.fromJson(participants);
+    Map allRooms = await videoPlugin?.send(data: payload);
+    JanusEvent event = JanusEvent.fromJson(allRooms);
 
-    List<JanusVideoRoom> rooms = [];
-
-    for (var room in event.plugindata?.data['list']) {
-      var participant = JanusVideoRoom.fromJson(room as Map<String, dynamic>);
-      rooms.add(participant);
+    for (var r in event.plugindata?.data['list']) {
+      var room = JanusVideoRoom.fromJson(r as Map<String, dynamic>);
+      if(room.room == roomId)
+        {
+          return room;
+        }
     }
-    return rooms;
+
+    return null;
   }
+
+  // Future<List<JanusVideoRoom>> _listRooms() async {
+  //   print('get all rooms');
+  //   var payload = {"request": "list"};
+  //   Map allRooms = await videoPlugin?.send(data: payload);
+  //   JanusEvent event = JanusEvent.fromJson(allRooms);
+  //
+  //   List<JanusVideoRoom> rooms = [];
+  //
+  //   for (var room in event.plugindata?.data['list']) {
+  //     var participant = JanusVideoRoom.fromJson(room as Map<String, dynamic>);
+  //     rooms.add(participant);
+  //   }
+  //   return rooms;
+  // }
 
   _cleanupWebRTC() async {
     StreamRenderer? rendererRemoved;
