@@ -12,7 +12,8 @@ import 'package:intl/intl.dart';
 import '../../../../core/io/network/urls.dart';
 import '../../../domain/entities/api_response.dart';
 import '../../dto/dashboard/dashboard_response_dto.dart';
-import '../../dto/meeting_dto.dart';
+import '../../dto/meetings/meeting_dto.dart';
+import '../../dto/meetings/meeting_response_dto.dart';
 
 class ApiImpl extends Api {
   T? _parseResponseData<T>(
@@ -124,10 +125,10 @@ class ApiImpl extends Api {
   }
 
   @override
-  Future<ApiResponse<List<MeetingDto>?>> getMeetings() async {
+  Future<ApiResponse<MeetingResponseDto>> getMeetings(int page) async {
     Dio dio = await getIt.getAsync<Dio>();
     try{
-      Response response = await dio.get(Urls.meetings);
+      Response response = await dio.get('${Urls.meetings}$page');
 
       List<MeetingDto> meetings = [];
 
@@ -136,7 +137,9 @@ class ApiImpl extends Api {
         meetings.add(participant);
       }
 
-      return ApiResponse(response: meetings);
+      // var lastPage = response.data['last_page'];
+
+      return ApiResponse(response: MeetingResponseDto.fromJson(response.data));
     }
     on DioException catch(e){
       return ApiResponse(error: ApiErrorDto.fromDioException(e));

@@ -1,10 +1,6 @@
 
-import 'package:json_annotation/json_annotation.dart';
-
 import '../../../domain/entities/dashboard/session_meeting.dart';
 
-
-@JsonSerializable(explicitToJson: true)
 class SessionMeetingDto extends SessionMeeting{
   SessionMeetingDto(
       {required super.meetingId,
@@ -14,9 +10,7 @@ class SessionMeetingDto extends SessionMeeting{
       required super.date});
 
 
-  @override
   factory SessionMeetingDto.fromJson(Map<String, dynamic> json) {
-    var meetings = json["meetings"];
 
     return SessionMeetingDto(
       averageEngagement: json['avg_engagement'] as double,

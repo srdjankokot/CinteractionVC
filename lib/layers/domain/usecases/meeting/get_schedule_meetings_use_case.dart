@@ -1,5 +1,5 @@
 import '../../entities/api_response.dart';
-import '../../entities/meeting.dart';
+import '../../entities/meetings/meeting.dart';
 import '../../repos/meetings_repo.dart';
 
 class GetScheduleMeetings{

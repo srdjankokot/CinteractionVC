@@ -3,7 +3,7 @@ import 'package:cinteraction_vc/layers/domain/usecases/meeting/meeting_use_cases
 import 'package:equatable/equatable.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
-import '../../../domain/entities/meeting.dart';
+import '../../../domain/entities/meetings/meeting.dart';
 
 part 'meetings_state.dart';
 
@@ -20,11 +20,35 @@ class MeetingCubit extends Cubit<MeetingState> with BlocLoggy {
     loadMeetings();
   }
 
+  var meetingLoadPage = 1;
+  var meetingLastPage = 100;
+
   void loadMeetings() async {
+    if (state.isLoading) {
+      return;
+    }
+
+    if (meetingLoadPage > meetingLastPage) {
+      return;
+    }
+
     emit(state.copyWith(isLoading: true));
-    var meetings = await meetingUseCases.getPastMeetingsUseCase();
+    var meetings = await meetingUseCases.getPastMeetingsUseCase(meetingLoadPage);
     if (meetings.error == null) {
-      emit(state.copyWith(meetings: meetings.response ?? List.empty()));
+      var meetingsList = state.meetings;
+      if (meetingsList.isEmpty) {
+        meetingsList = meetings.response?.meetings ?? List.empty();
+        meetingLoadPage++;
+      } else {
+        meetingsList.addAll(meetings.response?.meetings ?? List.empty());
+        if ((meetings.response?.meetings ?? List.empty()).isNotEmpty) {
+          meetingLoadPage++;
+        }
+      }
+
+      meetingLastPage = meetings.response?.lastPage ?? 100;
+      emit(state.copyWith(meetings: meetingsList));
+
     } else {
       emit(state.copyWith(meetings: List.empty()));
     }
@@ -41,8 +65,9 @@ class MeetingCubit extends Cubit<MeetingState> with BlocLoggy {
     }
   }
 
-  void tabChanged()
-  {
+  void tabChanged() {
+    meetingLoadPage = 1;
+    meetingLastPage = 100;
     emit(state.copyWith(isShowingPastMeetings: !state.isShowingPastMeetings));
   }
 }

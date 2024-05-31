@@ -11,7 +11,7 @@ import 'package:slide_digital_clock/slide_digital_clock.dart';
 import '../../../../../../assets/colors/Colors.dart';
 import '../../../../../../core/ui/images/image.dart';
 import '../../../../../data/dto/user_dto.dart';
-import '../../../../../domain/entities/meeting.dart';
+import '../../../../../domain/entities/meetings/meeting.dart';
 
 class NextMeetingWidget extends StatelessWidget {
   const NextMeetingWidget({super.key, required this.meeting});
