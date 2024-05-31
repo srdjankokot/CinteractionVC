@@ -6,7 +6,7 @@ class Urls{
   static String registerEndpoint = '$baseUrl/api/register';
   static String socialLoginEndpoint = '$baseUrl/api/social/login';
   static String getUserDetails = '$baseUrl/api/user';
-  static String meetings = '$baseUrl/api/get/all/past/meetings?paginate=10&page=1';
+  static String meetings = '$baseUrl/api/get/all/past/meetings?paginate=10&page=';
   static String scheduledMeetings = '$baseUrl/api/get/all/scheduled/meetings?paginate=500&page=1';
   static String nextScheduledMeetings = '$baseUrl/api/get/all/scheduled/meetings?paginate=500&page=1';
   static String startCall = '$baseUrl/api/start-call';

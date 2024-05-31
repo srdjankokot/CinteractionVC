@@ -1,9 +1,11 @@
-import 'package:cinteraction_vc/layers/data/dto/meeting_dto.dart';
+import 'package:cinteraction_vc/layers/data/dto/meetings/meeting_dto.dart';
 import 'package:cinteraction_vc/layers/domain/entities/dashboard/dashboard_response.dart';
 
 import '../../../core/io/network/models/login_response.dart';
 import '../../data/dto/user_dto.dart';
 import '../entities/api_response.dart';
+import '../entities/meetings/meeting.dart';
+import '../entities/meetings/meeting_response.dart';
 
 abstract class Api {
   Future<ApiResponse<LoginResponse?>> signInEmailPass({required email, required pass});
@@ -17,8 +19,8 @@ abstract class Api {
   Future<ApiResponse<int>> startCall({required streamId, required userId});
   Future<bool> endCall({required callId, required userId});
 
-  Future<ApiResponse<List<MeetingDto>?>> getMeetings();
-  Future<ApiResponse<List<MeetingDto>?>> getScheduledMeetings();
+  Future<ApiResponse<MeetingResponse?>> getMeetings(int page);
+  Future<ApiResponse<List<Meeting>?>> getScheduledMeetings();
   Future<ApiResponse<MeetingDto?>> getNextMeeting();
 
   Future<ApiResponse<String?>> scheduleMeeting({required String name, required String description, required String tag, required DateTime date});
