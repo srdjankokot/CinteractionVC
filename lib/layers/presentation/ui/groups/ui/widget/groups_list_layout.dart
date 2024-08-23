@@ -35,7 +35,7 @@ class GroupListLayout extends StatelessWidget {
                       children: [
                         Text(
                           'Groups',
-                          style: context.textTheme.headlineLarge,
+                          style: context.titleTheme.headlineLarge,
                         ),
                         Text(
                           '${groups.length} Groups',

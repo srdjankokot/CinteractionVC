@@ -124,4 +124,14 @@ Future<ApiResponse<bool>> signUpWithEmailAndPassword({required String email,
     return ApiResponse(error: response.error);
   }
 
+  @override
+  Future<ApiResponse<bool?>> resetPassword({required String email}) async{
+    return await _api.resetPassword(email: email);
+  }
+
+  @override
+  Future<ApiResponse<bool?>> setNewPassword({required String email, required String token, required String newPassword}) async {
+    return await _api.setNewPassword(email: email, token: token, newPassword: newPassword);
+  }
+
 }

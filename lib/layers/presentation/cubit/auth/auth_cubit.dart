@@ -103,6 +103,16 @@ class AuthCubit extends Cubit<AuthState> with BlocLoggy {
     }
   }
 
+  Future<void> resetPassword(String email) async {
+    try {
+      final response = await _authUseCases.resetPassword(email);
+      emit(state.copyWith(resetPassword: true));
+    } catch (e, s) {
+      loggy.error('signInWithGoogle error', e, s);
+      emit(state.error(errorMessage:  e.toString()));
+    }
+  }
+
   Future<void> signInWithFacebook() async {
     emit(state.error(errorMessage: 'Not implemented yet'));
   }
@@ -118,6 +128,17 @@ class AuthCubit extends Cubit<AuthState> with BlocLoggy {
     } else {
       emit(const AuthState.register());
     }
+  }
+
+  void setNewPassword(String email, String token, String password) async
+  {
+  try {
+    final response = await _authUseCases.setNewPassword(email, token, password);
+    emit(state.copyWith(resetPassword: true));
+  } catch (e, s) {
+    loggy.error('signInWithGoogle error', e, s);
+    emit(state.error(errorMessage:  e.toString()));
+  }
   }
 
   void submit(String mail, String password, String name, bool terms)

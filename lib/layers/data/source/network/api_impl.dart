@@ -279,6 +279,63 @@ class ApiImpl extends Api {
       return ApiResponse(error: ApiErrorDto.fromDioException(e));
     }
   }
+
+  @override
+  Future<ApiResponse<bool>> resetPassword({required email}) async{
+
+    // https://vc.cinteraction.com/api/forgot-password
+    // Method: POST
+    // Header:
+    // Accept: application/json
+    // Body:
+    // email
+
+    Dio dio = await getIt.getAsync<Dio>();
+    var formData = {
+      'email': email,
+    };
+    try {
+      Response response = await dio.post(Urls.restPassword, data: formData);
+      print(response);
+      return ApiResponse(response: response.statusCode! > 200 && response.statusCode! < 300);
+
+    } on DioException catch (e, s) {
+      print(e.response?.statusMessage);
+      return ApiResponse(error: ApiErrorDto.fromDioException(e));
+    }
+  }
+
+  @override
+  Future<ApiResponse<bool>> setNewPassword({required email, required token, required newPassword}) async{
+    Dio dio = await getIt.getAsync<Dio>();
+
+    // https://vc.cinteraction.com/api/reset-password
+    // Method: POST
+    // Header:
+    // Accept: aplication/json
+    // Body:
+    // token - dobijes iz linka
+    // email - dobijes iz linka
+    // password
+    // password_confirm
+
+
+    var formData = {
+      'email': email,
+      'token': token,
+      'password': newPassword,
+      'password_confirmation': newPassword
+    };
+    try {
+      Response response = await dio.post(Urls.setNewPassword, data: formData);
+      print(response);
+      return ApiResponse(response: response.statusCode! > 200 && response.statusCode! < 300);
+
+    } on DioException catch (e, s) {
+      print(e.response?.statusMessage);
+      return ApiResponse(error: ApiErrorDto.fromDioException(e));
+    }
+  }
 }
 
 

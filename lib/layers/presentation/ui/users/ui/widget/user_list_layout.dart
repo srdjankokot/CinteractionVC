@@ -36,7 +36,7 @@ class UserListLayout extends StatelessWidget {
                       children: [
                         Text(
                           'Users',
-                          style: context.textTheme.headlineLarge,
+                          style: context.titleTheme.headlineLarge,
                         ),
                         Text(
                           '${users.length} Users',
