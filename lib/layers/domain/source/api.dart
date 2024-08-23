@@ -30,5 +30,9 @@ abstract class Api {
   Future<ApiResponse<DashboardResponse?>> getDashboardData();
 
 
+  Future<ApiResponse<bool>> resetPassword({required email});
+  Future<ApiResponse<bool>> setNewPassword({required email, required token, required newPassword});
+
+
 
 }

@@ -70,7 +70,7 @@ class _MeetingListLayoutState extends State<MeetingListLayout> {
                           children: [
                             Text(
                               'Meetings',
-                              style: context.textTheme.headlineLarge,
+                              style: context.titleTheme.headlineLarge,
                             ),
                             Text('${state.meetings.length} Meetings'),
                             const SizedBox(
@@ -382,7 +382,7 @@ class _MeetingListLayoutState extends State<MeetingListLayout> {
                     margin: const EdgeInsets.only(top: 15.0, bottom: 15.0),
                     child: Text(
                       'Meetings',
-                      style: context.textTheme.headlineLarge,
+                      style: context.titleTheme.headlineLarge,
                     ),
                   ),
                   const Divider(),

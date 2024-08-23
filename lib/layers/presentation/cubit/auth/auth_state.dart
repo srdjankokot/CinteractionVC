@@ -3,12 +3,13 @@ part of 'auth_cubit.dart';
 class AuthState extends Equatable {
   const AuthState(
       {required this.isLogged,
-        required this.loginSuccess,
+      required this.loginSuccess,
       required this.registerSuccess,
       required this.isSignUp,
       this.loading,
       required this.isChecked,
-      this.errorMessage});
+      this.errorMessage,
+      this.resetPassword});
 
   @override
   List<Object?> get props => [isSignUp, loading, isChecked, isLogged];
@@ -20,6 +21,7 @@ class AuthState extends Equatable {
   final bool? loading;
   final bool isChecked;
   final String? errorMessage;
+  final bool? resetPassword;
 
   const AuthState.initial({
     bool isLogged = false,
@@ -28,29 +30,34 @@ class AuthState extends Equatable {
     bool isSignUp = false,
     bool loading = false,
     bool isChecked = false,
+    bool resetPassword = false,
   }) : this(
-    isLogged: isLogged,
-            isSignUp: isSignUp,
-            loading: loading,
-            isChecked: isChecked,
-            loginSuccess: loginSuccess,
-            registerSuccess: registerSuccess);
+      isLogged: isLogged,
+      isSignUp: isSignUp,
+      loading: loading,
+      isChecked: isChecked,
+      loginSuccess: loginSuccess,
+      registerSuccess: registerSuccess,
+      resetPassword: resetPassword
+  );
 
   const AuthState.register(
-      {
-        bool isLogged = false,
-        bool loginSuccess = false,
+      {bool isLogged = false,
+      bool loginSuccess = false,
       bool registerSuccess = false,
       bool isSignUp = true,
       bool loading = false,
-      bool isChecked = false})
+      bool isChecked = false,
+      bool resetPassword = false,
+      })
       : this(
-      isLogged: isLogged,
+            isLogged: isLogged,
             isSignUp: isSignUp,
             loading: loading,
             isChecked: isChecked,
             loginSuccess: loginSuccess,
-            registerSuccess: registerSuccess);
+            registerSuccess: registerSuccess,
+      resetPassword: resetPassword);
 
   const AuthState.loginSuccess({
     bool isLogged = false,
@@ -59,35 +66,44 @@ class AuthState extends Equatable {
     bool isSignUp = false,
     bool loading = false,
     bool isChecked = false,
+    bool resetPassword = false,
   }) : this(
-      isLogged: isLogged,
+            isLogged: isLogged,
             isSignUp: isSignUp,
             loading: loading,
             isChecked: isChecked,
             loginSuccess: loginSuccess,
-            registerSuccess: registerSuccess);
+            registerSuccess: registerSuccess,
+      resetPassword: resetPassword);
 
   const AuthState.registerSuccess(
-      {
-        bool isLogged = false,
-        bool loginSuccess = false,
+      {bool isLogged = false,
+      bool loginSuccess = false,
       bool registerSuccess = true,
       bool isSignUp = false,
       bool loading = false,
-      bool isChecked = false})
+      bool isChecked = false,
+        bool resetPassword = false,})
       : this(
-      isLogged: isLogged,
+            isLogged: isLogged,
             isSignUp: isSignUp,
             loading: loading,
             isChecked: isChecked,
             loginSuccess: loginSuccess,
-            registerSuccess: registerSuccess);
+            registerSuccess: registerSuccess,
+      resetPassword: resetPassword);
 
   AuthState copyWith(
-      {bool? isSignUp, bool? loading, bool? isChecked, String? errorMessage, bool? isLogged}) {
+      {bool? isSignUp,
+      bool? loading,
+      bool? isChecked,
+      String? errorMessage,
+      bool? isLogged,
+        bool? resetPassword}) {
     return AuthState(
-      isLogged: isLogged?? this.isLogged,
+        isLogged: isLogged ?? this.isLogged,
         isSignUp: isSignUp ?? this.isSignUp,
+        resetPassword: resetPassword ?? false,
         loading: loading,
         isChecked: isChecked ?? this.isChecked,
         errorMessage: errorMessage,

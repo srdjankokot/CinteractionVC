@@ -5,6 +5,7 @@ import 'package:cinteraction_vc/core/extension/context_user.dart';
 import 'package:cinteraction_vc/core/navigation/route.dart';
 import 'package:cinteraction_vc/layers/domain/usecases/conference/conference_usecases.dart';
 import 'package:cinteraction_vc/layers/presentation/cubit/home/home_cubit.dart';
+import 'package:cinteraction_vc/layers/presentation/ui/auth/reset_pass_enter_new.dart';
 
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
@@ -49,10 +50,44 @@ final GoRouter router = GoRouter(
       },
     ),
     // Forgot Password
+    // GoRoute(
+    //   path: AppRoute.forgotPassword.path,
+    //   builder: (context, state) => const ForgotPasswordPage(),
+    // ),
+    //
     GoRoute(
       path: AppRoute.forgotPassword.path,
-      builder: (context, state) => const ForgotPasswordPage(),
+      builder: (context, state) {
+        return BlocProvider(
+          create: (context) => AuthCubit(
+            authUseCases: getIt.get<AuthUseCases>(),
+          ),
+          child: const ForgotPasswordPage(),
+        );
+      },
     ),
+
+    //New password
+    GoRoute(
+      path: AppRoute.enterNewPassword.path,
+      builder: (context, state) {
+
+        // final hash = state.pathParameters['hash'];
+        final Map<String, String> queryParameters = state.uri.queryParameters;
+        // print("email: ${queryParameters["email"]}");
+        final email  = queryParameters["email"];
+        final token  = queryParameters["token"];
+
+
+        return BlocProvider(
+          create: (context) => AuthCubit(
+            authUseCases: getIt.get<AuthUseCases>(),
+          ),
+          child:  EnterNewPassword(token: token??"", email: email??""),
+        );
+      },
+    ),
+
     // Forgot Password Success
     GoRoute(
       path: AppRoute.forgotPasswordSuccess.path,

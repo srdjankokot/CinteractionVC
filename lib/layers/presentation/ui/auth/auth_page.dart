@@ -48,8 +48,7 @@ class AuthPage extends StatelessWidget {
 
     void onAuthState(BuildContext context, AuthState state) {
       title = state.isSignUp ? 'Sign up' : 'Log in';
-      checkboxTitle =
-          state.isSignUp ? 'I agree to the Terms of Service' : 'Remember me';
+      checkboxTitle = state.isSignUp ? 'I agree to the Terms of Service' : 'Remember me';
       changeLayoutTitle = state.isSignUp
           ? 'Already have an account?'
           : 'Don’t have an account?';
@@ -144,7 +143,7 @@ class AuthPage extends StatelessWidget {
                                   Text(
                                     title,
                                     textAlign: TextAlign.center,
-                                    style: context.textTheme.headlineLarge,
+                                    style: context.titleTheme.headlineLarge,
                                   ),
                                   const SizedBox(height: 33),
 
@@ -365,7 +364,7 @@ class AuthPage extends StatelessWidget {
                     Text(
                       title,
                       textAlign: TextAlign.center,
-                      style: context.textTheme.headlineLarge,
+                      style: context.titleTheme.headlineLarge,
                     ),
                     const SizedBox(height: 33),
 
