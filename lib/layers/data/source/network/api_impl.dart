@@ -309,17 +309,6 @@ class ApiImpl extends Api {
   Future<ApiResponse<bool>> setNewPassword({required email, required token, required newPassword}) async{
     Dio dio = await getIt.getAsync<Dio>();
 
-    // https://vc.cinteraction.com/api/reset-password
-    // Method: POST
-    // Header:
-    // Accept: aplication/json
-    // Body:
-    // token - dobijes iz linka
-    // email - dobijes iz linka
-    // password
-    // password_confirm
-
-
     var formData = {
       'email': email,
       'token': token,
