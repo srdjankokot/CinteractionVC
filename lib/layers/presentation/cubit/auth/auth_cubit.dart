@@ -104,6 +104,7 @@ class AuthCubit extends Cubit<AuthState> with BlocLoggy {
   }
 
   Future<void> resetPassword(String email) async {
+    emit(state.copyWith(loading : true));
     try {
       final response = await _authUseCases.resetPassword(email);
       emit(state.copyWith(resetPassword: true));
@@ -132,7 +133,9 @@ class AuthCubit extends Cubit<AuthState> with BlocLoggy {
 
   void setNewPassword(String email, String token, String password) async
   {
-  try {
+    emit(state.copyWith(loading : true));
+
+    try {
     final response = await _authUseCases.setNewPassword(email, token, password);
     emit(state.copyWith(resetPassword: true));
   } catch (e, s) {
