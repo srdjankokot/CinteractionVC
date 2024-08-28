@@ -7,6 +7,7 @@ import 'package:cinteraction_vc/core/util/util.dart';
 import 'package:cinteraction_vc/layers/domain/entities/api_response.dart';
 import 'package:cinteraction_vc/layers/domain/entities/chat_message.dart';
 import 'package:cinteraction_vc/layers/domain/repos/conference_repo.dart';
+import 'package:image/image.dart';
 import 'package:janus_client/janus_client.dart';
 import 'package:logging/logging.dart';
 import 'package:webrtc_interface/webrtc_interface.dart';
@@ -1079,9 +1080,14 @@ class ConferenceRepoImpl extends ConferenceRepo {
           .first
           .captureFrame();
 
-      // print(base64Encode(image!.asUint8List().toList()).toString());
-
       var img = base64Encode(image!.asUint8List().toList()).toString();
+
+      //make image 256x256
+      // final decoded = decodePng(image!.asUint8List());
+      // final resized = copyResizeCropSquare(decoded!,  256);
+      // final resizedByteData = encodePng(resized);
+      // var img = base64Encode(resizedByteData);
+
 
       final engagement = await _api.getEngagement(
           averageAttention: 0,
