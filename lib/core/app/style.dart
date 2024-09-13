@@ -329,5 +329,7 @@ TextTheme _getMonteserratTextTheme(ColorScheme colorScheme) {
     ),
 
   );
-    return GoogleFonts.montserratTextTheme(textTheme);
+
+
+    return GoogleFonts.notoSansTextTheme(textTheme);
 }
