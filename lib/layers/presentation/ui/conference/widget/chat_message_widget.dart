@@ -21,7 +21,7 @@ class ChatMessageWidget extends StatelessWidget {
         mainAxisAlignment:message.displayName == 'Me' ? MainAxisAlignment.end: MainAxisAlignment.start,
         children: [
           Visibility(
-              visible: message.displayName != 'Me',
+              visible: message.displayName != 'Me' && message.avatarUrl.isNotEmpty,
               child: UserImage.medium(message.avatarUrl)),
           const SizedBox(width: 12,),
           Column(

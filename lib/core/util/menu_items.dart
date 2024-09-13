@@ -1,7 +1,6 @@
 import 'package:cinteraction_vc/core/extension/context.dart';
-import 'package:cinteraction_vc/layers/domain/usecases/meeting/meeting_use_cases.dart';
 import 'package:cinteraction_vc/layers/presentation/cubit/dashboard/dashboard_cubit.dart';
-import 'package:cinteraction_vc/layers/presentation/ui/landing/ui/page/home_page.dart';
+import 'package:cinteraction_vc/layers/presentation/ui/chat/chat_room.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../layers/presentation/cubit/groups/groups_cubit.dart';
@@ -43,6 +42,7 @@ final desktopMenu = <MenuItem>[
   home,
   dashboard,
   meetings,
+  chat,
   // insights,
   // users,
   // groups,
@@ -171,4 +171,10 @@ final notifications = MenuItem(
   body:  const Center(child: Text('Notifications')),
 );
 
+final chat = MenuItem(
+  route: null,
+  label: 'Chat',
+  assetName: 'menu_chat',
+  body:  const ChatRoomPage(),
+);
 
