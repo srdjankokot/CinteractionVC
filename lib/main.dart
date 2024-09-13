@@ -23,6 +23,7 @@ Future<void> main() async {
   _initLoggy();
   _initGoogleFonts();
 
+  sharedPref = await SharedPreferences.getInstance();
   await initializeGetIt();
 
   GoRouter.optionURLReflectsImperativeAPIs = true;
@@ -37,7 +38,7 @@ Future<void> main() async {
     );
   }
 
-  sharedPref = await SharedPreferences.getInstance();
+
 
   configureUrl();
   runApp(const CinteractionFlutterApp());

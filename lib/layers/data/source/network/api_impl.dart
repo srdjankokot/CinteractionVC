@@ -325,6 +325,25 @@ class ApiImpl extends Api {
       return ApiResponse(error: ApiErrorDto.fromDioException(e));
     }
   }
+
+  @override
+  Future<ApiResponse<bool>> sentChatMessage({required text, required from, required to}) async {
+    Dio dio = await getIt.getAsync<Dio>();
+    var formData = {
+      'text': text,
+      'from': from,
+      'to': to
+    };
+    try {
+      Response response = await dio.post(Urls.sentMessage, data: formData);
+      print("ChatMessageToServer $response");
+      return ApiResponse(response: response.statusCode! > 200 && response.statusCode! < 300);
+
+    } on DioException catch (e, s) {
+      print(e.response?.statusMessage);
+      return ApiResponse(error: ApiErrorDto.fromDioException(e));
+    }
+  }
 }
 
 

@@ -10,8 +10,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_webrtc/flutter_webrtc.dart';
-import 'package:go_router/go_router.dart';
-import 'package:janus_client/janus_client.dart';
 import 'package:visibility_detector/visibility_detector.dart';
 
 import '../../../../core/navigation/route.dart';
@@ -80,24 +78,6 @@ class VideoRoomPage extends StatelessWidget {
           }
 
           var subscribers = state.streamSubscribers?.toList();
-
-          // if (!context.isWide) {
-          //   for (var remoteStream in items) {
-          //
-          //     if (remoteStream.mid != null) {
-          //       //index 0 is the lowest
-          //
-          //       // context.read<ConferenceCubit>().changeSubstream(remoteStream.mid!, 0);
-          //
-          //       if(remoteStream.subStreamQuality != ConfigureStreamQuality.LOW)
-          //         {
-          //           print('change remote substream');
-          //           context.read<ConferenceCubit>().changeSubStream(ConfigureStreamQuality.LOW, remoteStream);
-          //         }
-          //
-          //     }
-          //   }
-          // }
 
           return Material(
             child: Center(

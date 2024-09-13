@@ -13,7 +13,8 @@ enum AppRoute {
   auth('/auth'),
   forgotPassword('/auth/forgot_password'),
   forgotPasswordSuccess('/auth/forgot_password/success'),
-  enterNewPassword('/reset-app');
+  enterNewPassword('/reset-app'),
+  chat('/chat');
 
   const AppRoute(this.path);
 

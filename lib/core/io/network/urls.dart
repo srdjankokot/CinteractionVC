@@ -25,4 +25,5 @@ class Urls{
 
   static String restPassword = '$baseUrl/api/forgot-password';
   static String setNewPassword = '$baseUrl/api/reset-password';
+  static String sentMessage = 'https://7a2f-188-2-51-157.ngrok-free.app/api/message';
 }

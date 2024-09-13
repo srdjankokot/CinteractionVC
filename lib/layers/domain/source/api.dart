@@ -33,6 +33,8 @@ abstract class Api {
   Future<ApiResponse<bool>> resetPassword({required email});
   Future<ApiResponse<bool>> setNewPassword({required email, required token, required newPassword});
 
+  Future<ApiResponse<bool>> sentChatMessage({required text, required from, required to});
+
 
 
 }

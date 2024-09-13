@@ -1,5 +1,7 @@
 import 'package:json_annotation/json_annotation.dart';
 
+import '../../../../layers/domain/entities/chat_message.dart';
+
 part 'participant.g.dart';
 
 
@@ -24,6 +26,9 @@ class Participant{
   @JsonKey(name: 'talking')
   bool talking;
 
+  List<ChatMessage> messages = [];
+
+  bool haveUnreadMessages = false;
 
   @override
   factory Participant.fromJson(Map<String, dynamic> json) => _$ParticipantFromJson(json);
