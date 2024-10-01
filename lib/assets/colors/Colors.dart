@@ -6,7 +6,8 @@ class ColorConstants {
 
   static const kStateColors = [ kEngProgress30];
 
-  static const kStateInfo = Color(0xFF56A0D6);
+  // static const kStateInfo = Color(0xFF56A0D6);
+  static const kStateInfo = Color(0xFF24408B);
   static const kStateSuccess = Color(0xFF1CBC96);
   static const kStateWarning = Color(0xFFEFBA32);
   static const kStateError = Color(0xFFDA2E2E);

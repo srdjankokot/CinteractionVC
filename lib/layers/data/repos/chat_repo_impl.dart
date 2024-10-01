@@ -161,6 +161,8 @@ class ChatRepoImpl extends ChatRepo {
               avatarUrl: data['avatarUrl'] ?? "",
               seen: false));
 
+          print("Unreaded messages: ${participant.haveUnreadMessages}");
+
           // messages.add(data['text']);
           _messagesStream.add(currentParticipant!.messages);
           _participantsStream.add(subscribers);
@@ -236,10 +238,23 @@ class ChatRepoImpl extends ChatRepo {
     currentParticipant = participant;
     messages = currentParticipant!.messages;
     _messagesStream.add(messages);
+    print("Changed current participant");
   }
 
   @override
   Stream<List<ChatMessage>> getMessageStream() {
     return _messagesStream.stream;
+  }
+
+  @override
+  Future<void> messageSeen(int index) async {
+    var participant = subscribers.firstWhere((item) => item.display == currentParticipant?.display);
+
+    messages = participant.messages;
+    messages[index].seen = true;
+    participant.haveUnreadMessages = _haveUnread(participant);
+
+    // _messagesStream.add(messages);
+    _participantsStream.add(subscribers);
   }
 }

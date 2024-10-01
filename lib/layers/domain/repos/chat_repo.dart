@@ -10,4 +10,5 @@ abstract class ChatRepo{
   Stream<List<Participant>> getParticipantsStream();
   Stream<List<ChatMessage>> getMessageStream();
   Future<void> setCurrentParticipant(Participant participant);
+  Future<void> messageSeen(int index);
 }

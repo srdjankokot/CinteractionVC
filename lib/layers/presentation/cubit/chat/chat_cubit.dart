@@ -37,7 +37,6 @@ class ChatCubit extends Cubit<ChatState> with BlocLoggy {
   }
 
   void _onMessages(List<ChatMessage> messages) {
-
     var unread = messages.length;
     emit(state.copyWith(
         isInitial: false,
@@ -59,5 +58,10 @@ class ChatCubit extends Cubit<ChatState> with BlocLoggy {
 
   Future<void> setCurrentParticipant(Participant participant) async {
     chatUseCases.setCurrentParticipant(participant);
+  }
+
+  Future<void> chatMessageSeen(int index)
+  async {
+    chatUseCases.messageSeen(index: index);
   }
 }
