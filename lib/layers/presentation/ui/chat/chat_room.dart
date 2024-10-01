@@ -77,7 +77,7 @@ class ChatRoomPage extends StatelessWidget{
                         children: [
                           Expanded(
                             child: Container(
-                              child:     state.messages == null
+                              child: state.messages == null
                                   ? const Center(
                                   child: Text('No Messages'))
                                   : ListView.builder(
@@ -91,7 +91,7 @@ class ChatRoomPage extends StatelessWidget{
                                       key: Key(
                                           index.toString()),
                                       onVisibilityChanged: (VisibilityInfo info) {
-                                        // context.read<ChatCubit>().chatMessageSeen(index);
+                                        context.read<ChatCubit>().chatMessageSeen(index);
                                       },
                                       child: ChatMessageWidget(
                                           message:

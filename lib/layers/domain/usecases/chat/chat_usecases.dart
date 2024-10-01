@@ -1,5 +1,6 @@
 import 'package:cinteraction_vc/layers/domain/usecases/chat/get_messages.dart';
 import 'package:cinteraction_vc/layers/domain/usecases/chat/get_participants.dart';
+import 'package:cinteraction_vc/layers/domain/usecases/chat/message_seen.dart';
 import 'package:cinteraction_vc/layers/domain/usecases/chat/send_message.dart';
 import 'package:cinteraction_vc/layers/domain/usecases/chat/set_current_participant.dart';
 
@@ -13,7 +14,8 @@ class ChatUseCases{
         sendMessage = SendMessage(repo: repo),
         getParticipantsStream = GetParticipantsStream(repo: repo),
         getMessageStream = GetMessagesStream(repo: repo),
-        setCurrentParticipant = SetCurrentParticipant(repo: repo)
+        setCurrentParticipant = SetCurrentParticipant(repo: repo),
+        messageSeen = MessageSeen(repo: repo)
   ;
 
   ChatInitialize chatInitialize;
@@ -21,4 +23,5 @@ class ChatUseCases{
   GetParticipantsStream getParticipantsStream;
   GetMessagesStream getMessageStream;
   SetCurrentParticipant setCurrentParticipant;
+  MessageSeen messageSeen;
 }
