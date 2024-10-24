@@ -96,6 +96,7 @@ class ChatRepoImpl extends ChatRepo {
   Stream<StreamRenderer> getRemoteStream() {
     return _remoteStream.stream;
   }
+  
 
   @override
   Stream<List<Participant>> getParticipantsStream() {
