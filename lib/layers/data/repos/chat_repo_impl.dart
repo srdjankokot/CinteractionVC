@@ -96,7 +96,7 @@ class ChatRepoImpl extends ChatRepo {
   Stream<StreamRenderer> getRemoteStream() {
     return _remoteStream.stream;
   }
-  
+
 
   @override
   Stream<List<Participant>> getParticipantsStream() {
@@ -140,7 +140,7 @@ class ChatRepoImpl extends ChatRepo {
     //   'publishers': maxPublishersDefault
     // };
     // var created = await textRoom.createRoom(roomId: room.toString(), adminKey: "supersecret", history: 10, isPrivate: false, description: "TestRoom", permanent: false, pin: "pin", secret: "secret", post: "https://7a2f-188-2-51-157.ngrok-free.app/api/message");
-    var created = await textRoom.createRoom(roomId: room, post: "https://f0f4-188-2-51-157.ngrok-free.app/api/message", permanent: true);
+    var created = await textRoom.createRoom(roomId: room.toString(), permanent: true);
     print(created);
     // JanusEvent event = JanusEvent.fromJson(created);
     // if (event.plugindata?.data['videoroom'] == 'created') {
