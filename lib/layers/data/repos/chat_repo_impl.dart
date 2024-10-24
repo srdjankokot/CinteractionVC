@@ -70,7 +70,7 @@ class ChatRepoImpl extends ChatRepo {
 
     ws = WebSocketJanusTransport(url: url);
     client = JanusClient(
-        transport: ws,
+        transport: ws!,
         withCredentials: true,
         apiSecret: apiSecret,
         isUnifiedPlan: true,
