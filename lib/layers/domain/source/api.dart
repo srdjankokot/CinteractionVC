@@ -35,6 +35,8 @@ abstract class Api {
 
   Future<ApiResponse<bool>> sentChatMessage({required text, required from, required to});
 
+  Future<ApiResponse<List<UserDto>>> getCompanyUsers();
+
 
 
 }

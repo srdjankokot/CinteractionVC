@@ -53,8 +53,7 @@ class ConferenceRepoImpl extends ConferenceRepo {
   int room = 12344321;
   late JanusVideoRoom? roomDetails;
 
-  final _conferenceStream =
-      StreamController<Map<dynamic, StreamRenderer>>.broadcast();
+  final _conferenceStream = StreamController<Map<dynamic, StreamRenderer>>.broadcast();
   final _conferenceEndedStream = StreamController<String>.broadcast();
   final _conferenceChatStream = StreamController<List<ChatMessage>>.broadcast();
   final _participantsStream = StreamController<List<Participant>>.broadcast();
@@ -386,8 +385,7 @@ class ConferenceRepoImpl extends ConferenceRepo {
     renderers.addAll(videoState.streamsToBeRendered);
 
     videoState.streamsToBeRendered.clear();
-    videoState.streamsToBeRendered
-        .putIfAbsent('local', () => localVideoRenderer);
+    videoState.streamsToBeRendered.putIfAbsent('local', () => localVideoRenderer);
     videoState.streamsToBeRendered.addAll(renderers);
 
     // _conferenceStream.add(videoState.streamsToBeRendered);

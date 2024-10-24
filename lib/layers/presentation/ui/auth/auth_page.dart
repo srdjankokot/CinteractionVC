@@ -77,6 +77,7 @@ class AuthPage extends StatelessWidget {
       if (state.loginSuccess) {
         // if (state.user != null) {
           AppRoute.home.go(context);
+          // AppRoute.chat.go(context);
           return;
         // }
       }
