@@ -1,7 +1,9 @@
 import 'dart:async';
 import 'dart:math';
 
+import 'package:cinteraction_vc/layers/data/dto/user_dto.dart';
 import 'package:cinteraction_vc/layers/domain/repos/chat_repo.dart';
+import 'package:flutter/foundation.dart';
 import 'package:http/http.dart';
 import 'package:janus_client/janus_client.dart';
 import 'package:logging/logging.dart';
@@ -10,6 +12,7 @@ import 'package:webrtc_interface/webrtc_interface.dart';
 import '../../../core/app/injector.dart';
 import '../../../core/io/network/models/participant.dart';
 import '../../../core/util/conf.dart';
+import '../../../core/util/util.dart';
 import '../../domain/entities/chat_message.dart';
 import '../../domain/entities/user.dart';
 import '../../domain/source/api.dart';
@@ -32,31 +35,81 @@ class ChatRepoImpl extends ChatRepo {
   late JanusTextRoomPlugin textRoom;
   late WebSocketJanusTransport ws;
 
+
+  late JanusVideoCallPlugin videoCallPlugin;
+  late StreamRenderer _localVideoRenderer;
+  late StreamRenderer _remoteVideoRenderer;
+
+  late RTCSessionDescription? remoteJsep;
+
+  VideoRoomPluginStateManager videoState = VideoRoomPluginStateManager();
+
+
   final _participantsStream = StreamController<List<Participant>>.broadcast();
 
+  final _usersStream = StreamController<List<UserDto>>.broadcast();
+
   final _messagesStream = StreamController<List<ChatMessage>>.broadcast();
+
+  final _videoCallStream = StreamController<String>.broadcast();
 
   List<Participant> subscribers = [];
 
   Participant? currentParticipant;
   List<ChatMessage> messages = [];
 
+
+  final _localStream = StreamController<StreamRenderer>.broadcast();
+  final _remoteStream = StreamController<StreamRenderer>.broadcast();
+
   @override
   Future<void> initialize() async {
     print("initialize janus");
+
+    _loadUsers();
+
     ws = WebSocketJanusTransport(url: url);
     client = JanusClient(
-        transport: ws!,
+        transport: ws,
         withCredentials: true,
         apiSecret: apiSecret,
         isUnifiedPlan: true,
         iceServers: iceServers,
         loggerLevel: Level.FINE);
 
-    session = await client.createSession();
-    await _attachPlugin();
-    _setup();
+    // session = await client.createSession();
+    // await _attachPlugin();
+    // _setup();
+
+    await _configureConnection();
+    // _registerUser();
     // _checkRoom();
+  }
+
+
+  @override
+  Stream<StreamRenderer> getLocalStream() {
+    return _localStream.stream;
+  }
+
+  @override
+  Stream<StreamRenderer> getRemoteStream() {
+    return _remoteStream.stream;
+  }
+
+  @override
+  Stream<List<Participant>> getParticipantsStream() {
+    return _participantsStream.stream;
+  }
+
+  @override
+  Stream<List<UserDto>> getUsersStream() {
+    return _usersStream.stream;
+  }
+
+  @override
+  Stream<List<ChatMessage>> getMessageStream() {
+    return _messagesStream.stream;
   }
 
   _editRoom() async
@@ -131,7 +184,6 @@ class ChatRepoImpl extends ChatRepo {
          }
       }
 
-
     return false;
   }
 
@@ -182,10 +234,15 @@ class ChatRepoImpl extends ChatRepo {
             return;
           }
 
-          var participant = Participant(
-              display: data['username'], id: Random().nextInt(999999));
 
-          subscribers.add(participant);
+          if(subscribers.where((element) => element.display == data['username']).toList().isEmpty){
+            print("there is no participant with this display name");
+            var participant = Participant(display: data['username'], id: Random().nextInt(999999));
+
+            subscribers.add(participant);
+          }
+
+
           _participantsStream.add(subscribers);
           if (currentParticipant == null) setCurrentParticipant(subscribers.first);
         }
@@ -208,10 +265,6 @@ class ChatRepoImpl extends ChatRepo {
     });
   }
 
-  @override
-  Stream<List<Participant>> getParticipantsStream() {
-    return _participantsStream.stream;
-  }
 
   @override
   Future<void> sendMessage(String msg) async {
@@ -226,11 +279,7 @@ class ChatRepoImpl extends ChatRepo {
         time: DateTime.now(),
         avatarUrl: user!.imageUrl,
         seen: true));
-
     _messagesStream.add(currentParticipant!.messages);
-
-
-
   }
 
   @override
@@ -241,10 +290,6 @@ class ChatRepoImpl extends ChatRepo {
     print("Changed current participant");
   }
 
-  @override
-  Stream<List<ChatMessage>> getMessageStream() {
-    return _messagesStream.stream;
-  }
 
   @override
   Future<void> messageSeen(int index) async {
@@ -257,4 +302,193 @@ class ChatRepoImpl extends ChatRepo {
     // _messagesStream.add(messages);
     _participantsStream.add(subscribers);
   }
+
+  _loadUsers() async
+  {
+    var response = await _api.getCompanyUsers();
+    var users = response.response;
+    _usersStream.add(users!);
+  }
+
+/**
+ *
+ * VIDEO CALL PART
+ *
+ */
+
+  _configureConnection() async{
+    session = await client.createSession();
+
+    await _attachPlugin();
+    _setup();
+
+    videoCallPlugin = await session.attach<JanusVideoCallPlugin>();
+
+    videoCallPlugin.data?.listen((event) async {
+      print(event.text);//i think this is for chat in call
+      // setState(() {
+      //   messages.add(event.text);
+      // });
+    });
+    videoCallPlugin.webRTCHandle?.peerConnection?.onConnectionState = (connectionState) async {
+      print("PEER CONNECTION STATE: $connectionState");
+      if (connectionState == RTCPeerConnectionState.RTCPeerConnectionStateConnected) {
+        print('connection established');
+      }
+    };
+
+
+
+    videoCallPlugin.remoteTrack?.listen((event) async {
+      if (event.track != null && event.flowing == true) {
+        _remoteVideoRenderer = StreamRenderer('remote', 'remote');
+        await _remoteVideoRenderer.init();
+        _remoteVideoRenderer.mediaStream?.addTrack(event.track!);
+        // remoteVideoStream?.addTrack(event.track!);
+        _remoteVideoRenderer.videoRenderer.srcObject = _remoteVideoRenderer.mediaStream;
+        // this is done only for web since web api are muted by default for local tagged mediaStream
+        if (kIsWeb) {
+          _remoteVideoRenderer.isVideoMuted = false;
+          _remoteVideoRenderer.isAudioMuted = false;
+        }
+
+        _remoteStream.add(_remoteVideoRenderer);
+      }
+    });
+
+
+    videoCallPlugin.typedMessages?.listen((even) async {
+      Object data = even.event.plugindata?.data;
+      if (data is VideoCallRegisteredEvent) {
+        print('VideoCallRegisteredEvent');
+        // Navigator.of(context).pop(registerDialog);
+        // print(data.result?.username);
+        // nameController.clear();
+        // await makeCallDialog();
+      }
+      if (data is VideoCallIncomingCallEvent) {
+        print("VideoCallIncomingCallEvent");
+        // incomingDialog = await showIncomingCallDialog(data.result!.username!, even.jsep);
+        remoteJsep = even.jsep;
+        _videoCallStream.add("IncomingCall");
+      }
+      if (data is VideoCallAcceptedEvent) {
+        // setState(() {
+        //   ringing = false;
+        // });
+        print("video call is accepted");
+        await videoCallPlugin.handleRemoteJsep(even.jsep);
+      }
+      if (data is VideoCallCallingEvent) {
+        print("VideoCallCallingEvent start ringing");
+        _videoCallStream.add("Calling");
+        // Navigator.of(context).pop(callDialog);
+        // setState(() {
+        //   ringing = true;
+        // });
+      }
+      if (data is VideoCallUpdateEvent) {
+        if (even.jsep != null) {
+          if (even.jsep?.type == "answer") {
+            videoCallPlugin.handleRemoteJsep(even.jsep);
+          } else {
+            var answer = await videoCallPlugin.createAnswer();
+            await videoCallPlugin.set(jsep: answer);
+          }
+        }
+      }
+      if (data is VideoCallHangupEvent) {
+        await destroy();
+      }
+    }, onError: (error) async {
+      if (error is JanusError) {
+
+        print(error);
+        // var dialog;
+        // dialog = await showDialog(
+        //     context: context,
+        //     builder: (context) {
+        //       return AlertDialog(
+        //         actions: [
+        //           TextButton(
+        //               onPressed: () async {
+        //                 Navigator.of(context).pop(dialog);
+        //                 nameController.clear();
+        //               },
+        //               child: Text('Okay'))
+        //         ],
+        //         title: Text('Whoops!'),
+        //         content: Text(error.error),
+        //       );
+        //     });
+      }
+    });
+
+    _registerUser();
+    // videoCallPlugin.getList();
+  }
+
+  Future<void> _registerUser() async {
+    await videoCallPlugin.register(displayName);
+  }
+
+  destroy() async {
+    rejectCall();
+  }
+
+  @override
+  Future<void> makeCall(String user) async{
+    await _configureLocalVideoRenderer();
+    await videoCallPlugin.call(user);
+  }
+
+  @override
+  Stream<String> getVideoCallStream() {
+    return _videoCallStream.stream;
+  }
+
+
+  @override
+  Future<void> answerCall() async{
+    await _configureLocalVideoRenderer();
+    await videoCallPlugin.handleRemoteJsep(remoteJsep);
+    var answer = await videoCallPlugin.createAnswer();
+    await videoCallPlugin.acceptCall(answer: answer);
+  }
+
+  @override
+  Future<void> rejectCall() async {
+    await videoCallPlugin.hangup();
+    // await videoCallPlugin.send(data: {"request": "hangup"});
+    _videoCallStream.add("Rejected");
+    remoteJsep = null;
+
+     session.dispose();
+    // _cleanupWebRTC();
+
+    await _configureConnection();
+  }
+
+  _configureLocalVideoRenderer() async {
+    _localVideoRenderer = StreamRenderer('local', 'local');
+    await _localVideoRenderer.init();
+    _localVideoRenderer.mediaStream = await videoCallPlugin.initializeMediaDevices(mediaConstraints: {
+      'video': {'width': 640, 'height': 360},
+      'audio': true
+    });
+
+    _localVideoRenderer.videoRenderer.srcObject = _localVideoRenderer.mediaStream;
+    _localVideoRenderer.publisherName = displayName;
+    _localVideoRenderer.publisherId = myId.toString();
+
+    _localStream.add(_localVideoRenderer);
+  }
+
+  Future<void> cleanUpWebRTCStuff() async {
+    _localVideoRenderer.videoRenderer.srcObject = null;
+    _remoteVideoRenderer.videoRenderer.srcObject = null;
+    _localVideoRenderer.dispose();
+    _remoteVideoRenderer.dispose();
+  }
+
 }

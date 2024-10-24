@@ -1,5 +1,6 @@
 class Urls{
-  static String baseUrl = 'https://vc.cinteraction.com';
+  // static String baseUrl = 'https://vc.cinteraction.com';
+  static String baseUrl = 'https://cinteraction.nswebdevelopment.com';
   // static String baseUrl = 'https://80d0-24-135-247-244.ngrok-free.app/api';
 
   static String loginEndpoint = '$baseUrl/api/login';
@@ -22,8 +23,9 @@ class Urls{
   static String sendEngagement = '$baseUrl/api/update-call-attention';
   static String dashboard = '$baseUrl/api/dashboards';
 
-
   static String restPassword = '$baseUrl/api/forgot-password';
   static String setNewPassword = '$baseUrl/api/reset-password';
   static String sentMessage = 'https://7a2f-188-2-51-157.ngrok-free.app/api/message';
+
+  static String getCompanyUsers = '$baseUrl/api/users';
 }

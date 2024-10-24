@@ -50,6 +50,24 @@ class ApiImpl extends Api {
   }
 
   @override
+  Future<ApiResponse<List<UserDto>>> getCompanyUsers() async {
+    try {
+      Dio dio = await getIt.getAsync<Dio>();
+      Response response = await dio.get(Urls.getCompanyUsers);
+
+      List<UserDto> users = [];
+      for (var u in response.data['data']) {
+        var user = UserDto.fromJson(u as Map<String, dynamic>);
+        users.add(user);
+      }
+
+      return ApiResponse(response: users);
+    } on DioException catch (e) {
+      return ApiResponse(error: ApiErrorDto.fromDioException(e));
+    }
+  }
+
+  @override
   Future<String?> socialLogin({required provider, required token}) async {
     Dio dio = await getIt.getAsync<Dio>();
 

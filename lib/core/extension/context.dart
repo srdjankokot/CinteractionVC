@@ -51,8 +51,8 @@ extension Context on BuildContext {
   bool get isWide {
 
     // return  kIsWeb;
-    final isMobile = defaultTargetPlatform == TargetPlatform.iOS || defaultTargetPlatform == TargetPlatform.android;
-    return !isMobile;
+    // final isMobile = defaultTargetPlatform == TargetPlatform.iOS || defaultTargetPlatform == TargetPlatform.android;
+    // return !isMobile;
 
     final maxWidth = MediaQuery.sizeOf(this).width;
     return maxWidth > desktopWidthBreakpoint;

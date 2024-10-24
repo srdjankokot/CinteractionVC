@@ -37,8 +37,6 @@ final GoRouter router = GoRouter(
     GoRoute(
       path: AppRoute.auth.path,
       builder: (context, state) {
-
-
         print("router: ${AppRoute.auth.path}");
         return BlocProvider(
           create: (context) => AuthCubit(
