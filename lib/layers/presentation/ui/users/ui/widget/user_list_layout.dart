@@ -163,8 +163,7 @@ class UserListLayout extends StatelessWidget {
                           TableCell(
                               verticalAlignment:
                                   TableCellVerticalAlignment.middle,
-                              child: Text(
-                                  '${user.createdAt.day}/${user.createdAt.month}/${user.createdAt.year}')),
+                              child: Text('${user.createdAt?.day}/${user.createdAt?.month}/${user.createdAt?.year}')),
                         ]),
                     ],
                   ),

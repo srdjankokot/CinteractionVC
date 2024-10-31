@@ -8,7 +8,7 @@ import '../../../domain/entities/chat_message.dart';
 class ChatState extends Equatable {
   final bool isInitial;
   final List<Participant>? participants;
-  final Participant? currentParticipant;
+  final UserDto? currentParticipant;
 
   final List<UserDto>? users;
 
@@ -62,7 +62,7 @@ class ChatState extends Equatable {
       bool? calling,
       StreamRenderer? localStream,
       StreamRenderer? remoteStream,
-      Participant? currentParticipant,
+      UserDto? currentParticipant,
       List<UserDto>? users}) {
     return ChatState(
       isInitial: isInitial ?? this.isInitial,

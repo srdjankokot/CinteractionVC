@@ -1,8 +1,10 @@
 import 'dart:async';
+import 'dart:html';
 import 'dart:math';
 
 import 'package:cinteraction_vc/layers/data/dto/user_dto.dart';
 import 'package:cinteraction_vc/layers/domain/repos/chat_repo.dart';
+import 'package:file_picker/file_picker.dart';
 import 'package:flutter/foundation.dart';
 import 'package:http/http.dart';
 import 'package:janus_client/janus_client.dart';
@@ -17,6 +19,10 @@ import '../../domain/entities/chat_message.dart';
 import '../../domain/entities/user.dart';
 import '../../domain/source/api.dart';
 import '../source/local/local_storage.dart';
+
+import 'package:firebase_storage/firebase_storage.dart';
+import 'package:image_picker/image_picker.dart';
+import 'package:path/path.dart' as Path;
 
 class ChatRepoImpl extends ChatRepo {
   ChatRepoImpl({required Api api}) : _api = api;
@@ -54,8 +60,9 @@ class ChatRepoImpl extends ChatRepo {
   final _videoCallStream = StreamController<String>.broadcast();
 
   List<Participant> subscribers = [];
+  List<UserDto> users = [];
 
-  Participant? currentParticipant;
+  UserDto? currentParticipant;
   List<ChatMessage> messages = [];
 
 
@@ -188,6 +195,21 @@ class ChatRepoImpl extends ChatRepo {
     return false;
   }
 
+  _matchParticipantWithUser()
+  {
+    for (var element in users) {element.online = false;}
+    for(var subscriber in subscribers)
+      {
+        UserDto fallbackUser = UserDto(id: 0, name: "name", email: "email", imageUrl: "imageUrl", createdAt: null);
+        users.firstWhere(
+              (item) => item.name == subscriber.display,  // Condition that won't be met
+          orElse: () => fallbackUser,       // Return null if no element matches
+        ).online = true;
+      }
+
+    _usersStream.add(users);
+  }
+
   _setListener() {
     textRoom.data?.listen((event) {
       print('recieved message from data channel $event');
@@ -217,8 +239,9 @@ class ChatRepoImpl extends ChatRepo {
           print("Unreaded messages: ${participant.haveUnreadMessages}");
 
           // messages.add(data['text']);
-          _messagesStream.add(currentParticipant!.messages);
+          _messagesStream.add(getUserMessages()!);
           _participantsStream.add(subscribers);
+          _matchParticipantWithUser();
           print(data);
         }
         if (data['textroom'] == 'leave') {
@@ -227,6 +250,7 @@ class ChatRepoImpl extends ChatRepo {
               .where((item) => item.display != data['username'])
               .toList();
           _participantsStream.add(subscribers);
+          _matchParticipantWithUser();
         }
         if (data['textroom'] == 'join') {
           print('from: ${data['username']} Joined The Chat!');
@@ -245,7 +269,8 @@ class ChatRepoImpl extends ChatRepo {
 
 
           _participantsStream.add(subscribers);
-          if (currentParticipant == null) setCurrentParticipant(subscribers.first);
+          _matchParticipantWithUser();
+          // if (currentParticipant == null) setCurrentParticipant(subscribers.first);
         }
         if (data['participants'] != null) {
           for (var element in (data['participants'] as List<dynamic>)) {
@@ -260,33 +285,46 @@ class ChatRepoImpl extends ChatRepo {
             subscribers.add(participant);
             // }
             _participantsStream.add(subscribers);
+            _matchParticipantWithUser();
           }
         }
       }
     });
   }
 
+  List<ChatMessage>? getUserMessages()
+  {
+    for(var sub in subscribers){
+      if(sub.display == currentParticipant?.name)
+        {
+          return sub.messages;
+        }
+    }
+
+    return List.empty();
+  }
+
 
   @override
   Future<void> sendMessage(String msg) async {
     // currentParticipant.display
-    await textRoom.sendMessage(room, msg, to: currentParticipant?.display);
+    await textRoom.sendMessage(room, msg, to: currentParticipant?.name);
    // var send =  await _api.sentChatMessage(text: msg, to: currentParticipant?.display, from: displayName);
 
    // print(send);
-    currentParticipant?.messages.add(ChatMessage(
+    getUserMessages()?.add(ChatMessage(
         message: msg,
         displayName: 'Me',
         time: DateTime.now(),
         avatarUrl: user!.imageUrl,
         seen: true));
-    _messagesStream.add(currentParticipant!.messages);
+    _messagesStream.add(getUserMessages()!);
   }
 
   @override
-  Future<void> setCurrentParticipant(Participant participant) async {
-    currentParticipant = participant;
-    messages = currentParticipant!.messages;
+  Future<void> setCurrentParticipant(UserDto user) async {
+    currentParticipant = user;
+    messages = getUserMessages()!;
     _messagesStream.add(messages);
     print("Changed current participant");
   }
@@ -294,7 +332,7 @@ class ChatRepoImpl extends ChatRepo {
 
   @override
   Future<void> messageSeen(int index) async {
-    var participant = subscribers.firstWhere((item) => item.display == currentParticipant?.display);
+    var participant = subscribers.firstWhere((item) => item.display == currentParticipant?.name);
 
     messages = participant.messages;
     messages[index].seen = true;
@@ -302,13 +340,14 @@ class ChatRepoImpl extends ChatRepo {
 
     // _messagesStream.add(messages);
     _participantsStream.add(subscribers);
+    _matchParticipantWithUser();
   }
 
   _loadUsers() async
   {
     var response = await _api.getCompanyUsers();
-    var users = response.response;
-    _usersStream.add(users!);
+    users = response.response!;
+    _matchParticipantWithUser();
   }
 
 /**
@@ -492,4 +531,56 @@ class ChatRepoImpl extends ChatRepo {
     _remoteVideoRenderer.dispose();
   }
 
+  @override
+  Future<void> chooseFile() async {
+    FilePickerResult? result = await FilePicker.platform.pickFiles();
+
+    if (result != null) {
+      PlatformFile file = result.files.first;
+
+      print(file.name);
+      print(file.bytes);
+      print(file.size);
+      print(file.extension);
+      // print(file.path);
+
+      uploadImageToStorage(file.name, file.bytes);
+    } else {
+      // User canceled the picker
+    }
+
+    // XFile? pickedFile = await ImagePicker().pickImage(
+    //   source: ImageSource.gallery,
+    // );
+    //
+    // uploadImageToStorage(pickedFile);
+  }
+
+  uploadImageToStorage(String name, Uint8List? bytes) async {
+    if(kIsWeb){
+      Reference _reference = FirebaseStorage.instance
+          .ref()
+          .child('files/${Path.basename("$name")}');
+      await _reference.putData(bytes!)
+          .whenComplete(() async {
+        await _reference.getDownloadURL().then((value) {
+
+          // uploadedPhotoUrl = value;
+
+
+          print(value);
+          sendMessage(value);
+
+        });
+      });
+    }else{
+//write a code for android or ios
+    }
+
+  }
+
+  @override
+  Future<void> sendFile(String name, Uint8List bytes) async{
+    uploadImageToStorage(name, bytes);
+  }
 }

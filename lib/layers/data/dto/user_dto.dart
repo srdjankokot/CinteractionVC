@@ -14,12 +14,10 @@ class UserDto extends User {
         id: json['id'] as int,
         name: json['name'] as String,
         email: json['email'] as String,
-        imageUrl: json['profile_photo_url'] as String,
-        createdAt: DateTime.parse(json['created_at'] as String),
+        imageUrl: json.containsKey('profile_photo_url')? json['profile_photo_url'] as String : json['image'] as String,
+        createdAt: json.containsKey('created_at')? DateTime.parse(json['created_at'] as String) : null,
       )
-        ..emailVerifiedAt = json['email_verified_at'] == null
-            ? null
-            : DateTime.parse(json['email_verified_at'] as String)
+        ..emailVerifiedAt = json['email_verified_at'] == null ? null : DateTime.parse(json['email_verified_at'] as String)
         ..groups = json['groups'] as int?
         ..avgEngagement = json['avgEngagement'] as int?
         ..totalMeetings = json['totalMeetings'] as int?;
@@ -30,7 +28,7 @@ class UserDto extends User {
     'name': name,
     'email': email,
     'profile_photo_url': imageUrl,
-    'created_at': createdAt.toIso8601String(),
+    'created_at': createdAt?.toIso8601String(),
     'email_verified_at': emailVerifiedAt?.toIso8601String(),
     'groups': groups,
     'avgEngagement': avgEngagement,

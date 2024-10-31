@@ -4,11 +4,13 @@ import 'package:cinteraction_vc/layers/domain/usecases/chat/get_participants.dar
 import 'package:cinteraction_vc/layers/domain/usecases/chat/get_users.dart';
 import 'package:cinteraction_vc/layers/domain/usecases/chat/message_seen.dart';
 import 'package:cinteraction_vc/layers/domain/usecases/chat/reject_call.dart';
+import 'package:cinteraction_vc/layers/domain/usecases/chat/send_file.dart';
 import 'package:cinteraction_vc/layers/domain/usecases/chat/send_message.dart';
 import 'package:cinteraction_vc/layers/domain/usecases/chat/set_current_participant.dart';
 
 import '../../repos/chat_repo.dart';
 import 'chat_initialize.dart';
+import 'choose_file.dart';
 import 'get_local_stream.dart';
 import 'get_remote_stream.dart';
 import 'get_videocall_stream.dart';
@@ -29,7 +31,9 @@ class ChatUseCases{
         getLocalStream = GetLocalStream(repo: repo),
         getRemoteStream = GetRemoteStream(repo: repo),
         answerCall = AnswerCall(repo: repo),
-        getUsersStream = GetUsersStream(repo: repo)
+        getUsersStream = GetUsersStream(repo: repo),
+        sendFile = SendFile(repo: repo),
+        chooseFile = ChooseFile(repo: repo)
   ;
 
   ChatInitialize chatInitialize;
@@ -45,4 +49,6 @@ class ChatUseCases{
   GetRemoteStream getRemoteStream;
   AnswerCall answerCall;
   GetUsersStream getUsersStream;
+  SendFile sendFile;
+  ChooseFile chooseFile;
 }

@@ -43,10 +43,6 @@ final _lightColorScheme = ColorScheme(
   outline: _divider,
 );
 
-
-
-
-
 ThemeData _getTheme() {
   final colorScheme = _lightColorScheme;
   final monteserratTextTheme = _getMonteserratTextTheme(colorScheme);
@@ -61,8 +57,7 @@ ThemeData _getTheme() {
     vertical: 18,
   );
 
-
-   var buttonTextStyle = primaryTextTheme.displaySmall;
+  var buttonTextStyle = primaryTextTheme.displaySmall;
 
   return ThemeData(
     useMaterial3: true,
@@ -210,10 +205,8 @@ ThemeData _getTheme() {
         textStyle: buttonTextStyle,
       ),
     ),
-
   );
 }
-
 
 ThemeData _getTitleTheme() {
   final colorScheme = _lightColorScheme;
@@ -228,7 +221,6 @@ ThemeData _getTitleTheme() {
     primaryTextTheme: primaryTextTheme,
   );
 }
-
 
 const minFontSize = 12.0;
 
@@ -291,12 +283,10 @@ TextTheme _getMonteserratTextTheme(ColorScheme colorScheme) {
       fontWeight: FontWeight.w700,
     ),
     displaySmall: TextStyle(
-      fontSize: minFontSize * 1.15,//16,
+      fontSize: minFontSize * 1.15, //16,
       color: color,
       fontWeight: FontWeight.w600,
     ),
-
-
 
     // Body
     bodyLarge: TextStyle(
@@ -310,26 +300,23 @@ TextTheme _getMonteserratTextTheme(ColorScheme colorScheme) {
       fontWeight: bodyWeight,
     ),
     bodySmall: TextStyle(
-      fontSize: minFontSize * 1.15,//16
+      fontSize: minFontSize * 1.15, //16
       color: color,
       fontWeight: bodyWeight,
     ),
 
-
     // Label
     labelLarge: TextStyle(
-      fontSize: minFontSize,//14
+      fontSize: minFontSize, //14
       color: color,
       fontWeight: FontWeight.w600,
     ),
     labelMedium: TextStyle(
-      fontSize: minFontSize,//14
+      fontSize: minFontSize, //14
       color: color,
       fontWeight: bodyWeight,
     ),
-
   );
 
-
-    return GoogleFonts.notoSansTextTheme(textTheme);
+  return GoogleFonts.notoSansTextTheme(textTheme);
 }

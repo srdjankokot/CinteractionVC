@@ -8,19 +8,21 @@ class User {
     required this.name,
     required this.email,
     required this.imageUrl,
-    required this.createdAt,
+    this.createdAt,
     this.emailVerifiedAt,
+    this.online = false
   });
 
   int id;
   String name;
   String email;
+  bool online;
 
   @JsonKey(name: 'profile_photo_url')
   String imageUrl;
 
   @JsonKey(name: 'created_at')
-  final DateTime createdAt;
+  final DateTime? createdAt;
 
   @JsonKey(name: 'email_verified_at')
   DateTime? emailVerifiedAt;
