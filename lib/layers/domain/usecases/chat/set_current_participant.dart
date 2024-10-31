@@ -1,4 +1,5 @@
 import 'package:cinteraction_vc/core/io/network/models/participant.dart';
+import 'package:cinteraction_vc/layers/data/dto/user_dto.dart';
 
 import '../../repos/chat_repo.dart';
 
@@ -7,7 +8,7 @@ class SetCurrentParticipant {
 
   final ChatRepo repo;
 
-  call(Participant participant){
-    repo.setCurrentParticipant(participant);
+  call(UserDto user){
+    repo.setCurrentParticipant(user);
   }
 }

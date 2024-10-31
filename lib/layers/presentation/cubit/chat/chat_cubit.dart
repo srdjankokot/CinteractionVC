@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:math';
+import 'dart:typed_data';
 
 import 'package:cinteraction_vc/layers/presentation/cubit/chat/chat_state.dart';
 
@@ -66,24 +67,34 @@ class ChatCubit extends Cubit<ChatState> with BlocLoggy {
   }
 
   void _onUsers(List<UserDto> users) {
+    print("User list ${users.length}");
     emit(state.copyWith(
         isInitial: false,
         users: users,
         numberOfParticipants: Random().nextInt(10000)));
   }
 
-
   Future<void> sendMessage(String msg) async {
     chatUseCases.sendMessage(msg: msg);
   }
 
-  Future<void> setCurrentParticipant(Participant participant) async {
-    chatUseCases.setCurrentParticipant(participant);
-    emit(state.copyWith(currentParticipant: participant));
+  Future<void> setCurrentParticipant(UserDto user) async {
+    chatUseCases.setCurrentParticipant(user);
+    emit(state.copyWith(currentParticipant: user));
   }
 
   Future<void> chatMessageSeen(int index) async {
     chatUseCases.messageSeen(index: index);
+  }
+
+  Future<void> sendFile(String name, Uint8List bytes) async
+  {
+    chatUseCases.sendFile(name, bytes);
+  }
+
+  Future<void> chooseFile() async
+  {
+    chatUseCases.chooseFile();
   }
 
   void _onVideoCall(String action) {
