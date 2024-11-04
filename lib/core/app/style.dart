@@ -318,5 +318,5 @@ TextTheme _getMonteserratTextTheme(ColorScheme colorScheme) {
     ),
   );
 
-  return GoogleFonts.notoSansTextTheme(textTheme);
+  return GoogleFonts.nunitoTextTheme(textTheme);
 }

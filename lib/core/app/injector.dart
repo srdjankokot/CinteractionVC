@@ -4,18 +4,23 @@ import 'package:cinteraction_vc/layers/data/repos/conference_repo_impl.dart';
 import 'package:cinteraction_vc/layers/data/repos/dashboard_repo_impl.dart';
 import 'package:cinteraction_vc/layers/data/repos/meetings_repo_impl.dart';
 import 'package:cinteraction_vc/layers/data/source/network/api_impl.dart';
+import 'package:cinteraction_vc/layers/domain/repos/call_repo.dart';
 import 'package:cinteraction_vc/layers/domain/repos/chat_repo.dart';
 import 'package:cinteraction_vc/layers/domain/repos/conference_repo.dart';
 import 'package:cinteraction_vc/layers/domain/repos/dashboard_repo.dart';
 import 'package:cinteraction_vc/layers/domain/repos/home_repo.dart';
+import 'package:cinteraction_vc/layers/domain/usecases/call/call_use_cases.dart';
 import 'package:cinteraction_vc/layers/domain/usecases/chat/chat_usecases.dart';
 import 'package:cinteraction_vc/layers/domain/usecases/dashboard/dashboard_usecases.dart';
 import 'package:cinteraction_vc/layers/domain/usecases/home/home_use_cases.dart';
 import 'package:cinteraction_vc/layers/presentation/cubit/chat/chat_cubit.dart';
 import 'package:dio/dio.dart';
 import 'package:get_it/get_it.dart';
+import 'package:janus_client/janus_client.dart';
+import 'package:logging/logging.dart';
 
 import '../../layers/data/repos/auth_repo_impl.dart';
+import '../../layers/data/repos/call_repo_impl.dart';
 import '../../layers/data/repos/home_repo_impl.dart';
 import '../../layers/data/source/local/local_storage.dart';
 import '../../layers/domain/repos/auth_repo.dart';
@@ -38,6 +43,7 @@ import '../../layers/presentation/ui/roles/repository/roles_repository.dart';
 import '../../layers/presentation/ui/users/provider/users_provider.dart';
 import '../../layers/presentation/ui/users/repository/users_repository.dart';
 import '../../main.dart';
+import '../util/conf.dart';
 
 GetIt getIt = GetIt.instance;
 
@@ -99,6 +105,9 @@ Future<void> initializeGetIt() async {
   getIt.registerFactory<AuthRepo>(() => AuthRepoImpl(api: getIt()),);
   getIt.registerFactory<ConferenceRepo>(() => ConferenceRepoImpl(api: getIt()));
   getIt.registerFactory<ChatRepo>(() => ChatRepoImpl(api: getIt()));
+
+  getIt.registerFactory<CallRepo>(() => CallRepoImpl(api: getIt()));
+
   getIt.registerFactory<MeetingRepo>(() => MeetingRepoImpl(api: getIt()));
   getIt.registerFactory<HomeRepo>(() => HomeRepoImpl(api: getIt()));
   getIt.registerFactory<DashboardRepo>(()=> DashboardRepoImpl(api: getIt()));
@@ -119,6 +128,7 @@ Future<void> initializeGetIt() async {
   getIt.registerFactory(() => HomeUseCases(repo: getIt()));
   getIt.registerFactory(() => DashboardUseCases());
   getIt.registerFactory(() => ChatUseCases(repo: getIt()));
+  getIt.registerFactory(() => CallUseCases(repo: getIt()));
 
   getIt.registerSingleton<ProfileProvider>(ProfileProvider());
   // getIt.registerFactory<UsersProvider>(() => UsersProvider());
@@ -130,7 +140,22 @@ Future<void> initializeGetIt() async {
   getIt.registerFactory<HomeCubit>(()=>HomeCubit(homeUseCases: getIt()));
   getIt.registerFactory<MeetingCubit>(()=>MeetingCubit(meetingUseCases: getIt()));
   getIt.registerFactory<DashboardCubit>(()=>DashboardCubit(dashboardUseCases: getIt()));
-  getIt.registerLazySingleton<ChatCubit>(() => ChatCubit(chatUseCases: getIt()));
+  getIt.registerLazySingleton<ChatCubit>(() => ChatCubit(chatUseCases: getIt(), callUseCases: getIt()));
+
+
+  getIt.registerFactory<JanusTransport>(() => WebSocketJanusTransport(url: url));
+  getIt.registerFactory<JanusClient>(() => JanusClient(
+      transport: getIt(),
+      withCredentials: true,
+      apiSecret: apiSecret,
+      isUnifiedPlan: true,
+      iceServers: iceServers,
+      loggerLevel: Level.FINE)
+  );
+
+  getIt.registerFactoryAsync<JanusSession>(() async {
+    return await getIt.get<JanusClient>().createSession();
+  });
 
   Map<String, dynamic>? getHeader()
   {

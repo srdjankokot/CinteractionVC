@@ -3,6 +3,8 @@ import 'dart:math';
 import 'dart:typed_data';
 
 import 'package:cinteraction_vc/layers/presentation/cubit/chat/chat_state.dart';
+import 'package:flutter/material.dart';
+import 'package:janus_client/janus_client.dart';
 
 import '../../../../core/io/network/models/participant.dart';
 import '../../../../core/logger/loggy_types.dart';
@@ -11,28 +13,29 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../../core/util/util.dart';
 import '../../../data/dto/user_dto.dart';
 import '../../../domain/entities/chat_message.dart';
+import '../../../domain/usecases/call/call_use_cases.dart';
 import '../../../domain/usecases/chat/chat_usecases.dart';
 
 class ChatCubit extends Cubit<ChatState> with BlocLoggy {
-  // final int roomId;
-  // final String displayName;
   final ChatUseCases chatUseCases;
+  final CallUseCases callUseCases;
 
-  // StreamSubscription<List<Participant>>? _participantsStream;
-
-  ChatCubit({required this.chatUseCases}) : super(const ChatState.initial()) {
+  ChatCubit({required this.chatUseCases, required this.callUseCases}) : super(const ChatState.initial()) {
     print("Chat Cubit is created");
     _load();
   }
 
   void _load() async {
     await chatUseCases.chatInitialize();
+    await callUseCases.initialize();
+
     chatUseCases.getParticipantsStream().listen(_onParticipants);
     chatUseCases.getUsersStream().listen(_onUsers);
     chatUseCases.getMessageStream().listen(_onMessages);
-    chatUseCases.videoCallStream().listen(_onVideoCall);
-    chatUseCases.getLocalStream().listen(_onLocalStream);
-    chatUseCases.getRemoteStream().listen(_onRemoteStream);
+
+    callUseCases.videoCallStream().listen(_onVideoCall);
+    callUseCases.getLocalStream().listen(_onLocalStream);
+    callUseCases.getRemoteStream().listen(_onRemoteStream);
   }
 
   @override
@@ -55,8 +58,12 @@ class ChatCubit extends Cubit<ChatState> with BlocLoggy {
   }
 
   void _onRemoteStream(StreamRenderer remoteStream) {
-    print("_onRemoteStream");
-    emit(state.copyWith(remoteStream: remoteStream));
+    emit(state.copyWith(
+        remoteStream: remoteStream,
+        numberOfParticipants: Random().nextInt(10000)
+    ));
+
+    print('remote stream changed');
   }
 
   void _onParticipants(List<Participant> participants) {
@@ -67,7 +74,7 @@ class ChatCubit extends Cubit<ChatState> with BlocLoggy {
   }
 
   void _onUsers(List<UserDto> users) {
-    print("User list ${users.length}");
+    print("_onUsers ${users.length}");
     emit(state.copyWith(
         isInitial: false,
         users: users,
@@ -97,17 +104,27 @@ class ChatCubit extends Cubit<ChatState> with BlocLoggy {
     chatUseCases.chooseFile();
   }
 
-  void _onVideoCall(String action) {
-    print(action);
-    if (action == "IncomingCall") {
-      emit(state.copyWith(incomingCall: true));
+  void _onVideoCall(Result result) {
+    print(result.event);
+    print(result.username);
+    if (result.event == "incomingcall") {
+      emit(
+          state.copyWith(
+              incomingCall: true,
+              caller: result.username
+          ));
     }
-    if(action == "Calling")
+    if(result.event == "calling")
       {
         emit(state.copyWith(calling: true));
       }
 
-    if(action == "Rejected")
+    if(result.event == "accepted")
+      {
+        emit(state.copyWith(calling: false, incomingCall: false));
+      }
+
+    if(result.event == "rejected")
       {
         print("change state to non call");
         emit(state.callFinished());
@@ -116,17 +133,30 @@ class ChatCubit extends Cubit<ChatState> with BlocLoggy {
   }
 
   Future<void> makeCall(String toUser) async {
-    chatUseCases.makeCall(toUser: toUser);
+    callUseCases.makeCall(toUser: toUser);
   }
 
   Future<void> answerCall() async {
-    chatUseCases.answerCall();
+    callUseCases.answerCall();
     emit(state.callFinished());
 
   }
 
   Future<void> rejectCall() async {
-    chatUseCases.rejectCall();
-    emit(state.callFinished());
+    callUseCases.rejectCall("click button");
+    // emit(state.callFinished());
+  }
+
+
+  Future<void> audioMute() async {
+    var mute = state.audioMuted;
+    await callUseCases.mute(kind: 'audio', muted: !mute);
+    emit(state.copyWith(audioMuted: !mute));
+  }
+
+  Future<void> videoMute() async {
+    var mute = state.videoMuted;
+    await callUseCases.mute(kind: 'video', muted: !mute);
+    emit(state.copyWith(videoMuted: !mute));
   }
 }
