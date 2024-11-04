@@ -6,6 +6,7 @@ import 'package:cinteraction_vc/core/extension/string.dart';
 import 'package:cinteraction_vc/core/ui/widget/call_button_shape.dart';
 import 'package:cinteraction_vc/core/ui/widget/engagement_progress.dart';
 import 'package:cinteraction_vc/layers/presentation/ui/conference/widget/chat_message_widget.dart';
+import 'package:cinteraction_vc/layers/presentation/ui/conference/widget/participant_video_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -776,7 +777,6 @@ class VideoRoomPage extends StatelessWidget {
       print(e);
     }
 
-    // print(screenshared?.publisherName);
 
     var numberStream = items.length;
     var row = sqrt(numberStream).round();
@@ -797,7 +797,7 @@ class VideoRoomPage extends StatelessWidget {
           spacing: 0,
           alignment: WrapAlignment.center,
           children: items
-              .map((e) => getRendererItem(context, e, itemHeight, itemWidth))
+              .map((e) => ParticipantVideoWidget(remoteStream: e, height: itemHeight, width: itemWidth))
               .toList(),
         );
       } else {
@@ -810,8 +810,7 @@ class VideoRoomPage extends StatelessWidget {
           children: <Widget>[
             Expanded(
               child: Container(
-                child: getRendererItem(context, screenshared, double.maxFinite,
-                    double.maxFinite - 500),
+                child:ParticipantVideoWidget(remoteStream: screenshared, height: double.maxFinite, width: double.maxFinite-500),
               ),
             ),
             Container(
@@ -833,8 +832,7 @@ class VideoRoomPage extends StatelessWidget {
                           borderRadius: BorderRadius.circular(6),
                         ),
                       ),
-                      child: getRendererItem(
-                          context, items[index], itemHeight, itemWidth),
+                      child:ParticipantVideoWidget(remoteStream: items[index], height: itemHeight, width: itemWidth),
                     );
                   },
                 ),
@@ -843,41 +841,6 @@ class VideoRoomPage extends StatelessWidget {
           ],
         );
 
-        return Stack(
-          children: [
-            Container(
-              child: getRendererItem(context, screenshared, double.maxFinite,
-                  double.maxFinite - 500),
-            ),
-            Container(
-              alignment: Alignment.centerRight,
-              margin: const EdgeInsets.only(right: 55),
-              child: SizedBox(
-                width: itemWidth + 20,
-                height: MediaQuery.of(context).size.height - 156,
-                child: ListView.builder(
-                  shrinkWrap: true,
-                  itemCount: items.length,
-                  itemBuilder: (context, index) {
-                    return Container(
-                      clipBehavior: Clip.hardEdge,
-                      margin: const EdgeInsets.all(3),
-                      decoration: ShapeDecoration(
-                        shape: RoundedRectangleBorder(
-                          side: const BorderSide(width: 2, color: Colors.white),
-                          borderRadius: BorderRadius.circular(6),
-                        ),
-                      ),
-                      child: getRendererItem(
-                          context, items[index], itemHeight, itemWidth),
-                    );
-                  },
-                ),
-              ),
-            ),
-          ],
-        );
-        return Container();
       }
     } else {
       final double itemWidth = size.width;
@@ -887,12 +850,7 @@ class VideoRoomPage extends StatelessWidget {
           return ListView.builder(
               itemCount: items.length,
               itemBuilder: (BuildContext context, int index) {
-                return getRendererItem(
-                    context,
-                    items[index],
-                    (constraints.minHeight) /
-                        (items.length > 3 ? 3 : items.length),
-                    itemWidth);
+                return ParticipantVideoWidget(remoteStream: items[index], height: (constraints.minHeight) / (items.length > 3 ? 3 : items.length), width: itemWidth);
               });
         },
       );
@@ -911,324 +869,4 @@ class VideoRoomPage extends StatelessWidget {
         break;
     }
   }
-
-  Widget getRendererItem(BuildContext context, StreamRenderer remoteStream,
-      double height, double width) {
-    var screenShare =
-        remoteStream.publisherName.toLowerCase().contains('screenshare');
-
-    if (context.isWide) {
-      return SizedBox(
-        height: height,
-        width: width,
-        child: Stack(
-          children: [
-            Visibility(
-              visible: remoteStream.isVideoMuted == false,
-              replacement: Center(
-                  child: CircleAvatar(
-                backgroundColor:
-                    ([...ColorConstants.kStateColors]..shuffle()).first,
-                radius: [width, height].reduce(min) / 4,
-                child: Text(remoteStream.publisherName.getInitials(),
-                    style: context.primaryTextTheme.titleLarge?.copyWith(
-                        fontSize: [width, height].reduce(min) / 8,
-                        fontWeight: FontWeight.bold)),
-              )
-
-                  // Text("Video Paused By ${remoteStream.publisherName!}",
-                  //     style: const TextStyle(color: Colors.white)),
-                  ),
-              child: RTCVideoView(
-                remoteStream.videoRenderer,
-                placeholderBuilder: (context) {
-                  return Text('data');
-                },
-                filterQuality: FilterQuality.none,
-                objectFit: screenShare
-                    ? RTCVideoViewObjectFit.RTCVideoViewObjectFitContain
-                    : RTCVideoViewObjectFit.RTCVideoViewObjectFitCover,
-                mirror: !screenShare,
-              ),
-            ),
-            // Text('${remoteStream.videoRenderer.videoWidth}:${remoteStream.videoRenderer.videoHeight}'),
-            Positioned(
-                top: 20,
-                right: 24,
-                child: Row(
-                  children: [
-                    Visibility(
-                      visible: width > 200,
-                      child: EngagementProgress(
-                          engagement: remoteStream.engagement ?? 0),
-                    ),
-                    Visibility(
-                      visible: remoteStream.publisherName != 'You',
-                      child: PopupMenuButton<String>(
-                        onSelected: (item) {
-                          handleClick(context, item, remoteStream.id);
-                        },
-                        itemBuilder: (BuildContext context) {
-                          return {'Kick', 'UnPublish'}.map((String choice) {
-                            return PopupMenuItem<String>(
-                              value: choice,
-                              child: Text(choice),
-                            );
-                          }).toList();
-                        },
-                      ),
-                    )
-                  ],
-                )),
-
-            Visibility(
-                visible: remoteStream.isAudioMuted == true,
-                child: Positioned(
-                    bottom: 50,
-                    left: 24,
-                    child:
-                        imageSVGAsset('icon_microphone_disabled') as Widget)),
-            Visibility(
-                visible: width < 200,
-                child: Positioned.fill(
-                  bottom: 20,
-                  child: Align(
-                      alignment: Alignment.bottomCenter,
-                      child: EngagementProgress(
-                          engagement: remoteStream.engagement ?? 0)),
-                )),
-          ],
-        ),
-      );
-    }
-
-    return Container(
-      width: width,
-      height: height,
-      padding: const EdgeInsets.all(5),
-      child: Container(
-        decoration: ShapeDecoration(
-          shape: RoundedRectangleBorder(
-            side: const BorderSide(width: 2, color: Colors.white),
-            borderRadius: BorderRadius.circular(6),
-          ),
-        ),
-        child: Stack(
-          children: [
-            ClipRRect(
-              borderRadius: BorderRadius.circular(6),
-              child: Visibility(
-                visible: remoteStream.isVideoMuted == false,
-                replacement: Center(
-                    child: CircleAvatar(
-                  backgroundColor:
-                      ([...ColorConstants.kStateColors]..shuffle()).first,
-                  radius: [width, height].reduce(min) / 4,
-                  child: Text(remoteStream.publisherName.getInitials(),
-                      style: context.primaryTextTheme.titleLarge?.copyWith(
-                          fontSize: [width, height].reduce(min) / 8,
-                          fontWeight: FontWeight.bold)),
-                )
-
-                    // Text("Video Paused By ${remoteStream.publisherName!}",
-                    //     style: const TextStyle(color: Colors.white)),
-                    ),
-                child: RTCVideoView(
-                  remoteStream.videoRenderer,
-                  placeholderBuilder: (context) {
-                    return Text('data');
-                  },
-                  filterQuality: FilterQuality.none,
-                  objectFit: screenShare
-                      ? RTCVideoViewObjectFit.RTCVideoViewObjectFitContain
-                      : RTCVideoViewObjectFit.RTCVideoViewObjectFitCover,
-                  mirror: !screenShare,
-                ),
-              ),
-            ),
-
-            // ClipRRect(
-            //   borderRadius: BorderRadius.circular(6),
-            //   child: RTCVideoView(
-            //     remoteStream.videoRenderer,
-            //     filterQuality: FilterQuality.none,
-            //     objectFit: RTCVideoViewObjectFit.RTCVideoViewObjectFitCover,
-            //     mirror: true,
-            //   ),
-            // ),
-            Positioned(
-                right: 0,
-                child: Row(
-                  children: [
-                    EngagementProgress(
-                        engagement: remoteStream.engagement ?? 0),
-                    PopupMenuButton<String>(
-                      itemBuilder: (BuildContext context) {
-                        return {'Kick', 'UnPublish'}.map((String choice) {
-                          return PopupMenuItem<String>(
-                            value: choice,
-                            child: Text(choice),
-                          );
-                        }).toList();
-                      },
-                    ),
-                  ],
-                )),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-Widget getRendererItem(BuildContext context, StreamRenderer remoteStream,
-    double height, double width) {
-  var screenShare =
-  remoteStream.publisherName.toLowerCase().contains('screenshare');
-
-  if (context.isWide) {
-    return SizedBox(
-      height: height,
-      width: width,
-      child: Stack(
-        children: [
-          Visibility(
-            visible: remoteStream.isVideoMuted == false,
-            replacement: Center(
-                child: CircleAvatar(
-                  backgroundColor:
-                  ([...ColorConstants.kStateColors]..shuffle()).first,
-                  radius: [width, height].reduce(min) / 4,
-                  child: Text(remoteStream.publisherName.getInitials(),
-                      style: context.primaryTextTheme.titleLarge?.copyWith(
-                          fontSize: [width, height].reduce(min) / 8,
-                          fontWeight: FontWeight.bold)),
-                )
-
-              // Text("Video Paused By ${remoteStream.publisherName!}",
-              //     style: const TextStyle(color: Colors.white)),
-            ),
-            child: RTCVideoView(
-              remoteStream.videoRenderer,
-              placeholderBuilder: (context) {
-                return Text('data');
-              },
-              filterQuality: FilterQuality.none,
-              objectFit: screenShare
-                  ? RTCVideoViewObjectFit.RTCVideoViewObjectFitContain
-                  : RTCVideoViewObjectFit.RTCVideoViewObjectFitCover,
-              mirror: !screenShare,
-            ),
-          ),
-          // Text('${remoteStream.videoRenderer.videoWidth}:${remoteStream.videoRenderer.videoHeight}'),
-          Positioned(
-              top: 20,
-              right: 24,
-              child: Row(
-                children: [
-                  Visibility(
-                    visible: width > 200,
-                    child: EngagementProgress(
-                        engagement: remoteStream.engagement ?? 0),
-                  ),
-                ],
-              )),
-
-          Visibility(
-              visible: remoteStream.isAudioMuted == true,
-              child: Positioned(
-                  bottom: 50,
-                  left: 24,
-                  child:
-                  imageSVGAsset('icon_microphone_disabled') as Widget)),
-          Visibility(
-              visible: width < 200,
-              child: Positioned.fill(
-                bottom: 20,
-                child: Align(
-                    alignment: Alignment.bottomCenter,
-                    child: EngagementProgress(
-                        engagement: remoteStream.engagement ?? 0)),
-              )),
-        ],
-      ),
-    );
-  }
-
-  return Container(
-    width: width,
-    height: height,
-    padding: const EdgeInsets.all(5),
-    child: Container(
-      decoration: ShapeDecoration(
-        shape: RoundedRectangleBorder(
-          side: const BorderSide(width: 2, color: Colors.white),
-          borderRadius: BorderRadius.circular(6),
-        ),
-      ),
-      child: Stack(
-        children: [
-          ClipRRect(
-            borderRadius: BorderRadius.circular(6),
-            child: Visibility(
-              visible: remoteStream.isVideoMuted == false,
-              replacement: Center(
-                  child: CircleAvatar(
-                    backgroundColor:
-                    ([...ColorConstants.kStateColors]..shuffle()).first,
-                    radius: [width, height].reduce(min) / 4,
-                    child: Text(remoteStream.publisherName.getInitials(),
-                        style: context.primaryTextTheme.titleLarge?.copyWith(
-                            fontSize: [width, height].reduce(min) / 8,
-                            fontWeight: FontWeight.bold)),
-                  )
-
-                // Text("Video Paused By ${remoteStream.publisherName!}",
-                //     style: const TextStyle(color: Colors.white)),
-              ),
-              child: RTCVideoView(
-                remoteStream.videoRenderer,
-                placeholderBuilder: (context) {
-                  return Text('data');
-                },
-                filterQuality: FilterQuality.none,
-                objectFit: screenShare
-                    ? RTCVideoViewObjectFit.RTCVideoViewObjectFitContain
-                    : RTCVideoViewObjectFit.RTCVideoViewObjectFitCover,
-                mirror: !screenShare,
-              ),
-            ),
-          ),
-
-          // ClipRRect(
-          //   borderRadius: BorderRadius.circular(6),
-          //   child: RTCVideoView(
-          //     remoteStream.videoRenderer,
-          //     filterQuality: FilterQuality.none,
-          //     objectFit: RTCVideoViewObjectFit.RTCVideoViewObjectFitCover,
-          //     mirror: true,
-          //   ),
-          // ),
-          Positioned(
-              right: 0,
-              child: Row(
-                children: [
-                  EngagementProgress(
-                      engagement: remoteStream.engagement ?? 0),
-                  PopupMenuButton<String>(
-                    itemBuilder: (BuildContext context) {
-                      return {'Kick', 'UnPublish'}.map((String choice) {
-                        return PopupMenuItem<String>(
-                          value: choice,
-                          child: Text(choice),
-                        );
-                      }).toList();
-                    },
-                  ),
-                ],
-              )),
-        ],
-      ),
-    ),
-  );
 }

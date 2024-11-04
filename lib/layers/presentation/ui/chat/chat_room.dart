@@ -4,6 +4,7 @@ import 'package:cinteraction_vc/core/extension/context.dart';
 import 'package:cinteraction_vc/core/extension/context_user.dart';
 import 'package:cinteraction_vc/layers/presentation/cubit/chat/chat_cubit.dart';
 import 'package:cinteraction_vc/layers/presentation/cubit/chat/chat_state.dart';
+import 'package:cinteraction_vc/layers/presentation/ui/conference/widget/participant_video_widget.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -13,9 +14,7 @@ import 'package:visibility_detector/visibility_detector.dart';
 import '../../../../assets/colors/Colors.dart';
 import '../../../../core/ui/images/image.dart';
 import '../../../../core/ui/widget/call_button_shape.dart';
-import '../conference/video_room.dart';
 import '../conference/widget/chat_message_widget.dart';
-import '../home/ui/widgets/join_popup.dart';
 import '../profile/ui/widget/user_image.dart';
 
 class ChatRoomPage extends StatelessWidget {
@@ -30,31 +29,33 @@ class ChatRoomPage extends StatelessWidget {
 
     FocusNode messageFocusNode = FocusNode();
 
-    AudioPlayer _audioPlayer = AudioPlayer();
+    AudioPlayer audioPlayer = AudioPlayer();
 
     late DropzoneViewController controller;
 
-    Future<void> _onFileDropped(dynamic event) async {
+    Future<void> onFileDropped(dynamic event) async {
 
-      final  name = controller.getFilename(event);
+      final  name = await controller.getFilename(event);
+
+      print(name);
+
       final bytes = await controller.getFileData(event);
       await context.read<ChatCubit>().sendFile(name.toString(), bytes);
       // You can process the file bytes as needed here
     }
 
-    void _playIncomingCallSound() async {
+    void playIncomingCallSound() async {
       // Play the sound
-      try {
-        await _audioPlayer.setSource(AssetSource('discord_incoming_call.mp3'));
-        _audioPlayer.resume();
-      } catch (e) {
-        print('Error playing sound: $e'); // Log any errors
-      }
+      // try {
+      //   await audioPlayer.setSource(AssetSource('discord_incoming_call.mp3'));
+      //   audioPlayer.resume();
+      // } catch (e) {
+      //   print('Error playing sound: $e'); // Log any errors
+      // }
     }
 
-    void _stopIncomingCallSound() async {
-      // Stop the sound if it's playing
-      await _audioPlayer.stop();
+    void stopIncomingCallSound() async {
+      await audioPlayer.stop();
     }
 
     Future<void> sendMessage() async {
@@ -92,7 +93,7 @@ class ChatRoomPage extends StatelessWidget {
 
     Future<dynamic> showIncomingCallDialog(
         BuildContext context, String caller) async {
-      _playIncomingCallSound();
+      playIncomingCallSound();
 
       return showDialog(
           context: context,
@@ -104,7 +105,7 @@ class ChatRoomPage extends StatelessWidget {
                     onPressed: () async {
                       context.read<ChatCubit>().answerCall();
                       Navigator.of(context).pop(incomingDialog);
-                      _stopIncomingCallSound();
+                      stopIncomingCallSound();
                       // Navigator.of(context).pop(callDialog);
                     },
                     child: const Text('Answer')),
@@ -113,7 +114,7 @@ class ChatRoomPage extends StatelessWidget {
                       Navigator.of(context, rootNavigator: true)
                           .pop(incomingDialog);
                       context.read<ChatCubit>().rejectCall();
-                      _stopIncomingCallSound();
+                      stopIncomingCallSound();
                     },
                     child: const Text('Reject')),
               ],
@@ -121,45 +122,30 @@ class ChatRoomPage extends StatelessWidget {
           });
     }
 
-    Future<dynamic> showCallingDialog(
-        BuildContext context, String caller) async {
-      return showDialog(
-          context: context,
-          builder: (context) {
-            return AlertDialog(
-              title: Text('Calling ${caller}'),
-              actions: [
-                ElevatedButton(
-                    onPressed: () async {
-                      // Navigator.of(context, rootNavigator: true).pop(incomingDialog);
-                      Navigator.of(context, rootNavigator: true)
-                          .pop(callDialog);
-
-                      // await publishVideo.hangup();
-                      context.read<ChatCubit>().rejectCall();
-                    },
-                    child: const Text('Reject')),
-              ],
-            );
-          });
-    }
 
     return BlocConsumer<ChatCubit, ChatState>(listener: (context, state) async {
       if (state.incomingCall ?? false) {
-        String callerName = "Caller Name"; // Replace with actual caller name
-        await showIncomingCallDialog(context, callerName);
+        // String callerName = "Caller Name"; // Replace with actual caller name
+        await showIncomingCallDialog(context, state.caller!);
         return;
       } else {
         if (Navigator.canPop(context)) {
           Navigator.of(context).pop(incomingDialog);
-          _stopIncomingCallSound();
+          stopIncomingCallSound();
         }
       }
 
       if (state.calling ?? false) {
         await makeCallDialog();
         return;
+      }else{
+        if (Navigator.canPop(context)) {
+          Navigator.of(context).pop(incomingDialog);
+        }
       }
+
+
+
     }, builder: (context, state) {
       return Scaffold(
           body: Stack(
@@ -229,52 +215,6 @@ class ChatRoomPage extends StatelessWidget {
                       );
                     },
                   ),
-
-                  // ListView.builder(
-                  //   itemCount: state.participants?.length ?? 0,
-                  //   itemBuilder: (context, index) {
-                  //     var participant = state.participants![index];
-                  //
-                  //     return GestureDetector(
-                  //       onTap: (){context.read<ChatCubit>().setCurrentParticipant(state.participants![index]);
-                  //       },
-                  //       child: Padding(
-                  //         padding: const EdgeInsets.all(4.0),
-                  //         child: Row(
-                  //           children: [
-                  //             const SizedBox(
-                  //               width: 10,
-                  //             ),
-                  //             Container(
-                  //               width: 50.0,  // Adjust the width as needed
-                  //               height: 50.0, // Adjust the height as needed
-                  //               decoration: const BoxDecoration(
-                  //                 color: Colors.brown,
-                  //                 shape: BoxShape.circle,
-                  //               ),
-                  //             ),
-                  //             const SizedBox(
-                  //               width: 10,
-                  //             ),
-                  //
-                  //             Column(
-                  //               mainAxisAlignment: MainAxisAlignment.center,
-                  //               crossAxisAlignment: CrossAxisAlignment.start,
-                  //               children: [
-                  //                 Text(
-                  //                   participant.display,
-                  //                   textAlign: TextAlign.center,
-                  //                   style: context.textTheme.titleSmall,
-                  //                 ),
-                  //               ],
-                  //             ),
-                  //           ],
-                  //         ),
-                  //       ),
-                  //     );
-                  //
-                  //   },
-                  // ),
                 ),
               ),
 
@@ -296,15 +236,12 @@ class ChatRoomPage extends StatelessWidget {
                     child: () {
                       if (state.localStream != null) {
                         if (state.remoteStream == null) {
-                          return getRendererItem(context, state.localStream!,
-                              double.maxFinite, double.maxFinite);
+                          return ParticipantVideoWidget(remoteStream: state.localStream!, height: double.maxFinite, width: double.maxFinite);
                         } else {
                           return Stack(
                             children: [
-                              getRendererItem(context, state.remoteStream!,
-                                  double.maxFinite, double.maxFinite),
-                              getRendererItem(
-                                  context, state.localStream!, 200, 200),
+                              ParticipantVideoWidget(remoteStream: state.remoteStream!, height: double.maxFinite, width: double.maxFinite),
+                              ParticipantVideoWidget(remoteStream: state.localStream!, height: 200, width: 200),
                               Positioned.fill(
                                 bottom: 20,
                                 child: Row(
@@ -312,29 +249,29 @@ class ChatRoomPage extends StatelessWidget {
                                   crossAxisAlignment: CrossAxisAlignment.end,
                                   children: [
                                     CallButtonShape(
-                                        image: false
+                                        image: !state.audioMuted
                                             ? imageSVGAsset('icon_microphone')
                                                 as Widget
                                             : imageSVGAsset(
                                                     'icon_microphone_disabled')
                                                 as Widget,
                                         onClickAction: () async {
-                                          // await context
-                                          //     .read<ConferenceCubit>()
-                                          //     .audioMute();
+                                          await context
+                                              .read<ChatCubit>()
+                                              .audioMute();
                                         }),
                                     const SizedBox(width: 20),
                                     CallButtonShape(
-                                        image: false
+                                        image: !state.videoMuted
                                             ? imageSVGAsset(
                                                 'icon_video_recorder') as Widget
                                             : imageSVGAsset(
                                                     'icon_video_recorder_disabled')
                                                 as Widget,
                                         onClickAction: () async {
-                                          // await context
-                                          //     .read<ConferenceCubit>()
-                                          //     .videoMute();
+                                          await context
+                                              .read<ChatCubit>()
+                                              .videoMute();
                                         }),
                                     const SizedBox(width: 20),
                                     CallButtonShape(
@@ -367,16 +304,13 @@ class ChatRoomPage extends StatelessWidget {
                         if (state.localStream != null) {
                           print("local stream not null");
                           if (state.remoteStream == null) {
-                            return getRendererItem(context, state.localStream!,
-                                double.maxFinite, double.maxFinite);
+                            return ParticipantVideoWidget(remoteStream: state.localStream!, height:double.maxFinite, width: double.maxFinite);
                           } else {
-                            print("remote stream not null");
                             return Stack(
                               children: [
-                                getRendererItem(context, state.remoteStream!,
-                                    double.maxFinite, double.maxFinite),
-                                getRendererItem(
-                                    context, state.localStream!, 200, 200),
+
+                                ParticipantVideoWidget(remoteStream: state.remoteStream!, height: double.maxFinite, width: double.maxFinite),
+                                ParticipantVideoWidget(remoteStream: state.remoteStream!, height: 200, width: 200),
                                 Positioned.fill(
                                   bottom: 20,
                                   child: Row(
@@ -551,6 +485,8 @@ class ChatRoomPage extends StatelessWidget {
                                         onClickAction: () async {
                                           await context.read<ChatCubit>().makeCall(
                                               state.currentParticipant!.name);
+
+                                          // await context.read<ChatCubit>().rejectCall();
                                         },
                                       )
                                   )
@@ -567,7 +503,7 @@ class ChatRoomPage extends StatelessWidget {
                               children: [
                                 DropzoneView(
                                   onCreated: (ctrl) => controller = ctrl,
-                                  onDrop: _onFileDropped,
+                                  onDrop: onFileDropped,
                                 ),
                                 Container(
                                   child: state.messages == null

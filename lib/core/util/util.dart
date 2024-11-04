@@ -15,9 +15,16 @@ class StreamRenderer {
   ConfigureStreamQuality subStreamQuality = ConfigureStreamQuality.HIGH;
 
   Future<void> dispose() async {
-    await stopAllTracksAndDispose(mediaStream);
-    videoRenderer.srcObject = null;
-    await videoRenderer.dispose();
+    if(!isRendererDisposed(videoRenderer))
+      {
+        await stopAllTracksAndDispose(mediaStream);
+        videoRenderer.srcObject = null;
+        await videoRenderer.dispose();
+      }
+  }
+
+  bool isRendererDisposed(RTCVideoRenderer renderer) {
+    return renderer.textureId == null;
   }
 
   StreamRenderer(this.id, this.publisherName);

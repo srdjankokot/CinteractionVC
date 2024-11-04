@@ -62,11 +62,60 @@ class LinkText extends StatelessWidget {
           // Add your code here
         },
         child: ["png", "jpg", "jpeg"].contains(fileData['extension'])
-            ? Container(
+            ?
+        SizedBox(
+          width: 300, // Set your desired width
+          height: 200, // Set your desired height
+          child: Image.network(
+            fullUrl, // Replace with your image URL
+            fit: BoxFit.cover,
+            // Options: BoxFit.cover, BoxFit.contain, BoxFit.fill, etc.
+            loadingBuilder: (BuildContext context, Widget child,
+                ImageChunkEvent? loadingProgress) {
+              if (loadingProgress == null) {
+                return child; // Image is loaded
+              }
+              return Center(
+                child: CircularProgressIndicator(
+                  value: loadingProgress.expectedTotalBytes != null
+                      ? loadingProgress.cumulativeBytesLoaded /
+                      (loadingProgress.expectedTotalBytes ?? 1)
+                      : null,
+                ),
+              );
+            },
+            errorBuilder: (BuildContext context, Object error,
+                StackTrace? stackTrace) {
+              return Container(
+                width: 150,
+                height: 100,
                 padding: const EdgeInsets.all(16.0),
                 child: Column(
                   children: [
-                    imageSVGAsset('pdf_file') as Widget,
+
+                    const Image(
+                      image: ImageAsset('pdf_file.png'),
+                    ),
+
+                    Text(
+                      "${fileData['fileName']}",
+                      style: context.primaryTextTheme.bodySmall
+                          ?.copyWith(color: ColorConstants.kGray600),
+                      softWrap: true,
+                    )
+                  ],
+                ),
+              ); // Handle error loading image
+            },
+          ),
+        ):
+        Container(
+                padding: const EdgeInsets.all(16.0),
+                child: Column(
+                  children: [
+                    const Image(
+                      image: ImageAsset('pdf_file.png'),
+                    ),
                     Text(
                       "${fileData['fileName']}",
                       style: context.primaryTextTheme.bodySmall
@@ -76,52 +125,12 @@ class LinkText extends StatelessWidget {
                   ],
                 ),
               )
-            : SizedBox(
-                width: 300, // Set your desired width
-                height: 200, // Set your desired height
-                child: Image.network(
-                  fullUrl, // Replace with your image URL
-                  fit: BoxFit.cover,
-                  // Options: BoxFit.cover, BoxFit.contain, BoxFit.fill, etc.
-                  loadingBuilder: (BuildContext context, Widget child,
-                      ImageChunkEvent? loadingProgress) {
-                    if (loadingProgress == null) {
-                      return child; // Image is loaded
-                    }
-                    return Center(
-                      child: CircularProgressIndicator(
-                        value: loadingProgress.expectedTotalBytes != null
-                            ? loadingProgress.cumulativeBytesLoaded /
-                                (loadingProgress.expectedTotalBytes ?? 1)
-                            : null,
-                      ),
-                    );
-                  },
-                  errorBuilder: (BuildContext context, Object error,
-                      StackTrace? stackTrace) {
-                    return Container(
-                      width: 150,
-                      height: 100,
-                      padding: const EdgeInsets.all(16.0),
-                      child: Column(
-                        children: [
 
-                          IconButton(icon: imageSVGAsset('pdf_file') as Widget, onPressed: (){
 
-                          })
-                          ,
-                          Text(
-                            "${fileData['fileName']}",
-                            style: context.primaryTextTheme.bodySmall
-                                ?.copyWith(color: ColorConstants.kGray600),
-                            softWrap: true,
-                          )
-                        ],
-                      ),
-                    ); // Handle error loading image
-                  },
-                ),
-              ),
+            ,
+
+
+
       );
     } else {
       return Text(

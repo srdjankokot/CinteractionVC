@@ -35,23 +35,15 @@ class ChatMessageWidget extends StatelessWidget {
                          visible: message.displayName != 'Me',
                          child: Text(message.displayName, style: context.primaryTextTheme.displaySmall)),
                      const SizedBox(width: 6,),
-                 Container(
-                   child: Text(
-                       DateFormat('hh:mm a').format(message.time),
-                       style: context.primaryTextTheme.bodySmall?.copyWith(color: ColorConstants.kGray600),
+                 Text(
+                     DateFormat('hh:mm a').format(message.time),
+                     style: context.primaryTextTheme.bodySmall?.copyWith(color: ColorConstants.kGray600),
 
-                     )
-                 ),
+                   ),
                    ],
                  ),
                LinkText(message.message)
 
-           //
-           // Text(
-           //         message.message,
-           //         style: context.primaryTextTheme.bodySmall?.copyWith(color: ColorConstants.kGray600),
-           //         softWrap: true,
-           //       ),
              ],
            ),)
           ],

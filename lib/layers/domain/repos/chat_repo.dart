@@ -18,12 +18,12 @@ abstract class ChatRepo{
   Future<void> setCurrentParticipant(UserDto user);
   Future<void> messageSeen(int index);
 
-  Future<void> makeCall(String user);
-  Future<void> answerCall();
-  Future<void> rejectCall();
-  Stream<String> getVideoCallStream();
-  Stream<StreamRenderer> getLocalStream();
-  Stream<StreamRenderer> getRemoteStream();
+  // Future<void> makeCall(String user);
+  // Future<void> answerCall();
+  // Future<void> rejectCall();
+  // Stream<String> getVideoCallStream();
+  // Stream<StreamRenderer> getLocalStream();
+  // Stream<StreamRenderer> getRemoteStream();
 
   Future<void> sendFile(String name, Uint8List bytes);
   Future<void> chooseFile();
