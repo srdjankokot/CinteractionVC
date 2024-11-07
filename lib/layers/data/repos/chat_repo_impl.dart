@@ -31,7 +31,7 @@ class ChatRepoImpl extends ChatRepo {
   // final JanusClient _client;
   // int room = 111223;
 
-  late int myId = user?.id ?? Random().nextInt(999999);
+  late String myId = user?.id ?? "";
   late String displayName = user?.name ?? 'User $myId';
 
   // late JanusClient client;
@@ -59,23 +59,10 @@ class ChatRepoImpl extends ChatRepo {
 
   @override
   Future<void> initialize() async {
-
-
     _loadUsers();
     _session = await getIt.getAsync<JanusSession>();
-    // ws = WebSocketJanusTransport(url: url);
-    // client = JanusClient(
-    //     transport: ws!,
-    //     withCredentials: true,
-    //     apiSecret: apiSecret,
-    //     isUnifiedPlan: true,
-    //     iceServers: iceServers,
-    //     loggerLevel: Level.FINE);
-    //
-    // session = await _client.createSession();
     await _attachPlugin();
     _setup();
-    // await _configureConnection();
   }
 
   @override
@@ -148,7 +135,7 @@ class ChatRepoImpl extends ChatRepo {
     await textRoom.setup();
     textRoom.onData?.listen((event) async {
       if (RTCDataChannelState.RTCDataChannelOpen == event) {
-        await textRoom.joinRoom(room, displayName, display: displayName, pin: "",);
+        await textRoom.joinRoom(room, user!.id, display: displayName, pin: "",);
       }
     });
 
@@ -173,13 +160,12 @@ class ChatRepoImpl extends ChatRepo {
     for (var element in users) {element.online = false;}
     for(var subscriber in subscribers)
       {
-        UserDto fallbackUser = UserDto(id: 0, name: "name", email: "email", imageUrl: "imageUrl", createdAt: null);
+        UserDto fallbackUser = UserDto(id: "0", name: "name", email: "email", imageUrl: "imageUrl", createdAt: null);
         users.firstWhere(
-              (item) => item.name == subscriber.display,  // Condition that won't be met
+              (item) => item.id == subscriber.id,  // Condition that won't be met
           orElse: () => fallbackUser,       // Return null if no element matches
         ).online = true;
       }
-
     _usersStream.add(users);
   }
 
@@ -197,14 +183,14 @@ class ChatRepoImpl extends ChatRepo {
           //   }
 
           var participant = subscribers.firstWhere(
-              (item) => item.display == data['from']); // or any default value);
+              (item) => item.id.toString() == data['from']); // or any default value);
 
 
           participant.haveUnreadMessages = _haveUnread(participant);
           // participant.messages.add(data['text']);
           participant.messages.add(ChatMessage(
               message: data['text'],
-              displayName: data['from'],
+              displayName: participant.display,
               time: DateTime.parse(data['date']),
               avatarUrl: data['avatarUrl'] ?? "",
               seen: false));
@@ -220,7 +206,7 @@ class ChatRepoImpl extends ChatRepo {
         if (data['textroom'] == 'leave') {
           print('from: ${data['username']} Left The Chat!');
           subscribers = subscribers
-              .where((item) => item.display != data['username'])
+              .where((item) => item.id.toString() != data['username'])
               .toList();
           _participantsStream.add(subscribers);
           _matchParticipantWithUser();
@@ -233,9 +219,9 @@ class ChatRepoImpl extends ChatRepo {
           }
 
 
-          if(subscribers.where((element) => element.display == data['username']).toList().isEmpty){
+          if(subscribers.where((element) => element.id.toString() == data['username']).toList().isEmpty){
             print("there is no participant with this display name");
-            var participant = Participant(display: data['username'], id: Random().nextInt(999999));
+            var participant = Participant(display: data['display'], id: data['username']);
 
             subscribers.add(participant);
           }
@@ -253,7 +239,7 @@ class ChatRepoImpl extends ChatRepo {
 
             // var participant = Participant.fromJson(element as Map<String, dynamic>);
             var participant = Participant(
-                display: element['username'], id: Random().nextInt(999999));
+                display: element['display'], id: element['username']);
             // if(!participant.publisher){
             subscribers.add(participant);
             // }
@@ -280,8 +266,11 @@ class ChatRepoImpl extends ChatRepo {
 
   @override
   Future<void> sendMessage(String msg) async {
+
+    var pars = await textRoom.listParticipants(room);
+    print(pars);
     // currentParticipant.display
-    await textRoom.sendMessage(room, msg, to: currentParticipant?.name);
+    await textRoom.sendMessage(room, msg, to: currentParticipant?.id.toString());
    // var send =  await _api.sentChatMessage(text: msg, to: currentParticipant?.display, from: displayName);
 
    // print(send);
@@ -319,7 +308,7 @@ class ChatRepoImpl extends ChatRepo {
   _loadUsers() async
   {
     var response = await _api.getCompanyUsers();
-    users = response.response!;
+    users = response.response!.where((element) => element.id != myId).toList();
     _matchParticipantWithUser();
   }
 

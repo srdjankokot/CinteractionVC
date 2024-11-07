@@ -13,7 +13,7 @@ class User {
     this.online = false
   });
 
-  int id;
+  String id;
   String name;
   String email;
   bool online;

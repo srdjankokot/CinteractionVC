@@ -108,10 +108,12 @@ class ChatCubit extends Cubit<ChatState> with BlocLoggy {
     print(result.event);
     print(result.username);
     if (result.event == "incomingcall") {
+
+      ;
       emit(
           state.copyWith(
               incomingCall: true,
-              caller: result.username
+              caller: state.users?.firstWhere((element) => element.id == result.username).name
           ));
     }
     if(result.event == "calling")

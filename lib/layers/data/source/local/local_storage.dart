@@ -35,7 +35,11 @@ class LocalStorageImpl extends LocalStorage{
 
   @override
   Future<bool> saveLoggedUser({required UserDto user}) {
-    return _sharedPref.setString('user', json.encode(user.toJson()));
+
+    print("==============");
+    print(user.id.substring(5));
+    return _sharedPref.setString('user', json.encode(
+        user.toJson()));
   }
 
   @override
