@@ -327,6 +327,7 @@ class ChatRepoImpl extends ChatRepo {
   @override
   Future<void> chooseFile() async {
     FilePickerResult? result = await FilePicker.platform.pickFiles();
+
     if (result != null) {
       PlatformFile file = result.files.first;
       uploadImageToStorage(file.name, file.bytes);
