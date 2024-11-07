@@ -11,7 +11,7 @@ class UserDto extends User {
 
   factory UserDto.fromJson(Map<String, dynamic> json) =>
       UserDto(
-        id: json['id'] as int,
+        id: "hash_${json['id']}",
         name: json['name'] as String,
         email: json['email'] as String,
         imageUrl: json.containsKey('profile_photo_url')? json['profile_photo_url'] as String : json['image'] as String,
@@ -24,7 +24,7 @@ class UserDto extends User {
 
 
   Map<String, dynamic> toJson() => <String, dynamic>{
-    'id': id,
+    'id': id.substring(5),
     'name': name,
     'email': email,
     'profile_photo_url': imageUrl,

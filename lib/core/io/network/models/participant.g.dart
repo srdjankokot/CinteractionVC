@@ -7,7 +7,7 @@ part of 'participant.dart';
 // **************************************************************************
 
 Participant _$ParticipantFromJson(Map<String, dynamic> json) => Participant(
-      id: json['id'] as int,
+      id: json['id'] as String,
       display: json['display'] as String,
       publisher: json['publisher'] as bool? ?? false,
       talking: json['talking'] as bool? ?? false,

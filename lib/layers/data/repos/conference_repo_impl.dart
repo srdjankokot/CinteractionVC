@@ -61,10 +61,10 @@ class ConferenceRepoImpl extends ConferenceRepo {
 
   User? user = getIt.get<LocalStorage>().loadLoggedUser();
 
-  late int myId = user?.id ?? Random().nextInt(999999);
+  late String myId = user?.id ?? "";
   late String displayName = user?.name ?? 'User $myId';
 
-  get screenShareId => myId + int.parse("1");
+  get screenShareId => myId + "_screen_share";
 
   int? callId;
 

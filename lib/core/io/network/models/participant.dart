@@ -15,7 +15,7 @@ class Participant{
     this.talking = false,});
 
   @JsonKey(name: 'id')
-  int id;
+  String id;
 
   @JsonKey(name: 'display')
   String display;

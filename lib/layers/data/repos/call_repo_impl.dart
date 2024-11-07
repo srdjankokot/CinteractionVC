@@ -29,7 +29,7 @@ class CallRepoImpl extends CallRepo {
   final _videoCallStream = StreamController<Result>.broadcast();
 
   User? user = getIt.get<LocalStorage>().loadLoggedUser();
-  late int myId = user?.id ?? Random().nextInt(999999);
+  late String myId = user?.id ?? "";
   late String displayName = user?.name ?? 'User $myId';
 
   late JanusSession _session;
@@ -271,7 +271,7 @@ class CallRepoImpl extends CallRepo {
 
   Future<void> _registerUser() async {
     print("regiter user");
-    await videoCallPlugin.register(displayName);
+    await videoCallPlugin.register(myId);
   }
 
   destroy() async {
