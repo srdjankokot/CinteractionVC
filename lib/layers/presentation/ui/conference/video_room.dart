@@ -28,8 +28,8 @@ class VideoRoomPage extends StatelessWidget {
     }
 
     if (state.isEnded) {
-      // Navigator.of(context).pop();
-      AppRoute.home.pushReplacement(context);
+      Navigator.of(context).pop();
+      // AppRoute.home.pushReplacement(context);
     }
   }
 
