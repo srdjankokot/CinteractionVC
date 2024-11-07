@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import 'package:audioplayers/audioplayers.dart';
 import 'package:cinteraction_vc/core/app/style.dart';
 import 'package:cinteraction_vc/core/extension/context.dart';
@@ -5,16 +7,21 @@ import 'package:cinteraction_vc/core/extension/context_user.dart';
 import 'package:cinteraction_vc/layers/presentation/cubit/chat/chat_cubit.dart';
 import 'package:cinteraction_vc/layers/presentation/cubit/chat/chat_state.dart';
 import 'package:cinteraction_vc/layers/presentation/ui/conference/widget/participant_video_widget.dart';
+import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_dropzone/flutter_dropzone.dart';
+import 'package:go_router/go_router.dart';
 import 'package:visibility_detector/visibility_detector.dart';
 
 import '../../../../assets/colors/Colors.dart';
 import '../../../../core/ui/images/image.dart';
 import '../../../../core/ui/widget/call_button_shape.dart';
 import '../conference/widget/chat_message_widget.dart';
+import '../home/ui/widgets/home_item.dart';
+import '../home/ui/widgets/join_popup.dart';
+import '../home/ui/widgets/schedule_popup.dart';
 import '../profile/ui/widget/user_image.dart';
 
 class ChatRoomPage extends StatelessWidget {
@@ -34,8 +41,7 @@ class ChatRoomPage extends StatelessWidget {
     late DropzoneViewController controller;
 
     Future<void> onFileDropped(dynamic event) async {
-
-      final  name = await controller.getFilename(event);
+      final name = await controller.getFilename(event);
 
       print(name);
 
@@ -46,12 +52,12 @@ class ChatRoomPage extends StatelessWidget {
 
     void playIncomingCallSound() async {
       // Play the sound
-      // try {
-      //   await audioPlayer.setSource(AssetSource('discord_incoming_call.mp3'));
-      //   audioPlayer.resume();
-      // } catch (e) {
-      //   print('Error playing sound: $e'); // Log any errors
-      // }
+      try {
+        await audioPlayer.setSource(AssetSource('discord_incoming_call.mp3'));
+        audioPlayer.resume();
+      } catch (e) {
+        print('Error playing sound: $e'); // Log any errors
+      }
     }
 
     void stopIncomingCallSound() async {
@@ -123,6 +129,25 @@ class ChatRoomPage extends StatelessWidget {
     }
 
 
+    Future<void> displayJoinRoomPopup(BuildContext context) async {
+      return showDialog(
+        context: context,
+        builder: (context) {
+          return const JoinPopup();
+        },
+      );
+    }
+
+    Future<void> displayAddScheduleMeetingPopup(BuildContext ctx) async {
+
+      return showDialog(
+        context: ctx,
+        builder: (context) {
+          return  SchedulePopup(context: ctx,);
+        },
+      );
+    }
+
     return BlocConsumer<ChatCubit, ChatState>(listener: (context, state) async {
       if (state.incomingCall ?? false) {
         // String callerName = "Caller Name"; // Replace with actual caller name
@@ -138,14 +163,11 @@ class ChatRoomPage extends StatelessWidget {
       if (state.calling ?? false) {
         await makeCallDialog();
         return;
-      }else{
+      } else {
         if (Navigator.canPop(context)) {
           Navigator.of(context).pop(incomingDialog);
         }
       }
-
-
-
     }, builder: (context, state) {
       return Scaffold(
           body: Stack(
@@ -155,66 +177,125 @@ class ChatRoomPage extends StatelessWidget {
               // First column
               SizedBox(
                 width: 300,
-                child: Center(
-                  child: ListView.builder(
-                    itemCount: state.users?.length ?? 0,
-                    itemBuilder: (context, index) {
-                      var user = state.users![index];
+                child: Column(
+                  children: [
+                    Container(
+                      width: double.maxFinite,
+                      padding: const EdgeInsets.all(10),
+                      child: Row(
+                        children: [
+                          Expanded(
+                            child: HomeTabItem.mobile(
+                              image: const Image(
+                                image: ImageAsset('stand.png'),
+                                fit: BoxFit.fill,
+                              ),
+                              onClickAction: () {
+                                context.pushNamed('meeting',
+                                    pathParameters: {
+                                      'roomId':
+                                          Random().nextInt(999999).toString(),
+                                    },
+                                    extra: context.getCurrentUser?.name);
+                              },
+                              label: 'Start Meeting',
+                              textStyle: context.textTheme.labelMedium,
+                            ),
+                          ),
+                          Expanded(
+                            child: HomeTabItem.mobile(
+                                image: const Image(
+                                  image: ImageAsset('add_user.png'),
+                                ),
+                                bgColor: ColorConstants.kStateSuccess,
+                                onClickAction: () => {
+                                      // AppRoute.meeting.push(context)
+                                      displayJoinRoomPopup(context)
+                                    },
+                                label: 'Join',
+                                textStyle: context.textTheme.labelMedium),
+                          ),
+                          Expanded(
+                            child: HomeTabItem.mobile(
+                                image: const Image(
+                                  image: ImageAsset('calendar-date.png'),
+                                ),
+                                bgColor: ColorConstants.kStateInfo,
+                                onClickAction: () async {
+                                  displayAddScheduleMeetingPopup(context);
+                                },
+                                label: 'Schedule',
+                                textStyle: context.textTheme.labelMedium),
+                          )
+                        ],
+                      ),
+                    ),
+                    const Divider(),
+                    Expanded(
+                      child: ListView.builder(
+                        itemCount: state.users?.length ?? 0,
+                        itemBuilder: (context, index) {
+                          var user = state.users![index];
 
-                      return GestureDetector(
-                        onTap: () {
-                          context.read<ChatCubit>().setCurrentParticipant(state.users![index]);
-                        },
-                        child: Padding(
-                          padding: const EdgeInsets.all(4.0),
-                          child: Row(
-                            crossAxisAlignment: CrossAxisAlignment.center,
-                            mainAxisAlignment: MainAxisAlignment.start,
-                            children: [
-                              const SizedBox(
-                                width: 10,
-                              ),
-                              Stack(
+                          return GestureDetector(
+                            onTap: () {
+                              context
+                                  .read<ChatCubit>()
+                                  .setCurrentParticipant(state.users![index]);
+                            },
+                            child: Padding(
+                              padding: const EdgeInsets.all(4.0),
+                              child: Row(
+                                crossAxisAlignment: CrossAxisAlignment.center,
+                                mainAxisAlignment: MainAxisAlignment.start,
                                 children: [
-                                  UserImage.medium(user.imageUrl),
-                                  Visibility(
-                                      visible: user.online,
-                                      child: Positioned(
-                                        bottom: 2,
-                                        right: 4,
-                                        child: ClipOval(
-                                          child: Container(
-                                            width: 10.0,
-                                            // width of the circle
-                                            height: 10.0,
-                                            // height of the circle
-                                            color: Colors
-                                                .green, // background color
-                                          ),
-                                        ),
-                                      ))
-                                ],
-                              ),
-                              const SizedBox(
-                                width: 10,
-                              ),
-                              Column(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Text(
-                                    user.name,
-                                    textAlign: TextAlign.center,
-                                    style: context.textTheme.titleMedium,
+                                  const SizedBox(
+                                    width: 10,
+                                  ),
+                                  Stack(
+                                    children: [
+                                      UserImage.medium(user.imageUrl),
+                                      Visibility(
+                                          visible: user.online,
+                                          child: Positioned(
+                                            bottom: 2,
+                                            right: 4,
+                                            child: ClipOval(
+                                              child: Container(
+                                                width: 10.0,
+                                                // width of the circle
+                                                height: 10.0,
+                                                // height of the circle
+                                                color: Colors
+                                                    .green, // background color
+                                              ),
+                                            ),
+                                          ))
+                                    ],
+                                  ),
+                                  const SizedBox(
+                                    width: 10,
+                                  ),
+                                  Column(
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      Text(
+                                        user.name,
+                                        textAlign: TextAlign.center,
+                                        style: context.textTheme.titleMedium,
+                                      ),
+                                    ],
                                   ),
                                 ],
                               ),
-                            ],
-                          ),
-                        ),
-                      );
-                    },
-                  ),
+                            ),
+                          );
+                        },
+                      ),
+                    ),
+                  ],
                 ),
               ),
 
@@ -236,12 +317,21 @@ class ChatRoomPage extends StatelessWidget {
                     child: () {
                       if (state.localStream != null) {
                         if (state.remoteStream == null) {
-                          return ParticipantVideoWidget(remoteStream: state.localStream!, height: double.maxFinite, width: double.maxFinite);
+                          return ParticipantVideoWidget(
+                              remoteStream: state.localStream!,
+                              height: double.maxFinite,
+                              width: double.maxFinite);
                         } else {
                           return Stack(
                             children: [
-                              ParticipantVideoWidget(remoteStream: state.remoteStream!, height: double.maxFinite, width: double.maxFinite),
-                              ParticipantVideoWidget(remoteStream: state.localStream!, height: 200, width: 200),
+                              ParticipantVideoWidget(
+                                  remoteStream: state.remoteStream!,
+                                  height: double.maxFinite,
+                                  width: double.maxFinite),
+                              ParticipantVideoWidget(
+                                  remoteStream: state.localStream!,
+                                  height: 200,
+                                  width: 200),
                               Positioned.fill(
                                 bottom: 20,
                                 child: Row(
@@ -304,13 +394,21 @@ class ChatRoomPage extends StatelessWidget {
                         if (state.localStream != null) {
                           print("local stream not null");
                           if (state.remoteStream == null) {
-                            return ParticipantVideoWidget(remoteStream: state.localStream!, height:double.maxFinite, width: double.maxFinite);
+                            return ParticipantVideoWidget(
+                                remoteStream: state.localStream!,
+                                height: double.maxFinite,
+                                width: double.maxFinite);
                           } else {
                             return Stack(
                               children: [
-
-                                ParticipantVideoWidget(remoteStream: state.remoteStream!, height: double.maxFinite, width: double.maxFinite),
-                                ParticipantVideoWidget(remoteStream: state.remoteStream!, height: 200, width: 200),
+                                ParticipantVideoWidget(
+                                    remoteStream: state.remoteStream!,
+                                    height: double.maxFinite,
+                                    width: double.maxFinite),
+                                ParticipantVideoWidget(
+                                    remoteStream: state.remoteStream!,
+                                    height: 200,
+                                    width: 200),
                                 Positioned.fill(
                                   bottom: 20,
                                   child: Row(
@@ -460,14 +558,19 @@ class ChatRoomPage extends StatelessWidget {
                                             // Adjust the width as needed
                                             height: 15.0,
                                             // Adjust the height as needed
-                                            decoration:  BoxDecoration(
-                                              color: state.currentParticipant!.online ? Colors.green : Colors.amber,
+                                            decoration: BoxDecoration(
+                                              color: state.currentParticipant!
+                                                      .online
+                                                  ? Colors.green
+                                                  : Colors.amber,
                                               shape: BoxShape.circle,
                                             ),
                                           ),
                                           const SizedBox(width: 5.0),
                                           Text(
-                                           state.currentParticipant!.online? "Active now": "Away",
+                                            state.currentParticipant!.online
+                                                ? "Active now"
+                                                : "Away",
                                             style: titleThemeStyle
                                                 .textTheme.labelLarge,
                                           ),
@@ -478,60 +581,55 @@ class ChatRoomPage extends StatelessWidget {
                                   const Spacer(),
                                   Visibility(
                                       visible: state.currentParticipant!.online,
-                                      child:    CallButtonShape(
-                                        image:
-                                        imageSVGAsset('icon_phone') as Widget,
+                                      child: CallButtonShape(
+                                        image: imageSVGAsset('icon_phone')
+                                            as Widget,
                                         bgColor: ColorConstants.kPrimaryColor,
                                         onClickAction: () async {
-                                          await context.read<ChatCubit>().makeCall(
-                                              state.currentParticipant!.name);
+                                          await context
+                                              .read<ChatCubit>()
+                                              .makeCall(state
+                                                  .currentParticipant!.name);
 
                                           // await context.read<ChatCubit>().rejectCall();
                                         },
-                                      )
-                                  )
-
-
-
+                                      ))
                                 ],
                               ),
                             ),
                             const Divider(),
                             Expanded(
-                              child:
-                              Stack(
-                              children: [
-                                DropzoneView(
-                                  onCreated: (ctrl) => controller = ctrl,
-                                  onDrop: onFileDropped,
-                                ),
-                                Container(
-                                  child: state.messages == null
-                                      ? const Center(child: Text('No Messages'))
-                                      : ListView.builder(
-
-                                    controller: chatController,
-                                    itemCount: state.messages?.length,
-                                    itemBuilder:
-                                        (BuildContext context, int index) {
-                                      return VisibilityDetector(
-                                          key: Key(index.toString()),
-                                          onVisibilityChanged:
-                                              (VisibilityInfo info) {
-                                            context
-                                                .read<ChatCubit>()
-                                                .chatMessageSeen(index);
-                                          },
-                                          child: ChatMessageWidget(
-                                              message:
-                                              state.messages![index]));
-                                    },
+                              child: Stack(
+                                children: [
+                                  DropzoneView(
+                                    onCreated: (ctrl) => controller = ctrl,
+                                    onDrop: onFileDropped,
                                   ),
-                                ),
-
-                              ],
-                              )
-                        ,
+                                  Container(
+                                    child: state.messages == null
+                                        ? const Center(
+                                            child: Text('No Messages'))
+                                        : ListView.builder(
+                                            controller: chatController,
+                                            itemCount: state.messages?.length,
+                                            itemBuilder: (BuildContext context,
+                                                int index) {
+                                              return VisibilityDetector(
+                                                  key: Key(index.toString()),
+                                                  onVisibilityChanged:
+                                                      (VisibilityInfo info) {
+                                                    context
+                                                        .read<ChatCubit>()
+                                                        .chatMessageSeen(index);
+                                                  },
+                                                  child: ChatMessageWidget(
+                                                      message: state
+                                                          .messages![index]));
+                                            },
+                                          ),
+                                  ),
+                                ],
+                              ),
                             ),
                             const SizedBox(
                               height: 5,
@@ -557,15 +655,14 @@ class ChatRoomPage extends StatelessWidget {
                                         )),
                                   ),
                                 ),
-
                                 IconButton(
                                   onPressed: () async {
-                                    await context.read<ChatCubit>().chooseFile();
+                                    await context
+                                        .read<ChatCubit>()
+                                        .chooseFile();
                                   },
-                                  icon: imageSVGAsset('three_dots')
-                                  as Widget,
+                                  icon: imageSVGAsset('three_dots') as Widget,
                                 )
-
                               ],
                             ),
                           ],
