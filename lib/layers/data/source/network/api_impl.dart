@@ -1,5 +1,3 @@
-
-
 import 'package:cinteraction_vc/core/app/injector.dart';
 import 'package:cinteraction_vc/core/io/network/models/login_response.dart';
 import 'package:cinteraction_vc/layers/data/dto/api_error_dto.dart';
@@ -29,7 +27,7 @@ class ApiImpl extends Api {
       Dio dio = await getIt.getAsync<Dio>();
       Response response = await dio.post(Urls.loginEndpoint, data: formData);
       LoginResponse? login =
-      _parseResponseData(response.data, LoginResponse.fromJson);
+          _parseResponseData(response.data, LoginResponse.fromJson);
 
       return ApiResponse(response: login);
       // return login;
@@ -37,15 +35,17 @@ class ApiImpl extends Api {
       return ApiResponse(error: ApiErrorDto.fromDioException(e));
     }
   }
+
   @override
   Future<ApiResponse<UserDto?>> getUserDetails() async {
     try {
       Dio dio = await getIt.getAsync<Dio>();
       Response response = await dio.get(Urls.getUserDetails);
       print(response);
-      return ApiResponse(response: _parseResponseData(response.data, UserDto.fromJson));
+      return ApiResponse(
+          response: _parseResponseData(response.data, UserDto.fromJson));
     } on DioException catch (e) {
-     return ApiResponse(error: ApiErrorDto.fromDioException(e));
+      return ApiResponse(error: ApiErrorDto.fromDioException(e));
     }
   }
 
@@ -97,24 +97,25 @@ class ApiImpl extends Api {
     try {
       dio.options.headers['Authorization'] = Urls.IVIAccessToken;
       var response = await dio.post(Urls.engagement, data: formData);
-      return double.parse(response.data['engagements'][0]['engagement_rank'].toString());
-        return -1;
+      return double.parse(
+          response.data['engagements'][0]['engagement_rank'].toString());
+      return -1;
     } on DioException catch (e, s) {
       print(e);
-    }
-    on Exception catch(e){
+    } on Exception catch (e) {
       print(e);
     }
     return 0;
   }
 
   @override
-  Future<ApiResponse<int>> startCall({required streamId, required userId}) async {
+  Future<ApiResponse<int>> startCall(
+      {required streamId, required userId}) async {
     Dio dio = await getIt.getAsync<Dio>();
     try {
       var formData = {
         'streamId': streamId,
-        'user_id': userId,
+        'user_id': int.parse(userId),
         'timezone': 'Europe/Belgrade',
         'recording': false
       };
@@ -128,7 +129,6 @@ class ApiImpl extends Api {
     } on DioException catch (e) {
       return ApiResponse(error: ApiErrorDto.fromDioException(e));
     }
-
   }
 
   @override
@@ -145,7 +145,7 @@ class ApiImpl extends Api {
   @override
   Future<ApiResponse<MeetingResponseDto>> getMeetings(int page) async {
     Dio dio = await getIt.getAsync<Dio>();
-    try{
+    try {
       Response response = await dio.get('${Urls.meetings}$page');
 
       List<MeetingDto> meetings = [];
@@ -158,8 +158,7 @@ class ApiImpl extends Api {
       // var lastPage = response.data['last_page'];
 
       return ApiResponse(response: MeetingResponseDto.fromJson(response.data));
-    }
-    on DioException catch(e){
+    } on DioException catch (e) {
       return ApiResponse(error: ApiErrorDto.fromDioException(e));
     }
   }
@@ -167,7 +166,7 @@ class ApiImpl extends Api {
   @override
   Future<ApiResponse<List<MeetingDto>?>> getScheduledMeetings() async {
     Dio dio = await getIt.getAsync<Dio>();
-    try{
+    try {
       Response response = await dio.get(Urls.scheduledMeetings);
       List<MeetingDto> meetings = [];
       for (var meet in response.data['data']) {
@@ -175,37 +174,31 @@ class ApiImpl extends Api {
         meetings.add(meeting);
       }
       return ApiResponse(response: meetings);
-    }
-    on DioException catch(e){
+    } on DioException catch (e) {
       return ApiResponse(error: ApiErrorDto.fromDioException(e));
     }
   }
 
-
-
   @override
-  Future<ApiResponse<MeetingDto?>> getNextMeeting() async{
+  Future<ApiResponse<MeetingDto?>> getNextMeeting() async {
     Dio dio = await getIt.getAsync<Dio>();
-    try{
+    try {
       Response response = await dio.get(Urls.nextScheduledMeetings);
       MeetingDto? nextMeeting;
       for (var meet in response.data['data']) {
         var meeting = MeetingDto.fromJson(meet as Map<String, dynamic>);
-        if(DateTime.now().difference(meeting.meetingStart).abs() < const Duration(hours: 24))
-          {
-            nextMeeting = meeting;
-            break;
-          }
+        if (DateTime.now().difference(meeting.meetingStart).abs() <
+            const Duration(hours: 24)) {
+          nextMeeting = meeting;
+          break;
+        }
       }
 
-        return ApiResponse(response: nextMeeting);
-    }
-    on DioException catch(e){
+      return ApiResponse(response: nextMeeting);
+    } on DioException catch (e) {
       return ApiResponse(error: ApiErrorDto.fromDioException(e));
     }
   }
-
-
 
   @override
   Future<ApiResponse<bool>> signUpEmailPass(
@@ -222,16 +215,19 @@ class ApiImpl extends Api {
 
     try {
       Response response = await dio.post(Urls.registerEndpoint, data: formData);
-      return ApiResponse(response: response.statusCode! > 200 && response.statusCode! < 300);
-
+      return ApiResponse(
+          response: response.statusCode! > 200 && response.statusCode! < 300);
     } on DioException catch (e, s) {
       return ApiResponse(error: ApiErrorDto.fromDioException(e));
     }
-
   }
 
   @override
-  Future<ApiResponse<String?>> scheduleMeeting({required String name, required String description, required String tag, required DateTime date}) async {
+  Future<ApiResponse<String?>> scheduleMeeting(
+      {required String name,
+      required String description,
+      required String tag,
+      required DateTime date}) async {
     Dio dio = await getIt.getAsync<Dio>();
 
     var formData = {
@@ -248,7 +244,6 @@ class ApiImpl extends Api {
       Response response = await dio.post(Urls.scheduleMeeting, data: formData);
       print(response);
       return ApiResponse(response: response.data['link']);
-
     } on DioException catch (e, s) {
       print(e.response?.statusMessage);
       return ApiResponse(error: ApiErrorDto.fromDioException(e));
@@ -256,7 +251,8 @@ class ApiImpl extends Api {
   }
 
   @override
-  Future<ApiResponse<bool>> sendEngagement({required engagement, required userId, required callId}) async {
+  Future<ApiResponse<bool>> sendEngagement(
+      {required engagement, required userId, required callId}) async {
     Dio dio = await getIt.getAsync<Dio>();
 
     var formData = {
@@ -268,8 +264,8 @@ class ApiImpl extends Api {
     try {
       Response response = await dio.post(Urls.sendEngagement, data: formData);
       print(response);
-      return ApiResponse(response: response.statusCode! > 200 && response.statusCode! < 300);
-
+      return ApiResponse(
+          response: response.statusCode! > 200 && response.statusCode! < 300);
     } on DioException catch (e, s) {
       print(e.response?.statusMessage);
       return ApiResponse(error: ApiErrorDto.fromDioException(e));
@@ -277,7 +273,10 @@ class ApiImpl extends Api {
   }
 
   @override
-  Future<ApiResponse<bool?>> sendMessage({required String userId, required String message, required String callId}) {
+  Future<ApiResponse<bool?>> sendMessage(
+      {required String userId,
+      required String message,
+      required String callId}) {
     // TODO: implement sendMessage
     throw UnimplementedError();
   }
@@ -289,9 +288,9 @@ class ApiImpl extends Api {
     try {
       Response response = await dio.get(Urls.dashboard);
       // print(response.data);
-      var dashboard = DashboardResponseDto.fromJson(response.data as Map<String, dynamic>);
+      var dashboard =
+          DashboardResponseDto.fromJson(response.data as Map<String, dynamic>);
       return ApiResponse(response: dashboard);
-
     } on DioException catch (e, s) {
       print(e.response?.statusMessage);
       return ApiResponse(error: ApiErrorDto.fromDioException(e));
@@ -299,8 +298,7 @@ class ApiImpl extends Api {
   }
 
   @override
-  Future<ApiResponse<bool>> resetPassword({required email}) async{
-
+  Future<ApiResponse<bool>> resetPassword({required email}) async {
     // https://vc.cinteraction.com/api/forgot-password
     // Method: POST
     // Header:
@@ -315,8 +313,8 @@ class ApiImpl extends Api {
     try {
       Response response = await dio.post(Urls.restPassword, data: formData);
       print(response);
-      return ApiResponse(response: response.statusCode! > 200 && response.statusCode! < 300);
-
+      return ApiResponse(
+          response: response.statusCode! > 200 && response.statusCode! < 300);
     } on DioException catch (e, s) {
       print(e.response?.statusMessage);
       return ApiResponse(error: ApiErrorDto.fromDioException(e));
@@ -324,7 +322,8 @@ class ApiImpl extends Api {
   }
 
   @override
-  Future<ApiResponse<bool>> setNewPassword({required email, required token, required newPassword}) async{
+  Future<ApiResponse<bool>> setNewPassword(
+      {required email, required token, required newPassword}) async {
     Dio dio = await getIt.getAsync<Dio>();
 
     var formData = {
@@ -336,8 +335,8 @@ class ApiImpl extends Api {
     try {
       Response response = await dio.post(Urls.setNewPassword, data: formData);
       print(response);
-      return ApiResponse(response: response.statusCode! > 200 && response.statusCode! < 300);
-
+      return ApiResponse(
+          response: response.statusCode! > 200 && response.statusCode! < 300);
     } on DioException catch (e, s) {
       print(e.response?.statusMessage);
       return ApiResponse(error: ApiErrorDto.fromDioException(e));
@@ -345,25 +344,18 @@ class ApiImpl extends Api {
   }
 
   @override
-  Future<ApiResponse<bool>> sentChatMessage({required text, required from, required to}) async {
+  Future<ApiResponse<bool>> sentChatMessage(
+      {required text, required from, required to}) async {
     Dio dio = await getIt.getAsync<Dio>();
-    var formData = {
-      'text': text,
-      'from': from,
-      'to': to
-    };
+    var formData = {'text': text, 'from': from, 'to': to};
     try {
       Response response = await dio.post(Urls.sentMessage, data: formData);
       print("ChatMessageToServer $response");
-      return ApiResponse(response: response.statusCode! > 200 && response.statusCode! < 300);
-
+      return ApiResponse(
+          response: response.statusCode! > 200 && response.statusCode! < 300);
     } on DioException catch (e, s) {
       print(e.response?.statusMessage);
       return ApiResponse(error: ApiErrorDto.fromDioException(e));
     }
   }
 }
-
-
-
-
