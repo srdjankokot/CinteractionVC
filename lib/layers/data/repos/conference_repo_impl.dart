@@ -53,8 +53,7 @@ class ConferenceRepoImpl extends ConferenceRepo {
   int room = 12344321;
   late JanusVideoRoom? roomDetails;
 
-  final _conferenceStream =
-      StreamController<Map<dynamic, StreamRenderer>>.broadcast();
+  final _conferenceStream = StreamController<Map<dynamic, StreamRenderer>>.broadcast();
   final _conferenceEndedStream = StreamController<String>.broadcast();
   final _conferenceChatStream = StreamController<List<ChatMessage>>.broadcast();
   final _participantsStream = StreamController<List<Participant>>.broadcast();
@@ -70,6 +69,7 @@ class ConferenceRepoImpl extends ConferenceRepo {
   int? callId;
 
   List<ChatMessage> messages = [];
+
 
   @override
   Future<void> initialize(
@@ -385,8 +385,7 @@ class ConferenceRepoImpl extends ConferenceRepo {
     renderers.addAll(videoState.streamsToBeRendered);
 
     videoState.streamsToBeRendered.clear();
-    videoState.streamsToBeRendered
-        .putIfAbsent('local', () => localVideoRenderer);
+    videoState.streamsToBeRendered.putIfAbsent('local', () => localVideoRenderer);
     videoState.streamsToBeRendered.addAll(renderers);
 
     // _conferenceStream.add(videoState.streamsToBeRendered);
@@ -625,6 +624,7 @@ class ConferenceRepoImpl extends ConferenceRepo {
 
   @override
   Future<void> mute({required String kind, required bool muted}) async {
+
     var payload = {
       "request": "moderate",
       "room": room,
@@ -638,7 +638,7 @@ class ConferenceRepoImpl extends ConferenceRepo {
         .where((element) => element.kind == kind)
         .toList()
         .forEach((element) {
-      print('mid: ${element.id}');
+       print('mid: ${ element.id}');
       element.enabled = !muted;
     });
 
@@ -831,7 +831,7 @@ class ConferenceRepoImpl extends ConferenceRepo {
     var publishers = participants.where((element) => element.publisher);
     print('Number of publishers ${publishers.length}');
 
-    var max = roomDetails?.maxPublishers!.toInt() ?? maxPublishersDefault;
+    var max = roomDetails?.maxPublishers!.toInt()?? maxPublishersDefault;
 
     return publishers.length < max;
   }
@@ -894,8 +894,7 @@ class ConferenceRepoImpl extends ConferenceRepo {
 
   @override
   Future<void> changeSubStream(
-      {required ConfigureStreamQuality quality,
-      required StreamRenderer remoteStream}) async {
+      {required ConfigureStreamQuality quality, required StreamRenderer remoteStream}) async {
     // var numberOfPublishers = videoState.streamsToBeRendered.length;
     // ConfigureStreamQuality.values[index];
     // var streamQuality = ConfigureStreamQuality.HIGH;
@@ -915,8 +914,8 @@ class ConferenceRepoImpl extends ConferenceRepo {
     //       ConfigureStream(mid: remoteStream.mid, substream: quality)
     //     ],
     //   );
-    changeSubstream(remoteStreamId: remoteStream.id, substream: 1);
-    remoteStream.subStreamQuality = quality;
+      changeSubstream(remoteStreamId: remoteStream.id,  substream: 1);
+      remoteStream.subStreamQuality = quality;
     // }
   }
 
@@ -955,7 +954,9 @@ class ConferenceRepoImpl extends ConferenceRepo {
   }
 
   _createRoom(int roomId) async {
-    Map<String, dynamic>? extras = {'publishers': maxPublishersDefault};
+    Map<String, dynamic>? extras ={
+      'publishers': maxPublishersDefault
+    };
     var created = await videoPlugin?.createRoom(room, extras: extras);
     JanusEvent event = JanusEvent.fromJson(created);
     if (event.plugindata?.data['videoroom'] == 'created') {
@@ -967,22 +968,21 @@ class ConferenceRepoImpl extends ConferenceRepo {
 
   _joinPublisher() async {
     roomDetails = await _getRoomDetails(room);
-    await videoPlugin?.joinPublisher(room,
-        displayName: displayName, id: int.parse(myId));
+    await videoPlugin?.joinPublisher(room, displayName: displayName, id: int.parse(myId));
   }
 
-  Future<JanusVideoRoom?> _getRoomDetails(int roomId) async {
+  Future<JanusVideoRoom?> _getRoomDetails(int roomId) async{
     var payload = {"request": "list"};
     Map allRooms = await videoPlugin?.send(data: payload);
     JanusEvent event = JanusEvent.fromJson(allRooms);
 
     for (var r in event.plugindata?.data['list']) {
       var room = JanusVideoRoom.fromJson(r as Map<String, dynamic>);
-      if (room.room == roomId) {
-        return room;
-      }
+      if(room.room == roomId)
+        {
+          return room;
+        }
     }
-
     return null;
   }
 
@@ -1067,14 +1067,13 @@ class ConferenceRepoImpl extends ConferenceRepo {
   _getEngagement() async {
     // return;
 
-    if (engagementIsRunning || (localVideoRenderer.isVideoMuted ?? false))
-      return;
+    if (engagementIsRunning || (localVideoRenderer.isVideoMuted??false)) return;
 
     engagementIsRunning = true;
 
     try {
-      var image = await localVideoRenderer.mediaStream
-          ?.getVideoTracks()
+
+      var image = await localVideoRenderer.mediaStream?.getVideoTracks()
           .first
           .captureFrame();
 
@@ -1085,6 +1084,7 @@ class ConferenceRepoImpl extends ConferenceRepo {
       // final resized = copyResizeCropSquare(decoded!,  256);
       // final resizedByteData = encodePng(resized);
       // var img = base64Encode(resizedByteData);
+
 
       final engagement = await _api.getEngagement(
           averageAttention: 0,
