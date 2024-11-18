@@ -6,7 +6,8 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
-import 'package:slide_digital_clock/slide_digital_clock.dart';
+import 'package:one_clock/one_clock.dart';
+// import 'package:slide_digital_clock/slide_digital_clock.dart';
 
 import '../../../../../../assets/colors/Colors.dart';
 import '../../../../../../core/ui/images/image.dart';
@@ -45,17 +46,20 @@ class NextMeetingWidget extends StatelessWidget {
                 children: [
                   Container(
                     margin: const EdgeInsets.only(bottom: 20),
-                    child: DigitalClock(
-                      showSecondsDigit: false,
-                      hourMinuteDigitTextStyle: context
-                          .titleTheme.headlineMedium
-                          ?.copyWith(color: Colors.white),
-                      colon: Text(
-                        ':',
-                        style: context.titleTheme.headlineMedium
-                            ?.copyWith(color: Colors.white, fontSize: 30),
-                      ),
-                    ),
+                    child: const DigitalClock(
+                      showSeconds: false,
+                      textScaleFactor: 1.3,
+                      isLive: true,
+                      digitalClockTextColor: Colors.white,
+                    )
+
+
+                    // DigitalClock(
+                    //   showSecondsDigit: false,
+                    //   hourMinuteDigitTextStyle: context.titleTheme.headlineMedium?.copyWith(color: Colors.white),
+                    //   colon: Text(':', style: context.titleTheme.headlineMedium?.copyWith(color: Colors.white, fontSize: 30),
+                    //   ),
+                    // ),
                   ),
                   Text(
                     currentDate,

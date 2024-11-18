@@ -968,7 +968,7 @@ class ConferenceRepoImpl extends ConferenceRepo {
 
   _joinPublisher() async {
     roomDetails = await _getRoomDetails(room);
-    await videoPlugin?.joinPublisher(room, displayName: displayName, id: myId);
+    await videoPlugin?.joinPublisher(room, displayName: displayName, id: int.parse(myId));
   }
 
   Future<JanusVideoRoom?> _getRoomDetails(int roomId) async{
@@ -983,7 +983,6 @@ class ConferenceRepoImpl extends ConferenceRepo {
           return room;
         }
     }
-
     return null;
   }
 
