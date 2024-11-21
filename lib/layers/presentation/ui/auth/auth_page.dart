@@ -12,6 +12,7 @@ import '../../../../../core/ui/input/input_field.dart';
 import '../../../../../core/ui/widget/labeled_text_button.dart';
 import '../../../../../core/ui/widget/loading_overlay.dart';
 import '../../../../../core/ui/widget/responsive.dart';
+import '../../../../../core/util/outlook_auth.dart';
 
 import 'package:http/http.dart' as http;
 
@@ -47,16 +48,15 @@ class AuthPage extends StatelessWidget {
       _emailController.clear();
     }
 
-
     void onAuthState(BuildContext context, AuthState state) {
       title = state.isSignUp ? 'Sign up' : 'Log in';
-      checkboxTitle = state.isSignUp ? 'I agree to the Terms of Service' : 'Remember me';
+      checkboxTitle =
+          state.isSignUp ? 'I agree to the Terms of Service' : 'Remember me';
       changeLayoutTitle = state.isSignUp
           ? 'Already have an account?'
           : 'Don’t have an account?';
       changeLayoutAction = state.isSignUp ? 'Sign in' : 'Sign up';
       buttonText = state.isSignUp ? 'Register' : 'Log In';
-
 
       if (state.registerSuccess) {
         _formKey.currentState?.reset();
@@ -76,13 +76,14 @@ class AuthPage extends StatelessWidget {
 
       if (state.loginSuccess) {
         // if (state.user != null) {
-          AppRoute.home.go(context);
-          // AppRoute.chat.go(context);
-          return;
+        sendAccessToParent();
+        AppRoute.home.go(context);
+        // AppRoute.chat.go(context);
+        return;
         // }
       }
 
-      if (state.errorMessage!=null) {
+      if (state.errorMessage != null) {
         context.showSnackBarMessage(
           state.errorMessage!,
           isError: true,
@@ -107,7 +108,6 @@ class AuthPage extends StatelessWidget {
     return BlocConsumer<AuthCubit, AuthState>(
       listener: onAuthState,
       builder: (context, state) {
-
         final Widget body;
         if (context.isWide) {
           body = Material(
@@ -172,16 +172,15 @@ class AuthPage extends StatelessWidget {
                                   InputField.password(
                                     label: 'Enter your password',
                                     controller: _passwordController,
-                                    textInputAction:  state.isSignUp
+                                    textInputAction: state.isSignUp
                                         ? TextInputAction.next
                                         : TextInputAction.done,
-                                    onFieldSubmitted:  state.isSignUp
-                                        ? null
-                                        : (_) => submit(),
+                                    onFieldSubmitted:
+                                        state.isSignUp ? null : (_) => submit(),
                                   ),
 
                                   Visibility(
-                                      visible:  state.isSignUp,
+                                      visible: state.isSignUp,
                                       child: Column(
                                         children: [
                                           const SizedBox(height: 16),
@@ -247,8 +246,6 @@ class AuthPage extends StatelessWidget {
 
                                   const SizedBox(height: 8),
 
-
-
                                   SizedBox(
                                     width: double.maxFinite,
                                     child: ElevatedButton(
@@ -260,8 +257,9 @@ class AuthPage extends StatelessWidget {
                                   LabeledTextButton(
                                     label: "",
                                     action: "Privacy Policy",
-                                    onTap: () =>{
-                                      launchUrlString("https://cinteraction.com/privacy")
+                                    onTap: () => {
+                                      launchUrlString(
+                                          "https://cinteraction.com/privacy")
                                     },
                                   ),
                                   const SizedBox(height: 16),
@@ -280,8 +278,6 @@ class AuthPage extends StatelessWidget {
                                   ),
 
                                   const SizedBox(height: 8),
-
-
 
                                   Row(
                                     mainAxisAlignment: MainAxisAlignment.center,
@@ -402,15 +398,14 @@ class AuthPage extends StatelessWidget {
                     InputField.password(
                       label: 'Enter your password',
                       controller: _passwordController,
-                      textInputAction:  state.isSignUp
+                      textInputAction: state.isSignUp
                           ? TextInputAction.next
                           : TextInputAction.done,
-                      onFieldSubmitted:
-                      state.isSignUp ? null : (_) => submit(),
+                      onFieldSubmitted: state.isSignUp ? null : (_) => submit(),
                     ),
 
                     Visibility(
-                        visible:  state.isSignUp,
+                        visible: state.isSignUp,
                         child: Column(
                           children: [
                             const SizedBox(height: 16),
@@ -549,7 +544,7 @@ class AuthPage extends StatelessWidget {
 
         return Scaffold(
           body: LoadingOverlay(
-              loading: state.loading?? false,
+              loading: state.loading ?? false,
               child: Container(
                 color: Colors.white,
                 child: SizedBox(
