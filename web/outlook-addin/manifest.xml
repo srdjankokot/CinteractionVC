@@ -13,7 +13,8 @@
   <HighResolutionIconUrl DefaultValue="https://cinteraction.nswebdevelopment.com/web/addin/assets/icon-128.png"/>
   <SupportUrl DefaultValue="https://cinteraction.nswebdevelopment.com/web/"/>
   <AppDomains>
-    <AppDomain>https://cinteraction.nswebdevelopment.com/</AppDomain>
+    <!-- <AppDomain>https://886f-188-2-51-157.ngrok-free.app/auth</AppDomain> -->
+    <AppDomain>https://cinteraction.nswebdevelopment.com/web/auth</AppDomain>
   </AppDomains>
   <Hosts>
     <Host Name="Mailbox"/>
@@ -26,7 +27,7 @@
   <FormSettings>
     <Form xsi:type="ItemRead">
       <DesktopSettings>
-        <SourceLocation DefaultValue="https://cinteraction.nswebdevelopment.com/web/addin/taskpane.html"/>
+       <SourceLocation DefaultValue="https://cinteraction.nswebdevelopment.com/web/addin/taskpane.html"/>
         <RequestedHeight>250</RequestedHeight>
       </DesktopSettings>
     </Form>
@@ -146,7 +147,7 @@
       </bt:Images>
       <bt:Urls>
         <bt:Url id="Commands.Url" DefaultValue="https://cinteraction.nswebdevelopment.com/web/addin/commands.html"/>
-        <bt:Url id="Taskpane.Url" DefaultValue="https://cinteraction.nswebdevelopment.com/web/addin/taskpane.html"/>
+        <bt:Url id="Taskpane.Url" DefaultValue="https://cinteraction.nswebdevelopment.com/web/addin/taskpane.html"/> 
       </bt:Urls>
       <bt:ShortStrings>
         <bt:String id="CommandsGroup.Label" DefaultValue="Cinteraction Add-in"/>

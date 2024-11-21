@@ -38,8 +38,8 @@ function action(event) {
       </br>
       <p>
           Join the meeting:
-          <a href="https://cinteraction.nswebdevelopment.com/web/home/meeting/${meetingId}" target="_blank" style="color: #46139A; text-decoration: none;">
-            https://cinteraction.nswebdevelopment.com/web/home/meeting/${meetingId}
+          <a href="https://cinteraction.nswebdevelopment.com/web/home/meeting/${12345}" target="_blank" style="color: #46139A; text-decoration: none;">
+            https://cinteraction.nswebdevelopment.com/web/home/meeting/${12345}
           </a>
       </p>
       </br>
