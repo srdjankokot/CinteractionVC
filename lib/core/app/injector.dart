@@ -48,32 +48,27 @@ import '../util/conf.dart';
 GetIt getIt = GetIt.instance;
 
 Future<void> initializeGetIt() async {
-
   getIt.registerFactoryAsync<Dio>(() async {
     final accessToken = await getAccessToken();
-    return Dio(
-        BaseOptions(
-          headers: {
-            'Accept': 'application/json',
-            'Content-Type': 'application/json',
-            'Authorization' :  accessToken
-          },
-          validateStatus: (statusCode) {
-            if (statusCode == null) {
-              return false;
-            }
+    print('AAAAAAAA $accessToken');
+    return Dio(BaseOptions(
+      headers: {
+        'Accept': 'application/json',
+        'Content-Type': 'application/json',
+        'Authorization': accessToken
+      },
+      validateStatus: (statusCode) {
+        if (statusCode == null) {
+          return false;
+        }
 
-            return statusCode >= 200 && statusCode < 300;
-            if (statusCode == 422) {
-              // your http status code
-              return true;
-            } else {
-
-            }
-
-
-          },
-        ));
+        return statusCode >= 200 && statusCode < 300;
+        if (statusCode == 422) {
+          // your http status code
+          return true;
+        } else {}
+      },
+    ));
   });
 
   // getIt.registerFactory<Dio>(() => Dio(
@@ -98,11 +93,13 @@ Future<void> initializeGetIt() async {
 
   getIt.registerSingleton<Api>(ApiImpl());
 
+  getIt.registerFactory<LocalStorage>(
+    () => LocalStorageImpl(sharedPreferences: sharedPref),
+  );
 
-  getIt.registerFactory<LocalStorage>(() => LocalStorageImpl(sharedPreferences: sharedPref),);
-
-
-  getIt.registerFactory<AuthRepo>(() => AuthRepoImpl(api: getIt()),);
+  getIt.registerFactory<AuthRepo>(
+    () => AuthRepoImpl(api: getIt()),
+  );
   getIt.registerFactory<ConferenceRepo>(() => ConferenceRepoImpl(api: getIt()));
   getIt.registerFactory<ChatRepo>(() => ChatRepoImpl(api: getIt()));
 
@@ -110,17 +107,20 @@ Future<void> initializeGetIt() async {
 
   getIt.registerFactory<MeetingRepo>(() => MeetingRepoImpl(api: getIt()));
   getIt.registerFactory<HomeRepo>(() => HomeRepoImpl(api: getIt()));
-  getIt.registerFactory<DashboardRepo>(()=> DashboardRepoImpl(api: getIt()));
-
+  getIt.registerFactory<DashboardRepo>(() => DashboardRepoImpl(api: getIt()));
 
   getIt.registerFactory<UsersProvider>(() => UsersProvider());
   getIt.registerFactory<GroupsProvider>(() => GroupsProvider());
   getIt.registerFactory<RolesProvider>(() => RolesProvider());
-  getIt.registerFactory<GroupsRepository>(() => GroupsRepository(groupsProvider: getIt()));
-  getIt.registerFactory<UsersRepository>(() => UsersRepository(usersProvider: getIt()));
+  getIt.registerFactory<GroupsRepository>(
+      () => GroupsRepository(groupsProvider: getIt()));
+  getIt.registerFactory<UsersRepository>(
+      () => UsersRepository(usersProvider: getIt()));
 
-  getIt.registerFactory<RolesRepository>(() => RolesRepository(rolesProvider: getIt()));
-  getIt.registerSingleton<UsersCubit>(UsersCubit(groupRepository: getIt(),usersRepository: getIt()));
+  getIt.registerFactory<RolesRepository>(
+      () => RolesRepository(rolesProvider: getIt()));
+  getIt.registerSingleton<UsersCubit>(
+      UsersCubit(groupRepository: getIt(), usersRepository: getIt()));
 
   getIt.registerFactory(() => AuthUseCases());
   getIt.registerFactory(() => ConferenceUseCases(repo: getIt()));
@@ -134,36 +134,38 @@ Future<void> initializeGetIt() async {
   // getIt.registerFactory<UsersProvider>(() => UsersProvider());
 
   // getIt.registerFactory<UsersRepository>(() => UsersRepository(usersProvider: getIt()));
-  getIt.registerSingleton<ProfileRepository>(ProfileRepository(profileProvider: getIt()));
+  getIt.registerSingleton<ProfileRepository>(
+      ProfileRepository(profileProvider: getIt()));
 
   getIt.registerSingleton<ProfileCubit>(ProfileCubit(userRepository: getIt()));
-  getIt.registerFactory<HomeCubit>(()=>HomeCubit(homeUseCases: getIt()));
-  getIt.registerFactory<MeetingCubit>(()=>MeetingCubit(meetingUseCases: getIt()));
-  getIt.registerFactory<DashboardCubit>(()=>DashboardCubit(dashboardUseCases: getIt()));
-  getIt.registerLazySingleton<ChatCubit>(() => ChatCubit(chatUseCases: getIt(), callUseCases: getIt()));
+  getIt.registerFactory<HomeCubit>(() => HomeCubit(homeUseCases: getIt()));
+  getIt.registerFactory<MeetingCubit>(
+      () => MeetingCubit(meetingUseCases: getIt()));
+  getIt.registerFactory<DashboardCubit>(
+      () => DashboardCubit(dashboardUseCases: getIt()));
+  getIt.registerLazySingleton<ChatCubit>(
+      () => ChatCubit(chatUseCases: getIt(), callUseCases: getIt()));
 
-
-  getIt.registerFactory<JanusTransport>(() => WebSocketJanusTransport(url: url));
+  getIt
+      .registerFactory<JanusTransport>(() => WebSocketJanusTransport(url: url));
   getIt.registerFactory<JanusClient>(() => JanusClient(
       transport: getIt(),
       withCredentials: true,
       apiSecret: apiSecret,
       isUnifiedPlan: true,
       iceServers: iceServers,
-      loggerLevel: Level.FINE)
-  );
+      loggerLevel: Level.FINE));
 
   getIt.registerFactoryAsync<JanusSession>(() async {
     return await getIt.get<JanusClient>().createSession();
   });
 
-  Map<String, dynamic>? getHeader()
-  {
+  Map<String, dynamic>? getHeader() {
     return {
       'Accept': 'application/json',
-    'Content-Type': 'application/json',
-    'Authorization' : getAccessToken()
-  };
+      'Content-Type': 'application/json',
+      'Authorization': getAccessToken()
+    };
     return null;
   }
 }

@@ -1,9 +1,11 @@
+import { signInEmailPass } from "./auth";
+
 Office.onReady((info) => {
   if (info.host === Office.HostType.Outlook) {
     const appBody = document.getElementById("app-body");
     if (appBody) {
       appBody.style.display = "flex";
-      appBody.style.flexDirection = "column"; // Set flex-direction to column
+      appBody.style.flexDirection = "column";
     }
 
     document.getElementById("helloButton").onclick = run;
@@ -11,37 +13,76 @@ Office.onReady((info) => {
 });
 
 export async function run() {
-  const authUrl = "https://cinteraction.nswebdevelopment.com/web/auth";
+  const email = "superadmin@mail.com";
+  const password = "password";
 
-  Office.context.ui.displayDialogAsync(
-    authUrl,
-    { height: 50, width: 50, displayInIframe: true },
-    function (asyncResult) {
-      if (asyncResult.status === Office.AsyncResultStatus.Failed) {
-        console.error("Dialog failed to open:", asyncResult.error.message);
-        return;
+  const loginResult = await signInEmailPass(email, password);
+
+  if (loginResult.success) {
+    const accessToken = loginResult.data.access_token;
+
+    Office.context.mailbox.getCallbackTokenAsync({ isRest: true }, async function (result) {
+      if (result.status === "succeeded") {
+        const callbackToken = result.value;
+
+        console.log("accessToken", accessToken);
+        console.log("callbackToken", callbackToken);
+
+        // Pozivanje funkcije za kreiranje sastanka
+        // await scheduleMeeting(callbackToken);
+      } else {
+        console.error("Failed to get callback token: " + result.error.message);
       }
-
-      const dialog = asyncResult.value;
-      window.addEventListener("message", (event) => {
-        if (event.origin !== "expected_origin") {
-          console.error("Message received from unknown source:", event.origin);
-          return;
-        }
-
-        console.log("Message received from Flutter:", event.data);
-        const message = event.data;
-        if (message.startsWith("success:")) {
-          const accessToken = message.split(":")[1];
-          console.log("Access Token:", accessToken);
-        } else {
-          console.error("Login failed or user canceled");
-        }
-      });
-
-      dialog.addEventHandler(Office.EventType.DialogEventReceived, () => {
-        console.log("Dialog closed by user or system");
-      });
-    }
-  );
+    });
+  } else {
+    console.error("Login failed:", loginResult.error);
+  }
 }
+
+// async function scheduleMeeting(callbackToken) {
+//   const meetingData = {
+//     subject: "Sastanak sa timom",
+//     body: {
+//       contentType: "HTML",
+//       content: "Diskusija o projektu.",
+//     },
+//     start: {
+//       dateTime: "2024-11-23T10:00:00",
+//       timeZone: "Europe/Belgrade",
+//     },
+//     end: {
+//       dateTime: "2024-11-23T11:00:00",
+//       timeZone: "Europe/Belgrade",
+//     },
+//     attendees: [
+//       {
+//         emailAddress: {
+//           address: "kljestan.radovan@gmial.com",
+//           name: "Participant Name",
+//         },
+//         type: "required",
+//       },
+//     ],
+//   };
+
+//   try {
+//     const response = await fetch("https://graph.microsoft.com/v1.0/me/events", {
+//       method: "POST",
+//       headers: {
+//         Authorization: `Bearer ${callbackToken}`,
+//         "Content-Type": "application/json",
+//       },
+//       body: JSON.stringify(meetingData),
+//     });
+
+//     if (response.ok) {
+//       const event = await response.json();
+//       console.log("Meeting created:", event);
+//     } else {
+//       const error = await response.json();
+//       console.error("Error creating meeting:", error);
+//     }
+//   } catch (error) {
+//     console.error("Error while creating meeting:", error);
+//   }
+// }
