@@ -13,7 +13,7 @@
   <HighResolutionIconUrl DefaultValue="https://cinteraction.nswebdevelopment.com/web/addin/assets/icon-128.png"/>
   <SupportUrl DefaultValue="https://cinteraction.nswebdevelopment.com/web/"/>
   <AppDomains>
-    <!-- <AppDomain>https://886f-188-2-51-157.ngrok-free.app/auth</AppDomain> -->
+    <AppDomain>https://cinteraction.nswebdevelopment.com/api/login</AppDomain>
     <AppDomain>https://cinteraction.nswebdevelopment.com/web/auth</AppDomain>
   </AppDomains>
   <Hosts>
@@ -27,7 +27,7 @@
   <FormSettings>
     <Form xsi:type="ItemRead">
       <DesktopSettings>
-       <SourceLocation DefaultValue="https://cinteraction.nswebdevelopment.com/web/addin/taskpane.html"/>
+        <SourceLocation DefaultValue="https://localhost:3003/taskpane/taskpane.html"/>
         <RequestedHeight>250</RequestedHeight>
       </DesktopSettings>
     </Form>
@@ -146,8 +146,8 @@
         <bt:Image id="Icon.Plus.80" DefaultValue="https://cinteraction.nswebdevelopment.com/web/addin/assets/plus-64.png"/>
       </bt:Images>
       <bt:Urls>
-        <bt:Url id="Commands.Url" DefaultValue="https://cinteraction.nswebdevelopment.com/web/addin/commands.html"/>
-        <bt:Url id="Taskpane.Url" DefaultValue="https://cinteraction.nswebdevelopment.com/web/addin/taskpane.html"/> 
+        <bt:Url id="Commands.Url" DefaultValue="https://localhost:3003/commands.html"/> 
+        <bt:Url id="Taskpane.Url" DefaultValue="https://localhost:3003/taskpane.html"/>
       </bt:Urls>
       <bt:ShortStrings>
         <bt:String id="CommandsGroup.Label" DefaultValue="Cinteraction Add-in"/>
