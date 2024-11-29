@@ -28,6 +28,7 @@
     "watch": "webpack --mode development --watch"
   },
   "dependencies": {
+    "axios": "^1.7.7",
     "core-js": "^3.36.0",
     "regenerator-runtime": "^0.14.1"
   },
@@ -50,6 +51,7 @@
     "office-addin-manifest": "^1.13.4",
     "office-addin-prettier-config": "^1.2.1",
     "os-browserify": "^0.3.0",
+    "prettier": "^3.4.1",
     "process": "^0.11.10",
     "source-map-loader": "^5.0.0",
     "webpack": "^5.90.3",
