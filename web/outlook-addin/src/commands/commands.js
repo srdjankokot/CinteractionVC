@@ -5,14 +5,9 @@
 
 /* global Office */
 
-Office.onReady(() => {
-  // If needed, Office.js is ready to be called.
-});
-
-/**
- * Shows a notification when the add-in command is executed.
- * @param event {Office.AddinCommands.Event}
- */
+{
+  /* <script type="text/javascript" src="../launchevent/launchevent.js"></script>; */
+}
 
 function generateRandomNumber() {
   // Generate a random 6-digit number
@@ -20,17 +15,11 @@ function generateRandomNumber() {
   return randomNumber;
 }
 
-function action(event) {
-  // const message = {
-  //   type: Office.MailboxEnums.ItemNotificationMessageType.InformationalMessage,
-  //   message: "Performed action teasdf asdfasdfasdfsf.",
-  //   icon: "Icon.80x80",
-  //   persistent: true,
-  // };
+// Handler za ItemSend
 
+function action(event) {
   const meetingId = generateRandomNumber();
-  // // Show a notification message.
-  // Office.context.mailbox.item.notificationMessages.replaceAsync("action", message);
+
   const bodyContent = `
   <div style="font-family:Arial, sans-serif; padding: 10px; font-size: 14px;">
       <img src="https://cinteraction.nswebdevelopment.com/web/addin/assets/cinteraction_logo.png" alt="Cinteraction" title="Cinteraction" />
@@ -49,6 +38,7 @@ function action(event) {
       </p>
   </div>
   `;
+
   // Set the dynamically generated content with the meeting link into the email body
   Office.context.mailbox.item.body.setAsync(
     bodyContent,
@@ -57,7 +47,7 @@ function action(event) {
     },
     function (asyncResult) {
       if (asyncResult.status == Office.AsyncResultStatus.Failed) {
-        // console.error(asyncResult.error.message);
+        console.error("Error setting body:", asyncResult.error.message);
       }
     }
   );
