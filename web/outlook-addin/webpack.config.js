@@ -76,6 +76,10 @@ module.exports = async (env, options) => {
               }
             },
           },
+          {
+            from: "./src/launchevent/launchevent.js",
+            to: "launchevent.js",
+          },
         ],
       }),
       new HtmlWebpackPlugin({
