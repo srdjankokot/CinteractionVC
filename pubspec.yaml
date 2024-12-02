@@ -79,9 +79,9 @@ dependencies:
   url_launcher: ^6.2.6
   audioplayers: ^5.2.1
   firebase_storage: ^12.1.0
-  image_picker: ^1.0.8
+  image_picker: ^1.1.2
   file_picker: ^8.0.0+1
-  flutter_dropzone: ^3.0.7
+  flutter_dropzone: ^4.0.0
 
 dev_dependencies:
   json_serializable: ^6.7.1
