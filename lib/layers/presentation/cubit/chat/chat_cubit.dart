@@ -161,4 +161,9 @@ class ChatCubit extends Cubit<ChatState> with BlocLoggy {
     await callUseCases.mute(kind: 'video', muted: !mute);
     emit(state.copyWith(videoMuted: !mute));
   }
+
+  void changeListType(ListType listType)
+  {
+    emit(state.copyWith(listType: listType));
+  }
 }

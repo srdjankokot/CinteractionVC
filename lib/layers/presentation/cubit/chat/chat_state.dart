@@ -5,6 +5,13 @@ import '../../../../core/io/network/models/participant.dart';
 import '../../../data/dto/user_dto.dart';
 import '../../../domain/entities/chat_message.dart';
 
+
+enum ListType {
+  Chats,
+  Users
+}
+
+
 class ChatState extends Equatable {
   final bool isInitial;
   final List<Participant>? participants;
@@ -20,6 +27,7 @@ class ChatState extends Equatable {
   final String? caller;
   final bool audioMuted;
   final bool videoMuted;
+  final ListType listType;
   final StreamRenderer? localStream;
   final StreamRenderer? remoteStream;
 
@@ -38,6 +46,7 @@ class ChatState extends Equatable {
     this.users,
     required this.audioMuted,
     required this.videoMuted,
+    required this.listType
   });
 
   const ChatState.initial({
@@ -45,11 +54,13 @@ class ChatState extends Equatable {
     int unreadMessages = 0,
     bool audioMuted = false,
     bool videoMuted = false,
+    ListType listType = ListType.Chats
   }) : this(
             isInitial: isInitial,
             unreadMessages: unreadMessages,
             audioMuted: audioMuted,
-            videoMuted: videoMuted);
+            videoMuted: videoMuted,
+            listType: listType);
 
   @override
   List<Object?> get props => [
@@ -66,7 +77,8 @@ class ChatState extends Equatable {
         currentParticipant,
         users,
         audioMuted,
-        videoMuted
+        videoMuted,
+         listType
       ];
 
   ChatState copyWith({
@@ -84,6 +96,7 @@ class ChatState extends Equatable {
     List<UserDto>? users,
     bool? audioMuted,
     bool? videoMuted,
+    ListType? listType
   }) {
     return ChatState(
       isInitial: isInitial ?? this.isInitial,
@@ -100,6 +113,7 @@ class ChatState extends Equatable {
       users: users ?? this.users,
       audioMuted: audioMuted ?? this.audioMuted,
       videoMuted: videoMuted ?? this.videoMuted,
+      listType: listType ?? this.listType,
     );
   }
 
@@ -119,6 +133,7 @@ class ChatState extends Equatable {
       currentParticipant: currentParticipant,
       audioMuted: audioMuted,
       videoMuted: videoMuted,
+      listType: ListType.Chats,
     );
   }
 }
