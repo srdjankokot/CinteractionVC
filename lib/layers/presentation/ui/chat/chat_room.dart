@@ -128,7 +128,6 @@ class ChatRoomPage extends StatelessWidget {
           });
     }
 
-
     Future<void> displayJoinRoomPopup(BuildContext context) async {
       return showDialog(
         context: context,
@@ -139,11 +138,12 @@ class ChatRoomPage extends StatelessWidget {
     }
 
     Future<void> displayAddScheduleMeetingPopup(BuildContext ctx) async {
-
       return showDialog(
         context: ctx,
         builder: (context) {
-          return  SchedulePopup(context: ctx,);
+          return SchedulePopup(
+            context: ctx,
+          );
         },
       );
     }
@@ -231,69 +231,99 @@ class ChatRoomPage extends StatelessWidget {
                       ),
                     ),
                     const Divider(),
-                    Expanded(
-                      child: ListView.builder(
-                        itemCount: state.users?.length ?? 0,
-                        itemBuilder: (context, index) {
-                          var user = state.users![index];
-
-                          return GestureDetector(
-                            onTap: () {
-                              context
-                                  .read<ChatCubit>()
-                                  .setCurrentParticipant(state.users![index]);
-                            },
-                            child: Padding(
-                              padding: const EdgeInsets.all(4.0),
-                              child: Row(
-                                crossAxisAlignment: CrossAxisAlignment.center,
-                                mainAxisAlignment: MainAxisAlignment.start,
-                                children: [
-                                  const SizedBox(
-                                    width: 10,
-                                  ),
-                                  Stack(
-                                    children: [
-                                      UserImage.medium(user.imageUrl),
-                                      Visibility(
-                                          visible: user.online,
-                                          child: Positioned(
-                                            bottom: 2,
-                                            right: 4,
-                                            child: ClipOval(
-                                              child: Container(
-                                                width: 10.0,
-                                                // width of the circle
-                                                height: 10.0,
-                                                // height of the circle
-                                                color: Colors
-                                                    .green, // background color
-                                              ),
-                                            ),
-                                          ))
-                                    ],
-                                  ),
-                                  const SizedBox(
-                                    width: 10,
-                                  ),
-                                  Column(
-                                    mainAxisAlignment: MainAxisAlignment.center,
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.start,
-                                    children: [
-                                      Text(
-                                        user.name,
-                                        textAlign: TextAlign.center,
-                                        style: context.textTheme.titleMedium,
-                                      ),
-                                    ],
-                                  ),
-                                ],
-                              ),
+                    Container(
+                      width: double.maxFinite,
+                      padding: const EdgeInsets.all(10),
+                      child: Row(
+                        children: ListType.values.map((option) {
+                          return Expanded(
+                              child: ListTile(
+                            titleAlignment: ListTileTitleAlignment.center,
+                            title: Text(
+                              option.name,
+                              textAlign: TextAlign.center,
                             ),
-                          );
-                        },
+                            onTap: () {
+                              context.read<ChatCubit>().changeListType(option);
+                            },
+                            selected: state.listType == option,
+                            selectedColor: ColorConstants.kPrimaryColor,
+                          ));
+                        }).toList(),
                       ),
+                    ),
+                    const Divider(),
+                    Expanded(
+                      child: state.listType == ListType.Chats
+                          ? Text("")
+                          : ListView.builder(
+                              itemCount: state.users?.length ?? 0,
+                              itemBuilder: (context, index) {
+                                var user = state.users![index];
+                                return GestureDetector(
+                                  onTap: () {
+                                    context
+                                        .read<ChatCubit>()
+                                        .setCurrentParticipant(
+                                            state.users![index]);
+                                  },
+                                  child: Container(
+                                    color: state.currentParticipant?.id == user.id ? ColorConstants.kPrimaryColor.withOpacity(0.2) : Colors.white,
+                                    child: Padding(
+                                      padding: const EdgeInsets.all(4.0),
+                                      child:
+                                      Row(
+                                        crossAxisAlignment: CrossAxisAlignment.center,
+                                        mainAxisAlignment: MainAxisAlignment.start,
+                                        children: [
+                                          const SizedBox(
+                                            width: 10,
+                                          ),
+                                          Stack(
+                                            children: [
+                                              UserImage.medium(user.imageUrl),
+                                              Visibility(
+                                                  visible: user.online,
+                                                  child: Positioned(
+                                                    bottom: 2,
+                                                    right: 4,
+                                                    child: ClipOval(
+                                                      child: Container(
+                                                        width: 10.0,
+                                                        // width of the circle
+                                                        height: 10.0,
+                                                        // height of the circle
+                                                        color: Colors
+                                                            .green, // background color
+                                                      ),
+                                                    ),
+                                                  ))
+                                            ],
+                                          ),
+                                          const SizedBox(
+                                            width: 10,
+                                          ),
+                                          Column(
+                                            mainAxisAlignment:
+                                                MainAxisAlignment.center,
+                                            crossAxisAlignment:
+                                                CrossAxisAlignment.start,
+                                            children: [
+                                              Text(
+                                                user.name,
+                                                textAlign: TextAlign.center,
+                                                style:
+                                                    context.textTheme.titleMedium,
+                                              ),
+                                            ],
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                  ),
+                                );
+                              },
+                            ),
                     ),
                   ],
                 ),
@@ -588,7 +618,8 @@ class ChatRoomPage extends StatelessWidget {
                                         onClickAction: () async {
                                           await context
                                               .read<ChatCubit>()
-                                              .makeCall(state.currentParticipant!.id);
+                                              .makeCall(
+                                                  state.currentParticipant!.id);
 
                                           // await context.read<ChatCubit>().rejectCall();
                                         },
