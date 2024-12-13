@@ -422,10 +422,9 @@ class VideoRoomPage extends StatelessWidget {
                                                               .chatMessageSeen(
                                                                   index);
                                                         },
-                                                        child: ChatMessageWidget(
-                                                            message:
-                                                                state.messages![
-                                                                    index]));
+                                                        child: Center(
+                                                          child: Text('Test'),
+                                                        ));
                                                   },
                                                 ),
                                         ),
@@ -501,9 +500,8 @@ class VideoRoomPage extends StatelessWidget {
                                       //       // })
                                       //     }),
                                       IconButton(
-                                          icon:
-                                              imageSVGAsset('icon_switch_camera')
-                                                  as Widget,
+                                          icon: imageSVGAsset(
+                                              'icon_switch_camera') as Widget,
                                           onPressed: () async {
                                             await context
                                                 .read<ConferenceCubit>()
@@ -512,13 +510,15 @@ class VideoRoomPage extends StatelessWidget {
                                     ],
                                   ),
                                   Expanded(
-                                        child: getLayout(context, items, state.isGridLayout),
+                                    child: getLayout(
+                                        context, items, state.isGridLayout),
                                   ),
                                   Padding(
                                     padding: const EdgeInsets.only(
                                         top: 18.0, bottom: 18.0),
                                     child: Row(
-                                      mainAxisAlignment: MainAxisAlignment.center,
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.center,
                                       crossAxisAlignment:
                                           CrossAxisAlignment.center,
                                       children: [
@@ -551,8 +551,8 @@ class VideoRoomPage extends StatelessWidget {
                                         const SizedBox(width: 20),
                                         CallButtonShape(
                                             image: !state.audioMuted
-                                                ? imageSVGAsset('icon_microphone')
-                                                    as Widget
+                                                ? imageSVGAsset(
+                                                    'icon_microphone') as Widget
                                                 : imageSVGAsset(
                                                         'icon_microphone_disabled')
                                                     as Widget,
@@ -594,7 +594,8 @@ class VideoRoomPage extends StatelessWidget {
                                           CallButtonShape(
                                             image: imageSVGAsset('icon_message')
                                                 as Widget,
-                                            bgColor: ColorConstants.kPrimaryColor
+                                            bgColor: ColorConstants
+                                                .kPrimaryColor
                                                 .withOpacity(0.4),
                                             onClickAction: () async {
                                               await context
@@ -616,7 +617,8 @@ class VideoRoomPage extends StatelessWidget {
                                               child: Container(
                                                 width: 12,
                                                 height: 12,
-                                                decoration: const ShapeDecoration(
+                                                decoration:
+                                                    const ShapeDecoration(
                                                   color: Colors.white,
                                                   shape: OvalBorder(),
                                                 ),
@@ -646,105 +648,111 @@ class VideoRoomPage extends StatelessWidget {
                                 ],
                               ),
                               AnimatedPositioned(
-                                bottom: state.showingChat ? 0 : -MediaQuery.of(context).size.height * 0.8,
+                                bottom: state.showingChat
+                                    ? 0
+                                    : -MediaQuery.of(context).size.height * 0.8,
                                 right: 0,
                                 left: 0,
                                 duration: const Duration(milliseconds: 250),
-
-                                  child: Container(
-                                    width: double.maxFinite,
-                                    height: MediaQuery.of(context).size.height * 0.8,
-                                    color: Colors.white,
-                                    child: Padding(
-                                      padding: EdgeInsets.only(bottom: MediaQuery.of(context).viewInsets.bottom + 23, top: 23, right: 23, left: 23),
-                                      child: Column(
-                                        // crossAxisAlignment: CrossAxisAlignment.start,
-                                        children: [
-                                          Row(
-                                            children: [
-                                              Expanded(
-                                                child: Text(
-                                                  'Chat messages',
-                                                  style: context
-                                                      .titleTheme.titleMedium,
-                                                ),
-                                              ),
-                                              IconButton(
-                                                icon: const Icon(Icons.close),
-                                                onPressed: () {
-                                                  context
-                                                      .read<ConferenceCubit>()
-                                                      .toggleChatWindow();
-                                                },
-                                              )
-                                            ],
-                                          ),
-                                          Expanded(
-                                            child: Container(
-                                              child: state.messages == null
-                                                  ? const Center(
-                                                  child: Text('No Messages'))
-                                                  : ListView.builder(
-                                                controller: chatController,
-                                                itemCount:
-                                                state.messages?.length,
-                                                itemBuilder:
-                                                    (BuildContext context,
-                                                    int index) {
-                                                  return VisibilityDetector(
-                                                      key: Key(
-                                                          index.toString()),
-                                                      onVisibilityChanged:
-                                                          (VisibilityInfo
-                                                      info) {
-                                                        // print('${state.messages![int.parse('${(info.key as ValueKey).value}')]} (message seen)');
-                                                        context
-                                                            .read<
-                                                            ConferenceCubit>()
-                                                            .chatMessageSeen(
-                                                            index);
-                                                      },
-                                                      child: ChatMessageWidget(
-                                                          message:
-                                                          state.messages![
-                                                          index]));
-                                                },
+                                child: Container(
+                                  width: double.maxFinite,
+                                  height:
+                                      MediaQuery.of(context).size.height * 0.8,
+                                  color: Colors.white,
+                                  child: Padding(
+                                    padding: EdgeInsets.only(
+                                        bottom: MediaQuery.of(context)
+                                                .viewInsets
+                                                .bottom +
+                                            23,
+                                        top: 23,
+                                        right: 23,
+                                        left: 23),
+                                    child: Column(
+                                      // crossAxisAlignment: CrossAxisAlignment.start,
+                                      children: [
+                                        Row(
+                                          children: [
+                                            Expanded(
+                                              child: Text(
+                                                'Chat messages',
+                                                style: context
+                                                    .titleTheme.titleMedium,
                                               ),
                                             ),
+                                            IconButton(
+                                              icon: const Icon(Icons.close),
+                                              onPressed: () {
+                                                context
+                                                    .read<ConferenceCubit>()
+                                                    .toggleChatWindow();
+                                              },
+                                            )
+                                          ],
+                                        ),
+                                        Expanded(
+                                          child: Container(
+                                            child: state.messages == null
+                                                ? const Center(
+                                                    child: Text('No Messages'))
+                                                : ListView.builder(
+                                                    controller: chatController,
+                                                    itemCount:
+                                                        state.messages?.length,
+                                                    itemBuilder:
+                                                        (BuildContext context,
+                                                            int index) {
+                                                      return VisibilityDetector(
+                                                          key: Key(
+                                                              index.toString()),
+                                                          onVisibilityChanged:
+                                                              (VisibilityInfo
+                                                                  info) {
+                                                            // print('${state.messages![int.parse('${(info.key as ValueKey).value}')]} (message seen)');
+                                                            context
+                                                                .read<
+                                                                    ConferenceCubit>()
+                                                                .chatMessageSeen(
+                                                                    index);
+                                                          },
+                                                          child: Text('Test'));
+                                                    },
+                                                  ),
                                           ),
-                                          const SizedBox(
-                                            height: 5,
-                                          ),
-                                          Row(
-                                            children: [
-                                              Expanded(
-                                                child: TextField(
-                                                  textInputAction:
-                                                  TextInputAction.go,
-                                                  focusNode: messageFocusNode,
-                                                  onSubmitted: (value) {
-                                                    sendMessage();
-                                                  },
-                                                  controller:
-                                                  messageFieldController,
-                                                  decoration: InputDecoration(
-                                                      hintText: "Send a message",
-                                                      suffixIcon: IconButton(
-                                                        onPressed: () {
-                                                          sendMessage();
-                                                        },
-                                                        icon: imageSVGAsset(
-                                                            'icon_send') as Widget,
-                                                      )),
-                                                ),
-                                              )
-                                            ],
-                                          ),
-                                        ],
-                                      ),
+                                        ),
+                                        const SizedBox(
+                                          height: 5,
+                                        ),
+                                        Row(
+                                          children: [
+                                            Expanded(
+                                              child: TextField(
+                                                textInputAction:
+                                                    TextInputAction.go,
+                                                focusNode: messageFocusNode,
+                                                onSubmitted: (value) {
+                                                  sendMessage();
+                                                },
+                                                controller:
+                                                    messageFieldController,
+                                                decoration: InputDecoration(
+                                                    hintText: "Send a message",
+                                                    suffixIcon: IconButton(
+                                                      onPressed: () {
+                                                        sendMessage();
+                                                      },
+                                                      icon: imageSVGAsset(
+                                                              'icon_send')
+                                                          as Widget,
+                                                    )),
+                                              ),
+                                            )
+                                          ],
+                                        ),
+                                      ],
                                     ),
                                   ),
-
+                                ),
                               ),
                             ],
                           ),
@@ -777,7 +785,6 @@ class VideoRoomPage extends StatelessWidget {
       print(e);
     }
 
-
     var numberStream = items.length;
     var row = sqrt(numberStream).round();
     var col = ((numberStream) / row).ceil();
@@ -797,7 +804,8 @@ class VideoRoomPage extends StatelessWidget {
           spacing: 0,
           alignment: WrapAlignment.center,
           children: items
-              .map((e) => ParticipantVideoWidget(remoteStream: e, height: itemHeight, width: itemWidth))
+              .map((e) => ParticipantVideoWidget(
+                  remoteStream: e, height: itemHeight, width: itemWidth))
               .toList(),
         );
       } else {
@@ -810,7 +818,10 @@ class VideoRoomPage extends StatelessWidget {
           children: <Widget>[
             Expanded(
               child: Container(
-                child:ParticipantVideoWidget(remoteStream: screenshared, height: double.maxFinite, width: double.maxFinite-500),
+                child: ParticipantVideoWidget(
+                    remoteStream: screenshared,
+                    height: double.maxFinite,
+                    width: double.maxFinite - 500),
               ),
             ),
             Container(
@@ -832,7 +843,10 @@ class VideoRoomPage extends StatelessWidget {
                           borderRadius: BorderRadius.circular(6),
                         ),
                       ),
-                      child:ParticipantVideoWidget(remoteStream: items[index], height: itemHeight, width: itemWidth),
+                      child: ParticipantVideoWidget(
+                          remoteStream: items[index],
+                          height: itemHeight,
+                          width: itemWidth),
                     );
                   },
                 ),
@@ -840,7 +854,6 @@ class VideoRoomPage extends StatelessWidget {
             ),
           ],
         );
-
       }
     } else {
       final double itemWidth = size.width;
@@ -850,7 +863,11 @@ class VideoRoomPage extends StatelessWidget {
           return ListView.builder(
               itemCount: items.length,
               itemBuilder: (BuildContext context, int index) {
-                return ParticipantVideoWidget(remoteStream: items[index], height: (constraints.minHeight) / (items.length > 3 ? 3 : items.length), width: itemWidth);
+                return ParticipantVideoWidget(
+                    remoteStream: items[index],
+                    height: (constraints.minHeight) /
+                        (items.length > 3 ? 3 : items.length),
+                    width: itemWidth);
               });
         },
       );

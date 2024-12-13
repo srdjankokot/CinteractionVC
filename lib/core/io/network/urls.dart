@@ -1,4 +1,4 @@
-class Urls{
+class Urls {
   // static String baseUrl = 'https://vc.cinteraction.com';
   static String baseUrl = 'https://cinteraction.nswebdevelopment.com';
   // static String baseUrl = 'https://80d0-24-135-247-244.ngrok-free.app/api';
@@ -7,9 +7,12 @@ class Urls{
   static String registerEndpoint = '$baseUrl/api/register';
   static String socialLoginEndpoint = '$baseUrl/api/social/login';
   static String getUserDetails = '$baseUrl/api/user';
-  static String meetings = '$baseUrl/api/get/all/past/meetings?paginate=10&page=';
-  static String scheduledMeetings = '$baseUrl/api/get/all/scheduled/meetings?paginate=500&page=1';
-  static String nextScheduledMeetings = '$baseUrl/api/get/all/scheduled/meetings?paginate=500&page=1';
+  static String meetings =
+      '$baseUrl/api/get/all/past/meetings?paginate=10&page=';
+  static String scheduledMeetings =
+      '$baseUrl/api/get/all/scheduled/meetings?paginate=500&page=1';
+  static String nextScheduledMeetings =
+      '$baseUrl/api/get/all/scheduled/meetings?paginate=500&page=1';
   static String startCall = '$baseUrl/api/start-call';
   static String endCall = '$baseUrl/api/end-call-with-user';
   static String scheduleMeeting = '$baseUrl/api/schedule/meeting';
@@ -17,7 +20,8 @@ class Urls{
   static String sendMessage = '$baseUrl/call/{call_id}/message';
 
   static String baseIviUrl = 'https://server.institutonline.ai:55611';
-  static String IVIAccessToken = 'Bearer 15|Jsoy8PjvLXRw3Y9ggJyYRr4ylHamlWecHNKDSOVk';
+  static String IVIAccessToken =
+      'Bearer 15|Jsoy8PjvLXRw3Y9ggJyYRr4ylHamlWecHNKDSOVk';
 
   static String engagement = '$baseIviUrl/engagement/rank';
   static String sendEngagement = '$baseUrl/api/update-call-attention';
@@ -25,7 +29,13 @@ class Urls{
 
   static String restPassword = '$baseUrl/api/forgot-password';
   static String setNewPassword = '$baseUrl/api/reset-password';
-  static String sentMessage = 'https://7a2f-188-2-51-157.ngrok-free.app/api/message';
+  static String sentMessage =
+      'https://7a2f-188-2-51-157.ngrok-free.app/api/message';
 
   static String getCompanyUsers = '$baseUrl/api/users';
+
+  ////////CHAT_URLS////////
+  static String getAllChats = '$baseUrl/api/chats';
+  static String getChatById = '$baseUrl/api/chats/';
+  static String sentChatMessage = '$baseUrl/api/chats/create';
 }

@@ -1,8 +1,11 @@
 import 'dart:async';
 import 'dart:math';
 
+import 'package:cinteraction_vc/layers/data/dto/chat/chat_detail_dto.dart';
+import 'package:cinteraction_vc/layers/data/dto/chat/chat_dto.dart';
 import 'package:cinteraction_vc/layers/data/dto/user_dto.dart';
 import 'package:cinteraction_vc/layers/domain/repos/chat_repo.dart';
+import 'package:cinteraction_vc/layers/domain/usecases/chat/set_current_chat.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/foundation.dart';
 import 'package:janus_client/janus_client.dart';
@@ -14,13 +17,13 @@ import '../../../core/util/util.dart';
 import '../../domain/entities/chat_message.dart';
 import '../../domain/entities/user.dart';
 import '../../domain/source/api.dart';
+import '../dto/chat/last_message_dto.dart';
 import '../source/local/local_storage.dart';
 
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:path/path.dart' as Path;
 
 class ChatRepoImpl extends ChatRepo {
-
   ChatRepoImpl({required Api api}) : _api = api;
   User? user = getIt.get<LocalStorage>().loadLoggedUser();
   // User? user;
@@ -39,15 +42,15 @@ class ChatRepoImpl extends ChatRepo {
   late JanusTextRoomPlugin textRoom;
   // late WebSocketJanusTransport ws;
 
-
-
-
   VideoRoomPluginStateManager videoState = VideoRoomPluginStateManager();
-
 
   final _participantsStream = StreamController<List<Participant>>.broadcast();
 
   final _usersStream = StreamController<List<UserDto>>.broadcast();
+
+  final _chatStream = StreamController<List<ChatDto>>.broadcast();
+
+  final _chatDetailsStream = StreamController<ChatDetailsDto>.broadcast();
 
   final _messagesStream = StreamController<List<ChatMessage>>.broadcast();
 
@@ -57,9 +60,13 @@ class ChatRepoImpl extends ChatRepo {
   UserDto? currentParticipant;
   List<ChatMessage> messages = [];
 
+  ChatDto? currentChat;
+
   @override
   Future<void> initialize() async {
     _loadUsers();
+    _loadChats();
+
     _session = await getIt.getAsync<JanusSession>();
     await _attachPlugin();
     _setup();
@@ -76,25 +83,32 @@ class ChatRepoImpl extends ChatRepo {
   }
 
   @override
+  Stream<ChatDetailsDto> getChatDetailsStream() {
+    return _chatDetailsStream.stream;
+  }
+
+  @override
+  Stream<List<ChatDto>> getChatsStream() {
+    return _chatStream.stream;
+  }
+
+  @override
   Stream<List<ChatMessage>> getMessageStream() {
     return _messagesStream.stream;
   }
 
-  _editRoom() async
-  {
+  _editRoom() async {
     var exist = await textRoom.editRoom();
   }
 
-
   _checkRoom() async {
-
     var exist = await textRoom.exists(room);
     print(exist);
     // JanusEvent event = JanusEvent.fromJson(exist);
 
     // print('room is exist: ${event.plugindata}');
     // if (event.plugindata?.data['exists'] == true) {
-    if(exist!){
+    if (exist!) {
       print('try to join publisher');
     } else {
       print('need to create the room');
@@ -107,7 +121,8 @@ class ChatRepoImpl extends ChatRepo {
     //   'publishers': maxPublishersDefault
     // };
     // var created = await textRoom.createRoom(roomId: room.toString(), adminKey: "supersecret", history: 10, isPrivate: false, description: "TestRoom", permanent: false, pin: "pin", secret: "secret", post: "https://7a2f-188-2-51-157.ngrok-free.app/api/message");
-    var created = await textRoom.createRoom(roomId: room.toString(), permanent: true);
+    var created =
+        await textRoom.createRoom(roomId: room.toString(), permanent: true);
     print(created);
     // JanusEvent event = JanusEvent.fromJson(created);
     // if (event.plugindata?.data['videoroom'] == 'created') {
@@ -135,37 +150,46 @@ class ChatRepoImpl extends ChatRepo {
     await textRoom.setup();
     textRoom.onData?.listen((event) async {
       if (RTCDataChannelState.RTCDataChannelOpen == event) {
-        await textRoom.joinRoom(room, user!.id, display: displayName, pin: "",);
+        await textRoom.joinRoom(
+          room,
+          user!.id,
+          display: displayName,
+          pin: "",
+        );
       }
     });
 
     _setListener();
   }
 
-  bool _haveUnread(Participant participant)
-  {
-    for(var message in participant.messages)
-      {
-       if(message.seen == false)
-         {
-           return true;
-         }
+  bool _haveUnread(Participant participant) {
+    for (var message in participant.messages) {
+      if (message.seen == false) {
+        return true;
       }
+    }
 
     return false;
   }
 
-  _matchParticipantWithUser()
-  {
-    for (var element in users) {element.online = false;}
-    for(var subscriber in subscribers)
-      {
-        UserDto fallbackUser = UserDto(id: "0", name: "name", email: "email", imageUrl: "imageUrl", createdAt: null);
-        users.firstWhere(
-              (item) => item.id == subscriber.id,  // Condition that won't be met
-          orElse: () => fallbackUser,       // Return null if no element matches
-        ).online = true;
-      }
+  _matchParticipantWithUser() {
+    for (var element in users) {
+      element.online = false;
+    }
+    for (var subscriber in subscribers) {
+      UserDto fallbackUser = UserDto(
+          id: "0",
+          name: "name",
+          email: "email",
+          imageUrl: "imageUrl",
+          createdAt: null);
+      users
+          .firstWhere(
+            (item) => item.id == subscriber.id, // Condition that won't be met
+            orElse: () => fallbackUser, // Return null if no element matches
+          )
+          .online = true;
+    }
     _usersStream.add(users);
   }
 
@@ -182,9 +206,8 @@ class ChatRepoImpl extends ChatRepo {
           //     print(prt.display);
           //   }
 
-          var participant = subscribers.firstWhere(
-              (item) => item.id.toString() == data['from']); // or any default value);
-
+          var participant = subscribers.firstWhere((item) =>
+              item.id.toString() == data['from']); // or any default value);
 
           participant.haveUnreadMessages = _haveUnread(participant);
           // participant.messages.add(data['text']);
@@ -218,14 +241,16 @@ class ChatRepoImpl extends ChatRepo {
             return;
           }
 
-
-          if(subscribers.where((element) => element.id.toString() == data['username']).toList().isEmpty){
+          if (subscribers
+              .where((element) => element.id.toString() == data['username'])
+              .toList()
+              .isEmpty) {
             print("there is no participant with this display name");
-            var participant = Participant(display: data['display'], id: data['username']);
+            var participant =
+                Participant(display: data['display'], id: data['username']);
 
             subscribers.add(participant);
           }
-
 
           _participantsStream.add(subscribers);
           _matchParticipantWithUser();
@@ -251,29 +276,26 @@ class ChatRepoImpl extends ChatRepo {
     });
   }
 
-  List<ChatMessage>? getUserMessages()
-  {
-    for(var sub in subscribers){
-      if(sub.display == currentParticipant?.name)
-        {
-          return sub.messages;
-        }
+  List<ChatMessage>? getUserMessages() {
+    for (var sub in subscribers) {
+      if (sub.display == currentParticipant?.name) {
+        return sub.messages;
+      }
     }
 
     return List.empty();
   }
 
-
   @override
   Future<void> sendMessage(String msg) async {
-
     var pars = await textRoom.listParticipants(room);
     print(pars);
     // currentParticipant.display
-    await textRoom.sendMessage(room, msg, to: currentParticipant?.id.toString());
-   // var send =  await _api.sentChatMessage(text: msg, to: currentParticipant?.display, from: displayName);
+    await textRoom.sendMessage(room, msg,
+        to: currentParticipant?.id.toString());
+    // var send =  await _api.sentChatMessage(text: msg, to: currentParticipant?.display, from: displayName);
 
-   // print(send);
+    // print(send);
     getUserMessages()?.add(ChatMessage(
         message: msg,
         displayName: 'Me',
@@ -291,10 +313,18 @@ class ChatRepoImpl extends ChatRepo {
     print("Changed current participant");
   }
 
+  @override
+  Future<void> setCurrentChat(ChatDto chat) async {
+    currentChat = chat;
+    messages = getUserMessages()!;
+    _messagesStream.add(messages);
+    print("Changed current participant");
+  }
 
   @override
   Future<void> messageSeen(int index) async {
-    var participant = subscribers.firstWhere((item) => item.display == currentParticipant?.name);
+    var participant = subscribers
+        .firstWhere((item) => item.display == currentParticipant?.name);
 
     messages = participant.messages;
     messages[index].seen = true;
@@ -305,13 +335,43 @@ class ChatRepoImpl extends ChatRepo {
     _matchParticipantWithUser();
   }
 
-  _loadUsers() async
-  {
+  _loadUsers() async {
     var response = await _api.getCompanyUsers();
     users = response.response!.where((element) => element.id != myId).toList();
     _matchParticipantWithUser();
   }
 
+  _loadChats() async {
+    var response = await _api.getAllChats();
+    print("Response: $response");
+
+    if (response.error == null) {
+      List<ChatDto> chats = response.response ?? [];
+      print('Chats loaded: $chats');
+      _chatStream.add(chats);
+
+      for (var chat in chats) {
+        print('Chat: $chat');
+      }
+    } else {
+      print('Error: ${response.error}');
+    }
+  }
+
+  @override
+  Future<void> getChatDetails(int id) async {
+    try {
+      var response = await _api.getChatById(id: id);
+      if (response.error == null && response.response != null) {
+        _chatDetailsStream.add(response.response!);
+        print('Res ${response.response}');
+      } else {
+        print("Error: ${response.error}");
+      }
+    } catch (e) {
+      print("Error while fetching chat: $e");
+    }
+  }
 
   @override
   Future<void> chooseFile() async {
@@ -326,30 +386,25 @@ class ChatRepoImpl extends ChatRepo {
   }
 
   uploadImageToStorage(String name, Uint8List? bytes) async {
-    if(kIsWeb){
+    if (kIsWeb) {
       Reference _reference = FirebaseStorage.instance
           .ref()
           .child('files/${Path.basename("$name")}');
-      await _reference.putData(bytes!)
-          .whenComplete(() async {
+      await _reference.putData(bytes!).whenComplete(() async {
         await _reference.getDownloadURL().then((value) {
-
           // uploadedPhotoUrl = value;
-
 
           print(value);
           sendMessage(value);
-
         });
       });
-    }else{
+    } else {
 //write a code for android or ios
     }
-
   }
 
   @override
-  Future<void> sendFile(String name, Uint8List bytes) async{
+  Future<void> sendFile(String name, Uint8List bytes) async {
     uploadImageToStorage(name, bytes);
   }
 }
