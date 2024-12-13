@@ -4,8 +4,13 @@ import 'package:audioplayers/audioplayers.dart';
 import 'package:cinteraction_vc/core/app/style.dart';
 import 'package:cinteraction_vc/core/extension/context.dart';
 import 'package:cinteraction_vc/core/extension/context_user.dart';
+import 'package:cinteraction_vc/layers/data/dto/chat/chat_detail_dto.dart';
+import 'package:cinteraction_vc/layers/data/dto/user_dto.dart';
+import 'package:cinteraction_vc/layers/domain/usecases/chat/set_current_chat.dart';
 import 'package:cinteraction_vc/layers/presentation/cubit/chat/chat_cubit.dart';
 import 'package:cinteraction_vc/layers/presentation/cubit/chat/chat_state.dart';
+import 'package:cinteraction_vc/layers/presentation/ui/chat/widget/chat_details_widget.dart';
+import 'package:cinteraction_vc/layers/presentation/ui/chat/widget/user_list_view.dart';
 import 'package:cinteraction_vc/layers/presentation/ui/conference/widget/participant_video_widget.dart';
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/cupertino.dart';
@@ -18,6 +23,7 @@ import 'package:visibility_detector/visibility_detector.dart';
 import '../../../../assets/colors/Colors.dart';
 import '../../../../core/ui/images/image.dart';
 import '../../../../core/ui/widget/call_button_shape.dart';
+import 'widget/chat_list_view.dart';
 import '../conference/widget/chat_message_widget.dart';
 import '../home/ui/widgets/home_item.dart';
 import '../home/ui/widgets/join_popup.dart';
@@ -149,6 +155,10 @@ class ChatRoomPage extends StatelessWidget {
     }
 
     return BlocConsumer<ChatCubit, ChatState>(listener: (context, state) async {
+      if (state.chatDetails != null) {
+        print('nameListener ${state.chatDetails?.authUser}');
+      }
+
       if (state.incomingCall ?? false) {
         // String callerName = "Caller Name"; // Replace with actual caller name
         await showIncomingCallDialog(context, state.caller!);
@@ -255,76 +265,9 @@ class ChatRoomPage extends StatelessWidget {
                     const Divider(),
                     Expanded(
                       child: state.listType == ListType.Chats
-                          ? Text("")
-                          : ListView.builder(
-                              itemCount: state.users?.length ?? 0,
-                              itemBuilder: (context, index) {
-                                var user = state.users![index];
-                                return GestureDetector(
-                                  onTap: () {
-                                    context
-                                        .read<ChatCubit>()
-                                        .setCurrentParticipant(
-                                            state.users![index]);
-                                  },
-                                  child: Container(
-                                    color: state.currentParticipant?.id == user.id ? ColorConstants.kPrimaryColor.withOpacity(0.2) : Colors.white,
-                                    child: Padding(
-                                      padding: const EdgeInsets.all(4.0),
-                                      child:
-                                      Row(
-                                        crossAxisAlignment: CrossAxisAlignment.center,
-                                        mainAxisAlignment: MainAxisAlignment.start,
-                                        children: [
-                                          const SizedBox(
-                                            width: 10,
-                                          ),
-                                          Stack(
-                                            children: [
-                                              UserImage.medium(user.imageUrl),
-                                              Visibility(
-                                                  visible: user.online,
-                                                  child: Positioned(
-                                                    bottom: 2,
-                                                    right: 4,
-                                                    child: ClipOval(
-                                                      child: Container(
-                                                        width: 10.0,
-                                                        // width of the circle
-                                                        height: 10.0,
-                                                        // height of the circle
-                                                        color: Colors
-                                                            .green, // background color
-                                                      ),
-                                                    ),
-                                                  ))
-                                            ],
-                                          ),
-                                          const SizedBox(
-                                            width: 10,
-                                          ),
-                                          Column(
-                                            mainAxisAlignment:
-                                                MainAxisAlignment.center,
-                                            crossAxisAlignment:
-                                                CrossAxisAlignment.start,
-                                            children: [
-                                              Text(
-                                                user.name,
-                                                textAlign: TextAlign.center,
-                                                style:
-                                                    context.textTheme.titleMedium,
-                                              ),
-                                            ],
-                                          ),
-                                        ],
-                                      ),
-                                    ),
-                                  ),
-                                );
-                              },
-                            ),
-                    ),
+                          ? ChatsListView(state: state)
+                          : UsersListView(state: state),
+                    )
                   ],
                 ),
               ),
@@ -420,150 +363,151 @@ class ChatRoomPage extends StatelessWidget {
                         }
                       }
 
-                      if (state.currentParticipant != null) {
-                        if (state.localStream != null) {
-                          print("local stream not null");
-                          if (state.remoteStream == null) {
-                            return ParticipantVideoWidget(
-                                remoteStream: state.localStream!,
-                                height: double.maxFinite,
-                                width: double.maxFinite);
-                          } else {
-                            return Stack(
-                              children: [
-                                ParticipantVideoWidget(
-                                    remoteStream: state.remoteStream!,
-                                    height: double.maxFinite,
-                                    width: double.maxFinite),
-                                ParticipantVideoWidget(
-                                    remoteStream: state.remoteStream!,
-                                    height: 200,
-                                    width: 200),
-                                Positioned.fill(
-                                  bottom: 20,
-                                  child: Row(
-                                    mainAxisAlignment: MainAxisAlignment.center,
-                                    crossAxisAlignment: CrossAxisAlignment.end,
-                                    children: [
-                                      CallButtonShape(
-                                          image: false
-                                              ? imageSVGAsset('icon_microphone')
-                                                  as Widget
-                                              : imageSVGAsset(
-                                                      'icon_microphone_disabled')
-                                                  as Widget,
-                                          onClickAction: () async {
-                                            // await context
-                                            //     .read<ConferenceCubit>()
-                                            //     .audioMute();
-                                          }),
-                                      const SizedBox(width: 20),
-                                      CallButtonShape(
-                                          image: false
-                                              ? imageSVGAsset(
-                                                      'icon_video_recorder')
-                                                  as Widget
-                                              : imageSVGAsset(
-                                                      'icon_video_recorder_disabled')
-                                                  as Widget,
-                                          onClickAction: () async {
-                                            // await context
-                                            //     .read<ConferenceCubit>()
-                                            //     .videoMute();
-                                          }),
-                                      const SizedBox(width: 20),
-                                      CallButtonShape(
-                                          image: imageSVGAsset(
-                                              'icon_arrow_square_up') as Widget,
-                                          bgColor: true
-                                              ? ColorConstants.kPrimaryColor
-                                              : ColorConstants.kWhite30,
-                                          onClickAction: () async {}),
+                      if (state.currentParticipant != null ||
+                          state.chatDetails != null) {
+                        // if (state.localStream != null) {
+                        //   print("local stream not null");
+                        //   if (state.remoteStream == null) {
+                        //     return ParticipantVideoWidget(
+                        //         remoteStream: state.localStream!,
+                        //         height: double.maxFinite,
+                        //         width: double.maxFinite);
+                        //   } else {
+                        //     return Stack(
+                        //       children: [
+                        //         ParticipantVideoWidget(
+                        //             remoteStream: state.remoteStream!,
+                        //             height: double.maxFinite,
+                        //             width: double.maxFinite),
+                        //         ParticipantVideoWidget(
+                        //             remoteStream: state.remoteStream!,
+                        //             height: 200,
+                        //             width: 200),
+                        //         Positioned.fill(
+                        //           bottom: 20,
+                        //           child: Row(
+                        //             mainAxisAlignment: MainAxisAlignment.center,
+                        //             crossAxisAlignment: CrossAxisAlignment.end,
+                        //             children: [
+                        //               CallButtonShape(
+                        //                   image: false
+                        //                       ? imageSVGAsset('icon_microphone')
+                        //                           as Widget
+                        //                       : imageSVGAsset(
+                        //                               'icon_microphone_disabled')
+                        //                           as Widget,
+                        //                   onClickAction: () async {
+                        //                     // await context
+                        //                     //     .read<ConferenceCubit>()
+                        //                     //     .audioMute();
+                        //                   }),
+                        //               const SizedBox(width: 20),
+                        //               CallButtonShape(
+                        //                   image: false
+                        //                       ? imageSVGAsset(
+                        //                               'icon_video_recorder')
+                        //                           as Widget
+                        //                       : imageSVGAsset(
+                        //                               'icon_video_recorder_disabled')
+                        //                           as Widget,
+                        //                   onClickAction: () async {
+                        //                     // await context
+                        //                     //     .read<ConferenceCubit>()
+                        //                     //     .videoMute();
+                        //                   }),
+                        //               const SizedBox(width: 20),
+                        //               CallButtonShape(
+                        //                   image: imageSVGAsset(
+                        //                       'icon_arrow_square_up') as Widget,
+                        //                   bgColor: true
+                        //                       ? ColorConstants.kPrimaryColor
+                        //                       : ColorConstants.kWhite30,
+                        //                   onClickAction: () async {}),
 
-                                      // const SizedBox(width: 20),
+                        //               // const SizedBox(width: 20),
 
-                                      // Stack(children: [
-                                      //   CallButtonShape(
-                                      //     image: imageSVGAsset('icon_message')
-                                      //     as Widget,
-                                      //     bgColor: ColorConstants.kPrimaryColor
-                                      //         .withOpacity(0.4),
-                                      //     onClickAction: () async {
-                                      //       await context
-                                      //           .read<ConferenceCubit>()
-                                      //           .toggleChatWindow();
-                                      //     },
-                                      //   ),
-                                      //   Positioned(
-                                      //     right: 0,
-                                      //     top: 0,
-                                      //     child: AnimatedOpacity(
-                                      //       opacity:
-                                      //       (state.unreadMessages != null &&
-                                      //           state.unreadMessages! > 0)
-                                      //           ? 1
-                                      //           : 0,
-                                      //       duration:
-                                      //       const Duration(milliseconds: 250),
-                                      //       child: Container(
-                                      //         width: 12,
-                                      //         height: 12,
-                                      //         decoration: const ShapeDecoration(
-                                      //           color: Colors.white,
-                                      //           shape: OvalBorder(),
-                                      //         ),
-                                      //         // child: Text(
-                                      //         //   '1',
-                                      //         //   style: context
-                                      //         //       .primaryTextTheme.labelSmall
-                                      //         //       ?.copyWith(
-                                      //         //           fontSize: 8,
-                                      //         //           fontWeight:
-                                      //         //               FontWeight.w700),
-                                      //         // )
-                                      //       ),
-                                      //     ),
-                                      //   ),
-                                      //   // child: Text('${state.unreadMessages}', style: context.primaryTextTheme.labelSmall,)),
-                                      //   //   child: Text('1', style: context.primaryTextTheme.labelSmall?.copyWith(fontSize: 8, fontWeight: FontWeight.w700),)),,
-                                      // ]),
+                        //               // Stack(children: [
+                        //               //   CallButtonShape(
+                        //               //     image: imageSVGAsset('icon_message')
+                        //               //     as Widget,
+                        //               //     bgColor: ColorConstants.kPrimaryColor
+                        //               //         .withOpacity(0.4),
+                        //               //     onClickAction: () async {
+                        //               //       await context
+                        //               //           .read<ConferenceCubit>()
+                        //               //           .toggleChatWindow();
+                        //               //     },
+                        //               //   ),
+                        //               //   Positioned(
+                        //               //     right: 0,
+                        //               //     top: 0,
+                        //               //     child: AnimatedOpacity(
+                        //               //       opacity:
+                        //               //       (state.unreadMessages != null &&
+                        //               //           state.unreadMessages! > 0)
+                        //               //           ? 1
+                        //               //           : 0,
+                        //               //       duration:
+                        //               //       const Duration(milliseconds: 250),
+                        //               //       child: Container(
+                        //               //         width: 12,
+                        //               //         height: 12,
+                        //               //         decoration: const ShapeDecoration(
+                        //               //           color: Colors.white,
+                        //               //           shape: OvalBorder(),
+                        //               //         ),
+                        //               //         // child: Text(
+                        //               //         //   '1',
+                        //               //         //   style: context
+                        //               //         //       .primaryTextTheme.labelSmall
+                        //               //         //       ?.copyWith(
+                        //               //         //           fontSize: 8,
+                        //               //         //           fontWeight:
+                        //               //         //               FontWeight.w700),
+                        //               //         // )
+                        //               //       ),
+                        //               //     ),
+                        //               //   ),
+                        //               //   // child: Text('${state.unreadMessages}', style: context.primaryTextTheme.labelSmall,)),
+                        //               //   //   child: Text('1', style: context.primaryTextTheme.labelSmall?.copyWith(fontSize: 8, fontWeight: FontWeight.w700),)),,
+                        //               // ]),
 
-                                      const SizedBox(width: 20),
-                                      // CallButtonShape(
-                                      //     image: imageSVGAsset('icon_user') as Widget,
-                                      //     // onClickAction: joined ? switchCamera : null),
-                                      //     onClickAction: joined ? null : null),
-                                      // const SizedBox(width: 20),
-                                      CallButtonShape(
-                                        image: imageSVGAsset('icon_phone')
-                                            as Widget,
-                                        bgColor: ColorConstants.kPrimaryColor,
-                                        onClickAction: () async {
-                                          await context
-                                              .read<ChatCubit>()
-                                              .rejectCall();
-                                        },
-                                      ),
+                        //               const SizedBox(width: 20),
+                        //               // CallButtonShape(
+                        //               //     image: imageSVGAsset('icon_user') as Widget,
+                        //               //     // onClickAction: joined ? switchCamera : null),
+                        //               //     onClickAction: joined ? null : null),
+                        //               // const SizedBox(width: 20),
+                        //               CallButtonShape(
+                        //                 image: imageSVGAsset('icon_phone')
+                        //                     as Widget,
+                        //                 bgColor: ColorConstants.kPrimaryColor,
+                        //                 onClickAction: () async {
+                        //                   await context
+                        //                       .read<ChatCubit>()
+                        //                       .rejectCall();
+                        //                 },
+                        //               ),
 
-                                      // const SizedBox(width: 20),
+                        //               // const SizedBox(width: 20),
 
-                                      // CallButtonShape(
-                                      //     image: state.engagementEnabled
-                                      //         ? const Icon(Icons.image)
-                                      //         : const Icon(Icons.image_not_supported),
-                                      //     onClickAction: () async {
-                                      //       await context
-                                      //           .read<ConferenceCubit>()
-                                      //           .toggleEngagement();
-                                      //     }),
-                                      //
-                                    ],
-                                  ),
-                                ),
-                              ],
-                            );
-                          }
-                        }
+                        //               // CallButtonShape(
+                        //               //     image: state.engagementEnabled
+                        //               //         ? const Icon(Icons.image)
+                        //               //         : const Icon(Icons.image_not_supported),
+                        //               //     onClickAction: () async {
+                        //               //       await context
+                        //               //           .read<ConferenceCubit>()
+                        //               //           .toggleEngagement();
+                        //               //     }),
+                        //               //
+                        //             ],
+                        //           ),
+                        //         ),
+                        //       ],
+                        //     );
+                        //   }
+                        // }
 
                         return Column(
                           // crossAxisAlignment: CrossAxisAlignment.start,
@@ -577,7 +521,14 @@ class ChatRoomPage extends StatelessWidget {
                                         CrossAxisAlignment.start,
                                     children: [
                                       Text(
-                                        state.currentParticipant!.name,
+                                        state.listType == ListType.Chats
+                                            ? (state.isLoading
+                                                ? "Loading"
+                                                : (state.chatDetails?.authUser
+                                                        .name ??
+                                                    "Unknown User"))
+                                            : (state.currentParticipant?.name ??
+                                                ""),
                                         style: titleThemeStyle
                                             .textTheme.titleLarge,
                                       ),
@@ -588,42 +539,42 @@ class ChatRoomPage extends StatelessWidget {
                                             // Adjust the width as needed
                                             height: 15.0,
                                             // Adjust the height as needed
-                                            decoration: BoxDecoration(
-                                              color: state.currentParticipant!
-                                                      .online
-                                                  ? Colors.green
-                                                  : Colors.amber,
-                                              shape: BoxShape.circle,
-                                            ),
+                                            // decoration: BoxDecoration(
+                                            //   color: state.currentParticipant!
+                                            //           .online
+                                            //       ? Colors.green
+                                            //       : Colors.amber,
+                                            //   shape: BoxShape.circle,
+                                            // ),
                                           ),
                                           const SizedBox(width: 5.0),
-                                          Text(
-                                            state.currentParticipant!.online
-                                                ? "Active now"
-                                                : "Away",
-                                            style: titleThemeStyle
-                                                .textTheme.labelLarge,
-                                          ),
+                                          // Text(
+                                          //   state.currentParticipant!.online
+                                          //       ? "Active now"
+                                          //       : "Away",
+                                          //   style: titleThemeStyle
+                                          //       .textTheme.labelLarge,
+                                          // ),
                                         ],
                                       )
                                     ],
                                   ),
                                   const Spacer(),
-                                  Visibility(
-                                      visible: state.currentParticipant!.online,
-                                      child: CallButtonShape(
-                                        image: imageSVGAsset('icon_phone')
-                                            as Widget,
-                                        bgColor: ColorConstants.kPrimaryColor,
-                                        onClickAction: () async {
-                                          await context
-                                              .read<ChatCubit>()
-                                              .makeCall(
-                                                  state.currentParticipant!.id);
+                                  // Visibility(
+                                  //     visible: state.currentParticipant!.online,
+                                  //     child: CallButtonShape(
+                                  //       image: imageSVGAsset('icon_phone')
+                                  //           as Widget,
+                                  //       bgColor: ColorConstants.kPrimaryColor,
+                                  //       onClickAction: () async {
+                                  //         await context
+                                  //             .read<ChatCubit>()
+                                  //             .makeCall(
+                                  //                 state.currentParticipant!.id);
 
-                                          // await context.read<ChatCubit>().rejectCall();
-                                        },
-                                      ))
+                                  //         // await context.read<ChatCubit>().rejectCall();
+                                  //       },
+                                  //     ))
                                 ],
                               ),
                             ),
@@ -635,29 +586,33 @@ class ChatRoomPage extends StatelessWidget {
                                     onCreated: (ctrl) => controller = ctrl,
                                     onDrop: onFileDropped,
                                   ),
-                                  Container(
-                                    child: state.messages == null
-                                        ? const Center(
-                                            child: Text('No Messages'))
-                                        : ListView.builder(
-                                            controller: chatController,
-                                            itemCount: state.messages?.length,
-                                            itemBuilder: (BuildContext context,
-                                                int index) {
-                                              return VisibilityDetector(
-                                                  key: Key(index.toString()),
-                                                  onVisibilityChanged:
-                                                      (VisibilityInfo info) {
-                                                    context
-                                                        .read<ChatCubit>()
-                                                        .chatMessageSeen(index);
-                                                  },
-                                                  child: ChatMessageWidget(
-                                                      message: state
-                                                          .messages![index]));
-                                            },
-                                          ),
-                                  ),
+                                  state.listType == ListType.Chats
+                                      ? Container(
+                                          child: state.chatDetails?.messages ==
+                                                  null
+                                              ? const Center(
+                                                  child: Text('No Messages'))
+                                              : ChatDetailsWidget(
+                                                  state.chatDetails!),
+                                        )
+                                      : ListView.builder(
+                                          controller: chatController,
+                                          itemCount: state.messages?.length,
+                                          itemBuilder: (BuildContext context,
+                                              int index) {
+                                            return VisibilityDetector(
+                                                key: Key(index.toString()),
+                                                onVisibilityChanged:
+                                                    (VisibilityInfo info) {
+                                                  context
+                                                      .read<ChatCubit>()
+                                                      .chatMessageSeen(index);
+                                                },
+                                                child: ChatMessageWidget(
+                                                    message: state
+                                                        .messages![index]));
+                                          },
+                                        ),
                                 ],
                               ),
                             ),
@@ -678,6 +633,7 @@ class ChatRoomPage extends StatelessWidget {
                                         hintText: "Send a message",
                                         suffixIcon: IconButton(
                                           onPressed: () {
+                                            print('Pressed button');
                                             sendMessage();
                                           },
                                           icon: imageSVGAsset('icon_send')

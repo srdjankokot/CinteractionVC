@@ -1,6 +1,9 @@
+import 'dart:io';
+
 import 'package:cinteraction_vc/core/app/injector.dart';
 import 'package:cinteraction_vc/core/io/network/models/login_response.dart';
 import 'package:cinteraction_vc/layers/data/dto/api_error_dto.dart';
+import 'package:cinteraction_vc/layers/data/dto/chat/chat_detail_dto.dart';
 import 'package:cinteraction_vc/layers/data/dto/user_dto.dart';
 import 'package:cinteraction_vc/layers/domain/entities/dashboard/dashboard_response.dart';
 import 'package:cinteraction_vc/layers/domain/source/api.dart';
@@ -9,6 +12,7 @@ import 'package:intl/intl.dart';
 
 import '../../../../core/io/network/urls.dart';
 import '../../../domain/entities/api_response.dart';
+import '../../dto/chat/chat_dto.dart';
 import '../../dto/dashboard/dashboard_response_dto.dart';
 import '../../dto/meetings/meeting_dto.dart';
 import '../../dto/meetings/meeting_response_dto.dart';
@@ -54,6 +58,8 @@ class ApiImpl extends Api {
     try {
       Dio dio = await getIt.getAsync<Dio>();
       Response response = await dio.get(Urls.getCompanyUsers);
+
+      print('PROLAZIIIIII');
 
       List<UserDto> users = [];
       for (var u in response.data['data']) {
@@ -355,6 +361,87 @@ class ApiImpl extends Api {
           response: response.statusCode! > 200 && response.statusCode! < 300);
     } on DioException catch (e, s) {
       print(e.response?.statusMessage);
+      return ApiResponse(error: ApiErrorDto.fromDioException(e));
+    }
+  }
+
+  @override
+  Future<ApiResponse<List<ChatDto>>> getAllChats() async {
+    try {
+      Dio dio = await getIt.getAsync<Dio>();
+      Response response = await dio.get(Urls.getAllChats);
+      print('ResponseForAll');
+      print(response);
+
+      List<ChatDto> chats = [];
+      for (var chat in response.data['data']) {
+        var chatDto = ChatDto.fromJson(chat as Map<String, dynamic>);
+        chats.add(chatDto);
+        print('chats $chatDto[chat_id]');
+      }
+
+      return ApiResponse(response: chats);
+    } on DioException catch (e) {
+      return ApiResponse(error: ApiErrorDto.fromDioException(e));
+    }
+  }
+
+  @override
+  Future<ApiResponse<ChatDetailsDto>> getChatById({required dynamic id}) async {
+    try {
+      Dio dio = await getIt.getAsync<Dio>();
+      Response response = await dio.get('${Urls.getChatById}$id');
+      var chatDetails = ChatDetailsDto.fromJson(response.data);
+
+      return ApiResponse(response: chatDetails);
+    } on DioException catch (e) {
+      return ApiResponse(error: ApiErrorDto.fromDioException(e));
+    }
+  }
+
+  @override
+  Future<ApiResponse<MessageDto>> sentMessage({
+    required String name,
+    required int chatId,
+    required int senderId,
+    required String message,
+    required List<int> participantIds,
+    List<File>? uploadedFiles,
+  }) async {
+    Dio dio = await getIt.getAsync<Dio>();
+
+    var formData = FormData.fromMap({
+      'name': name,
+      'chat_id': chatId,
+      'sender_id': senderId,
+      'message': message,
+      'chat_participants':
+          participantIds.map((id) => {'participant_id': id}).toList(),
+      if (uploadedFiles != null)
+        'uploaded_files': uploadedFiles.map(
+          (file) => MultipartFile.fromFileSync(file.path),
+        ),
+    });
+
+    try {
+      Response response = await dio.post(
+        Urls.sentChatMessage,
+        data: formData,
+        options: Options(
+          headers: {
+            'Content-Type': 'multipart/form-data',
+            'Accept': 'application/json',
+          },
+        ),
+      );
+
+      print("ChatMessageToServer: ${response.data}");
+
+      var messageDto = MessageDto.fromJson(response.data);
+
+      return ApiResponse(response: messageDto);
+    } on DioException catch (e, s) {
+      print("Greška: ${e.response?.statusMessage}");
       return ApiResponse(error: ApiErrorDto.fromDioException(e));
     }
   }

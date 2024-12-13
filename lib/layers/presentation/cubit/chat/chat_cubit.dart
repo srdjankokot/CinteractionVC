@@ -2,6 +2,8 @@ import 'dart:async';
 import 'dart:math';
 import 'dart:typed_data';
 
+import 'package:cinteraction_vc/layers/data/dto/chat/chat_detail_dto.dart';
+import 'package:cinteraction_vc/layers/data/dto/chat/chat_dto.dart';
 import 'package:cinteraction_vc/layers/presentation/cubit/chat/chat_state.dart';
 import 'package:flutter/material.dart';
 import 'package:janus_client/janus_client.dart';
@@ -20,7 +22,8 @@ class ChatCubit extends Cubit<ChatState> with BlocLoggy {
   final ChatUseCases chatUseCases;
   final CallUseCases callUseCases;
 
-  ChatCubit({required this.chatUseCases, required this.callUseCases}) : super(const ChatState.initial()) {
+  ChatCubit({required this.chatUseCases, required this.callUseCases})
+      : super(const ChatState.initial()) {
     print("Chat Cubit is created");
     _load();
   }
@@ -31,7 +34,9 @@ class ChatCubit extends Cubit<ChatState> with BlocLoggy {
 
     chatUseCases.getParticipantsStream().listen(_onParticipants);
     chatUseCases.getUsersStream().listen(_onUsers);
+    chatUseCases.getChatsStream().listen(_onChats);
     chatUseCases.getMessageStream().listen(_onMessages);
+    chatUseCases.getChatDetailsStream().listen(_onChatDetails);
 
     callUseCases.videoCallStream().listen(_onVideoCall);
     callUseCases.getLocalStream().listen(_onLocalStream);
@@ -60,8 +65,7 @@ class ChatCubit extends Cubit<ChatState> with BlocLoggy {
   void _onRemoteStream(StreamRenderer remoteStream) {
     emit(state.copyWith(
         remoteStream: remoteStream,
-        numberOfParticipants: Random().nextInt(10000)
-    ));
+        numberOfParticipants: Random().nextInt(10000)));
 
     print('remote stream changed');
   }
@@ -81,26 +85,56 @@ class ChatCubit extends Cubit<ChatState> with BlocLoggy {
         numberOfParticipants: Random().nextInt(10000)));
   }
 
+  void _onChats(List<ChatDto> chats) {
+    print("_onChats: $chats ");
+    emit(state.copyWith(chats: chats));
+  }
+
+  void _onChatDetails(ChatDetailsDto chatDetails) {
+    print("onMessages $chatDetails");
+    emit(state.copyWith(chatDetails: chatDetails));
+  }
+
   Future<void> sendMessage(String msg) async {
     chatUseCases.sendMessage(msg: msg);
   }
+
+  // Future<void> sendMessageToUser(int senderId, String message, int participiantId ) {
+
+  // }
 
   Future<void> setCurrentParticipant(UserDto user) async {
     chatUseCases.setCurrentParticipant(user);
     emit(state.copyWith(currentParticipant: user));
   }
 
+  Future<void> setCurrentChat(ChatDto chat) async {
+    chatUseCases.setCurrentChat(chat);
+    emit(state.copyWith(currentChat: chat));
+  }
+
+  Future<void> getChatDetails(int chatId) async {
+    emit(state.copyWith(isLoading: true));
+
+    try {
+      final chatDetails = await chatUseCases.getChatDetails(chatId);
+      emit(state.copyWith(chatDetails: chatDetails));
+    } catch (e) {
+      print("Error fetching chat details: $e");
+    } finally {
+      emit(state.copyWith(isLoading: false));
+    }
+  }
+
   Future<void> chatMessageSeen(int index) async {
     chatUseCases.messageSeen(index: index);
   }
 
-  Future<void> sendFile(String name, Uint8List bytes) async
-  {
+  Future<void> sendFile(String name, Uint8List bytes) async {
     chatUseCases.sendFile(name, bytes);
   }
 
-  Future<void> chooseFile() async
-  {
+  Future<void> chooseFile() async {
     chatUseCases.chooseFile();
   }
 
@@ -108,30 +142,25 @@ class ChatCubit extends Cubit<ChatState> with BlocLoggy {
     print(result.event);
     print(result.username);
     if (result.event == "incomingcall") {
-
       ;
-      emit(
-          state.copyWith(
-              incomingCall: true,
-              caller: state.users?.firstWhere((element) => element.id == result.username).name
-          ));
+      emit(state.copyWith(
+          incomingCall: true,
+          caller: state.users
+              ?.firstWhere((element) => element.id == result.username)
+              .name));
     }
-    if(result.event == "calling")
-      {
-        emit(state.copyWith(calling: true));
-      }
+    if (result.event == "calling") {
+      emit(state.copyWith(calling: true));
+    }
 
-    if(result.event == "accepted")
-      {
-        emit(state.copyWith(calling: false, incomingCall: false));
-      }
+    if (result.event == "accepted") {
+      emit(state.copyWith(calling: false, incomingCall: false));
+    }
 
-    if(result.event == "rejected")
-      {
-        print("change state to non call");
-        emit(state.callFinished());
-
-      }
+    if (result.event == "rejected") {
+      print("change state to non call");
+      emit(state.callFinished());
+    }
   }
 
   Future<void> makeCall(String toUser) async {
@@ -141,14 +170,12 @@ class ChatCubit extends Cubit<ChatState> with BlocLoggy {
   Future<void> answerCall() async {
     callUseCases.answerCall();
     emit(state.callFinished());
-
   }
 
   Future<void> rejectCall() async {
     callUseCases.rejectCall("click button");
     // emit(state.callFinished());
   }
-
 
   Future<void> audioMute() async {
     var mute = state.audioMuted;
@@ -162,8 +189,7 @@ class ChatCubit extends Cubit<ChatState> with BlocLoggy {
     emit(state.copyWith(videoMuted: !mute));
   }
 
-  void changeListType(ListType listType)
-  {
+  void changeListType(ListType listType) {
     emit(state.copyWith(listType: listType));
   }
 }

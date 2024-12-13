@@ -8,30 +8,33 @@ class UserDto extends User {
       required super.imageUrl,
       required super.createdAt});
 
-
-  factory UserDto.fromJson(Map<String, dynamic> json) =>
-      UserDto(
+  factory UserDto.fromJson(Map<String, dynamic> json) => UserDto(
         id: "hash_${json['id']}",
         name: json['name'] as String,
         email: json['email'] as String,
-        imageUrl: json.containsKey('profile_photo_url')? json['profile_photo_url'] as String : json['image'] as String,
-        createdAt: json.containsKey('created_at')? DateTime.parse(json['created_at'] as String) : null,
+        imageUrl: json.containsKey('profile_photo_url')
+            ? json['profile_photo_url'] as String
+            : json['image'] as String,
+        createdAt: json.containsKey('created_at')
+            ? DateTime.parse(json['created_at'] as String)
+            : null,
       )
-        ..emailVerifiedAt = json['email_verified_at'] == null ? null : DateTime.parse(json['email_verified_at'] as String)
+        ..emailVerifiedAt = json['email_verified_at'] == null
+            ? null
+            : DateTime.parse(json['email_verified_at'] as String)
         ..groups = json['groups'] as int?
         ..avgEngagement = json['avgEngagement'] as int?
         ..totalMeetings = json['totalMeetings'] as int?;
 
-
   Map<String, dynamic> toJson() => <String, dynamic>{
-    'id': id.substring(5),
-    'name': name,
-    'email': email,
-    'profile_photo_url': imageUrl,
-    'created_at': createdAt?.toIso8601String(),
-    'email_verified_at': emailVerifiedAt?.toIso8601String(),
-    'groups': groups,
-    'avgEngagement': avgEngagement,
-    'totalMeetings': totalMeetings,
-  };
+        'id': id.substring(5),
+        'name': name,
+        'email': email,
+        'profile_photo_url': imageUrl,
+        'created_at': createdAt?.toIso8601String(),
+        'email_verified_at': emailVerifiedAt?.toIso8601String(),
+        'groups': groups,
+        'avgEngagement': avgEngagement,
+        'totalMeetings': totalMeetings,
+      };
 }
