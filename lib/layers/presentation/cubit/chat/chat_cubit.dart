@@ -138,6 +138,15 @@ class ChatCubit extends Cubit<ChatState> with BlocLoggy {
     chatUseCases.chooseFile();
   }
 
+  Future<void> sendChatMessage(
+      chatId, messageContent, participiantsId, senderId) async {
+    chatUseCases.sendMessageToChatStream(
+        chatId: chatId,
+        messageContent: messageContent,
+        participantIds: participiantsId,
+        senderId: senderId);
+  }
+
   void _onVideoCall(Result result) {
     print(result.event);
     print(result.username);

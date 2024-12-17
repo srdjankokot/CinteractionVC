@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:cinteraction_vc/layers/data/dto/meetings/meeting_dto.dart';
 import 'package:cinteraction_vc/layers/domain/entities/dashboard/dashboard_response.dart';
 
@@ -56,4 +58,12 @@ abstract class Api {
 
   Future<ApiResponse<List<ChatDto>>> getAllChats();
   Future<ApiResponse<ChatDetailsDto>> getChatById({required id});
+  Future<ApiResponse<MessageDto>> sendMessageToChat({
+    required String name,
+    required int chatId,
+    required int senderId,
+    required String message,
+    required List<int> participantIds,
+    List<File>? uploadedFiles,
+  });
 }

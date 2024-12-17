@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:io';
 import 'dart:math';
 
 import 'package:cinteraction_vc/layers/data/dto/chat/chat_detail_dto.dart';
@@ -9,6 +10,7 @@ import 'package:cinteraction_vc/layers/domain/usecases/chat/set_current_chat.dar
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/foundation.dart';
 import 'package:janus_client/janus_client.dart';
+import 'package:logging/logging.dart';
 import 'package:webrtc_interface/webrtc_interface.dart';
 
 import '../../../core/app/injector.dart';
@@ -19,6 +21,8 @@ import '../../domain/entities/user.dart';
 import '../../domain/source/api.dart';
 import '../dto/chat/last_message_dto.dart';
 import '../source/local/local_storage.dart';
+
+import '../../../core/util//conf.dart';
 
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:path/path.dart' as Path;
@@ -38,6 +42,8 @@ class ChatRepoImpl extends ChatRepo {
   late String displayName = user?.name ?? 'User $myId';
 
   // late JanusClient client;
+  late JanusClient _janusClient;
+  late WebSocketJanusTransport ws;
   late JanusSession _session;
   late JanusTextRoomPlugin textRoom;
   // late WebSocketJanusTransport ws;
@@ -51,6 +57,8 @@ class ChatRepoImpl extends ChatRepo {
   final _chatStream = StreamController<List<ChatDto>>.broadcast();
 
   final _chatDetailsStream = StreamController<ChatDetailsDto>.broadcast();
+
+  final _chatMessagesStream = StreamController<MessageDto>.broadcast();
 
   final _messagesStream = StreamController<List<ChatMessage>>.broadcast();
 
@@ -66,8 +74,6 @@ class ChatRepoImpl extends ChatRepo {
   Future<void> initialize() async {
     _loadUsers();
     _loadChats();
-
-    _session = await getIt.getAsync<JanusSession>();
     await _attachPlugin();
     _setup();
   }
@@ -83,13 +89,18 @@ class ChatRepoImpl extends ChatRepo {
   }
 
   @override
+  Stream<List<ChatDto>> getChatsStream() {
+    return _chatStream.stream;
+  }
+
+  @override
   Stream<ChatDetailsDto> getChatDetailsStream() {
     return _chatDetailsStream.stream;
   }
 
   @override
-  Stream<List<ChatDto>> getChatsStream() {
-    return _chatStream.stream;
+  Stream<MessageDto> sendMessageToChat() {
+    return _chatMessagesStream.stream;
   }
 
   @override
@@ -97,12 +108,28 @@ class ChatRepoImpl extends ChatRepo {
     return _messagesStream.stream;
   }
 
+  initializeJanus() async {
+    print('Initialiaziiiiing');
+    // rest = RestJanusTransport(url: servermap['janus_rest']);
+    ws = WebSocketJanusTransport(url: url);
+    _janusClient = JanusClient(
+        transport: ws!,
+        withCredentials: true,
+        apiSecret: '123456',
+        isUnifiedPlan: true,
+        iceServers: iceServers,
+        loggerLevel: Level.FINE);
+    _session = await _janusClient.createSession();
+
+    textRoom = await _session.attach<JanusTextRoomPlugin>();
+  }
+
   _editRoom() async {
     var exist = await textRoom.editRoom();
   }
 
-  _checkRoom() async {
-    var exist = await textRoom.exists(room);
+  _checkRoom(int id) async {
+    var exist = await textRoom.exists(id);
     print(exist);
     // JanusEvent event = JanusEvent.fromJson(exist);
 
@@ -112,7 +139,7 @@ class ChatRepoImpl extends ChatRepo {
       print('try to join publisher');
     } else {
       print('need to create the room');
-      await _createRoom(room);
+      await _createRoom(id);
     }
   }
 
@@ -122,8 +149,8 @@ class ChatRepoImpl extends ChatRepo {
     // };
     // var created = await textRoom.createRoom(roomId: room.toString(), adminKey: "supersecret", history: 10, isPrivate: false, description: "TestRoom", permanent: false, pin: "pin", secret: "secret", post: "https://7a2f-188-2-51-157.ngrok-free.app/api/message");
     var created =
-        await textRoom.createRoom(roomId: room.toString(), permanent: true);
-    print(created);
+        await textRoom.createRoom(roomId: roomId.toString(), permanent: true);
+    print('createdStatus $created');
     // JanusEvent event = JanusEvent.fromJson(created);
     // if (event.plugindata?.data['videoroom'] == 'created') {
     //   // await _joinPublisher();
@@ -134,6 +161,7 @@ class ChatRepoImpl extends ChatRepo {
 
   _attachPlugin() async {
     textRoom = await _session.attach<JanusTextRoomPlugin>();
+    print('textRoom $textRoom');
   }
 
   _leave() async {
@@ -148,6 +176,9 @@ class ChatRepoImpl extends ChatRepo {
 
   _setup() async {
     await textRoom.setup();
+    print(
+      'textRoom $textRoom',
+    );
     textRoom.onData?.listen((event) async {
       if (RTCDataChannelState.RTCDataChannelOpen == event) {
         await textRoom.joinRoom(
@@ -314,14 +345,6 @@ class ChatRepoImpl extends ChatRepo {
   }
 
   @override
-  Future<void> setCurrentChat(ChatDto chat) async {
-    currentChat = chat;
-    messages = getUserMessages()!;
-    _messagesStream.add(messages);
-    print("Changed current participant");
-  }
-
-  @override
   Future<void> messageSeen(int index) async {
     var participant = subscribers
         .firstWhere((item) => item.display == currentParticipant?.name);
@@ -341,10 +364,12 @@ class ChatRepoImpl extends ChatRepo {
     _matchParticipantWithUser();
   }
 
+  ////API FUNCTIONS/////////////////
+
   _loadChats() async {
     var response = await _api.getAllChats();
     print("Response: $response");
-
+    // initializeJanus();
     if (response.error == null) {
       List<ChatDto> chats = response.response ?? [];
       print('Chats loaded: $chats');
@@ -359,10 +384,21 @@ class ChatRepoImpl extends ChatRepo {
   }
 
   @override
+  Future<void> setCurrentChat(ChatDto chat) async {
+    currentChat = chat;
+    messages = getUserMessages()!;
+    _messagesStream.add(messages);
+    print("Changed current participant");
+  }
+
+  @override
   Future<void> getChatDetails(int id) async {
     try {
       var response = await _api.getChatById(id: id);
       if (response.error == null && response.response != null) {
+        print('janusSession: ${_session.sessionId}');
+
+        textRoom.createRoom(roomId: id.toString());
         _chatDetailsStream.add(response.response!);
         print('Res ${response.response}');
       } else {
@@ -370,6 +406,31 @@ class ChatRepoImpl extends ChatRepo {
       }
     } catch (e) {
       print("Error while fetching chat: $e");
+    }
+  }
+
+  @override
+  Future<void> sendMessageToChatWrapper(
+      int chatId, String messageContent, int senderId, List<int> participantIds,
+      {List<File>? uploadedFiles}) async {
+    try {
+      var response = await _api.sendMessageToChat(
+        name: 'Sample Name',
+        chatId: chatId,
+        senderId: senderId,
+        message: messageContent,
+        participantIds: participantIds,
+        uploadedFiles: uploadedFiles,
+      );
+      if (response.error == null && response.response != null) {
+        print('Message sent successfully: ${response.response}');
+
+        _chatMessagesStream.add(response.response!);
+      } else {
+        print("Error sending message: ${response.error}");
+      }
+    } catch (e) {
+      print("Error while sending message: $e");
     }
   }
 

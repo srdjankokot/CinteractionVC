@@ -524,8 +524,8 @@ class ChatRoomPage extends StatelessWidget {
                                         state.listType == ListType.Chats
                                             ? (state.isLoading
                                                 ? "Loading"
-                                                : (state.chatDetails?.authUser
-                                                        .name ??
+                                                : (state.chatDetails
+                                                        ?.chatName ??
                                                     "Unknown User"))
                                             : (state.currentParticipant?.name ??
                                                 ""),
@@ -632,9 +632,16 @@ class ChatRoomPage extends StatelessWidget {
                                     decoration: InputDecoration(
                                         hintText: "Send a message",
                                         suffixIcon: IconButton(
-                                          onPressed: () {
-                                            print('Pressed button');
-                                            sendMessage();
+                                          onPressed: () async {
+                                            await context
+                                                .read<ChatCubit>()
+                                                .sendChatMessage(
+                                                    4,
+                                                    messageFieldController.text,
+                                                    [6],
+                                                    state.chatDetails?.authUser
+                                                        .id);
+                                            messageFieldController.text = "";
                                           },
                                           icon: imageSVGAsset('icon_send')
                                               as Widget,
