@@ -1,8 +1,10 @@
+import 'dart:io';
 import 'dart:typed_data';
 
 import 'package:cinteraction_vc/layers/data/dto/chat/chat_detail_dto.dart';
 import 'package:cinteraction_vc/layers/data/dto/user_dto.dart';
 import 'package:cinteraction_vc/layers/domain/usecases/chat/get_chat_details.dart';
+import 'package:cinteraction_vc/layers/domain/usecases/chat/send_message.dart';
 import 'package:webrtc_interface/webrtc_interface.dart';
 
 import '../../../core/io/network/models/participant.dart';
@@ -20,6 +22,9 @@ abstract class ChatRepo {
   Stream<List<ChatDto>> getChatsStream();
   Stream<List<ChatMessage>> getMessageStream();
   Stream<ChatDetailsDto> getChatDetailsStream();
+  Future<void> sendMessageToChatWrapper(
+      int chatId, String messageContent, int senderId, List<int> participantIds,
+      {List<File>? uploadedFiles});
   Future<void> setCurrentParticipant(UserDto user);
   Future<void> setCurrentChat(ChatDto chat);
   Future<void> getChatDetails(int id);

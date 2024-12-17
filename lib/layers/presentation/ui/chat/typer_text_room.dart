@@ -25,6 +25,7 @@ class _TextRoomExampleState extends State<TypedTextRoom> {
   FocusNode focusNode = FocusNode();
 
   initializeClient() async {
+    print('TestInit');
     // rest = RestJanusTransport(url: servermap['janus_rest']);
     ws = WebSocketJanusTransport(url: url);
     client = JanusClient(
@@ -33,7 +34,8 @@ class _TextRoomExampleState extends State<TypedTextRoom> {
         apiSecret: apiSecret,
         isUnifiedPlan: true,
         iceServers: iceServers,
-        loggerLevel: Level.FINE); session = await client.createSession();
+        loggerLevel: Level.FINE);
+    session = await client.createSession();
 
     textRoom = await session.attach<JanusTextRoomPlugin>();
   }
@@ -72,7 +74,9 @@ class _TextRoomExampleState extends State<TypedTextRoom> {
                       padding: const EdgeInsets.all(8.0),
                       child: ElevatedButton(
                           onPressed: () async {
-                            await textRoom.joinRoom(myRoom, userNameController.text, display: userNameController.text);
+                            await textRoom.joinRoom(
+                                myRoom, userNameController.text,
+                                display: userNameController.text);
                             Navigator.of(context).pop(dialog);
                           },
                           child: Text('Join')),
@@ -87,7 +91,8 @@ class _TextRoomExampleState extends State<TypedTextRoom> {
                         Padding(
                           padding: const EdgeInsets.all(8.0),
                           child: TextFormField(
-                            decoration: InputDecoration.collapsed(hintText: "Username"),
+                            decoration:
+                                InputDecoration.collapsed(hintText: "Username"),
                             controller: userNameController,
                           ),
                         ),
@@ -113,7 +118,8 @@ class _TextRoomExampleState extends State<TypedTextRoom> {
         }
         if (data['textroom'] == 'leave') {
           setState(() {
-            textMessages.add({'from': data['username'], 'text': 'Left The Chat!'});
+            textMessages
+                .add({'from': data['username'], 'text': 'Left The Chat!'});
             Future.delayed(Duration(seconds: 1)).then((value) {
               userNameDisplayMap.remove(data['username']);
             });
@@ -122,15 +128,18 @@ class _TextRoomExampleState extends State<TypedTextRoom> {
         }
         if (data['textroom'] == 'join') {
           setState(() {
-            userNameDisplayMap.putIfAbsent(data['username'], () => data['display']);
-            textMessages.add({'from': data['username'], 'text': 'Joined The Chat!'});
+            userNameDisplayMap.putIfAbsent(
+                data['username'], () => data['display']);
+            textMessages
+                .add({'from': data['username'], 'text': 'Joined The Chat!'});
           });
           scrollToBottom();
         }
         if (data['participants'] != null) {
           (data['participants'] as List<dynamic>).forEach((element) {
             setState(() {
-              userNameDisplayMap.putIfAbsent(element['username'], () => element['display']);
+              userNameDisplayMap.putIfAbsent(
+                  element['username'], () => element['display']);
             });
           });
         }
@@ -201,20 +210,25 @@ class _TextRoomExampleState extends State<TypedTextRoom> {
           children: [
             Expanded(
                 child: ListView.builder(
-                  controller: controller,
-                  itemBuilder: (context, index) {
-                    return ListTile(
-                      title: Text(userNameDisplayMap[textMessages[index]['from']] != null ? userNameDisplayMap[textMessages[index]['from']]! : ''),
-                      subtitle: Text(textMessages[index]['text'] != null ? textMessages[index]['text'] : ''),
-                    );
-                  },
-                  itemCount: textMessages.length,
-                )),
+              controller: controller,
+              itemBuilder: (context, index) {
+                return ListTile(
+                  title: Text(
+                      userNameDisplayMap[textMessages[index]['from']] != null
+                          ? userNameDisplayMap[textMessages[index]['from']]!
+                          : ''),
+                  subtitle: Text(textMessages[index]['text'] != null
+                      ? textMessages[index]['text']
+                      : ''),
+                );
+              },
+              itemCount: textMessages.length,
+            )),
             Material(
               clipBehavior: Clip.none,
               elevation: 10,
               child: Container(
-                // height: 70,
+                  // height: 70,
                   padding: EdgeInsets.only(
                     left: 20,
                     right: 20,
@@ -233,7 +247,8 @@ class _TextRoomExampleState extends State<TypedTextRoom> {
                           },
                           controller: nameController,
                           cursorHeight: 24,
-                          decoration: InputDecoration.collapsed(hintText: "Type Your Message"),
+                          decoration: InputDecoration.collapsed(
+                              hintText: "Type Your Message"),
                           focusNode: focusNode,
                         ),
                         fit: FlexFit.tight,

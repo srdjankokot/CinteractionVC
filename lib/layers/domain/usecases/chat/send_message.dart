@@ -5,7 +5,9 @@ class SendMessage {
 
   final ChatRepo repo;
 
-  call({required String msg}) {
+  call({
+    required String msg,
+  }) {
     repo.sendMessage(msg);
   }
 }

@@ -400,7 +400,7 @@ class ApiImpl extends Api {
   }
 
   @override
-  Future<ApiResponse<MessageDto>> sentMessage({
+  Future<ApiResponse<MessageDto>> sendMessageToChat({
     required String name,
     required int chatId,
     required int senderId,

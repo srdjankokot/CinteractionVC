@@ -3,7 +3,7 @@ class LastMessageDto {
   final int chatId;
   final int senderId;
   final String? message;
-  final String? filePath;
+  final List? filePath;
   final DateTime createdAt;
   final DateTime updatedAt;
 
@@ -22,7 +22,7 @@ class LastMessageDto {
         chatId: json['chatId'] as int,
         senderId: json['sender_id'] as int,
         message: json['message'] as String?,
-        filePath: json['file_path'] as String?,
+        filePath: json['file_path'] as List?,
         createdAt: DateTime.parse(json['created_at'] as String),
         updatedAt: DateTime.parse(json['updated_at'] as String),
       );
