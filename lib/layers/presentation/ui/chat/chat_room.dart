@@ -70,8 +70,10 @@ class ChatRoomPage extends StatelessWidget {
       await audioPlayer.stop();
     }
 
-    Future<void> sendMessage() async {
-      await context.read<ChatCubit>().sendMessage(messageFieldController.text);
+    Future<void> sendMessage(roomId) async {
+      await context
+          .read<ChatCubit>()
+          .sendMessage(messageFieldController.text, roomId);
       messageFieldController.text = '';
     }
 
@@ -626,7 +628,7 @@ class ChatRoomPage extends StatelessWidget {
                                     textInputAction: TextInputAction.go,
                                     focusNode: messageFocusNode,
                                     onSubmitted: (value) {
-                                      sendMessage();
+                                      sendMessage(state.chatDetails?.chatId);
                                     },
                                     controller: messageFieldController,
                                     decoration: InputDecoration(
@@ -641,6 +643,8 @@ class ChatRoomPage extends StatelessWidget {
                                                     [6],
                                                     state.chatDetails?.authUser
                                                         .id);
+                                            sendMessage(
+                                                state.chatDetails?.chatId);
                                             messageFieldController.text = "";
                                           },
                                           icon: imageSVGAsset('icon_send')

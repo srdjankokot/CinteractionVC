@@ -95,8 +95,8 @@ class ChatCubit extends Cubit<ChatState> with BlocLoggy {
     emit(state.copyWith(chatDetails: chatDetails));
   }
 
-  Future<void> sendMessage(String msg) async {
-    chatUseCases.sendMessage(msg: msg);
+  Future<void> sendMessage(String msg, int roomId) async {
+    chatUseCases.sendMessage(msg: msg, roomId: roomId);
   }
 
   // Future<void> sendMessageToUser(int senderId, String message, int participiantId ) {
