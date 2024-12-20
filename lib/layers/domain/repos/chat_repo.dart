@@ -16,7 +16,7 @@ abstract class ChatRepo {
   const ChatRepo();
 
   Future<void> initialize();
-  Future<void> sendMessage(String msg);
+  Future<void> sendMessage(String msg, int roomId);
   Stream<List<Participant>> getParticipantsStream();
   Stream<List<UserDto>> getUsersStream();
   Stream<List<ChatDto>> getChatsStream();
