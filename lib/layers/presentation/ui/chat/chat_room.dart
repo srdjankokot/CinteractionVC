@@ -5,6 +5,7 @@ import 'package:cinteraction_vc/core/app/style.dart';
 import 'package:cinteraction_vc/core/extension/context.dart';
 import 'package:cinteraction_vc/core/extension/context_user.dart';
 import 'package:cinteraction_vc/layers/data/dto/chat/chat_detail_dto.dart';
+import 'package:cinteraction_vc/layers/data/dto/chat/last_message_dto.dart';
 import 'package:cinteraction_vc/layers/data/dto/user_dto.dart';
 import 'package:cinteraction_vc/layers/domain/usecases/chat/set_current_chat.dart';
 import 'package:cinteraction_vc/layers/presentation/cubit/chat/chat_cubit.dart';
@@ -70,10 +71,10 @@ class ChatRoomPage extends StatelessWidget {
       await audioPlayer.stop();
     }
 
-    Future<void> sendMessage(roomId) async {
+    Future<void> sendMessage(participiantId) async {
       await context
           .read<ChatCubit>()
-          .sendMessage(messageFieldController.text, roomId);
+          .sendMessage(messageFieldController.text, participiantId);
       messageFieldController.text = '';
     }
 
@@ -157,9 +158,7 @@ class ChatRoomPage extends StatelessWidget {
     }
 
     return BlocConsumer<ChatCubit, ChatState>(listener: (context, state) async {
-      if (state.chatDetails != null) {
-        print('nameListener ${state.chatDetails?.authUser}');
-      }
+      if (state.chatDetails != null) {}
 
       if (state.incomingCall ?? false) {
         // String callerName = "Caller Name"; // Replace with actual caller name
@@ -628,23 +627,33 @@ class ChatRoomPage extends StatelessWidget {
                                     textInputAction: TextInputAction.go,
                                     focusNode: messageFocusNode,
                                     onSubmitted: (value) {
-                                      sendMessage(state.chatDetails?.chatId);
+                                      // sendMessage(state.chatDetails?.chatId);
                                     },
                                     controller: messageFieldController,
                                     decoration: InputDecoration(
                                         hintText: "Send a message",
                                         suffixIcon: IconButton(
                                           onPressed: () async {
+                                            var participiansList = state
+                                                .chatDetails!.chatParticipants
+                                                .map((data) => data.id)
+                                                .toList();
+
+                                            var participantId = state
+                                                .chatDetails!
+                                                .chatParticipants
+                                                .first
+                                                .id;
+
                                             await context
                                                 .read<ChatCubit>()
                                                 .sendChatMessage(
-                                                    4,
+                                                    state.chatDetails?.chatId,
                                                     messageFieldController.text,
-                                                    [6],
+                                                    participiansList,
                                                     state.chatDetails?.authUser
                                                         .id);
-                                            sendMessage(
-                                                state.chatDetails?.chatId);
+                                            sendMessage(participantId);
                                             messageFieldController.text = "";
                                           },
                                           icon: imageSVGAsset('icon_send')

@@ -4,15 +4,14 @@ import '../../../../layers/domain/entities/chat_message.dart';
 
 part 'participant.g.dart';
 
-
 @JsonSerializable()
-class Participant{
-
+class Participant {
   Participant({
     required this.id,
     required this.display,
     this.publisher = false,
-    this.talking = false,});
+    this.talking = false,
+  });
 
   @JsonKey(name: 'id')
   String id;
@@ -31,7 +30,7 @@ class Participant{
   bool haveUnreadMessages = false;
 
   @override
-  factory Participant.fromJson(Map<String, dynamic> json) => _$ParticipantFromJson(json);
+  factory Participant.fromJson(Map<String, dynamic> json) =>
+      _$ParticipantFromJson(json);
   Map<String, dynamic> toJson() => _$ParticipantToJson(this);
-
 }

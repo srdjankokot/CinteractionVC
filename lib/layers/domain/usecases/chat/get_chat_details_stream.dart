@@ -7,7 +7,6 @@ class GetChatDetailsStream {
 
   final ChatRepo repo;
 
-  // Sada vraća Stream<ChatDetailsDto> umesto Stream<List<MessageDto>>
   Stream<ChatDetailsDto> call() {
     return repo.getChatDetailsStream();
   }
