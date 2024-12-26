@@ -4,27 +4,52 @@ import 'package:cinteraction_vc/layers/data/dto/chat/chat_detail_dto.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
-class ChatDetailsWidget extends StatelessWidget {
+class ChatDetailsWidget extends StatefulWidget {
   final ChatDetailsDto chatDetails;
 
   const ChatDetailsWidget(this.chatDetails, {Key? key}) : super(key: key);
 
   @override
+  _ChatDetailsWidgetState createState() => _ChatDetailsWidgetState();
+}
+
+class _ChatDetailsWidgetState extends State<ChatDetailsWidget> {
+  final ScrollController _scrollController = ScrollController();
+
+  @override
+  void didUpdateWidget(covariant ChatDetailsWidget oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    _scrollToBottom();
+  }
+
+  void _scrollToBottom() {
+    if (_scrollController.hasClients) {
+      _scrollController.animateTo(
+        _scrollController.position.minScrollExtent,
+        duration: const Duration(milliseconds: 300),
+        curve: Curves.easeOut,
+      );
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
-    // Sortiranje poruka po datumu (od najstarije ka najnovijoj)
-    final sortedMessages = List.of(chatDetails.messages)
+    final sortedMessages = List.of(widget.chatDetails.messages)
       ..sort((a, b) =>
-          DateTime.parse(a.createdAt).compareTo(DateTime.parse(b.createdAt)));
+          DateTime.parse(b.createdAt).compareTo(DateTime.parse(a.createdAt)));
 
     return Column(
       children: [
         const SizedBox(height: 40),
         Expanded(
           child: ListView.builder(
+            controller: _scrollController,
+            reverse: true,
             itemCount: sortedMessages.length,
             itemBuilder: (context, index) {
               final message = sortedMessages[index];
-              final isSentByUser = message.senderId == chatDetails.authUser.id;
+              final isSentByUser =
+                  message.senderId == widget.chatDetails.authUser.id;
 
               return Align(
                 alignment:
@@ -70,5 +95,11 @@ class ChatDetailsWidget extends StatelessWidget {
         ),
       ],
     );
+  }
+
+  @override
+  void dispose() {
+    _scrollController.dispose();
+    super.dispose();
   }
 }

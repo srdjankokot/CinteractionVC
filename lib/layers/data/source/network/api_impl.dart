@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:io';
 
 import 'package:cinteraction_vc/core/app/injector.dart';
@@ -410,6 +411,8 @@ class ApiImpl extends Api {
   }) async {
     Dio dio = await getIt.getAsync<Dio>();
 
+    print('participiantsID: $participantIds');
+
     var formData = FormData.fromMap({
       'name': name,
       'chat_id': chatId,
@@ -417,10 +420,6 @@ class ApiImpl extends Api {
       'message': message,
       'chat_participants':
           participantIds.map((id) => {'participant_id': id}).toList(),
-      if (uploadedFiles != null)
-        'uploaded_files': uploadedFiles.map(
-          (file) => MultipartFile.fromFileSync(file.path),
-        ),
     });
 
     try {
@@ -435,10 +434,21 @@ class ApiImpl extends Api {
         ),
       );
 
-      print("ChatMessageToServer: ${response.data}");
+      print('RESPONSEdata: ${response.data}');
+      if (response.data != null && response.data['messages'] != null) {
+        // Mapiranje 'messages' iz odgovora
+        var messages = response.data['messages'] as List;
+        var mappedMessages =
+            messages.map((msg) => MessageDto.fromJson(msg)).toList();
 
+        print('Mapped Messages: $mappedMessages');
+
+        // Vraćanje prvog ili kreiranje novog objekta MessageDto
+        if (mappedMessages.isNotEmpty) {
+          return ApiResponse(response: mappedMessages.first);
+        }
+      }
       var messageDto = MessageDto.fromJson(response.data);
-
       return ApiResponse(response: messageDto);
     } on DioException catch (e, s) {
       print("Greška: ${e.response?.statusMessage}");

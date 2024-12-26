@@ -16,12 +16,13 @@ abstract class ChatRepo {
   const ChatRepo();
 
   Future<void> initialize();
-  Future<void> sendMessage(String msg, int roomId);
+  Future<void> sendMessage(String msg, int participiantId);
   Stream<List<Participant>> getParticipantsStream();
   Stream<List<UserDto>> getUsersStream();
   Stream<List<ChatDto>> getChatsStream();
   Stream<List<ChatMessage>> getMessageStream();
   Stream<ChatDetailsDto> getChatDetailsStream();
+
   Future<void> sendMessageToChatWrapper(
       int chatId, String messageContent, int senderId, List<int> participantIds,
       {List<File>? uploadedFiles});

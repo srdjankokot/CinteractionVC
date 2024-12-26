@@ -33,32 +33,32 @@ class ChatParticipantDto {
 }
 
 class MessageDto {
-  final int id;
+  final int? id;
   final int chatId;
   final int senderId;
   final String? message;
-  final List<String> filePath;
+  final List<String>? filePath;
   final String createdAt;
   final String updatedAt;
 
   MessageDto({
-    required this.id,
+    this.id,
     required this.chatId,
     required this.senderId,
     this.message,
-    required this.filePath,
+    this.filePath,
     required this.createdAt,
     required this.updatedAt,
   });
 
   factory MessageDto.fromJson(Map<String, dynamic> json) => MessageDto(
-        id: json['id'] as int,
-        chatId: json['chat_id'] as int,
-        senderId: json['sender_id'] as int,
+        id: json['id'] as int? ?? 0,
+        chatId: json['chat_id'] as int? ?? 0,
+        senderId: json['sender_id'] as int? ?? 0,
         message: json['message'] as String?,
         filePath: List<String>.from(json['file_path'] ?? []),
-        createdAt: json['created_at'] as String,
-        updatedAt: json['updated_at'] as String,
+        createdAt: json['created_at'] as String? ?? '',
+        updatedAt: json['updated_at'] as String? ?? '',
       );
 
   Map<String, dynamic> toJson() => {

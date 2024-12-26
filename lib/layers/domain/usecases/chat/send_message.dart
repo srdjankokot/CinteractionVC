@@ -7,8 +7,8 @@ class SendMessage {
 
   call({
     required String msg,
-    required int roomId,
+    required int participiantId,
   }) {
-    repo.sendMessage(msg, roomId);
+    repo.sendMessage(msg, participiantId);
   }
 }

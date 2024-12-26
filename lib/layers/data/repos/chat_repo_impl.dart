@@ -57,12 +57,14 @@ class ChatRepoImpl extends ChatRepo {
 
   final _chatDetailsStream = StreamController<ChatDetailsDto>.broadcast();
 
-  final _chatMessagesStream = StreamController<MessageDto>.broadcast();
+  final _chatMessagesStream = StreamController<List<MessageDto>>.broadcast();
 
   final _messagesStream = StreamController<List<ChatMessage>>.broadcast();
 
   List<Participant> subscribers = [];
   List<UserDto> users = [];
+
+  late ChatDetailsDto chatDetailsDto;
 
   UserDto? currentParticipant;
   List<ChatMessage> messages = [];
@@ -99,7 +101,7 @@ class ChatRepoImpl extends ChatRepo {
   }
 
   @override
-  Stream<MessageDto> sendMessageToChat() {
+  Stream<List<MessageDto>> sendMessageToChat() {
     return _chatMessagesStream.stream;
   }
 
@@ -134,7 +136,6 @@ class ChatRepoImpl extends ChatRepo {
     // var created = await textRoom.createRoom(roomId: room.toString(), adminKey: "supersecret", history: 10, isPrivate: false, description: "TestRoom", permanent: false, pin: "pin", secret: "secret", post: "https://7a2f-188-2-51-157.ngrok-free.app/api/message");
     var created =
         await textRoom.createRoom(roomId: roomId.toString(), permanent: true);
-    print('createdStatus $created');
     // JanusEvent event = JanusEvent.fromJson(created);
     // if (event.plugindata?.data['videoroom'] == 'created') {
     //   // await _joinPublisher();
@@ -174,7 +175,6 @@ class ChatRepoImpl extends ChatRepo {
         );
       }
     });
-    print('Ucitana soba!');
     _setListener();
   }
 
@@ -213,11 +213,24 @@ class ChatRepoImpl extends ChatRepo {
     textRoom.data?.listen((event) {
       print('recieved message from data channel $event');
       dynamic data = parse(event.text);
-      print(data);
       if (data != null) {
         if (data['textroom'] == 'message') {
-          var participant = subscribers.firstWhere((item) =>
-              item.id.toString() == data['from']); // or any default value);
+          var initChat = chatDetailsDto.chatParticipants
+              .firstWhere((item) => 'hash_${item.id}' == data['from']);
+          var senderId = int.parse(data['from'].replaceAll('hash_', ''));
+          if (initChat != null) {
+            chatDetailsDto.messages.add(MessageDto(
+                chatId: chatDetailsDto.chatId,
+                senderId: senderId,
+                createdAt: data['date'],
+                message: data['text'],
+                updatedAt: data['date']));
+
+            _chatDetailsStream.add(chatDetailsDto);
+          }
+
+          var participant = subscribers
+              .firstWhere((item) => item.id.toString() == data['from']);
 
           participant.haveUnreadMessages = _haveUnread(participant);
           // participant.messages.add(data['text']);
@@ -231,6 +244,7 @@ class ChatRepoImpl extends ChatRepo {
           print("Unreaded messages: ${participant.haveUnreadMessages}");
 
           // messages.add(data['text']);
+
           _messagesStream.add(getUserMessages()!);
           _participantsStream.add(subscribers);
           _matchParticipantWithUser();
@@ -297,12 +311,11 @@ class ChatRepoImpl extends ChatRepo {
   }
 
   @override
-  Future<void> sendMessage(String msg, int roomId) async {
+  Future<void> sendMessage(String msg, int participiantId) async {
     var pars = await textRoom.listParticipants(room);
     print('PAROVI $pars');
     // currentParticipant.display
-    await textRoom.sendMessage(room, msg,
-        to: currentParticipant?.id.toString());
+    await textRoom.sendMessage(room, msg, to: 'hash_$participiantId');
     // var send =  await _api.sentChatMessage(text: msg, to: currentParticipant?.display, from: displayName);
 
     // print(send);
@@ -343,48 +356,14 @@ class ChatRepoImpl extends ChatRepo {
     _matchParticipantWithUser();
   }
 
-  Future<void> createTextRoom(
-      {required int roomId, String description = 'New Room'}) async {
-    final createRoomRequest = {
-      'request': 'create',
-      'textroom': 'create',
-      'room': roomId,
-      'permanent': false,
-      'description': description,
-      'is_private': false,
-    };
-
-    await textRoom.send(data: createRoomRequest);
-
-    print('Room created with ID: $roomId');
-  }
-
-  Future<void> joinRoom(int roomId) async {
-    final joinRoomRequest = {
-      'request': 'join',
-      'room': roomId,
-      'ptype': 'subscriber', // ili 'subscriber', zavisno od uloge
-      'display': 'Radovan Kljestan', // Dodaj ime koje će se videti
-    };
-
-    await textRoom.send(data: joinRoomRequest);
-    print('Successfully joined room: $roomId');
-    var participants = await textRoom.listParticipants(roomId);
-    print('Participants in room $roomId: $participants');
-  }
-
   ////API FUNCTIONS/////////////////
 
   _loadChats() async {
     var response = await _api.getAllChats();
-    print("Response: $response");
     if (response.error == null) {
       List<ChatDto> chats = response.response ?? [];
+      print('ChatsResponse: $chats');
       _chatStream.add(chats);
-
-      for (var chat in chats) {
-        print('Chat: $chat');
-      }
     } else {
       print('Error: ${response.error}');
     }
@@ -402,10 +381,9 @@ class ChatRepoImpl extends ChatRepo {
     try {
       var response = await _api.getChatById(id: id);
       if (response.error == null && response.response != null) {
-        // createTextRoom(roomId: id);
-        joinRoom(room);
-
         _chatDetailsStream.add(response.response!);
+        chatDetailsDto = response.response!;
+        print('chatDTAFAFA $chatDetailsDto');
       } else {
         print("Error: ${response.error}");
       }
@@ -418,26 +396,16 @@ class ChatRepoImpl extends ChatRepo {
   Future<void> sendMessageToChatWrapper(
       int chatId, String messageContent, int senderId, List<int> participantIds,
       {List<File>? uploadedFiles}) async {
-    try {
-      var response = await _api.sendMessageToChat(
-        name: 'Sample Name',
-        chatId: chatId,
-        senderId: senderId,
-        message: messageContent,
-        participantIds: participantIds,
-        uploadedFiles: uploadedFiles,
-      );
-      if (response.error == null && response.response != null) {
-        print('Message sent successfully: ${response.response}');
-
-        _chatMessagesStream.add(response.response!);
-      } else {
-        print("Error sending message: ${response.error}");
-      }
-    } catch (e) {
-      print("Error while sending message: $e");
-    }
+    await _api.sendMessageToChat(
+      name: 'Sample Name',
+      chatId: chatId,
+      senderId: senderId,
+      message: messageContent,
+      participantIds: participantIds,
+    );
   }
+
+  //////////////////////////////////////
 
   @override
   Future<void> chooseFile() async {
