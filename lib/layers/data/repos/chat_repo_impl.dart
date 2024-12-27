@@ -145,9 +145,7 @@ class ChatRepoImpl extends ChatRepo {
   }
 
   _attachPlugin() async {
-    print('eeeeeeeeeeeee');
     textRoom = await _session.attach<JanusTextRoomPlugin>();
-    print('aaa $textRoom');
   }
 
   _leave() async {
@@ -162,9 +160,6 @@ class ChatRepoImpl extends ChatRepo {
 
   _setup() async {
     await textRoom.setup();
-    print(
-      'textRoom $textRoom',
-    );
     textRoom.onData?.listen((event) async {
       if (RTCDataChannelState.RTCDataChannelOpen == event) {
         await textRoom.joinRoom(
@@ -218,6 +213,8 @@ class ChatRepoImpl extends ChatRepo {
           var initChat = chatDetailsDto.chatParticipants
               .firstWhere((item) => 'hash_${item.id}' == data['from']);
           var senderId = int.parse(data['from'].replaceAll('hash_', ''));
+          print('senderID: $senderId');
+          print('currentUserID: ${chatDetailsDto.authUser.id}');
           if (initChat != null) {
             chatDetailsDto.messages.add(MessageDto(
                 chatId: chatDetailsDto.chatId,
@@ -225,9 +222,9 @@ class ChatRepoImpl extends ChatRepo {
                 createdAt: data['date'],
                 message: data['text'],
                 updatedAt: data['date']));
-
-            _chatDetailsStream.add(chatDetailsDto);
           }
+
+          _chatDetailsStream.add(chatDetailsDto);
 
           var participant = subscribers
               .firstWhere((item) => item.id.toString() == data['from']);
@@ -316,6 +313,23 @@ class ChatRepoImpl extends ChatRepo {
     print('PAROVI $pars');
     // currentParticipant.display
     await textRoom.sendMessage(room, msg, to: 'hash_$participiantId');
+
+    chatDetailsDto.messages.add(MessageDto(
+        chatId: chatDetailsDto.chatId,
+        senderId: chatDetailsDto.authUser.id,
+        message: msg,
+        createdAt: DateTime.now().toString(),
+        updatedAt: DateTime.now().toString()));
+
+    final updatedChatDetails = ChatDetailsDto(
+      chatName: chatDetailsDto.chatName,
+      authUser: chatDetailsDto.authUser,
+      chatId: chatDetailsDto.chatId,
+      chatParticipants: chatDetailsDto.chatParticipants,
+      messages: [...chatDetailsDto.messages],
+    );
+
+    _chatDetailsStream.add(updatedChatDetails);
     // var send =  await _api.sentChatMessage(text: msg, to: currentParticipant?.display, from: displayName);
 
     // print(send);
