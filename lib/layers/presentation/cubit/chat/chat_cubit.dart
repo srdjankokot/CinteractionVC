@@ -126,6 +126,18 @@ class ChatCubit extends Cubit<ChatState> with BlocLoggy {
     }
   }
 
+  Future<void> deleteChatMessage(int msgId, int chatId) async {
+    chatUseCases.chatDeleteMessage(msgId);
+    final chatDetails = await chatUseCases.getChatDetails(chatId);
+    emit(state.copyWith(chatDetails: chatDetails));
+  }
+
+  Future<void> editChatMessage(int msgId, String message, int chatId) async {
+    chatUseCases.chatEditMessage(msgId, message);
+    final chatDetails = await chatUseCases.getChatDetails(chatId);
+    emit(state.copyWith(chatDetails: chatDetails));
+  }
+
   Future<void> chatMessageSeen(int index) async {
     chatUseCases.messageSeen(index: index);
   }

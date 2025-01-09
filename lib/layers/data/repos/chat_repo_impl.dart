@@ -309,8 +309,6 @@ class ChatRepoImpl extends ChatRepo {
 
   @override
   Future<void> sendMessage(String msg, int participiantId) async {
-    var pars = await textRoom.listParticipants(room);
-    print('PAROVI $pars');
     // currentParticipant.display
     await textRoom.sendMessage(room, msg, to: 'hash_$participiantId');
 
@@ -367,17 +365,19 @@ class ChatRepoImpl extends ChatRepo {
   _loadUsers() async {
     var response = await _api.getCompanyUsers();
     users = response.response!.where((element) => element.id != myId).toList();
+    // print('users: $users.')
+    setCurrentParticipant(response.response![0]);
     _matchParticipantWithUser();
   }
 
-  ////API FUNCTIONS/////////////////
+  /////////////API FUNCTIONS/////////////////
 
   _loadChats() async {
     var response = await _api.getAllChats();
     if (response.error == null) {
       List<ChatDto> chats = response.response ?? [];
-      print('ChatsResponse: $chats');
       _chatStream.add(chats);
+      getChatDetails(chats[0].id);
     } else {
       print('Error: ${response.error}');
     }
@@ -397,7 +397,6 @@ class ChatRepoImpl extends ChatRepo {
       if (response.error == null && response.response != null) {
         _chatDetailsStream.add(response.response!);
         chatDetailsDto = response.response!;
-        print('chatDTAFAFA $chatDetailsDto');
       } else {
         print("Error: ${response.error}");
       }
@@ -407,11 +406,41 @@ class ChatRepoImpl extends ChatRepo {
   }
 
   @override
+  Future<void> deleteMessage(int id) async {
+    try {
+      var response = await _api.deleteMessageById(id: id);
+      if (response.error == null && response.response != null) {
+        _chatDetailsStream.add(response.response!);
+        chatDetailsDto = response.response!;
+      } else {
+        print("Error: ${response.error}");
+      }
+    } catch (e) {
+      print("Error while delete message: $e");
+    }
+  }
+
+  @override
+  Future<void> editMessage(int id, String message) async {
+    try {
+      var response = await _api.editMessageById(id: id, message: message);
+      if (response.error == null && response.response != null) {
+        _chatDetailsStream.add(response.response!);
+        chatDetailsDto = response.response!;
+      } else {
+        print("Error: ${response.error}");
+      }
+    } catch (e) {
+      print('Error while edit message: $e');
+    }
+  }
+
+  @override
   Future<void> sendMessageToChatWrapper(
       int chatId, String messageContent, int senderId, List<int> participantIds,
       {List<File>? uploadedFiles}) async {
     await _api.sendMessageToChat(
-      name: 'Sample Name',
+      name: 'Test',
       chatId: chatId,
       senderId: senderId,
       message: messageContent,

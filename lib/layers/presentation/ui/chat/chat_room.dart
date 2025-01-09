@@ -596,24 +596,32 @@ class ChatRoomPage extends StatelessWidget {
                                               : ChatDetailsWidget(
                                                   state.chatDetails!),
                                         )
-                                      : ListView.builder(
-                                          controller: chatController,
-                                          itemCount: state.messages?.length,
-                                          itemBuilder: (BuildContext context,
-                                              int index) {
-                                            return VisibilityDetector(
-                                                key: Key(index.toString()),
-                                                onVisibilityChanged:
-                                                    (VisibilityInfo info) {
-                                                  context
-                                                      .read<ChatCubit>()
-                                                      .chatMessageSeen(index);
-                                                },
-                                                child: ChatMessageWidget(
-                                                    message: state
-                                                        .messages![index]));
-                                          },
-                                        ),
+                                      : (state.messages == null ||
+                                              state.messages!.isEmpty)
+                                          ? const Center(
+                                              child: Text('No Messages'),
+                                            )
+                                          : ListView.builder(
+                                              controller: chatController,
+                                              itemCount: state.messages!.length,
+                                              itemBuilder:
+                                                  (BuildContext context,
+                                                      int index) {
+                                                return VisibilityDetector(
+                                                  key: Key(index.toString()),
+                                                  onVisibilityChanged:
+                                                      (VisibilityInfo info) {
+                                                    context
+                                                        .read<ChatCubit>()
+                                                        .chatMessageSeen(index);
+                                                  },
+                                                  child: ChatMessageWidget(
+                                                    message:
+                                                        state.messages![index],
+                                                  ),
+                                                );
+                                              },
+                                            ),
                                 ],
                               ),
                             ),
