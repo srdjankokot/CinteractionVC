@@ -371,9 +371,6 @@ class ApiImpl extends Api {
     try {
       Dio dio = await getIt.getAsync<Dio>();
       Response response = await dio.get(Urls.getAllChats);
-      print('ResponseForAll');
-      print(response);
-
       List<ChatDto> chats = [];
       for (var chat in response.data['data']) {
         var chatDto = ChatDto.fromJson(chat as Map<String, dynamic>);
@@ -401,6 +398,39 @@ class ApiImpl extends Api {
   }
 
   @override
+  Future<ApiResponse<ChatDetailsDto>> deleteMessageById(
+      {required dynamic id}) async {
+    try {
+      Dio dio = await getIt.getAsync<Dio>();
+      Response response = await dio.delete('${Urls.deleteMessageById}$id');
+      var chatDetails = ChatDetailsDto.fromJson(response.data);
+      return ApiResponse(response: chatDetails);
+    } on DioException catch (e) {
+      return ApiResponse(error: ApiErrorDto.fromDioException(e));
+    }
+  }
+
+  @override
+  Future<ApiResponse<ChatDetailsDto>> editMessageById({
+    required int id,
+    required String message,
+  }) async {
+    try {
+      Dio dio = await getIt.getAsync<Dio>();
+      Response response = await dio.put(
+        '${Urls.editMessage}$id',
+        data: {
+          'message': message,
+        },
+      );
+      var chatDetails = ChatDetailsDto.fromJson(response.data);
+      return ApiResponse(response: chatDetails);
+    } on DioException catch (e) {
+      return ApiResponse(error: ApiErrorDto.fromDioException(e));
+    }
+  }
+
+  @override
   Future<ApiResponse<MessageDto>> sendMessageToChat({
     required String name,
     required int chatId,
@@ -410,9 +440,6 @@ class ApiImpl extends Api {
     List<File>? uploadedFiles,
   }) async {
     Dio dio = await getIt.getAsync<Dio>();
-
-    print('participiantsID: $participantIds');
-
     var formData = FormData.fromMap({
       'name': name,
       'chat_id': chatId,
@@ -426,32 +453,18 @@ class ApiImpl extends Api {
       Response response = await dio.post(
         Urls.sentChatMessage,
         data: formData,
-        options: Options(
-          headers: {
-            'Content-Type': 'multipart/form-data',
-            'Accept': 'application/json',
-          },
-        ),
       );
-
-      print('RESPONSEdata: ${response.data}');
       if (response.data != null && response.data['messages'] != null) {
-        // Mapiranje 'messages' iz odgovora
         var messages = response.data['messages'] as List;
         var mappedMessages =
             messages.map((msg) => MessageDto.fromJson(msg)).toList();
-
-        print('Mapped Messages: $mappedMessages');
-
-        // Vraćanje prvog ili kreiranje novog objekta MessageDto
         if (mappedMessages.isNotEmpty) {
           return ApiResponse(response: mappedMessages.first);
         }
       }
       var messageDto = MessageDto.fromJson(response.data);
       return ApiResponse(response: messageDto);
-    } on DioException catch (e, s) {
-      print("Greška: ${e.response?.statusMessage}");
+    } on DioException catch (e) {
       return ApiResponse(error: ApiErrorDto.fromDioException(e));
     }
   }
