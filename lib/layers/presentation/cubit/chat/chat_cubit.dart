@@ -28,7 +28,7 @@ class ChatCubit extends Cubit<ChatState> with BlocLoggy {
     _load();
   }
 
-  
+
   void _load() async {
     await chatUseCases.chatInitialize();
     await callUseCases.initialize();
