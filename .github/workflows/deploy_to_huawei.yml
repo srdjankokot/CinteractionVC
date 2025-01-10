@@ -11,6 +11,7 @@ on:
     branches: [ "huawei" ]
   pull_request:
     branches: [ "huawei" ]
+  workflow_dispatch:
 
 jobs:
   build:
