@@ -11,7 +11,8 @@ on:
     branches: [ "huawei" ]
   pull_request:
     branches: [ "huawei" ]
-  workflow_dispatch:    # <-- This allows manual triggers
+  workflow_dispatch:
+    
 jobs:
   build:
     runs-on: ubuntu-latest
