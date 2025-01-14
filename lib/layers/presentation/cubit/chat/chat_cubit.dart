@@ -52,7 +52,7 @@ class ChatCubit extends Cubit<ChatState> with BlocLoggy {
   void _onMessages(List<ChatMessage> messages) {
     var unread = messages.length;
     emit(state.copyWith(
-        isInitial: false,
+        isInitial: true,
         messages: messages,
         numberOfParticipants: Random().nextInt(10000),
         unreadMessages: unread));
@@ -86,13 +86,17 @@ class ChatCubit extends Cubit<ChatState> with BlocLoggy {
   }
 
   void _onChats(List<ChatDto> chats) {
-    print("_onChats: $chats ");
-    emit(state.copyWith(chats: chats));
+    emit(state.copyWith(
+      isLoading: false,
+      chats: chats,
+    ));
   }
 
   void _onChatDetails(ChatDetailsDto chatDetails) {
-    print("onMessages $chatDetails");
-    emit(state.copyWith(chatDetails: chatDetails));
+    emit(state.copyWith(
+      isLoading: false,
+      chatDetails: chatDetails,
+    ));
   }
 
   Future<void> sendMessage(String msg, int participiantId) async {
@@ -114,15 +118,21 @@ class ChatCubit extends Cubit<ChatState> with BlocLoggy {
   }
 
   Future<void> getChatDetails(int chatId) async {
-    emit(state.copyWith(isLoading: true));
-
     try {
       final chatDetails = await chatUseCases.getChatDetails(chatId);
-      emit(state.copyWith(chatDetails: chatDetails));
+      emit(state.copyWith(chatDetails: chatDetails, isLoading: true));
     } catch (e) {
       print("Error fetching chat details: $e");
-    } finally {
-      emit(state.copyWith(isLoading: false));
+    }
+  }
+
+  Future<void> getChatDetailsByParticipiant(int participiantId) async {
+    try {
+      final chatDetails =
+          await chatUseCases.getChatDetailsByParticipiant(participiantId);
+      emit(state.copyWith(chatDetails: chatDetails, isLoading: true));
+    } catch (e) {
+      print("Error while fetching chat by participiant: $e");
     }
   }
 
@@ -150,18 +160,21 @@ class ChatCubit extends Cubit<ChatState> with BlocLoggy {
     chatUseCases.chooseFile();
   }
 
-  Future<void> sendChatMessage(
-      chatId, messageContent, participiantsId, senderId) async {
+  Future<void> sendChatMessage({
+    int? chatId,
+    required String messageContent,
+    required List<int> participiantsId,
+    required int senderId,
+  }) async {
     chatUseCases.sendMessageToChatStream(
-        chatId: chatId,
-        messageContent: messageContent,
-        participantIds: participiantsId,
-        senderId: senderId);
+      chatId: chatId ?? 0,
+      messageContent: messageContent,
+      participantIds: participiantsId,
+      senderId: senderId,
+    );
   }
 
   void _onVideoCall(Result result) {
-    print(result.event);
-    print(result.username);
     if (result.event == "incomingcall") {
       ;
       emit(state.copyWith(

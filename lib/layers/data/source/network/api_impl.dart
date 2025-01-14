@@ -60,8 +60,6 @@ class ApiImpl extends Api {
       Dio dio = await getIt.getAsync<Dio>();
       Response response = await dio.get(Urls.getCompanyUsers);
 
-      print('PROLAZIIIIII');
-
       List<UserDto> users = [];
       for (var u in response.data['data']) {
         var user = UserDto.fromJson(u as Map<String, dynamic>);
@@ -122,7 +120,7 @@ class ApiImpl extends Api {
     try {
       var formData = {
         'streamId': streamId,
-        'user_id': int.parse(userId),
+        'user_id': int.parse(userId.toString().replaceAll("hash_", '')),
         'timezone': 'Europe/Belgrade',
         'recording': false
       };
@@ -142,7 +140,10 @@ class ApiImpl extends Api {
   Future<bool> endCall({required callId, required userId}) async {
     Dio dio = await getIt.getAsync<Dio>();
 
-    var formData = FormData.fromMap({'call_id': callId, 'user_id': userId});
+    var formData = FormData.fromMap({
+      'call_id': callId,
+      'user_id': int.parse(userId.toString().replaceAll("hash_", ''))
+    });
     Response response = await dio.post(Urls.endCall, data: formData);
     print('end call by user $response');
 
@@ -398,6 +399,20 @@ class ApiImpl extends Api {
   }
 
   @override
+  Future<ApiResponse<ChatDetailsDto>> getChatByParticipiant(
+      {required dynamic id}) async {
+    try {
+      Dio dio = await getIt.getAsync<Dio>();
+      Response response = await dio.get('${Urls.getChatByParticipiant}$id');
+      var chatDetails = ChatDetailsDto.fromJson(response.data);
+
+      return ApiResponse(response: chatDetails);
+    } on DioException catch (e) {
+      return ApiResponse(error: ApiErrorDto.fromDioException(e));
+    }
+  }
+
+  @override
   Future<ApiResponse<ChatDetailsDto>> deleteMessageById(
       {required dynamic id}) async {
     try {
@@ -442,7 +457,7 @@ class ApiImpl extends Api {
     Dio dio = await getIt.getAsync<Dio>();
     var formData = FormData.fromMap({
       'name': name,
-      'chat_id': chatId,
+      // 'chat_id': chatId,
       'sender_id': senderId,
       'message': message,
       'chat_participants':
