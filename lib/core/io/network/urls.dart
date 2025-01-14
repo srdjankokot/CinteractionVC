@@ -37,6 +37,7 @@ class Urls {
   ////////CHAT_URLS////////
   static String getAllChats = '$baseUrl/api/chats';
   static String getChatById = '$baseUrl/api/chats/';
+  static String getChatByParticipiant = '$baseUrl/api/chats/user/';
   static String sentChatMessage = '$baseUrl/api/chats/create';
   static String deleteMessageById = '$baseUrl/api/chats/delete/message/';
   static String editMessage = '$baseUrl/api/chats/edit/message/';

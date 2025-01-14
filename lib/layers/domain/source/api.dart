@@ -58,6 +58,7 @@ abstract class Api {
 
   Future<ApiResponse<List<ChatDto>>> getAllChats();
   Future<ApiResponse<ChatDetailsDto>> getChatById({required id});
+  Future<ApiResponse<ChatDetailsDto>> getChatByParticipiant({required id});
   Future<ApiResponse<ChatDetailsDto>> deleteMessageById({required id});
   Future<ApiResponse<ChatDetailsDto>> editMessageById(
       {required int id, required String message});

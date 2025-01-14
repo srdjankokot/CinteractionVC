@@ -7,26 +7,51 @@ import '../../../cubit/chat/chat_cubit.dart';
 import '../../../cubit/chat/chat_state.dart';
 import '../../profile/ui/widget/user_image.dart';
 
-class UsersListView extends StatelessWidget {
+class UsersListView extends StatefulWidget {
   final ChatState state;
 
   const UsersListView({Key? key, required this.state}) : super(key: key);
 
   @override
+  State<UsersListView> createState() => _UsersListViewState();
+}
+
+class _UsersListViewState extends State<UsersListView> {
+  int? selectedUserId;
+
+  @override
+  void initState() {
+    super.initState();
+    if (widget.state.users != null && widget.state.users!.isNotEmpty) {
+      selectedUserId =
+          int.parse(widget.state.users!.first.id.replaceFirst('hash_', ''));
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        context.read<ChatCubit>().getChatDetailsByParticipiant(selectedUserId!);
+        context.read<ChatCubit>().setCurrentParticipant(widget.state.users![0]);
+      });
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
     return ListView.builder(
-      itemCount: state.users?.length ?? 0,
+      itemCount: widget.state.users?.length ?? 0,
       itemBuilder: (context, index) {
-        var user = state.users![index];
+        var user = widget.state.users![index];
+        int userId = int.parse(user.id.replaceFirst('hash_', ''));
 
         return GestureDetector(
-          onTap: () {
-            context.read<ChatCubit>().setCurrentParticipant(user);
+          onTap: () async {
+            setState(() {
+              selectedUserId = userId;
+            });
+            await context
+                .read<ChatCubit>()
+                .getChatDetailsByParticipiant(userId);
+            await context.read<ChatCubit>().setCurrentParticipant(user);
           },
           child: Container(
-            color: state.currentChat?.id == state.chatDetails?.chatId
-                ? ColorConstants.kPrimaryColor.withOpacity(0.2)
-                : Colors.white,
+            color: userId == selectedUserId ? Colors.blue[100] : Colors.white,
             child: Padding(
               padding: const EdgeInsets.all(4.0),
               child: Row(
