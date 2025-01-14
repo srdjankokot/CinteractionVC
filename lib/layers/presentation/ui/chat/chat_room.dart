@@ -158,8 +158,6 @@ class ChatRoomPage extends StatelessWidget {
     }
 
     return BlocConsumer<ChatCubit, ChatState>(listener: (context, state) async {
-      if (state.chatDetails != null) {}
-
       if (state.incomingCall ?? false) {
         // String callerName = "Caller Name"; // Replace with actual caller name
         await showIncomingCallDialog(context, state.caller!);
@@ -524,9 +522,11 @@ class ChatRoomPage extends StatelessWidget {
                                       Text(
                                         state.listType == ListType.Chats
                                             ? (state.isLoading
-                                                ? "Loading"
-                                                : (state.chatDetails
-                                                        ?.chatName ??
+                                                ? ""
+                                                : (state
+                                                        .chatDetails
+                                                        ?.chatParticipants[0]
+                                                        .name ??
                                                     "Unknown User"))
                                             : (state.currentParticipant?.name ??
                                                 ""),
@@ -587,41 +587,13 @@ class ChatRoomPage extends StatelessWidget {
                                     onCreated: (ctrl) => controller = ctrl,
                                     onDrop: onFileDropped,
                                   ),
-                                  state.listType == ListType.Chats
-                                      ? Container(
-                                          child: state.chatDetails?.messages ==
-                                                  null
-                                              ? const Center(
-                                                  child: Text('No Messages'))
-                                              : ChatDetailsWidget(
-                                                  state.chatDetails!),
-                                        )
-                                      : (state.messages == null ||
-                                              state.messages!.isEmpty)
-                                          ? const Center(
-                                              child: Text('No Messages'),
-                                            )
-                                          : ListView.builder(
-                                              controller: chatController,
-                                              itemCount: state.messages!.length,
-                                              itemBuilder:
-                                                  (BuildContext context,
-                                                      int index) {
-                                                return VisibilityDetector(
-                                                  key: Key(index.toString()),
-                                                  onVisibilityChanged:
-                                                      (VisibilityInfo info) {
-                                                    context
-                                                        .read<ChatCubit>()
-                                                        .chatMessageSeen(index);
-                                                  },
-                                                  child: ChatMessageWidget(
-                                                    message:
-                                                        state.messages![index],
-                                                  ),
-                                                );
-                                              },
-                                            ),
+                                  Container(
+                                    child: !state.isLoading
+                                        ? ChatDetailsWidget(state)
+                                        : const Center(
+                                            child: CircularProgressIndicator(),
+                                          ),
+                                  )
                                 ],
                               ),
                             ),
@@ -634,8 +606,26 @@ class ChatRoomPage extends StatelessWidget {
                                   child: TextField(
                                     textInputAction: TextInputAction.go,
                                     focusNode: messageFocusNode,
-                                    onSubmitted: (value) {
-                                      // sendMessage(state.chatDetails?.chatId);
+                                    onSubmitted: (value) async {
+                                      var participiansList = state
+                                          .chatDetails!.chatParticipants
+                                          .map((data) => data.id)
+                                          .toList();
+
+                                      var participantId = state.chatDetails!
+                                          .chatParticipants.first.id;
+
+                                      await context
+                                          .read<ChatCubit>()
+                                          .sendChatMessage(
+                                              chatId: state.chatDetails!.chatId,
+                                              messageContent:
+                                                  messageFieldController.text,
+                                              participiantsId: participiansList,
+                                              senderId: state
+                                                  .chatDetails!.authUser.id);
+                                      sendMessage(participantId);
+                                      messageFieldController.text = "";
                                     },
                                     controller: messageFieldController,
                                     decoration: InputDecoration(
@@ -656,11 +646,15 @@ class ChatRoomPage extends StatelessWidget {
                                             await context
                                                 .read<ChatCubit>()
                                                 .sendChatMessage(
-                                                    state.chatDetails?.chatId,
-                                                    messageFieldController.text,
-                                                    participiansList,
-                                                    state.chatDetails?.authUser
-                                                        .id);
+                                                    chatId: state
+                                                        .chatDetails!.chatId,
+                                                    messageContent:
+                                                        messageFieldController
+                                                            .text,
+                                                    participiantsId:
+                                                        participiansList,
+                                                    senderId: state.chatDetails!
+                                                        .authUser.id);
                                             sendMessage(participantId);
                                             messageFieldController.text = "";
                                           },

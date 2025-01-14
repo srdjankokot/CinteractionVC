@@ -217,7 +217,7 @@ class ChatRepoImpl extends ChatRepo {
           print('currentUserID: ${chatDetailsDto.authUser.id}');
           if (initChat != null) {
             chatDetailsDto.messages.add(MessageDto(
-                chatId: chatDetailsDto.chatId,
+                chatId: chatDetailsDto.chatId!,
                 senderId: senderId,
                 createdAt: data['date'],
                 message: data['text'],
@@ -313,7 +313,7 @@ class ChatRepoImpl extends ChatRepo {
     await textRoom.sendMessage(room, msg, to: 'hash_$participiantId');
 
     chatDetailsDto.messages.add(MessageDto(
-        chatId: chatDetailsDto.chatId,
+        chatId: chatDetailsDto.chatId!,
         senderId: chatDetailsDto.authUser.id,
         message: msg,
         createdAt: DateTime.now().toString(),
@@ -370,14 +370,13 @@ class ChatRepoImpl extends ChatRepo {
     _matchParticipantWithUser();
   }
 
-  /////////////API FUNCTIONS/////////////////
+  /////////////CHAT API FUNCTIONS/////////////////
 
   _loadChats() async {
     var response = await _api.getAllChats();
     if (response.error == null) {
       List<ChatDto> chats = response.response ?? [];
       _chatStream.add(chats);
-      getChatDetails(chats[0].id);
     } else {
       print('Error: ${response.error}');
     }
@@ -399,6 +398,31 @@ class ChatRepoImpl extends ChatRepo {
         chatDetailsDto = response.response!;
       } else {
         print("Error: ${response.error}");
+      }
+    } catch (e) {
+      print("Error while fetching chat: $e");
+    }
+  }
+
+  @override
+  Future<void> getChatDetailsByParticipiant(int id) async {
+    try {
+      var response = await _api.getChatByParticipiant(id: id);
+      if (response.error == null && response.response != null) {
+        _chatDetailsStream.add(response.response!);
+        chatDetailsDto = response.response!;
+        print('chatPart: ${chatDetailsDto.chatParticipants}');
+      } else {
+        print("Errors: ${response.error}");
+
+        final updatedChatDetails = ChatDetailsDto(
+          chatName: 'Test',
+          chatId: chatDetailsDto.chatId,
+          authUser: chatDetailsDto.authUser,
+          chatParticipants: chatDetailsDto.chatParticipants,
+          messages: [],
+        );
+        _chatDetailsStream.add(updatedChatDetails);
       }
     } catch (e) {
       print("Error while fetching chat: $e");
