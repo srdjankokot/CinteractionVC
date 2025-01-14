@@ -78,7 +78,7 @@ dependencies:
   visibility_detector: ^0.4.0+2
   url_launcher: ^6.2.6
   audioplayers: ^5.2.1
-  firebase_storage: ^12.1.0
+  firebase_storage: ^12.2.0
   image_picker: ^1.1.2
   file_picker: ^8.0.0+1
   flutter_dropzone: ^4.0.0
