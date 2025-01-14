@@ -29,6 +29,7 @@ abstract class ChatRepo {
   Future<void> setCurrentParticipant(UserDto user);
   Future<void> setCurrentChat(ChatDto chat);
   Future<void> getChatDetails(int id);
+  Future<void> getChatDetailsByParticipiant(int id);
   Future<void> deleteMessage(int id);
   Future<void> editMessage(int id, String message);
   Future<void> messageSeen(int index);

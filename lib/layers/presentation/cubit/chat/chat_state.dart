@@ -61,7 +61,7 @@ class ChatState extends Equatable {
   });
 
   const ChatState.initial({
-    bool isLoading = false,
+    bool isLoading = true,
     bool isInitial = true,
     int unreadMessages = 0,
     bool audioMuted = false,

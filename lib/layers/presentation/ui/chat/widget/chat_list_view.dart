@@ -7,26 +7,45 @@ import '../../../cubit/chat/chat_cubit.dart';
 import '../../../cubit/chat/chat_state.dart';
 import '../../profile/ui/widget/user_image.dart';
 
-class ChatsListView extends StatelessWidget {
+class ChatsListView extends StatefulWidget {
   final ChatState state;
 
   const ChatsListView({Key? key, required this.state}) : super(key: key);
 
   @override
+  State<ChatsListView> createState() => _ChatsListViewState();
+}
+
+class _ChatsListViewState extends State<ChatsListView> {
+  int? selectedChat;
+  @override
+  void initState() {
+    super.initState();
+    if (widget.state.chats != null && widget.state.chats!.isNotEmpty) {
+      selectedChat = widget.state.chats!.first.id;
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        context.read<ChatCubit>().getChatDetails(widget.state.chats![0].id);
+      });
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
     return ListView.builder(
-      itemCount: state.chats?.length ?? 0,
+      itemCount: widget.state.chats?.length ?? 0,
       itemBuilder: (context, index) {
-        var chat = state.chats![index];
+        var chat = widget.state.chats![index];
 
         return GestureDetector(
           onTap: () async {
+            setState(() {
+              selectedChat = chat.id;
+            });
             await context.read<ChatCubit>().getChatDetails(chat.id);
+            print('StateIsLoading: ${widget.state.isLoading}');
           },
           child: Container(
-            color: chat.id == state.chatDetails?.chatId
-                ? ColorConstants.kPrimaryColor.withOpacity(0.2)
-                : Colors.white,
+            color: chat.id == selectedChat ? Colors.blue[100] : Colors.white,
             child: Padding(
               padding: const EdgeInsets.all(4.0),
               child: Row(
@@ -36,7 +55,7 @@ class ChatsListView extends StatelessWidget {
                   const SizedBox(width: 10),
                   Stack(
                     children: [
-                      UserImage.medium(chat.name),
+                      UserImage.medium(widget.state.chats![index].name)
                     ],
                   ),
                   const SizedBox(width: 10),
