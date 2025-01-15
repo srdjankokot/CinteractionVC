@@ -39,11 +39,11 @@ jobs:
           username: ${{ secrets.FTP_HUAWEI_USERNAME }}
           server: ${{ secrets.FTP_HUAWEI_SERVER }}
           port: 22
-          local_path: build/web/
-          remote_path: var/www/cinteraction/front/
+          local_path: 'build/web/'
+          remote_path: 'var/www/cinteraction/front/'
           sftp_only: true
           password: ${{ secrets.FTP_HUAWEI_PASSWORD }}
-          rsyncArgs: --exclude=index.html --exclude=.htaccess
+          rsyncArgs: '--exclude=index.html --exclude=.htaccess'
 
 
     
