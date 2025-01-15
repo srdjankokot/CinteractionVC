@@ -5,7 +5,6 @@
 
 name: Deploy to Huawei
 
-
 on:
   push:
     branches: [ "huawei" ]
@@ -43,7 +42,4 @@ jobs:
           remote_folder: 'var/www/cinteraction/front'
           sftp: true
           password: ${{ secrets.FTP_HUAWEI_PASSWORD }}
-          exclude: '['index.html', '.htaccess']'
-
-
-    
+          exclude: ['index.html', '.htaccess']
