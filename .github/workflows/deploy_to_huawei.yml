@@ -5,39 +5,45 @@
 
 name: Deploy to Huawei
 
+
 on:
   push:
     branches: [ "huawei" ]
   pull_request:
     branches: [ "huawei" ]
   workflow_dispatch:
-    
+
 jobs:
   build:
     runs-on: ubuntu-latest
 
     steps:
       - uses: actions/checkout@v4
-    # Include the flutter action
+      # Include the flutter action
       - uses: subosito/flutter-action@v1
         with:
           flutter-version: 3.24.5
           channel: 'stable'
-          
+
       - name: Install dependencies
         run: flutter pub get
-      - name: Build Web Release   
+      - name: Build Web Release
         run: flutter build web --release
       - name: Flutter version
         run: flutter --version
 
-      - name: FTP Deployer
-        uses: sand4rt/ftp-deployer@v1.8
+      - name: FTP Deploy
+        uses: SamKirkland/FTP-Deploy-Action@v4.3.5
         with:
-          username: ${{ secrets.FTP_HUAWEI_USERNAME }}
-          host: ${{ secrets.FTP_HUAWEI_SERVER }}
-          port: 22
-          local_folder: 'build/web/'
-          remote_folder: 'var/www/cinteraction/front'
-          sftp: true
+          # ftp server
+          server: ${{ secrets.FTP_HUAWEI_SERVER }}
+          # ftp username
+          username:  ${{ secrets.FTP_HUAWEI_USERNAME }}
+          # ftp password
           password: ${{ secrets.FTP_HUAWEI_PASSWORD }}
+          port: 22
+          local-dir: build/web/
+          server-dir: home/front/var/www/cinteraction/front/
+          exclude: |
+            index.html
+            .htaccess
