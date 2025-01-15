@@ -10,7 +10,7 @@ class SendMessageToChatStream {
   final ChatRepo repo;
 
   call({
-    required int chatId,
+    int? chatId,
     required String messageContent,
     required int senderId,
     required List<int> participantIds,

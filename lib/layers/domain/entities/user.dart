@@ -3,15 +3,14 @@ import 'dart:math';
 import 'package:json_annotation/json_annotation.dart';
 
 class User {
-  User({
-    required this.id,
-    required this.name,
-    required this.email,
-    required this.imageUrl,
-    this.createdAt,
-    this.emailVerifiedAt,
-    this.online = false
-  });
+  User(
+      {required this.id,
+      required this.name,
+      required this.email,
+      required this.imageUrl,
+      this.createdAt,
+      this.emailVerifiedAt,
+      this.online = false});
 
   String id;
   String name;
@@ -31,8 +30,6 @@ class User {
   int? avgEngagement = Random().nextInt(100);
   int? totalMeetings = Random().nextInt(50);
 
-  final bool onboarded =  Random().nextInt(2) == 1;
-  late final bool checked  =  Random().nextInt(2) == 1;
-
-
+  final bool onboarded = Random().nextInt(2) == 1;
+  late final bool checked = Random().nextInt(2) == 1;
 }
