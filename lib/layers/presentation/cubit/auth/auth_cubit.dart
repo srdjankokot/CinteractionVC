@@ -82,10 +82,10 @@ class AuthCubit extends Cubit<AuthState> with BlocLoggy {
       return;
     }
 
-    if (user.emailVerifiedAt == null) {
-      emit(state.error(errorMessage: 'Email is not verified'));
-      return;
-    }
+    // if (user.emailVerifiedAt == null) {
+    //   emit(state.error(errorMessage: 'Email is not verified'));
+    //   return;
+    // }
 
     getIt.get<LocalStorage>().saveLoggedUser(user: user);
     emit(const AuthState.loginSuccess());

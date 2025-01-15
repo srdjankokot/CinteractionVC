@@ -31,7 +31,6 @@ jobs:
       - name: Flutter version
         run: flutter --version
 
-
       - name: FTP Deployer
         uses: sand4rt/ftp-deployer@v1.8
         with:
