@@ -33,17 +33,17 @@ jobs:
         run: flutter --version
 
 
-      - name: Deploy to Huawei Server
-        uses: wlixcc/SFTP-Deploy-Action@v1.2.5
+      - name: FTP Deployer
+        uses: sand4rt/ftp-deployer@v1.8
         with:
           username: ${{ secrets.FTP_HUAWEI_USERNAME }}
-          server: ${{ secrets.FTP_HUAWEI_SERVER }}
+          host: ${{ secrets.FTP_HUAWEI_SERVER }}
           port: 22
-          local_path: 'build/web'
-          remote_path: 'var/www/cinteraction/front'
-          sftp_only: true
+          local_folder: 'build/web/'
+          remote_folder: 'var/www/cinteraction/front'
+          sftp: true
           password: ${{ secrets.FTP_HUAWEI_PASSWORD }}
-          rsyncArgs: '--exclude=index.html --exclude=.htaccess'
+          exclude: '['index.html', '.htaccess']'
 
 
     
