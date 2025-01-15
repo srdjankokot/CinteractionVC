@@ -26,7 +26,7 @@ class _UsersListViewState extends State<UsersListView> {
       selectedUserId =
           int.parse(widget.state.users!.first.id.replaceFirst('hash_', ''));
       WidgetsBinding.instance.addPostFrameCallback((_) {
-        context.read<ChatCubit>().getChatDetailsByParticipiant(selectedUserId!);
+        context.read<ChatCubit>().getChatDetails(widget.state.chats![0].id);
         context.read<ChatCubit>().setCurrentParticipant(widget.state.users![0]);
       });
     }
@@ -45,10 +45,11 @@ class _UsersListViewState extends State<UsersListView> {
             setState(() {
               selectedUserId = userId;
             });
-            await context
-                .read<ChatCubit>()
-                .getChatDetailsByParticipiant(userId);
-            await context.read<ChatCubit>().setCurrentParticipant(user);
+            if (user.chatId != null) {
+              await context.read<ChatCubit>().getChatDetails(user.chatId);
+            } else {
+              await context.read<ChatCubit>().getEmptyChat();
+            }
           },
           child: Container(
             color: userId == selectedUserId ? Colors.blue[100] : Colors.white,

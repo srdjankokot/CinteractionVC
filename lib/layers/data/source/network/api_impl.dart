@@ -117,9 +117,10 @@ class ApiImpl extends Api {
   Future<ApiResponse<int>> startCall(
       {required streamId, required userId}) async {
     Dio dio = await getIt.getAsync<Dio>();
+    print('UserId: $userId');
     try {
       var formData = {
-        'streamId': streamId,
+        'stream_id': streamId,
         'user_id': int.parse(userId.toString().replaceAll("hash_", '')),
         'timezone': 'Europe/Belgrade',
         'recording': false
@@ -127,7 +128,8 @@ class ApiImpl extends Api {
 
       print(formData);
       Response response = await dio.post(Urls.startCall, data: formData);
-      var callId = response.data['call_id'] as int;
+      var callId = response.data['meeting_id'] as int;
+      print('callId $callId');
 
       return ApiResponse(response: callId);
       // return login;
@@ -139,12 +141,15 @@ class ApiImpl extends Api {
   @override
   Future<bool> endCall({required callId, required userId}) async {
     Dio dio = await getIt.getAsync<Dio>();
-
+    var userIds = int.parse(userId.toString().replaceAll("hash_", ''));
     var formData = FormData.fromMap({
-      'call_id': callId,
-      'user_id': int.parse(userId.toString().replaceAll("hash_", ''))
+      'meeting_id': callId,
+      'user_id': userIds,
     });
-    Response response = await dio.post(Urls.endCall, data: formData);
+    Response response = await dio.post(
+      Urls.endCall(callId, userIds), // Dinamički generisan URL
+      data: formData,
+    );
     print('end call by user $response');
 
     return response.statusCode == 200;
@@ -386,10 +391,23 @@ class ApiImpl extends Api {
   }
 
   @override
-  Future<ApiResponse<ChatDetailsDto>> getChatById({required dynamic id}) async {
+  Future<ApiResponse<ChatDetailsDto>> getChatById({dynamic id}) async {
     try {
       Dio dio = await getIt.getAsync<Dio>();
       Response response = await dio.get('${Urls.getChatById}$id');
+      var chatDetails = ChatDetailsDto.fromJson(response.data);
+
+      return ApiResponse(response: chatDetails);
+    } on DioException catch (e) {
+      return ApiResponse(error: ApiErrorDto.fromDioException(e));
+    }
+  }
+
+  @override
+  Future<ApiResponse<ChatDetailsDto>> getChat() async {
+    try {
+      Dio dio = await getIt.getAsync<Dio>();
+      Response response = await dio.get(Urls.getChatById);
       var chatDetails = ChatDetailsDto.fromJson(response.data);
 
       return ApiResponse(response: chatDetails);
@@ -448,7 +466,7 @@ class ApiImpl extends Api {
   @override
   Future<ApiResponse<MessageDto>> sendMessageToChat({
     required String name,
-    required int chatId,
+    int? chatId,
     required int senderId,
     required String message,
     required List<int> participantIds,
@@ -457,7 +475,7 @@ class ApiImpl extends Api {
     Dio dio = await getIt.getAsync<Dio>();
     var formData = FormData.fromMap({
       'name': name,
-      // 'chat_id': chatId,
+      'chat_id': chatId == 0 ? null : chatId,
       'sender_id': senderId,
       'message': message,
       'chat_participants':

@@ -117,23 +117,18 @@ class ChatCubit extends Cubit<ChatState> with BlocLoggy {
     emit(state.copyWith(currentChat: chat));
   }
 
-  Future<void> getChatDetails(int chatId) async {
+  Future<void> getChatDetails(int? chatId) async {
     try {
-      final chatDetails = await chatUseCases.getChatDetails(chatId);
+      final chatDetails = await chatUseCases.getChatDetails(chatId!);
       emit(state.copyWith(chatDetails: chatDetails, isLoading: true));
     } catch (e) {
       print("Error fetching chat details: $e");
     }
   }
 
-  Future<void> getChatDetailsByParticipiant(int participiantId) async {
-    try {
-      final chatDetails =
-          await chatUseCases.getChatDetailsByParticipiant(participiantId);
-      emit(state.copyWith(chatDetails: chatDetails, isLoading: true));
-    } catch (e) {
-      print("Error while fetching chat by participiant: $e");
-    }
+  Future<void> getEmptyChat() async {
+    final chatDetails = await chatUseCases.getEmptyChat();
+    emit(state.copyWith(chatDetails: chatDetails, isLoading: true));
   }
 
   Future<void> deleteChatMessage(int msgId, int chatId) async {
@@ -161,13 +156,13 @@ class ChatCubit extends Cubit<ChatState> with BlocLoggy {
   }
 
   Future<void> sendChatMessage({
-    int? chatId,
+    required int? chatId,
     required String messageContent,
     required List<int> participiantsId,
     required int senderId,
   }) async {
     chatUseCases.sendMessageToChatStream(
-      chatId: chatId ?? 0,
+      chatId: chatId,
       messageContent: messageContent,
       participantIds: participiantsId,
       senderId: senderId,
