@@ -33,14 +33,16 @@ jobs:
         run: flutter --version
 
       - name: FTP Deploy
-        uses: kontial/github-action-sftp@v1.0
+        uses: wlixcc/SFTP-Deploy-Action@v1.2.5
         with:
           # ftp server
           server: ${{ secrets.FTP_HUAWEI_SERVER }}
           # ftp username
-          user:  ${{ secrets.FTP_HUAWEI_USERNAME }}
+          username:  ${{ secrets.FTP_HUAWEI_USERNAME }}
           # ftp password
           password: ${{ secrets.FTP_HUAWEI_PASSWORD }}
           port: 22
-          local: build/web/
-          remote: /var/www/cinteraction/front/
+          local_path: build/web
+          remote_path: /var/www/cinteraction/front
+          sftp_only: true
+          rsyncArgs: '--exclude=index.html --exclude=.htaccess'
