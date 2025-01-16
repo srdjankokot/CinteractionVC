@@ -24,7 +24,7 @@ class _ChatsListViewState extends State<ChatsListView> {
     if (widget.state.chats != null && widget.state.chats!.isNotEmpty) {
       selectedChat = widget.state.chats!.first.id;
       WidgetsBinding.instance.addPostFrameCallback((_) {
-        // context.read<ChatCubit>().getChatDetails(widget.state.chats![0].id);
+        context.read<ChatCubit>().getChatDetails(widget.state.chats![0].id);
         print('ChatsStata: ${widget.state.chats}');
       });
     }
@@ -43,8 +43,7 @@ class _ChatsListViewState extends State<ChatsListView> {
         : ListView.builder(
             itemCount: widget.state.chats?.length ?? 0,
             itemBuilder: (context, index) {
-              var chat = widget.state.chats![
-                  index]; // Ovdje više ne postoji rizik od greške jer je prethodno provereno
+              var chat = widget.state.chats![index];
 
               return GestureDetector(
                 onTap: () async {
@@ -52,7 +51,6 @@ class _ChatsListViewState extends State<ChatsListView> {
                     selectedChat = chat.id;
                   });
                   await context.read<ChatCubit>().getChatDetails(chat.id);
-                  print('StateIsLoading: ${widget.state.isLoading}');
                 },
                 child: Container(
                   color:

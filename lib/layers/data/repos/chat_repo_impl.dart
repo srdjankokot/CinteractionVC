@@ -210,11 +210,12 @@ class ChatRepoImpl extends ChatRepo {
       dynamic data = parse(event.text);
       if (data != null) {
         if (data['textroom'] == 'message') {
+          // var initUserChat = currentParticipant!.id
           var initChat = chatDetailsDto.chatParticipants
               .firstWhere((item) => 'hash_${item.id}' == data['from']);
           var senderId = int.parse(data['from'].replaceAll('hash_', ''));
           print('senderID: $senderId');
-          print('currentUserID: ${chatDetailsDto.authUser.id}');
+          print('currentUserID: ${currentParticipant!.id}');
           if (initChat != null) {
             chatDetailsDto.messages.add(MessageDto(
                 chatId: chatDetailsDto.chatId!,
@@ -231,12 +232,12 @@ class ChatRepoImpl extends ChatRepo {
 
           participant.haveUnreadMessages = _haveUnread(participant);
           // participant.messages.add(data['text']);
-          participant.messages.add(ChatMessage(
-              message: data['text'],
-              displayName: participant.display,
-              time: DateTime.parse(data['date']),
-              avatarUrl: data['avatarUrl'] ?? "",
-              seen: false));
+          // participant.messages.add(MessageDto(
+          //     chatId: ,
+          //     displayName: participant.display,
+          //     time: DateTime.parse(data['date']),
+          //     avatarUrl: data['avatarUrl'] ?? "",
+          //     seen: false));
 
           print("Unreaded messages: ${participant.haveUnreadMessages}");
 
@@ -377,7 +378,6 @@ class ChatRepoImpl extends ChatRepo {
     if (response.error == null) {
       List<ChatDto> chats = response.response ?? [];
       _chatStream.add(chats);
-      getChatDetails(response.response![0].id);
     } else {
       print('Error: ${response.error}');
     }
@@ -411,7 +411,8 @@ class ChatRepoImpl extends ChatRepo {
       var response = await _api.getChat();
       if (response.error == null && response.response != null) {
         _chatDetailsStream.add(response.response!);
-        chatDetailsDto = response.response!;
+        // chatDetailsDto = response.response!;
+        print('currentIdPrt: ${currentParticipant!.id}');
       } else {
         print("Error: ${response.error}");
       }
