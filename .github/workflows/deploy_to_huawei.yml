@@ -43,4 +43,4 @@ jobs:
           password: ${{ secrets.FTP_HUAWEI_PASSWORD }}
           port: 22
           local: build/web/
-          remote: var/www/cinteraction/front/
+          remote: /var/www/cinteraction/front/
