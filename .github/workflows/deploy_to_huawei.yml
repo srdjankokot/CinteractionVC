@@ -33,7 +33,7 @@ jobs:
         run: flutter --version
 
       - name: FTP Deploy
-        uses: SamKirkland/FTP-Deploy-Action@v4.3.5
+        uses: wlixcc/SFTP-Deploy-Action@v1.2.5
         with:
           # ftp server
           server: ${{ secrets.FTP_HUAWEI_SERVER }}
@@ -42,8 +42,7 @@ jobs:
           # ftp password
           password: ${{ secrets.FTP_HUAWEI_PASSWORD }}
           port: 22
-          local-dir: build/web/
-          server-dir: home/front/var/www/cinteraction/front/
-          exclude: |
-            index.html
-            .htaccess
+          local_path: 'build/web'
+          remote_path: 'var/www/cinteraction/front'
+          sftp_only: true
+          rsyncArgs: '--exclude=index.html --exclude=.htaccess'
