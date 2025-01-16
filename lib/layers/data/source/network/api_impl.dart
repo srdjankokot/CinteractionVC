@@ -223,7 +223,7 @@ class ApiImpl extends Api {
       'email': email,
       'password': pass,
       'password_confirmation': pass,
-      'terms': terms
+      // 'terms': terms
     };
 
     try {
@@ -475,7 +475,7 @@ class ApiImpl extends Api {
     Dio dio = await getIt.getAsync<Dio>();
     var formData = FormData.fromMap({
       'name': name,
-      'chat_id': chatId == 0 ? null : chatId,
+      if (chatId != 0) 'chat_id': chatId,
       'sender_id': senderId,
       'message': message,
       'chat_participants':
