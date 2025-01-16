@@ -79,7 +79,7 @@ class ApiImpl extends Api {
     var formData = FormData.fromMap({'provider': provider, 'token': token});
     Response response =
         await dio.post(Urls.socialLoginEndpoint, data: formData);
-    var accessToken = response.data['Access-Token'] as String;
+    var accessToken = response.data['access_token'] as String;
 
     return accessToken;
   }
