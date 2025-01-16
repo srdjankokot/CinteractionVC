@@ -38,7 +38,7 @@ jobs:
           # ftp server
           server: ${{ secrets.FTP_HUAWEI_SERVER }}
           # ftp username
-          username:  ${{ secrets.FTP_HUAWEI_USERNAME }}
+          user:  ${{ secrets.FTP_HUAWEI_USERNAME }}
           # ftp password
           password: ${{ secrets.FTP_HUAWEI_PASSWORD }}
           port: 22
