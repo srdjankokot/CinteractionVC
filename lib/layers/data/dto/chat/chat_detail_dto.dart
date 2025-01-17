@@ -78,8 +78,8 @@ class MessageDto {
 }
 
 class ChatDetailsDto {
-  final int chatId;
-  final String chatName;
+  final int? chatId;
+  final String? chatName;
   final ChatParticipantDto authUser;
   final List<ChatParticipantDto> chatParticipants;
   final List<MessageDto> messages;
@@ -93,8 +93,8 @@ class ChatDetailsDto {
   });
 
   factory ChatDetailsDto.fromJson(Map<String, dynamic> json) => ChatDetailsDto(
-        chatId: json['chat_id'] as int,
-        chatName: json['chat_name'] as String,
+        chatId: json['chat_id'] as int?,
+        chatName: json['chat_name'] as String?,
         authUser: ChatParticipantDto.fromJson(json['auth_user']),
         chatParticipants: (json['chat_participants'] as List)
             .map((participant) => ChatParticipantDto.fromJson(participant))

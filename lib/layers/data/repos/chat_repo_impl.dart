@@ -189,11 +189,11 @@ class ChatRepoImpl extends ChatRepo {
     }
     for (var subscriber in subscribers) {
       UserDto fallbackUser = UserDto(
-          id: "0",
-          name: "name",
-          email: "email",
-          imageUrl: "imageUrl",
-          createdAt: null);
+        id: "0",
+        name: "name",
+        email: "email",
+        imageUrl: "imageUrl",
+      );
       users
           .firstWhere(
             (item) => item.id == subscriber.id, // Condition that won't be met
@@ -210,11 +210,12 @@ class ChatRepoImpl extends ChatRepo {
       dynamic data = parse(event.text);
       if (data != null) {
         if (data['textroom'] == 'message') {
+          // var initUserChat = currentParticipant!.id
           var initChat = chatDetailsDto.chatParticipants
               .firstWhere((item) => 'hash_${item.id}' == data['from']);
           var senderId = int.parse(data['from'].replaceAll('hash_', ''));
           print('senderID: $senderId');
-          print('currentUserID: ${chatDetailsDto.authUser.id}');
+          print('currentUserID: ${currentParticipant!.id}');
           if (initChat != null) {
             chatDetailsDto.messages.add(MessageDto(
                 chatId: chatDetailsDto.chatId!,
@@ -231,12 +232,12 @@ class ChatRepoImpl extends ChatRepo {
 
           participant.haveUnreadMessages = _haveUnread(participant);
           // participant.messages.add(data['text']);
-          participant.messages.add(ChatMessage(
-              message: data['text'],
-              displayName: participant.display,
-              time: DateTime.parse(data['date']),
-              avatarUrl: data['avatarUrl'] ?? "",
-              seen: false));
+          // participant.messages.add(MessageDto(
+          //     chatId: ,
+          //     displayName: participant.display,
+          //     time: DateTime.parse(data['date']),
+          //     avatarUrl: data['avatarUrl'] ?? "",
+          //     seen: false));
 
           print("Unreaded messages: ${participant.haveUnreadMessages}");
 
@@ -405,24 +406,15 @@ class ChatRepoImpl extends ChatRepo {
   }
 
   @override
-  Future<void> getChatDetailsByParticipiant(int id) async {
+  Future<void> getEmptyChat() async {
     try {
-      var response = await _api.getChatByParticipiant(id: id);
+      var response = await _api.getChat();
       if (response.error == null && response.response != null) {
         _chatDetailsStream.add(response.response!);
-        chatDetailsDto = response.response!;
-        print('chatPart: ${chatDetailsDto.chatParticipants}');
+        // chatDetailsDto = response.response!;
+        print('currentIdPrt: ${currentParticipant!.id}');
       } else {
-        print("Errors: ${response.error}");
-
-        final updatedChatDetails = ChatDetailsDto(
-          chatName: 'Test',
-          chatId: chatDetailsDto.chatId,
-          authUser: chatDetailsDto.authUser,
-          chatParticipants: chatDetailsDto.chatParticipants,
-          messages: [],
-        );
-        _chatDetailsStream.add(updatedChatDetails);
+        print("Error: ${response.error}");
       }
     } catch (e) {
       print("Error while fetching chat: $e");
@@ -460,8 +452,8 @@ class ChatRepoImpl extends ChatRepo {
   }
 
   @override
-  Future<void> sendMessageToChatWrapper(
-      int chatId, String messageContent, int senderId, List<int> participantIds,
+  Future<void> sendMessageToChatWrapper(int? chatId, String messageContent,
+      int senderId, List<int> participantIds,
       {List<File>? uploadedFiles}) async {
     await _api.sendMessageToChat(
       name: 'Test',

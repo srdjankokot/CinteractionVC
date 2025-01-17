@@ -264,7 +264,11 @@ class ChatRoomPage extends StatelessWidget {
                     const Divider(),
                     Expanded(
                       child: state.listType == ListType.Chats
-                          ? ChatsListView(state: state)
+                          ? state.chats!.isNotEmpty
+                              ? ChatsListView(state: state)
+                              : const Center(
+                                  child: Text('There is no chats'),
+                                )
                           : UsersListView(state: state),
                     )
                   ],
@@ -521,15 +525,10 @@ class ChatRoomPage extends StatelessWidget {
                                     children: [
                                       Text(
                                         state.listType == ListType.Chats
-                                            ? (state.isLoading
-                                                ? ""
-                                                : (state
-                                                        .chatDetails
-                                                        ?.chatParticipants[0]
-                                                        .name ??
-                                                    "Unknown User"))
-                                            : (state.currentParticipant?.name ??
-                                                ""),
+                                            ? state.chatDetails?.chatName ??
+                                                "" // Use null-safe operator to avoid errors
+                                            : state.currentParticipant?.name ??
+                                                "",
                                         style: titleThemeStyle
                                             .textTheme.titleLarge,
                                       ),
@@ -615,16 +614,7 @@ class ChatRoomPage extends StatelessWidget {
                                       var participantId = state.chatDetails!
                                           .chatParticipants.first.id;
 
-                                      await context
-                                          .read<ChatCubit>()
-                                          .sendChatMessage(
-                                              chatId: state.chatDetails!.chatId,
-                                              messageContent:
-                                                  messageFieldController.text,
-                                              participiantsId: participiansList,
-                                              senderId: state
-                                                  .chatDetails!.authUser.id);
-                                      sendMessage(participantId);
+                                      sendMessage(state.currentParticipant!.id);
                                       messageFieldController.text = "";
                                     },
                                     controller: messageFieldController,
