@@ -13,7 +13,7 @@ class Meeting {
       this.streamId,
       this.eventName});
 
-  @JsonKey(name: 'call_id')
+  @JsonKey(name: 'meeting_id')
   int callId;
 
   @JsonKey(name: 'organizer_id')

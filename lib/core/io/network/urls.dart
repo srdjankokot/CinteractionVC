@@ -7,14 +7,16 @@ class Urls {
   static String registerEndpoint = '$baseUrl/api/register';
   static String socialLoginEndpoint = '$baseUrl/api/social/login';
   static String getUserDetails = '$baseUrl/api/user';
-  static String meetings =
-      '$baseUrl/api/get/all/past/meetings?paginate=10&page=';
+  static String meetings = '$baseUrl/api/meetings/past?paginate=10&page=';
   static String scheduledMeetings =
-      '$baseUrl/api/get/all/scheduled/meetings?paginate=500&page=1';
+      '$baseUrl/api/meetings/scheduled?paginate=500&page=1';
   static String nextScheduledMeetings =
-      '$baseUrl/api/get/all/scheduled/meetings?paginate=500&page=1';
-  static String startCall = '$baseUrl/api/start-call';
-  static String endCall = '$baseUrl/api/end-call-with-user';
+      '$baseUrl/api/meetings/scheduled?paginate=500&page=1';
+  static String startCall = '$baseUrl/api/meetings/start';
+  static String endCall(int callId, int userId) {
+    return '$baseUrl/api/meetings/end/$callId/for/user/$userId';
+  }
+
   static String scheduleMeeting = '$baseUrl/api/schedule/meeting';
 
   static String sendMessage = '$baseUrl/call/{call_id}/message';
@@ -36,7 +38,7 @@ class Urls {
 
   ////////CHAT_URLS////////
   static String getAllChats = '$baseUrl/api/chats';
-  static String getChatById = '$baseUrl/api/chats/';
+  static String getChatById = '$baseUrl/api/chats/chat/';
   static String getChatByParticipiant = '$baseUrl/api/chats/user/';
   static String sentChatMessage = '$baseUrl/api/chats/create';
   static String deleteMessageById = '$baseUrl/api/chats/delete/message/';

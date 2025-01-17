@@ -23,19 +23,14 @@ class AuthCubit extends Cubit<AuthState> with BlocLoggy {
 
   final AuthUseCases _authUseCases;
 
-
-  void _init() async
-  {
+  void _init() async {
     var accessToken = await getAccessToken();
 
-
-    if(accessToken!=null)
-      {
-        print('access token: $accessToken');
-        var response = await _authUseCases.getUserDetails();
-        _successLogin(response);
-      }
-
+    if (accessToken != null) {
+      print('access token: $accessToken');
+      var response = await _authUseCases.getUserDetails();
+      _successLogin(response);
+    }
   }
 
   Future<void> signUpWithEmailAndPassword(
@@ -43,9 +38,7 @@ class AuthCubit extends Cubit<AuthState> with BlocLoggy {
       required String password,
       required String name,
       required bool terms}) async {
-
-
-    emit(state.copyWith(loading : true));
+    emit(state.copyWith(loading: true));
 
     final response = await _authUseCases.signUpWithEmailAndPassword(
         email, password, name, true);
@@ -60,7 +53,7 @@ class AuthCubit extends Cubit<AuthState> with BlocLoggy {
     required String email,
     required String password,
   }) async {
-    emit(state.copyWith(loading : true));
+    emit(state.copyWith(loading: true));
 
     try {
       final response =
@@ -82,36 +75,35 @@ class AuthCubit extends Cubit<AuthState> with BlocLoggy {
       return;
     }
 
-    if (user.emailVerifiedAt == null) {
-      emit(state.error(errorMessage: 'Email is not verified'));
-      return;
-    }
+    // if (user.emailVerifiedAt == null) {
+    //   emit(state.error(errorMessage: 'Email is not verified'));
+    //   return;
+    // }
 
     getIt.get<LocalStorage>().saveLoggedUser(user: user);
     emit(const AuthState.loginSuccess());
   }
 
   Future<void> signInWithGoogle() async {
-    emit(state.copyWith(loading : true));
+    emit(state.copyWith(loading: true));
     try {
       final response = await _authUseCases.signUpWithGoogle();
 
       _successLogin(response);
     } catch (e, s) {
       loggy.error('signInWithGoogle error', e, s);
-      emit(state.error(errorMessage:  e.toString()));
-
+      emit(state.error(errorMessage: e.toString()));
     }
   }
 
   Future<void> resetPassword(String email) async {
-    emit(state.copyWith(loading : true));
+    emit(state.copyWith(loading: true));
     try {
       final response = await _authUseCases.resetPassword(email);
       emit(state.copyWith(resetPassword: true));
     } catch (e, s) {
       loggy.error('signInWithGoogle error', e, s);
-      emit(state.error(errorMessage:  e.toString()));
+      emit(state.error(errorMessage: e.toString()));
     }
   }
 
@@ -119,8 +111,7 @@ class AuthCubit extends Cubit<AuthState> with BlocLoggy {
     emit(state.error(errorMessage: 'Not implemented yet'));
   }
 
-  void checkboxChangedState()
-  {
+  void checkboxChangedState() {
     emit(state.copyWith(isChecked: !state.isChecked));
   }
 
@@ -132,21 +123,20 @@ class AuthCubit extends Cubit<AuthState> with BlocLoggy {
     }
   }
 
-  void setNewPassword(String email, String token, String password) async
-  {
-    emit(state.copyWith(loading : true));
+  void setNewPassword(String email, String token, String password) async {
+    emit(state.copyWith(loading: true));
 
     try {
-    final response = await _authUseCases.setNewPassword(email, token, password);
-    emit(state.copyWith(resetPassword: true));
-  } catch (e, s) {
-    loggy.error('signInWithGoogle error', e, s);
-    emit(state.error(errorMessage:  e.toString()));
-  }
+      final response =
+          await _authUseCases.setNewPassword(email, token, password);
+      emit(state.copyWith(resetPassword: true));
+    } catch (e, s) {
+      loggy.error('signInWithGoogle error', e, s);
+      emit(state.error(errorMessage: e.toString()));
+    }
   }
 
-  void submit(String mail, String password, String name, bool terms)
-  {
+  void submit(String mail, String password, String name, bool terms) {
     if (state.isSignUp) {
       signUpWithEmailAndPassword(
           email: mail, password: password, name: name, terms: terms);
