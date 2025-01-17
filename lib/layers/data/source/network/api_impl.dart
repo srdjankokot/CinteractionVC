@@ -121,7 +121,7 @@ class ApiImpl extends Api {
     try {
       var formData = {
         'stream_id': streamId,
-        'user_id': int.parse(userId.toString().replaceAll("hash_", '')),
+        'user_id': int.parse(userId),
         'timezone': 'Europe/Belgrade',
         'recording': false
       };
@@ -141,7 +141,7 @@ class ApiImpl extends Api {
   @override
   Future<bool> endCall({required callId, required userId}) async {
     Dio dio = await getIt.getAsync<Dio>();
-    var userIds = int.parse(userId.toString().replaceAll("hash_", ''));
+    var userIds = int.parse(userId);
     var formData = FormData.fromMap({
       'meeting_id': callId,
       'user_id': userIds,
