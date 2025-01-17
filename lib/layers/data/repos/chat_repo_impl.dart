@@ -212,8 +212,8 @@ class ChatRepoImpl extends ChatRepo {
         if (data['textroom'] == 'message') {
           // var initUserChat = currentParticipant!.id
           var initChat = chatDetailsDto.chatParticipants
-              .firstWhere((item) => 'hash_${item.id}' == data['from']);
-          var senderId = int.parse(data['from'].replaceAll('hash_', ''));
+              .firstWhere((item) => '${item.id}' == data['from']);
+          var senderId = int.parse(data['from']);
           print('senderID: $senderId');
           print('currentUserID: ${currentParticipant!.id}');
           if (initChat != null) {
@@ -311,7 +311,7 @@ class ChatRepoImpl extends ChatRepo {
   @override
   Future<void> sendMessage(String msg, int participiantId) async {
     // currentParticipant.display
-    await textRoom.sendMessage(room, msg, to: 'hash_$participiantId');
+    await textRoom.sendMessage(room, msg, to: '$participiantId');
 
     chatDetailsDto.messages.add(MessageDto(
         chatId: chatDetailsDto.chatId!,

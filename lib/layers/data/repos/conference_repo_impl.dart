@@ -454,6 +454,7 @@ class ConferenceRepoImpl extends ConferenceRepo {
         });
       };
 
+
       remotePlugin?.remoteTrack?.listen((event) async {
         // print(event);
         print({
@@ -1067,7 +1068,7 @@ class ConferenceRepoImpl extends ConferenceRepo {
   _getEngagement() async {
     // return;
 
-    if (engagementIsRunning || (localVideoRenderer.isVideoMuted??false)) return;
+    if (engagementIsRunning || (localVideoRenderer.isVideoMuted ?? false)) return;
 
     engagementIsRunning = true;
 
