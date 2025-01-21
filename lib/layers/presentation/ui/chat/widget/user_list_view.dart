@@ -23,7 +23,9 @@ class _UsersListViewState extends State<UsersListView> {
   void initState() {
     super.initState();
     if (widget.state.users != null && widget.state.users!.isNotEmpty) {
+
       selectedUserId = int.parse(widget.state.users!.first.id);
+
       WidgetsBinding.instance.addPostFrameCallback((_) {
         context.read<ChatCubit>().getChatDetailsByParticipiant(selectedUserId!);
         context.read<ChatCubit>().setCurrentParticipant(widget.state.users![0]);
