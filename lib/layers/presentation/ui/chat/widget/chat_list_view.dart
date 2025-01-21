@@ -51,6 +51,7 @@ class _ChatsListViewState extends State<ChatsListView> {
                     selectedChat = chat.id;
                   });
                   await context.read<ChatCubit>().getChatDetails(chat.id);
+                  print('chatDetails: ${widget.state.chatDetails}');
                 },
                 child: Container(
                   color:
@@ -64,7 +65,7 @@ class _ChatsListViewState extends State<ChatsListView> {
                         const SizedBox(width: 10),
                         Stack(
                           children: [
-                            UserImage.medium(widget.state.chats![index].name),
+                            // UserImage.medium(chat.userImage!),
                           ],
                         ),
                         const SizedBox(width: 10),

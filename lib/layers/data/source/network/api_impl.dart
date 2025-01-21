@@ -12,6 +12,7 @@ import 'package:dio/dio.dart';
 import 'package:intl/intl.dart';
 
 import '../../../../core/io/network/urls.dart';
+import '../../../../core/util/secure_local_storage.dart';
 import '../../../domain/entities/api_response.dart';
 import '../../dto/chat/chat_dto.dart';
 import '../../dto/dashboard/dashboard_response_dto.dart';
@@ -59,6 +60,8 @@ class ApiImpl extends Api {
     try {
       Dio dio = await getIt.getAsync<Dio>();
       Response response = await dio.get(Urls.getCompanyUsers);
+
+      print('Responsee: $response');
 
       List<UserDto> users = [];
       for (var u in response.data['data']) {
@@ -121,7 +124,7 @@ class ApiImpl extends Api {
     try {
       var formData = {
         'stream_id': streamId,
-        'user_id': int.parse(userId.toString().replaceAll("hash_", '')),
+        'user_id': int.parse(userId),
         'timezone': 'Europe/Belgrade',
         'recording': false
       };
@@ -141,7 +144,7 @@ class ApiImpl extends Api {
   @override
   Future<bool> endCall({required callId, required userId}) async {
     Dio dio = await getIt.getAsync<Dio>();
-    var userIds = int.parse(userId.toString().replaceAll("hash_", ''));
+    var userIds = int.parse(userId);
     var formData = FormData.fromMap({
       'meeting_id': callId,
       'user_id': userIds,
@@ -248,7 +251,7 @@ class ApiImpl extends Api {
       'description': description,
       'tag': tag,
       'startDateTime': DateFormat('yyyy-MM-dd HH:mm').format(date),
-      'localTimeZone': 'Europe/Belgrade'
+      'timezone': 'Europe/Belgrade'
     };
 
     print(DateFormat('yyyy-MM-dd HH:mm').format(date));
@@ -270,12 +273,13 @@ class ApiImpl extends Api {
 
     var formData = {
       'attention': engagement,
-      'user_id': userId,
-      'call_id': callId,
+      // 'user_id': userId,
+      // 'call_id': callId,
     };
 
     try {
-      Response response = await dio.post(Urls.sendEngagement, data: formData);
+      Response response =
+          await dio.post('${Urls.sendEngagement}$callId', data: formData);
       print(response);
       return ApiResponse(
           response: response.statusCode! > 200 && response.statusCode! < 300);
@@ -475,7 +479,7 @@ class ApiImpl extends Api {
     Dio dio = await getIt.getAsync<Dio>();
     var formData = FormData.fromMap({
       'name': name,
-      if (chatId != 0) 'chat_id': chatId,
+      'chat_id': chatId,
       'sender_id': senderId,
       'message': message,
       'chat_participants':
