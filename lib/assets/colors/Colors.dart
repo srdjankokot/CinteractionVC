@@ -1,12 +1,13 @@
 import 'dart:ui';
 
 class ColorConstants {
-  static const kPrimaryColor = Color(0xFFF1471C);
+  static const kPrimaryColor = Color(0xFFbc101c);
   static const kSecondaryColor = Color(0xFF403736);
 
   static const kStateColors = [ kEngProgress30];
 
-  static const kStateInfo = Color(0xFF56A0D6);
+  // static const kStateInfo = Color(0xFF56A0D6);
+  static const kStateInfo = Color(0xFF24408B);
   static const kStateSuccess = Color(0xFF1CBC96);
   static const kStateWarning = Color(0xFFEFBA32);
   static const kStateError = Color(0xFFDA2E2E);

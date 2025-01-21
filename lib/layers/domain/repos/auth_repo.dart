@@ -24,4 +24,14 @@ abstract class AuthRepo
 
   Future<ApiResponse<UserDto?>> signWithFacebookAccount();
   Future<ApiResponse<UserDto?>> getUserDetails();
+  Future<ApiResponse<bool?>> resetPassword({
+    required String email,
+  });
+
+  Future<ApiResponse<bool?>> setNewPassword({
+    required String email,
+    required String token,
+    required String newPassword,
+  });
+
 }

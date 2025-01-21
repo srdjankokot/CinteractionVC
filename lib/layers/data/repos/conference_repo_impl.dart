@@ -7,6 +7,7 @@ import 'package:cinteraction_vc/core/util/util.dart';
 import 'package:cinteraction_vc/layers/domain/entities/api_response.dart';
 import 'package:cinteraction_vc/layers/domain/entities/chat_message.dart';
 import 'package:cinteraction_vc/layers/domain/repos/conference_repo.dart';
+import 'package:image/image.dart';
 import 'package:janus_client/janus_client.dart';
 import 'package:logging/logging.dart';
 import 'package:webrtc_interface/webrtc_interface.dart';
@@ -61,15 +62,14 @@ class ConferenceRepoImpl extends ConferenceRepo {
 
   User? user = getIt.get<LocalStorage>().loadLoggedUser();
 
-  late int myId = user?.id ?? Random().nextInt(999999);
+  late String myId = user?.id ?? "";
   late String displayName = user?.name ?? 'User $myId';
 
-  get screenShareId => myId + int.parse("1");
+  get screenShareId => myId + "_screen_share";
 
   int? callId;
 
   List<ChatMessage> messages = [];
-
 
   @override
   Future<void> initialize(
@@ -455,6 +455,7 @@ class ConferenceRepoImpl extends ConferenceRepo {
         });
       };
 
+
       remotePlugin?.remoteTrack?.listen((event) async {
         // print(event);
         print({
@@ -625,7 +626,6 @@ class ConferenceRepoImpl extends ConferenceRepo {
 
   @override
   Future<void> mute({required String kind, required bool muted}) async {
-
     var payload = {
       "request": "moderate",
       "room": room,
@@ -639,7 +639,7 @@ class ConferenceRepoImpl extends ConferenceRepo {
         .where((element) => element.kind == kind)
         .toList()
         .forEach((element) {
-       print('mid: ${ element.id}');
+      print('mid: ${element.id}');
       element.enabled = !muted;
     });
 
@@ -832,7 +832,7 @@ class ConferenceRepoImpl extends ConferenceRepo {
     var publishers = participants.where((element) => element.publisher);
     print('Number of publishers ${publishers.length}');
 
-    var max = roomDetails?.maxPublishers!.toInt()?? maxPublishersDefault;
+    var max = roomDetails?.maxPublishers!.toInt() ?? maxPublishersDefault;
 
     return publishers.length < max;
   }
@@ -895,7 +895,8 @@ class ConferenceRepoImpl extends ConferenceRepo {
 
   @override
   Future<void> changeSubStream(
-      {required ConfigureStreamQuality quality, required StreamRenderer remoteStream}) async {
+      {required ConfigureStreamQuality quality,
+      required StreamRenderer remoteStream}) async {
     // var numberOfPublishers = videoState.streamsToBeRendered.length;
     // ConfigureStreamQuality.values[index];
     // var streamQuality = ConfigureStreamQuality.HIGH;
@@ -915,8 +916,8 @@ class ConferenceRepoImpl extends ConferenceRepo {
     //       ConfigureStream(mid: remoteStream.mid, substream: quality)
     //     ],
     //   );
-      changeSubstream(remoteStreamId: remoteStream.id,  substream: 1);
-      remoteStream.subStreamQuality = quality;
+    changeSubstream(remoteStreamId: remoteStream.id, substream: 1);
+    remoteStream.subStreamQuality = quality;
     // }
   }
 
@@ -955,9 +956,7 @@ class ConferenceRepoImpl extends ConferenceRepo {
   }
 
   _createRoom(int roomId) async {
-    Map<String, dynamic>? extras ={
-      'publishers': maxPublishersDefault
-    };
+    Map<String, dynamic>? extras = {'publishers': maxPublishersDefault};
     var created = await videoPlugin?.createRoom(room, extras: extras);
     JanusEvent event = JanusEvent.fromJson(created);
     if (event.plugindata?.data['videoroom'] == 'created') {
@@ -969,22 +968,21 @@ class ConferenceRepoImpl extends ConferenceRepo {
 
   _joinPublisher() async {
     roomDetails = await _getRoomDetails(room);
-    await videoPlugin?.joinPublisher(room, displayName: displayName, id: myId);
+    await videoPlugin?.joinPublisher(room,
+        displayName: displayName, id: int.parse(myId));
   }
 
-  Future<JanusVideoRoom?> _getRoomDetails(int roomId) async{
+  Future<JanusVideoRoom?> _getRoomDetails(int roomId) async {
     var payload = {"request": "list"};
     Map allRooms = await videoPlugin?.send(data: payload);
     JanusEvent event = JanusEvent.fromJson(allRooms);
 
     for (var r in event.plugindata?.data['list']) {
       var room = JanusVideoRoom.fromJson(r as Map<String, dynamic>);
-      if(room.room == roomId)
-        {
-          return room;
-        }
+      if (room.room == roomId) {
+        return room;
+      }
     }
-
     return null;
   }
 
@@ -1069,19 +1067,24 @@ class ConferenceRepoImpl extends ConferenceRepo {
   _getEngagement() async {
     // return;
 
-    if (engagementIsRunning || (localVideoRenderer.isVideoMuted??false)) return;
+    if (engagementIsRunning || (localVideoRenderer.isVideoMuted ?? false))
+      return;
 
     engagementIsRunning = true;
 
     try {
-
-      var image = await localVideoRenderer.mediaStream?.getVideoTracks()
+      var image = await localVideoRenderer.mediaStream
+          ?.getVideoTracks()
           .first
           .captureFrame();
 
-      // print(base64Encode(image!.asUint8List().toList()).toString());
-
       var img = base64Encode(image!.asUint8List().toList()).toString();
+
+      //make image 256x256
+      // final decoded = decodePng(image!.asUint8List());
+      // final resized = copyResizeCropSquare(decoded!,  256);
+      // final resizedByteData = encodePng(resized);
+      // var img = base64Encode(resizedByteData);
 
       final engagement = await _api.getEngagement(
           averageAttention: 0,

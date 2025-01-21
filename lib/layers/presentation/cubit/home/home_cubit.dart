@@ -6,7 +6,7 @@ import 'package:flutter/material.dart';
 import '../../../../core/logger/loggy_types.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
-import '../../../domain/entities/meeting.dart';
+import '../../../domain/entities/meetings/meeting.dart';
 
 part 'home_state.dart';
 

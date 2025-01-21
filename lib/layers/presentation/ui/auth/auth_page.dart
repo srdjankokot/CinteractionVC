@@ -4,6 +4,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_sign_in/google_sign_in.dart';
+import 'package:url_launcher/url_launcher.dart';
+import 'package:url_launcher/url_launcher_string.dart';
 
 import '../../../../../core/navigation/route.dart';
 import '../../../../../core/ui/input/input_field.dart';
@@ -48,8 +50,7 @@ class AuthPage extends StatelessWidget {
 
     void onAuthState(BuildContext context, AuthState state) {
       title = state.isSignUp ? 'Sign up' : 'Log in';
-      checkboxTitle =
-          state.isSignUp ? 'I agree to the Terms of Service' : 'Remember me';
+      checkboxTitle = state.isSignUp ? 'I agree to the Terms of Service' : 'Remember me';
       changeLayoutTitle = state.isSignUp
           ? 'Already have an account?'
           : 'Don’t have an account?';
@@ -76,6 +77,7 @@ class AuthPage extends StatelessWidget {
       if (state.loginSuccess) {
         // if (state.user != null) {
           AppRoute.home.go(context);
+          // AppRoute.chat.go(context);
           return;
         // }
       }
@@ -144,7 +146,7 @@ class AuthPage extends StatelessWidget {
                                   Text(
                                     title,
                                     textAlign: TextAlign.center,
-                                    style: context.textTheme.headlineLarge,
+                                    style: context.titleTheme.headlineLarge,
                                   ),
                                   const SizedBox(height: 33),
 
@@ -244,6 +246,9 @@ class AuthPage extends StatelessWidget {
                                   ),
 
                                   const SizedBox(height: 8),
+
+
+
                                   SizedBox(
                                     width: double.maxFinite,
                                     child: ElevatedButton(
@@ -252,6 +257,13 @@ class AuthPage extends StatelessWidget {
                                     ),
                                   ),
 
+                                  LabeledTextButton(
+                                    label: "",
+                                    action: "Privacy Policy",
+                                    onTap: () =>{
+                                      launchUrlString("https://cinteraction.com/privacy")
+                                    },
+                                  ),
                                   const SizedBox(height: 16),
                                   // const Spacer(),
 
@@ -365,7 +377,7 @@ class AuthPage extends StatelessWidget {
                     Text(
                       title,
                       textAlign: TextAlign.center,
-                      style: context.textTheme.headlineLarge,
+                      style: context.titleTheme.headlineLarge,
                     ),
                     const SizedBox(height: 33),
 

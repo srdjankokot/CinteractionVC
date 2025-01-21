@@ -1,5 +1,5 @@
 import 'package:cinteraction_vc/layers/domain/entities/api_response.dart';
-import 'package:cinteraction_vc/layers/domain/entities/meeting.dart';
+import 'package:cinteraction_vc/layers/domain/entities/meetings/meeting.dart';
 import 'package:cinteraction_vc/layers/domain/repos/home_repo.dart';
 
 import '../../domain/source/api.dart';
