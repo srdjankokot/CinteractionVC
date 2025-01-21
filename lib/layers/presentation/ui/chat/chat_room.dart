@@ -614,7 +614,17 @@ class ChatRoomPage extends StatelessWidget {
                                       var participantId = state.chatDetails!
                                           .chatParticipants.first.id;
 
-                                      sendMessage(state.currentParticipant!.id);
+                                      await context
+                                          .read<ChatCubit>()
+                                          .sendChatMessage(
+                                              chatId: state.chatDetails!.chatId,
+                                              messageContent:
+                                                  messageFieldController.text,
+                                              participiantsId: participiansList,
+                                              senderId: state
+                                                  .chatDetails!.authUser.id);
+
+                                      sendMessage(participantId);
                                       messageFieldController.text = "";
                                     },
                                     controller: messageFieldController,
