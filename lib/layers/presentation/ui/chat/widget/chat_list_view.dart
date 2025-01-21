@@ -65,7 +65,7 @@ class _ChatsListViewState extends State<ChatsListView> {
                         const SizedBox(width: 10),
                         Stack(
                           children: [
-                            // UserImage.medium(chat.userImage!),
+                            UserImage.medium(chat.userImage!),
                           ],
                         ),
                         const SizedBox(width: 10),
