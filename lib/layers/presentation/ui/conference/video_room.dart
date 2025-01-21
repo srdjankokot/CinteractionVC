@@ -422,9 +422,10 @@ class VideoRoomPage extends StatelessWidget {
                                                               .chatMessageSeen(
                                                                   index);
                                                         },
-                                                        child: Center(
-                                                          child: Text('Test'),
-                                                        ));
+                                                        child: ChatMessageWidget(
+                                                            message:
+                                                                state.messages![
+                                                                    index]));
                                                   },
                                                 ),
                                         ),
@@ -715,7 +716,10 @@ class VideoRoomPage extends StatelessWidget {
                                                                 .chatMessageSeen(
                                                                     index);
                                                           },
-                                                          child: Text('Test'));
+                                                          child: ChatMessageWidget(
+                                                              message: state
+                                                                      .messages![
+                                                                  index]));
                                                     },
                                                   ),
                                           ),

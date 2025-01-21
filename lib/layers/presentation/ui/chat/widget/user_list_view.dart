@@ -23,10 +23,9 @@ class _UsersListViewState extends State<UsersListView> {
   void initState() {
     super.initState();
     if (widget.state.users != null && widget.state.users!.isNotEmpty) {
-      selectedUserId =
-          int.parse(widget.state.users!.first.id.replaceFirst('hash_', ''));
+      selectedUserId = int.parse(widget.state.users!.first.id);
       WidgetsBinding.instance.addPostFrameCallback((_) {
-        context.read<ChatCubit>().getChatDetails(selectedUserId!);
+        context.read<ChatCubit>().getChatDetailsByParticipiant(selectedUserId!);
         context.read<ChatCubit>().setCurrentParticipant(widget.state.users![0]);
       });
     }
@@ -38,18 +37,16 @@ class _UsersListViewState extends State<UsersListView> {
       itemCount: widget.state.users?.length ?? 0,
       itemBuilder: (context, index) {
         var user = widget.state.users![index];
-        int userId = int.parse(user.id.replaceFirst('hash_', ''));
+        int userId = int.parse(user.id);
 
         return GestureDetector(
           onTap: () async {
             setState(() {
               selectedUserId = userId;
             });
-            if (user.chatId != null) {
-              await context.read<ChatCubit>().getChatDetails(user.chatId);
-            } else {
-              await context.read<ChatCubit>().getEmptyChat();
-            }
+            await context
+                .read<ChatCubit>()
+                .getChatDetailsByParticipiant(userId);
             await context.read<ChatCubit>().setCurrentParticipant(user);
           },
           child: Container(

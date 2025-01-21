@@ -3,12 +3,14 @@ class ChatParticipantDto {
   final String image;
   final String name;
   final String email;
+  bool isOnline;
 
   ChatParticipantDto({
     required this.id,
     required this.image,
     required this.name,
     required this.email,
+    this.isOnline = false,
   });
 
   factory ChatParticipantDto.fromJson(Map<String, dynamic> json) =>
@@ -28,7 +30,7 @@ class ChatParticipantDto {
 
   @override
   String toString() {
-    return 'ChatParticipantDto(id: $id, image: $image, name: $name, email: $email)';
+    return 'ChatParticipantDto(id: $id, image: $image, name: $name, email: $email, isOnline: $isOnline)';
   }
 }
 
@@ -83,14 +85,15 @@ class ChatDetailsDto {
   final ChatParticipantDto authUser;
   final List<ChatParticipantDto> chatParticipants;
   final List<MessageDto> messages;
+  final bool isOnline;
 
-  ChatDetailsDto({
-    required this.chatId,
-    required this.chatName,
-    required this.authUser,
-    required this.chatParticipants,
-    required this.messages,
-  });
+  ChatDetailsDto(
+      {required this.chatId,
+      required this.chatName,
+      required this.authUser,
+      required this.chatParticipants,
+      required this.messages,
+      this.isOnline = false});
 
   factory ChatDetailsDto.fromJson(Map<String, dynamic> json) => ChatDetailsDto(
         chatId: json['chat_id'] as int?,
@@ -114,6 +117,6 @@ class ChatDetailsDto {
 
   @override
   String toString() {
-    return 'ChatDetailsDto(chatId: $chatId, chatName: $chatName, authUser: $authUser, chatParticipants: $chatParticipants, messages: $messages)';
+    return 'ChatDetailsDto(chatId: $chatId, chatName: $chatName, authUser: $authUser, chatParticipants: $chatParticipants, messages: $messages , isOnline: $isOnline)';
   }
 }

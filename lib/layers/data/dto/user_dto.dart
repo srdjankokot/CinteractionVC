@@ -12,14 +12,14 @@ class UserDto extends User {
   final int? chatId;
 
   factory UserDto.fromJson(Map<String, dynamic> json) => UserDto(
-      id: "hash_${json['id']}",
+      id: "${json['id']}",
       name: json['name'] as String,
       email: json['email'] as String,
       imageUrl: json['profile_photo_path'] as String,
       chatId: json['chat_id'] as int?);
 
   Map<String, dynamic> toJson() => <String, dynamic>{
-        'id': id.substring(5),
+        'id': id,
         'name': name,
         'email': email,
         'profile_photo_path': imageUrl,

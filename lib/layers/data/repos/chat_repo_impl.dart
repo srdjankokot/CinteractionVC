@@ -148,16 +148,6 @@ class ChatRepoImpl extends ChatRepo {
     textRoom = await _session.attach<JanusTextRoomPlugin>();
   }
 
-  _leave() async {
-    try {
-      await textRoom.leaveRoom(room);
-      textRoom.dispose();
-      _session.dispose();
-    } catch (e) {
-      print('no connection skipping');
-    }
-  }
-
   _setup() async {
     await textRoom.setup();
     textRoom.onData?.listen((event) async {
@@ -171,6 +161,17 @@ class ChatRepoImpl extends ChatRepo {
       }
     });
     _setListener();
+  }
+
+  leaveRoom() async {
+    print('Try to leave $room');
+    try {
+      await textRoom.leaveRoom(room);
+      textRoom.dispose();
+      _session.dispose();
+    } catch (e) {
+      print('no connection skipping');
+    }
   }
 
   bool _haveUnread(Participant participant) {
@@ -196,11 +197,12 @@ class ChatRepoImpl extends ChatRepo {
       );
       users
           .firstWhere(
-            (item) => item.id == subscriber.id, // Condition that won't be met
-            orElse: () => fallbackUser, // Return null if no element matches
+            (item) => int.parse(item.id) == subscriber.id,
+            orElse: () => fallbackUser,
           )
           .online = true;
     }
+    print('Users: $users');
     _usersStream.add(users);
   }
 
@@ -212,10 +214,9 @@ class ChatRepoImpl extends ChatRepo {
         if (data['textroom'] == 'message') {
           // var initUserChat = currentParticipant!.id
           var initChat = chatDetailsDto.chatParticipants
-              .firstWhere((item) => 'hash_${item.id}' == data['from']);
-          var senderId = int.parse(data['from'].replaceAll('hash_', ''));
-          print('senderID: $senderId');
-          print('currentUserID: ${currentParticipant!.id}');
+              .firstWhere((item) => '${item.id}' == data['from']);
+          var senderId = int.parse(data['from']);
+
           if (initChat != null) {
             chatDetailsDto.messages.add(MessageDto(
                 chatId: chatDetailsDto.chatId!,
@@ -224,13 +225,13 @@ class ChatRepoImpl extends ChatRepo {
                 message: data['text'],
                 updatedAt: data['date']));
           }
-
           _chatDetailsStream.add(chatDetailsDto);
 
           var participant = subscribers
               .firstWhere((item) => item.id.toString() == data['from']);
 
           participant.haveUnreadMessages = _haveUnread(participant);
+
           // participant.messages.add(data['text']);
           // participant.messages.add(MessageDto(
           //     chatId: ,
@@ -246,6 +247,7 @@ class ChatRepoImpl extends ChatRepo {
           _messagesStream.add(getUserMessages()!);
           _participantsStream.add(subscribers);
           _matchParticipantWithUser();
+          // _matchParticipiantWithChat();
           print(data);
         }
         if (data['textroom'] == 'leave') {
@@ -254,6 +256,7 @@ class ChatRepoImpl extends ChatRepo {
               .where((item) => item.id.toString() != data['username'])
               .toList();
           _participantsStream.add(subscribers);
+
           _matchParticipantWithUser();
         }
         if (data['textroom'] == 'join') {
@@ -311,14 +314,15 @@ class ChatRepoImpl extends ChatRepo {
   @override
   Future<void> sendMessage(String msg, int participiantId) async {
     // currentParticipant.display
-    await textRoom.sendMessage(room, msg, to: 'hash_$participiantId');
+    await _loadChats();
+    await textRoom.sendMessage(room, msg, to: '$participiantId');
 
     chatDetailsDto.messages.add(MessageDto(
         chatId: chatDetailsDto.chatId!,
         senderId: chatDetailsDto.authUser.id,
         message: msg,
-        createdAt: DateTime.now().toString(),
-        updatedAt: DateTime.now().toString()));
+        createdAt: DateTime.now().toIso8601String(),
+        updatedAt: DateTime.now().toIso8601String()));
 
     final updatedChatDetails = ChatDetailsDto(
       chatName: chatDetailsDto.chatName,
@@ -366,8 +370,6 @@ class ChatRepoImpl extends ChatRepo {
   _loadUsers() async {
     var response = await _api.getCompanyUsers();
     users = response.response!.where((element) => element.id != myId).toList();
-    // print('users: $users.')
-    setCurrentParticipant(response.response![0]);
     _matchParticipantWithUser();
   }
 
@@ -375,8 +377,10 @@ class ChatRepoImpl extends ChatRepo {
 
   _loadChats() async {
     var response = await _api.getAllChats();
+    print('Response2: $response');
     if (response.error == null) {
       List<ChatDto> chats = response.response ?? [];
+      // _matchParticipiantWithChat();
       _chatStream.add(chats);
     } else {
       print('Error: ${response.error}');
@@ -422,7 +426,23 @@ class ChatRepoImpl extends ChatRepo {
   }
 
   @override
+  Future<void> getChatDetailsByParticipiant(int id) async {
+    try {
+      var response = await _api.getChatByParticipiant(id: id);
+      if (response.error == null && response.response != null) {
+        chatDetailsDto = response.response!;
+        _chatDetailsStream.add(response.response!);
+      } else {
+        print("Errors: ${response.error}");
+      }
+    } catch (e) {
+      print("Error while fetching chat: $e");
+    }
+  }
+
+  @override
   Future<void> deleteMessage(int id) async {
+    print('ID: $id');
     try {
       var response = await _api.deleteMessageById(id: id);
       if (response.error == null && response.response != null) {
@@ -455,13 +475,42 @@ class ChatRepoImpl extends ChatRepo {
   Future<void> sendMessageToChatWrapper(int? chatId, String messageContent,
       int senderId, List<int> participantIds,
       {List<File>? uploadedFiles}) async {
-    await _api.sendMessageToChat(
+    var response = await _api.sendMessageToChat(
       name: 'Test',
       chatId: chatId,
       senderId: senderId,
       message: messageContent,
       participantIds: participantIds,
     );
+
+    if (response.error == null && response.response != null) {
+      ////This is used only for first message in users list////
+      if (chatDetailsDto.chatId == null) {
+        print('____Used_____');
+        chatDetailsDto.messages.add(MessageDto(
+          chatId: response.response!.chatId,
+          createdAt: DateTime.now().toIso8601String(),
+          message: response.response!.message,
+          senderId: response.response!.senderId,
+          updatedAt: DateTime.now().toIso8601String(),
+          id: response.response!.id,
+        ));
+        final updatedChatDetails = ChatDetailsDto(
+          chatName: chatDetailsDto.chatName,
+          authUser: chatDetailsDto.authUser,
+          chatId: response.response!.chatId,
+          chatParticipants: chatDetailsDto.chatParticipants,
+          messages: [...chatDetailsDto.messages],
+        );
+
+        _chatDetailsStream.add(updatedChatDetails);
+        _loadChats();
+      } else {
+        print('______notUsED______');
+      }
+    } else {
+      print("Error: ${response.error}");
+    }
   }
 
   //////////////////////////////////////

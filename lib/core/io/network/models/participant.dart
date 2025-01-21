@@ -14,7 +14,7 @@ class Participant {
   });
 
   @JsonKey(name: 'id')
-  String id;
+  int id;
 
   @JsonKey(name: 'display')
   String display;
