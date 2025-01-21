@@ -272,7 +272,7 @@ class ChatRepoImpl extends ChatRepo {
               .isEmpty) {
             print("there is no participant with this display name");
             var participant =
-                Participant(display: data['display'], id: data['username']);
+                Participant(display: data['display'], id: int.parse(data['username']));
 
             subscribers.add(participant);
           }
@@ -289,7 +289,7 @@ class ChatRepoImpl extends ChatRepo {
 
             // var participant = Participant.fromJson(element as Map<String, dynamic>);
             var participant = Participant(
-                display: element['display'], id: element['username']);
+                display: element['display'], id: int.parse(element['username']));
             // if(!participant.publisher){
             subscribers.add(participant);
             // }

@@ -4,6 +4,7 @@ import 'package:audioplayers/audioplayers.dart';
 import 'package:cinteraction_vc/core/app/style.dart';
 import 'package:cinteraction_vc/core/extension/context.dart';
 import 'package:cinteraction_vc/core/extension/context_user.dart';
+import 'package:cinteraction_vc/core/extension/image.dart';
 import 'package:cinteraction_vc/layers/data/dto/chat/chat_detail_dto.dart';
 import 'package:cinteraction_vc/layers/data/dto/chat/last_message_dto.dart';
 import 'package:cinteraction_vc/layers/data/dto/user_dto.dart';
@@ -368,149 +369,149 @@ class ChatRoomPage extends StatelessWidget {
 
                       if (state.currentParticipant != null ||
                           state.chatDetails != null) {
-                        // if (state.localStream != null) {
-                        //   print("local stream not null");
-                        //   if (state.remoteStream == null) {
-                        //     return ParticipantVideoWidget(
-                        //         remoteStream: state.localStream!,
-                        //         height: double.maxFinite,
-                        //         width: double.maxFinite);
-                        //   } else {
-                        //     return Stack(
-                        //       children: [
-                        //         ParticipantVideoWidget(
-                        //             remoteStream: state.remoteStream!,
-                        //             height: double.maxFinite,
-                        //             width: double.maxFinite),
-                        //         ParticipantVideoWidget(
-                        //             remoteStream: state.remoteStream!,
-                        //             height: 200,
-                        //             width: 200),
-                        //         Positioned.fill(
-                        //           bottom: 20,
-                        //           child: Row(
-                        //             mainAxisAlignment: MainAxisAlignment.center,
-                        //             crossAxisAlignment: CrossAxisAlignment.end,
-                        //             children: [
-                        //               CallButtonShape(
-                        //                   image: false
-                        //                       ? imageSVGAsset('icon_microphone')
-                        //                           as Widget
-                        //                       : imageSVGAsset(
-                        //                               'icon_microphone_disabled')
-                        //                           as Widget,
-                        //                   onClickAction: () async {
-                        //                     // await context
-                        //                     //     .read<ConferenceCubit>()
-                        //                     //     .audioMute();
-                        //                   }),
-                        //               const SizedBox(width: 20),
-                        //               CallButtonShape(
-                        //                   image: false
-                        //                       ? imageSVGAsset(
-                        //                               'icon_video_recorder')
-                        //                           as Widget
-                        //                       : imageSVGAsset(
-                        //                               'icon_video_recorder_disabled')
-                        //                           as Widget,
-                        //                   onClickAction: () async {
-                        //                     // await context
-                        //                     //     .read<ConferenceCubit>()
-                        //                     //     .videoMute();
-                        //                   }),
-                        //               const SizedBox(width: 20),
-                        //               CallButtonShape(
-                        //                   image: imageSVGAsset(
-                        //                       'icon_arrow_square_up') as Widget,
-                        //                   bgColor: true
-                        //                       ? ColorConstants.kPrimaryColor
-                        //                       : ColorConstants.kWhite30,
-                        //                   onClickAction: () async {}),
+                        if (state.localStream != null) {
+                          print("local stream not null");
+                          if (state.remoteStream == null) {
+                            return ParticipantVideoWidget(
+                                remoteStream: state.localStream!,
+                                height: double.maxFinite,
+                                width: double.maxFinite);
+                          } else {
+                            return Stack(
+                              children: [
+                                ParticipantVideoWidget(
+                                    remoteStream: state.remoteStream!,
+                                    height: double.maxFinite,
+                                    width: double.maxFinite),
+                                ParticipantVideoWidget(
+                                    remoteStream: state.remoteStream!,
+                                    height: 200,
+                                    width: 200),
+                                Positioned.fill(
+                                  bottom: 20,
+                                  child: Row(
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    crossAxisAlignment: CrossAxisAlignment.end,
+                                    children: [
+                                      CallButtonShape(
+                                          image: false
+                                              ? imageSVGAsset('icon_microphone')
+                                                  as Widget
+                                              : imageSVGAsset(
+                                                      'icon_microphone_disabled')
+                                                  as Widget,
+                                          onClickAction: () async {
+                                            // await context
+                                            //     .read<ConferenceCubit>()
+                                            //     .audioMute();
+                                          }),
+                                      const SizedBox(width: 20),
+                                      CallButtonShape(
+                                          image: false
+                                              ? imageSVGAsset(
+                                                      'icon_video_recorder')
+                                                  as Widget
+                                              : imageSVGAsset(
+                                                      'icon_video_recorder_disabled')
+                                                  as Widget,
+                                          onClickAction: () async {
+                                            // await context
+                                            //     .read<ConferenceCubit>()
+                                            //     .videoMute();
+                                          }),
+                                      const SizedBox(width: 20),
+                                      CallButtonShape(
+                                          image: imageSVGAsset(
+                                              'icon_arrow_square_up') as Widget,
+                                          bgColor: true
+                                              ? ColorConstants.kPrimaryColor
+                                              : ColorConstants.kWhite30,
+                                          onClickAction: () async {}),
 
-                        //               // const SizedBox(width: 20),
+                                      // const SizedBox(width: 20),
 
-                        //               // Stack(children: [
-                        //               //   CallButtonShape(
-                        //               //     image: imageSVGAsset('icon_message')
-                        //               //     as Widget,
-                        //               //     bgColor: ColorConstants.kPrimaryColor
-                        //               //         .withOpacity(0.4),
-                        //               //     onClickAction: () async {
-                        //               //       await context
-                        //               //           .read<ConferenceCubit>()
-                        //               //           .toggleChatWindow();
-                        //               //     },
-                        //               //   ),
-                        //               //   Positioned(
-                        //               //     right: 0,
-                        //               //     top: 0,
-                        //               //     child: AnimatedOpacity(
-                        //               //       opacity:
-                        //               //       (state.unreadMessages != null &&
-                        //               //           state.unreadMessages! > 0)
-                        //               //           ? 1
-                        //               //           : 0,
-                        //               //       duration:
-                        //               //       const Duration(milliseconds: 250),
-                        //               //       child: Container(
-                        //               //         width: 12,
-                        //               //         height: 12,
-                        //               //         decoration: const ShapeDecoration(
-                        //               //           color: Colors.white,
-                        //               //           shape: OvalBorder(),
-                        //               //         ),
-                        //               //         // child: Text(
-                        //               //         //   '1',
-                        //               //         //   style: context
-                        //               //         //       .primaryTextTheme.labelSmall
-                        //               //         //       ?.copyWith(
-                        //               //         //           fontSize: 8,
-                        //               //         //           fontWeight:
-                        //               //         //               FontWeight.w700),
-                        //               //         // )
-                        //               //       ),
-                        //               //     ),
-                        //               //   ),
-                        //               //   // child: Text('${state.unreadMessages}', style: context.primaryTextTheme.labelSmall,)),
-                        //               //   //   child: Text('1', style: context.primaryTextTheme.labelSmall?.copyWith(fontSize: 8, fontWeight: FontWeight.w700),)),,
-                        //               // ]),
+                                      // Stack(children: [
+                                      //   CallButtonShape(
+                                      //     image: imageSVGAsset('icon_message')
+                                      //     as Widget,
+                                      //     bgColor: ColorConstants.kPrimaryColor
+                                      //         .withOpacity(0.4),
+                                      //     onClickAction: () async {
+                                      //       await context
+                                      //           .read<ConferenceCubit>()
+                                      //           .toggleChatWindow();
+                                      //     },
+                                      //   ),
+                                      //   Positioned(
+                                      //     right: 0,
+                                      //     top: 0,
+                                      //     child: AnimatedOpacity(
+                                      //       opacity:
+                                      //       (state.unreadMessages != null &&
+                                      //           state.unreadMessages! > 0)
+                                      //           ? 1
+                                      //           : 0,
+                                      //       duration:
+                                      //       const Duration(milliseconds: 250),
+                                      //       child: Container(
+                                      //         width: 12,
+                                      //         height: 12,
+                                      //         decoration: const ShapeDecoration(
+                                      //           color: Colors.white,
+                                      //           shape: OvalBorder(),
+                                      //         ),
+                                      //         // child: Text(
+                                      //         //   '1',
+                                      //         //   style: context
+                                      //         //       .primaryTextTheme.labelSmall
+                                      //         //       ?.copyWith(
+                                      //         //           fontSize: 8,
+                                      //         //           fontWeight:
+                                      //         //               FontWeight.w700),
+                                      //         // )
+                                      //       ),
+                                      //     ),
+                                      //   ),
+                                      //   // child: Text('${state.unreadMessages}', style: context.primaryTextTheme.labelSmall,)),
+                                      //   //   child: Text('1', style: context.primaryTextTheme.labelSmall?.copyWith(fontSize: 8, fontWeight: FontWeight.w700),)),,
+                                      // ]),
 
-                        //               const SizedBox(width: 20),
-                        //               // CallButtonShape(
-                        //               //     image: imageSVGAsset('icon_user') as Widget,
-                        //               //     // onClickAction: joined ? switchCamera : null),
-                        //               //     onClickAction: joined ? null : null),
-                        //               // const SizedBox(width: 20),
-                        //               CallButtonShape(
-                        //                 image: imageSVGAsset('icon_phone')
-                        //                     as Widget,
-                        //                 bgColor: ColorConstants.kPrimaryColor,
-                        //                 onClickAction: () async {
-                        //                   await context
-                        //                       .read<ChatCubit>()
-                        //                       .rejectCall();
-                        //                 },
-                        //               ),
+                                      const SizedBox(width: 20),
+                                      // CallButtonShape(
+                                      //     image: imageSVGAsset('icon_user') as Widget,
+                                      //     // onClickAction: joined ? switchCamera : null),
+                                      //     onClickAction: joined ? null : null),
+                                      // const SizedBox(width: 20),
+                                      CallButtonShape(
+                                        image: imageSVGAsset('icon_phone')
+                                            as Widget,
+                                        bgColor: ColorConstants.kPrimaryColor,
+                                        onClickAction: () async {
+                                          await context
+                                              .read<ChatCubit>()
+                                              .rejectCall();
+                                        },
+                                      ),
 
-                        //               // const SizedBox(width: 20),
+                                      // const SizedBox(width: 20),
 
-                        //               // CallButtonShape(
-                        //               //     image: state.engagementEnabled
-                        //               //         ? const Icon(Icons.image)
-                        //               //         : const Icon(Icons.image_not_supported),
-                        //               //     onClickAction: () async {
-                        //               //       await context
-                        //               //           .read<ConferenceCubit>()
-                        //               //           .toggleEngagement();
-                        //               //     }),
-                        //               //
-                        //             ],
-                        //           ),
-                        //         ),
-                        //       ],
-                        //     );
-                        //   }
-                        // }
+                                      // CallButtonShape(
+                                      //     image: state.engagementEnabled
+                                      //         ? const Icon(Icons.image)
+                                      //         : const Icon(Icons.image_not_supported),
+                                      //     onClickAction: () async {
+                                      //       await context
+                                      //           .read<ConferenceCubit>()
+                                      //           .toggleEngagement();
+                                      //     }),
+                                      //
+                                    ],
+                                  ),
+                                ),
+                              ],
+                            );
+                          }
+                        }
 
                         return Column(
                           // crossAxisAlignment: CrossAxisAlignment.start,
@@ -539,42 +540,41 @@ class ChatRoomPage extends StatelessWidget {
                                             // Adjust the width as needed
                                             height: 15.0,
                                             // Adjust the height as needed
-                                            // decoration: BoxDecoration(
-                                            //   color: state.currentParticipant!
-                                            //           .online
-                                            //       ? Colors.green
-                                            //       : Colors.amber,
-                                            //   shape: BoxShape.circle,
-                                            // ),
+                                            decoration: BoxDecoration(
+                                              color: (state.currentParticipant == null ? false : state.currentParticipant!.online)
+                                                  ? Colors.green
+                                                  : Colors.amber,
+                                              shape: BoxShape.circle,
+                                            ),
                                           ),
                                           const SizedBox(width: 5.0),
-                                          // Text(
-                                          //   state.currentParticipant!.online
-                                          //       ? "Active now"
-                                          //       : "Away",
-                                          //   style: titleThemeStyle
-                                          //       .textTheme.labelLarge,
-                                          // ),
+                                          Text(
+                                            (state.currentParticipant == null ? false : state.currentParticipant!.online)
+                                                ? "Active now"
+                                                : "Away",
+                                            style: titleThemeStyle
+                                                .textTheme.labelLarge,
+                                          ),
                                         ],
                                       )
                                     ],
                                   ),
                                   const Spacer(),
-                                  // Visibility(
-                                  //     visible: state.currentParticipant!.online,
-                                  //     child: CallButtonShape(
-                                  //       image: imageSVGAsset('icon_phone')
-                                  //           as Widget,
-                                  //       bgColor: ColorConstants.kPrimaryColor,
-                                  //       onClickAction: () async {
-                                  //         await context
-                                  //             .read<ChatCubit>()
-                                  //             .makeCall(
-                                  //                 state.currentParticipant!.id);
+                                  Visibility(
+                                      visible: state.currentParticipant == null ? false:  state.currentParticipant!.online,
+                                      child: CallButtonShape(
+                                        image: imageSVGAsset('icon_phone')
+                                            as Widget,
+                                        bgColor: ColorConstants.kStateSuccess,
+                                        onClickAction: () async {
+                                          await context
+                                              .read<ChatCubit>()
+                                              .makeCall(
+                                                  state.currentParticipant!.id);
 
-                                  //         // await context.read<ChatCubit>().rejectCall();
-                                  //       },
-                                  //     ))
+                                          // await context.read<ChatCubit>().rejectCall();
+                                        },
+                                      ))
                                 ],
                               ),
                             ),
