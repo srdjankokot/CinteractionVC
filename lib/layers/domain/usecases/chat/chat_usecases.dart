@@ -1,6 +1,7 @@
 import 'package:cinteraction_vc/layers/domain/usecases/chat/delete_message.dart';
 import 'package:cinteraction_vc/layers/domain/usecases/chat/edit_message.dart';
 import 'package:cinteraction_vc/layers/domain/usecases/chat/get_chat_details.dart';
+import 'package:cinteraction_vc/layers/domain/usecases/chat/get_chat_details_by_participiant.dart';
 import 'package:cinteraction_vc/layers/domain/usecases/chat/get_chat_details_stream.dart';
 import 'package:cinteraction_vc/layers/domain/usecases/chat/get_chats_stream.dart';
 import 'package:cinteraction_vc/layers/domain/usecases/chat/get_empty_chat.dart';
@@ -35,6 +36,7 @@ class ChatUseCases {
         getChatsStream = GetChatsStream(repo: repo),
         setCurrentChat = SetCurrentChat(repo: repo),
         getChatDetails = GetChatDetails(repo: repo),
+        getChatDetailsByParticipiant = GetChatDetailsByParticipiant(repo: repo),
         getEmptyChat = GetEmptyChat(repo: repo),
         getChatDetailsStream = GetChatDetailsStream(repo: repo),
         sendMessageToChatStream = SendMessageToChatStream(repo: repo),
@@ -58,4 +60,5 @@ class ChatUseCases {
   SendMessageToChatStream sendMessageToChatStream;
   DeleteMessage chatDeleteMessage;
   EditMessage chatEditMessage;
+  GetChatDetailsByParticipiant getChatDetailsByParticipiant;
 }

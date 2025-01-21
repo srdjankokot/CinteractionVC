@@ -4,6 +4,7 @@ class Urls {
   // static String baseUrl = 'https://80d0-24-135-247-244.ngrok-free.app/api';
 
   static String loginEndpoint = '$baseUrl/api/login';
+  static String logOutEndpoint = '$baseUrl/api/logout';
   static String registerEndpoint = '$baseUrl/api/register';
   static String socialLoginEndpoint = '$baseUrl/api/social/login';
   static String getUserDetails = '$baseUrl/api/user';
@@ -17,7 +18,7 @@ class Urls {
     return '$baseUrl/api/meetings/end/$callId/for/user/$userId';
   }
 
-  static String scheduleMeeting = '$baseUrl/api/schedule/meeting';
+  static String scheduleMeeting = '$baseUrl/api/meetings/schedule';
 
   static String sendMessage = '$baseUrl/call/{call_id}/message';
 
@@ -26,7 +27,7 @@ class Urls {
       'Bearer 15|Jsoy8PjvLXRw3Y9ggJyYRr4ylHamlWecHNKDSOVk';
 
   static String engagement = '$baseIviUrl/engagement/rank';
-  static String sendEngagement = '$baseUrl/api/update-call-attention';
+  static String sendEngagement = '$baseUrl/api/meetings/update/attention/';
   static String dashboard = '$baseUrl/api/dashboards';
 
   static String restPassword = '$baseUrl/api/forgot-password';
@@ -34,7 +35,7 @@ class Urls {
   static String sentMessage =
       'https://7a2f-188-2-51-157.ngrok-free.app/api/message';
 
-  static String getCompanyUsers = '$baseUrl/api/users';
+  static String getCompanyUsers = '$baseUrl/api/users/chat';
 
   ////////CHAT_URLS////////
   static String getAllChats = '$baseUrl/api/chats';

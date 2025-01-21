@@ -126,6 +126,16 @@ class ChatCubit extends Cubit<ChatState> with BlocLoggy {
     }
   }
 
+  Future<void> getChatDetailsByParticipiant(int participiantId) async {
+    try {
+      final chatDetails =
+          await chatUseCases.getChatDetailsByParticipiant(participiantId);
+      emit(state.copyWith(chatDetails: chatDetails, isLoading: true));
+    } catch (e) {
+      print("Error while fetching chat by participiant: $e");
+    }
+  }
+
   Future<void> getEmptyChat() async {
     final chatDetails = await chatUseCases.getEmptyChat();
     emit(state.copyWith(chatDetails: chatDetails, isLoading: true));

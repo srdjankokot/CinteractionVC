@@ -29,6 +29,7 @@ abstract class ChatRepo {
   Future<void> setCurrentParticipant(UserDto user);
   Future<void> setCurrentChat(ChatDto chat);
   Future<void> getChatDetails(int id);
+  Future<void> getChatDetailsByParticipiant(int id);
   Future<void> getEmptyChat();
   Future<void> deleteMessage(int id);
   Future<void> editMessage(int id, String message);
@@ -43,4 +44,5 @@ abstract class ChatRepo {
 
   Future<void> sendFile(String name, Uint8List bytes);
   Future<void> chooseFile();
+  Future<void> leaveRoom();
 }
