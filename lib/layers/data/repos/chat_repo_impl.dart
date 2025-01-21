@@ -216,7 +216,7 @@ class ChatRepoImpl extends ChatRepo {
           var initChat = chatDetailsDto.chatParticipants
               .firstWhere((item) => '${item.id}' == data['from']);
           var senderId = int.parse(data['from']);
-
+          
           if (initChat != null) {
             chatDetailsDto.messages.add(MessageDto(
                 chatId: chatDetailsDto.chatId!,
