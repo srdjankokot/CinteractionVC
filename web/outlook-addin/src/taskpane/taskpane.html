@@ -1,0 +1,35 @@
+<!doctype html>
+<html>
+  <head>
+    <!-- Office JavaScript API -->
+    <script type="text/javascript" src="https://appsforoffice.microsoft.com/lib/1.1/hosted/office.js"></script>
+    <link rel="stylesheet" type="text/css" href="taskpane.css" />
+  </head>
+
+  <body>
+    <div id="app-body flex-direction: column">
+      <div id="login-form">
+        <img
+          src="https://cinteraction.nswebdevelopment.com/web/addin/assets/cinteraction_logo.png"
+          alt="Cinteraction"
+          title="Cinteraction"
+        />
+        <input type="email" id="emailInput" placeholder="Enter your email" />
+        <input type="password" id="passwordInput" placeholder="Enter your password" />
+        <button id="signInButton">Sign In</button>
+      </div>
+      <div id="signOutSection" style="display: flex">
+        <img
+          src="https://cinteraction.nswebdevelopment.com/web/addin/assets/cinteraction_logo.png"
+          alt="Cinteraction"
+          title="Cinteraction"
+        />
+        <button id="signOutButton">Sign Out</button>
+      </div>
+      <div id="spinner" style="display: none">Loading...</div>
+      <div id="errorMsg"></div>
+    </div>
+
+    <script></script>
+  </body>
+</html>

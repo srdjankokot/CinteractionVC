@@ -14,6 +14,9 @@ import 'core/app/injector.dart';
 import 'core/util/nonweb_url_strategy.dart' if (dart.library.html) 'core/util/web_url_strategy.dart';
 
 
+import 'package:firebase_core/firebase_core.dart';
+import 'firebase_options.dart';
+
 late SharedPreferences sharedPref;
 
 Future<void> main() async {
@@ -23,21 +26,26 @@ Future<void> main() async {
   _initLoggy();
   _initGoogleFonts();
 
+  sharedPref = await SharedPreferences.getInstance();
   await initializeGetIt();
 
   GoRouter.optionURLReflectsImperativeAPIs = true;
 
-  if (kIsWeb || defaultTargetPlatform == TargetPlatform.macOS) {
-    // initialiaze the facebook javascript SDK
-    await FacebookAuth.i.webAndDesktopInitialize(
-      appId: "1331067334444014",
-      cookie: true,
-      xfbml: true,
-      version: "v15.0",
-    );
-  }
 
-  sharedPref = await SharedPreferences.getInstance();
+  await Firebase.initializeApp(
+    options: DefaultFirebaseOptions.currentPlatform
+  );
+
+
+  // if (defaultTargetPlatform != TargetPlatform.windows) {
+    // window currently don't support storage emulator
+    // final emulatorHost =
+    // (!kIsWeb && defaultTargetPlatform == TargetPlatform.android)
+    //     ? '10.0.2.2'
+    //     : 'localhost';
+    //
+    // await FirebaseStorage.instance.useStorageEmulator(emulatorHost, 9199);
+  // }
 
   configureUrl();
   runApp(const CinteractionFlutterApp());

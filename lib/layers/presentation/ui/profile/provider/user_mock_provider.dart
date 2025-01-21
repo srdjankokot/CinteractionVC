@@ -10,7 +10,7 @@ import '../../../../domain/entities/user.dart';
 
 User get _mockUser =>
     User(
-      id: 23,
+      id: "23",
       name: 'John Doe',
       email: 'john@test.com',
       imageUrl:
@@ -92,7 +92,7 @@ class ProfileProvider {
 
       if (isAuthorized && googleUser != null) {
         final user = User(
-            id: 23,
+            id: "23",
             name: googleUser.displayName ?? "",
             email: googleUser.email,
             imageUrl: googleUser.photoUrl ?? "",

@@ -3,8 +3,12 @@ import 'dart:math';
 import 'package:cinteraction_vc/core/app/injector.dart';
 import 'package:cinteraction_vc/core/extension/context_user.dart';
 import 'package:cinteraction_vc/core/navigation/route.dart';
+import 'package:cinteraction_vc/layers/domain/usecases/chat/chat_usecases.dart';
 import 'package:cinteraction_vc/layers/domain/usecases/conference/conference_usecases.dart';
+import 'package:cinteraction_vc/layers/presentation/cubit/chat/chat_cubit.dart';
 import 'package:cinteraction_vc/layers/presentation/cubit/home/home_cubit.dart';
+import 'package:cinteraction_vc/layers/presentation/ui/auth/reset_pass_enter_new.dart';
+import 'package:cinteraction_vc/layers/presentation/ui/chat/chat_room.dart';
 
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
@@ -33,6 +37,7 @@ final GoRouter router = GoRouter(
     GoRoute(
       path: AppRoute.auth.path,
       builder: (context, state) {
+        print("router: ${AppRoute.auth.path}");
         return BlocProvider(
           create: (context) => AuthCubit(
             authUseCases: getIt.get<AuthUseCases>(),
@@ -43,16 +48,49 @@ final GoRouter router = GoRouter(
       redirect: (context, state) {
         var user = context.getCurrentUser;
         if (user != null) {
+          print("router: ${AppRoute.home.path}");
           return AppRoute.home.path;
         }
         return null;
       },
     ),
     // Forgot Password
+    // GoRoute(
+    //   path: AppRoute.forgotPassword.path,
+    //   builder: (context, state) => const ForgotPasswordPage(),
+    // ),
+    //
     GoRoute(
       path: AppRoute.forgotPassword.path,
-      builder: (context, state) => const ForgotPasswordPage(),
+      builder: (context, state) {
+        return BlocProvider(
+          create: (context) => AuthCubit(
+            authUseCases: getIt.get<AuthUseCases>(),
+          ),
+          child: const ForgotPasswordPage(),
+        );
+      },
     ),
+
+    //New password
+    GoRoute(
+      path: AppRoute.enterNewPassword.path,
+      builder: (context, state) {
+        // final hash = state.pathParameters['hash'];
+        final Map<String, String> queryParameters = state.uri.queryParameters;
+        // print("email: ${queryParameters["email"]}");
+        final email = queryParameters["email"];
+        final token = queryParameters["token"];
+
+        return BlocProvider(
+          create: (context) => AuthCubit(
+            authUseCases: getIt.get<AuthUseCases>(),
+          ),
+          child: EnterNewPassword(token: token ?? "", email: email ?? ""),
+        );
+      },
+    ),
+
     // Forgot Password Success
     GoRoute(
       path: AppRoute.forgotPasswordSuccess.path,
@@ -61,10 +99,19 @@ final GoRouter router = GoRouter(
     // Home
     GoRoute(
       path: AppRoute.home.path,
-      builder: (context, state) => const HomePage(),
+      builder: (context, state) {
+        print("router: ${AppRoute.home.path}");
+        return BlocProvider(
+          create: (context) => getIt.get<ChatCubit>(),
+          child: const HomePage(),
+        );
+      },
       redirect: (context, state) {
         var user = context.getCurrentUser;
-        if (user == null) return AppRoute.auth.path;
+        if (user == null) {
+          print("router: ${AppRoute.auth.path}");
+          return AppRoute.auth.path;
+        }
 
         var roomId = getIt.get<LocalStorage>().getRoomId();
         if (roomId != null) {
@@ -74,6 +121,8 @@ final GoRouter router = GoRouter(
         return null;
       },
     ),
+
+
     // Meeting
     GoRoute(
       path: AppRoute.meeting.path,
@@ -128,6 +177,23 @@ final GoRouter router = GoRouter(
       path: AppRoute.roles.path,
       builder: (context, state) {
         return roles.builder(context);
+      },
+    ),
+
+    GoRoute(
+      path: AppRoute.chat.path,
+      builder: (context, state) {
+        // final roomId = state.extra ?? '1234';
+        final display = state.extra ?? 'displayName';
+        final roomId =
+            state.pathParameters['roomId'] ?? Random().nextInt(999999);
+        // final display =  state.pathParameters['displayName'] ?? 'displayName';
+
+        // final roomId = state.pathParameters['roomId'];
+        return BlocProvider(
+          create: (context) => getIt.get<ChatCubit>(),
+          child: const ChatRoomPage(),
+        );
       },
     ),
   ],

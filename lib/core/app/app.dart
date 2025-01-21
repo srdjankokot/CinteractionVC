@@ -15,6 +15,9 @@ class CinteractionFlutterApp extends StatelessWidget {
   Widget build(BuildContext context) {
 
     print('______running app______');
+
+
+
     return MaterialApp.router(
           title: 'Cinteraction',
           theme: lightTheme,

@@ -14,11 +14,8 @@ import '../../domain/source/api.dart';
 import '../dto/user_dto.dart';
 import '../source/local/local_storage.dart';
 
-
 /// The scopes required by this application.
-const List<String> scopes = <String>[
-  'email','profile','openid'
-];
+const List<String> scopes = <String>['email', 'profile', 'openid'];
 
 GoogleSignIn _googleSignIn = GoogleSignIn(
   // Optional clientId
@@ -26,15 +23,12 @@ GoogleSignIn _googleSignIn = GoogleSignIn(
   scopes: scopes,
 );
 
-
 class AuthRepoImpl extends AuthRepo {
   AuthRepoImpl({
     required Api api,
   }) : _api = api;
 
   final Api _api;
-
-
 
   @override
   Future<ApiResponse<UserDto?>> signInWithEmailAndPassword(
@@ -47,67 +41,71 @@ class AuthRepoImpl extends AuthRepo {
     return ApiResponse(error: response.error);
   }
 
+  @override
+  Future<ApiResponse<UserDto?>> signWithFacebookAccount() async {
+    final LoginResult loginResult = await FacebookAuth.instance.login();
 
-@override
-Future<ApiResponse<UserDto?>> signWithFacebookAccount() async {
-  final LoginResult loginResult = await FacebookAuth.instance.login();
+    if (loginResult.status == LoginStatus.success) {
+      final userInfo = await FacebookAuth.instance.getUserData();
 
-  if (loginResult.status == LoginStatus.success) {
-    final userInfo = await FacebookAuth.instance.getUserData();
+      print('Facebook user: ${userInfo['name']}');
 
-    print('Facebook user: ${userInfo['name']}');
-
-    // final user = _mockUser;
-    final user = UserDto(
+      // final user = _mockUser;
+      final user = UserDto(
         id: userInfo['id'],
         name: userInfo['name'],
         email: userInfo['email'],
         imageUrl: 'http://graph.facebook.com/${userInfo['id']}/picture?',
-        createdAt: DateTime.now());
+      );
 
-    // _userStream.add(user);
-    return ApiResponse(response: user);
-  } else {
-    print('ResultStatus: ${loginResult.status}');
-    print('Message: ${loginResult.message}');
+      // _userStream.add(user);
+      return ApiResponse(response: user);
+    } else {
+      print('ResultStatus: ${loginResult.status}');
+      print('Message: ${loginResult.message}');
+    }
+
+    // _userStream.add(null);
+    return ApiResponse(
+        error: ApiError(errorCode: 0, errorMessage: 'Unknown Error'));
   }
 
-  // _userStream.add(null);
-  return ApiResponse(error: ApiError(errorCode: 0, errorMessage: 'Unknown Error'));
-}
+  @override
+  Future<ApiResponse<UserDto?>> signWithGoogleAccount() async {
+    var googleUser = await _googleSignIn.signIn();
+    final GoogleSignInAuthentication? googleAuth =
+        await googleUser?.authentication;
 
-@override
-Future<ApiResponse<UserDto?>> signWithGoogleAccount() async {
-  var googleUser = await _googleSignIn.signIn();
-  final GoogleSignInAuthentication? googleAuth =
-  await googleUser?.authentication;
+    bool isAuthorized = googleUser != null;
+    if (kIsWeb && googleUser != null) {
+      isAuthorized = await _googleSignIn.canAccessScopes(scopes);
+    }
 
-  bool isAuthorized = googleUser != null;
-  if (kIsWeb && googleUser != null) {
-    isAuthorized = await _googleSignIn.canAccessScopes(scopes);
+    if (isAuthorized && googleUser != null) {
+      String? accessToken = await _api.socialLogin(
+          provider: 'google', token: googleAuth?.accessToken);
+      await saveAccessToken(accessToken!);
+      return getUserDetails();
+    }
+
+    return ApiResponse(
+        error: ApiError(errorCode: 0, errorMessage: 'Unknown Error'));
   }
 
-  if (isAuthorized && googleUser != null) {
-    String? accessToken = await _api.socialLogin(provider: 'google', token: googleAuth?.accessToken);
-    await saveAccessToken(accessToken!);
-    return getUserDetails();
+  /// Simulate network delay
+  Future<void> _networkDelay() async {
+    await Future<void>.delayed(const Duration(seconds: 2));
   }
 
-  return ApiResponse(error: ApiError(errorCode: 0, errorMessage: 'Unknown Error'));
-}
-
-/// Simulate network delay
-Future<void> _networkDelay() async {
-  await Future<void>.delayed(const Duration(seconds: 2));
-}
-
-@override
-Future<ApiResponse<bool>> signUpWithEmailAndPassword({required String email,
-  required String password,
-  required String name,
-  required bool terms}) async {
-  return await _api.signUpEmailPass(email: email, pass: password, name: name, terms: terms);
-}
+  @override
+  Future<ApiResponse<bool>> signUpWithEmailAndPassword(
+      {required String email,
+      required String password,
+      required String name,
+      required bool terms}) async {
+    return await _api.signUpEmailPass(
+        email: email, pass: password, name: name, terms: terms);
+  }
 
   @override
   Future<ApiResponse<UserDto?>> getUserDetails() async {
@@ -124,4 +122,17 @@ Future<ApiResponse<bool>> signUpWithEmailAndPassword({required String email,
     return ApiResponse(error: response.error);
   }
 
+  @override
+  Future<ApiResponse<bool?>> resetPassword({required String email}) async {
+    return await _api.resetPassword(email: email);
+  }
+
+  @override
+  Future<ApiResponse<bool?>> setNewPassword(
+      {required String email,
+      required String token,
+      required String newPassword}) async {
+    return await _api.setNewPassword(
+        email: email, token: token, newPassword: newPassword);
+  }
 }

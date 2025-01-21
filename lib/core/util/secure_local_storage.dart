@@ -7,7 +7,7 @@ const String keyAccessToken = 'access_token';
 // to save token in local storage
 Future<bool> saveAccessToken(String? accessToken) async {
   await storage.write(key: keyAccessToken, value: accessToken);
-  print('Access token is saved');
+  print('Access token is saved $accessToken');
 
   return true;
 }

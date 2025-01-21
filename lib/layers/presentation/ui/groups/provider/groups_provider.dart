@@ -5,7 +5,7 @@ import '../model/group.dart';
 
 List<User> get _mockUsers => [
       User(
-        id: 23,
+        id: "23",
         name: 'John Doe',
         email: 'john@test.com',
         imageUrl:
@@ -13,7 +13,7 @@ List<User> get _mockUsers => [
         createdAt: DateTime.now(),
       ),
       User(
-        id: 24,
+        id: "24",
         name: 'John Doe',
         email: 'john@test.com',
         imageUrl:
@@ -23,7 +23,7 @@ List<User> get _mockUsers => [
     ];
 
 User get _user => User(
-      id: 25,
+      id: "25",
       name: 'John Doe',
       email: 'john@test.com',
       imageUrl:

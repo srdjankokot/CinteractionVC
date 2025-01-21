@@ -32,7 +32,7 @@ class RolesListLayout extends StatelessWidget {
                        Column(
                          crossAxisAlignment: CrossAxisAlignment.start,
                          children: [
-                           Text('Roles & Permissions', style: context.textTheme.headlineLarge,),
+                           Text('Roles & Permissions', style: context.titleTheme.headlineLarge,),
                            Text('${roles.length} Roles',)
                          ],
                        )
