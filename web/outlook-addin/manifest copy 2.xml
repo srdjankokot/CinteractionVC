@@ -24,9 +24,11 @@
     </Sets>
   </Requirements>
   <FormSettings>
+
+
     <Form xsi:type="ItemRead">
       <DesktopSettings>
-         <SourceLocation DefaultValue="https://178.220.126.196:3003/taskpane.html"/>
+         <SourceLocation DefaultValue="https://cinteraction.nswebdevelopment.com/web/addin/dist/taskpane.html"/>
         <RequestedHeight>250</RequestedHeight>
       </DesktopSettings>
     </Form>
@@ -161,10 +163,10 @@
         <bt:Image id="Icon.Plus.80" DefaultValue="https://cinteraction.nswebdevelopment.com/web/outlook-addin/assets/plus-64.png"/>
       </bt:Images>
       <bt:Urls>
-        <bt:Url id="Commands.Url" DefaultValue="https://178.220.126.196:3003/commands.html" />
-        <bt:Url id="Taskpane.Url" DefaultValue="https://178.220.126.196:3003/taskpane.html" />
-        <bt:Url id="WebViewRuntime.Url" DefaultValue="https://178.220.126.196:3003/commands.html" />
-        <bt:Url id="JSRuntime.Url" DefaultValue="https://178.220.126.196:3003/launchevent.js" />
+        <bt:Url id="Commands.Url" DefaultValue="https://cinteraction.nswebdevelopment.com/web/addin/dist/commands.html" />
+        <bt:Url id="Taskpane.Url" DefaultValue="https://cinteraction.nswebdevelopment.com/web/addin/dist/taskpane.html" />
+        <bt:Url id="WebViewRuntime.Url" DefaultValue="https://cinteraction.nswebdevelopment.com/web/addin/dist/commands.html" />
+        <bt:Url id="JSRuntime.Url" DefaultValue="https://cinteraction.nswebdevelopment.com/web/addin/dist/launchevent.js" />
       </bt:Urls>
       <bt:ShortStrings>
         <bt:String id="GroupLabel" DefaultValue="Cinteraction Add-in"/>
