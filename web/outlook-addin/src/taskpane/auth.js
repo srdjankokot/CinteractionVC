@@ -27,7 +27,7 @@ export async function signInEmailPass(email, password) {
 }
 
 export async function scheduleMeet(name, description, tag, startDateTime, localTimeZone, accessToken) {
-  const scheduleUrl = "https://cinteraction.nswebdevelopment.com/api/schedule/meeting";
+  const scheduleUrl = "https://cinteraction.nswebdevelopment.com/api/meetings/schedule";
 
   const params = {
     name,
