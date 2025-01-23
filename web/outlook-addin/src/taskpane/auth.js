@@ -1,6 +1,6 @@
-import axios from "axios";
+// import axios from "axios";
 
-export async function signInEmailPass(email, password) {
+ async function signInEmailPass(email, password) {
   console.log("calledFunc");
 
   const loginUrl = "https://cinteraction.nswebdevelopment.com/api/login";
@@ -26,7 +26,7 @@ export async function signInEmailPass(email, password) {
   }
 }
 
-export async function scheduleMeet(name, description, tag, startDateTime, localTimeZone, accessToken) {
+ async function scheduleMeet(name, description, tag, startDateTime, timezone, accessToken) {
   const scheduleUrl = "https://cinteraction.nswebdevelopment.com/api/meetings/schedule";
 
   const params = {
@@ -34,7 +34,7 @@ export async function scheduleMeet(name, description, tag, startDateTime, localT
     description,
     tag,
     startDateTime,
-    localTimeZone,
+    timezone,
   };
 
   try {
@@ -52,6 +52,17 @@ export async function scheduleMeet(name, description, tag, startDateTime, localT
       error: error.response ? error.response.data : error.message,
     };
   }
+
+}
+
+function meet()
+{
+  console.log("test function");
 }
 
 window.scheduleMeet = scheduleMeet;
+window.meet = meet;
+window.signInEmailPass = signInEmailPass;
+
+console.log("scheduleMeet and meet functions are now available on window.");
+
