@@ -216,7 +216,7 @@ class ChatRepoImpl extends ChatRepo {
           var initChat = chatDetailsDto.chatParticipants
               .firstWhere((item) => '${item.id}' == data['from']);
           var senderId = int.parse(data['from']);
-          
+
           if (initChat != null) {
             chatDetailsDto.messages.add(MessageDto(
                 chatId: chatDetailsDto.chatId!,
@@ -271,8 +271,8 @@ class ChatRepoImpl extends ChatRepo {
               .toList()
               .isEmpty) {
             print("there is no participant with this display name");
-            var participant =
-                Participant(display: data['display'], id: int.parse(data['username']));
+            var participant = Participant(
+                display: data['display'], id: int.parse(data['username']));
 
             subscribers.add(participant);
           }
@@ -289,7 +289,8 @@ class ChatRepoImpl extends ChatRepo {
 
             // var participant = Participant.fromJson(element as Map<String, dynamic>);
             var participant = Participant(
-                display: element['display'], id: int.parse(element['username']));
+                display: element['display'],
+                id: int.parse(element['username']));
             // if(!participant.publisher){
             subscribers.add(participant);
             // }
@@ -310,7 +311,6 @@ class ChatRepoImpl extends ChatRepo {
 
     return List.empty();
   }
-
 
   @override
   Future<void> setCurrentParticipant(UserDto user) async {
@@ -348,6 +348,7 @@ class ChatRepoImpl extends ChatRepo {
     if (response.error == null) {
       List<ChatDto> chats = response.response ?? [];
       // _matchParticipiantWithChat();
+
       _chatStream.add(chats);
     } else {
       print('Error: ${response.error}');
@@ -368,22 +369,6 @@ class ChatRepoImpl extends ChatRepo {
       if (response.error == null && response.response != null) {
         _chatDetailsStream.add(response.response!);
         chatDetailsDto = response.response!;
-      } else {
-        print("Error: ${response.error}");
-      }
-    } catch (e) {
-      print("Error while fetching chat: $e");
-    }
-  }
-
-  @override
-  Future<void> getEmptyChat() async {
-    try {
-      var response = await _api.getChat();
-      if (response.error == null && response.response != null) {
-        _chatDetailsStream.add(response.response!);
-        // chatDetailsDto = response.response!;
-        print('currentIdPrt: ${currentParticipant!.id}');
       } else {
         print("Error: ${response.error}");
       }
@@ -438,20 +423,34 @@ class ChatRepoImpl extends ChatRepo {
     }
   }
 
-
   @override
-  Future<void> sendMessage(String msg, List<String> participantIds) async {
-    await textRoom.sendMessage(room, msg, tos: participantIds);
+  Future<void> removeUserFromGroup(int chatId, int userId) async {
+    try {
+      var response =
+          await _api.removeUserFromGroupChat(chatId: chatId, userId: userId);
+      if (response.error == null && response.response != null) {
+        _chatDetailsStream.add(response.response!);
+        chatDetailsDto = response.response!;
+      } else {
+        print("Error: ${response.error}");
+      }
+    } catch (e) {
+      print('Error while edit message: $e');
+    }
   }
 
+  @override
+  Future<void> sendMessage(String? msg, List<String> participantIds) async {
+    await textRoom.sendMessage(room, msg!, tos: participantIds);
+  }
 
   @override
-  Future<void> sendMessageToChatWrapper(int? chatId, String messageContent,
-      int senderId, List<int> participantIds,
+  Future<void> sendMessageToChatWrapper(String? name, int? chatId,
+      String? messageContent, int senderId, List<int> participantIds,
       {List<File>? uploadedFiles}) async {
     //send message to server
     var response = await _api.sendMessageToChat(
-      name: 'Test',
+      name: name,
       chatId: chatId,
       senderId: senderId,
       message: messageContent,
@@ -461,31 +460,37 @@ class ChatRepoImpl extends ChatRepo {
     //send message throw janus too
     if (response.error == null && response.response != null) {
       ////This is used only for first message in users list////
-      List<String> participants = participantIds.map((int value) => value.toString()).toList();
+
+      List<String> participants =
+          participantIds.map((int value) => value.toString()).toList();
       sendMessage(messageContent, participants);
 
-        chatDetailsDto.messages.add(MessageDto(
-          chatId: response.response!.chatId,
-          createdAt: DateTime.now().toIso8601String(),
-          message: response.response!.message,
-          senderId: response.response!.senderId,
-          updatedAt: DateTime.now().toIso8601String(),
-          id: response.response!.id,
-        ));
-        final updatedChatDetails = ChatDetailsDto(
-          chatName: chatDetailsDto.chatName,
-          authUser: chatDetailsDto.authUser,
-          chatId: response.response!.chatId,
-          chatParticipants: chatDetailsDto.chatParticipants,
-          messages: [...chatDetailsDto.messages],
-        );
-        _chatDetailsStream.add(updatedChatDetails);
-        _loadChats();
-
+      chatDetailsDto.messages.add(MessageDto(
+        chatId: response.response!.chatId,
+        createdAt: DateTime.now().toIso8601String(),
+        message: response.response!.message,
+        senderId: response.response!.senderId,
+        updatedAt: DateTime.now().toIso8601String(),
+        id: response.response!.id,
+      ));
+      final updatedChatDetails = ChatDetailsDto(
+        chatName: chatDetailsDto.chatName,
+        authUser: chatDetailsDto.authUser,
+        chatId: response.response!.chatId,
+        chatParticipants: chatDetailsDto.chatParticipants,
+        messages: [...chatDetailsDto.messages],
+      );
+      _chatDetailsStream.add(updatedChatDetails);
+      _loadChats();
     } else {
       print("Error: ${response.error}");
     }
   }
+
+  // @override
+  // Future<void> createGroup(String name, int senderId, List<int> participantIds) async {
+  //     var response = await _api.crea
+  // }
 
   //////////////////////////////////////
 

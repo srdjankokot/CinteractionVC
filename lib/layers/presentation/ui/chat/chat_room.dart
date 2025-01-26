@@ -12,8 +12,10 @@ import 'package:cinteraction_vc/layers/domain/usecases/chat/set_current_chat.dar
 import 'package:cinteraction_vc/layers/presentation/cubit/chat/chat_cubit.dart';
 import 'package:cinteraction_vc/layers/presentation/cubit/chat/chat_state.dart';
 import 'package:cinteraction_vc/layers/presentation/ui/chat/widget/chat_details_widget.dart';
+import 'package:cinteraction_vc/layers/presentation/ui/chat/widget/editGroupDialog.dart';
 import 'package:cinteraction_vc/layers/presentation/ui/chat/widget/user_list_view.dart';
 import 'package:cinteraction_vc/layers/presentation/ui/conference/widget/participant_video_widget.dart';
+import 'package:cinteraction_vc/layers/presentation/ui/chat/widget/group_dialog.dart';
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -75,8 +77,7 @@ class ChatRoomPage extends StatelessWidget {
     Future<void> sendMessage() async {
       await context
           .read<ChatCubit>()
-          .sendChatMessage(
-          messageContent: messageFieldController.text);
+          .sendChatMessage(messageContent: messageFieldController.text);
 
       messageFieldController.text = '';
     }
@@ -158,6 +159,25 @@ class ChatRoomPage extends StatelessWidget {
           );
         },
       );
+    }
+
+    Future<void> displayCreateGroupPopup(BuildContext ctx, state) async {
+      return showDialog(
+          context: ctx,
+          builder: (context) {
+            return CreateGroupDialog(
+              state: state,
+              context: ctx,
+            );
+          });
+    }
+
+    Future<void> displayEditGroupPopup(BuildContext ctx, state) async {
+      return showDialog(
+          context: ctx,
+          builder: (context) {
+            return EditGroupDialog(state: state);
+          });
     }
 
     return BlocConsumer<ChatCubit, ChatState>(listener: (context, state) async {
@@ -251,10 +271,24 @@ class ChatRoomPage extends StatelessWidget {
                           return Expanded(
                               child: ListTile(
                             titleAlignment: ListTileTitleAlignment.center,
-                            title: Text(
-                              option.name,
-                              textAlign: TextAlign.center,
-                            ),
+                            title: option == ListType.Group
+                                ? IconButton(
+                                    icon: Icon(
+                                      Icons.group_add,
+                                      size: 24.0,
+                                      color: state.listType == option
+                                          ? ColorConstants.kPrimaryColor
+                                          : Colors.grey,
+                                    ),
+                                    onPressed: () async {
+                                      await displayCreateGroupPopup(
+                                          context, state);
+                                    },
+                                  )
+                                : Text(
+                                    option.name,
+                                    textAlign: TextAlign.center,
+                                  ),
                             onTap: () {
                               context.read<ChatCubit>().changeListType(option);
                             },
@@ -528,42 +562,83 @@ class ChatRoomPage extends StatelessWidget {
                                     children: [
                                       Text(
                                         state.listType == ListType.Chats
-                                            ? state.chatDetails?.chatName ??
-                                                "" // Use null-safe operator to avoid errors
+                                            ? (state.chatDetails?.chatName !=
+                                                    null
+                                                ? state.chatDetails?.chatName ??
+                                                    ""
+                                                : state.chatDetails!
+                                                    .chatParticipants
+                                                    .map((participant) =>
+                                                        participant.name)
+                                                    .join(", "))
                                             : state.currentParticipant?.name ??
                                                 "",
                                         style: titleThemeStyle
                                             .textTheme.titleLarge,
                                       ),
-                                      Row(
-                                        children: [
-                                          Container(
-                                            width: 15.0,
-                                            // Adjust the width as needed
-                                            height: 15.0,
-                                            // Adjust the height as needed
-                                            decoration: BoxDecoration(
-                                              color: (state.currentParticipant == null ? false : state.currentParticipant!.online)
-                                                  ? Colors.green
-                                                  : Colors.amber,
-                                              shape: BoxShape.circle,
-                                            ),
-                                          ),
-                                          const SizedBox(width: 5.0),
-                                          Text(
-                                            (state.currentParticipant == null ? false : state.currentParticipant!.online)
-                                                ? "Active now"
-                                                : "Away",
-                                            style: titleThemeStyle
-                                                .textTheme.labelLarge,
-                                          ),
-                                        ],
-                                      )
+                                      state.chatDetails!.chatParticipants
+                                                  .length >
+                                              1
+                                          ? GestureDetector(
+                                              onTap: () async {
+                                                await displayEditGroupPopup(
+                                                    context, state);
+                                              },
+                                              child: Row(children: [
+                                                Container(
+                                                    width: 20.0,
+                                                    height: 20.0,
+                                                    child: Text(state
+                                                        .chatDetails!
+                                                        .chatParticipants
+                                                        .length
+                                                        .toString())),
+
+                                                // const SizedBox(width: 3.0),
+                                                const Text('participiants')
+                                              ]),
+                                            )
+                                          : Row(
+                                              children: [
+                                                Container(
+                                                  width: 15.0,
+                                                  // Adjust the width as needed
+                                                  height: 15.0,
+                                                  // Adjust the height as needed
+                                                  decoration: BoxDecoration(
+                                                    color: (state.currentParticipant ==
+                                                                null
+                                                            ? false
+                                                            : state
+                                                                .currentParticipant!
+                                                                .online)
+                                                        ? Colors.green
+                                                        : Colors.amber,
+                                                    shape: BoxShape.circle,
+                                                  ),
+                                                ),
+                                                const SizedBox(width: 5.0),
+                                                Text(
+                                                  (state.currentParticipant ==
+                                                              null
+                                                          ? false
+                                                          : state
+                                                              .currentParticipant!
+                                                              .online)
+                                                      ? "Active now"
+                                                      : "Away",
+                                                  style: titleThemeStyle
+                                                      .textTheme.labelLarge,
+                                                ),
+                                              ],
+                                            )
                                     ],
                                   ),
                                   const Spacer(),
                                   Visibility(
-                                      visible: state.currentParticipant == null ? false:  state.currentParticipant!.online,
+                                      visible: state.currentParticipant == null
+                                          ? false
+                                          : state.currentParticipant!.online,
                                       child: CallButtonShape(
                                         image: imageSVGAsset('icon_phone')
                                             as Widget,

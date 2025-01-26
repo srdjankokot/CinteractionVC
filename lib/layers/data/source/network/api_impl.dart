@@ -435,6 +435,23 @@ class ApiImpl extends Api {
   }
 
   @override
+  Future<ApiResponse<ChatDetailsDto>> removeUserFromGroupChat(
+      {required int chatId, required int userId}) async {
+    try {
+      Dio dio = await getIt.getAsync<Dio>();
+      Response response = await dio.post(
+        "${Urls.removeUserFromGroupChat}$chatId",
+        data: {"user_id": userId},
+      );
+      var chatDetails = ChatDetailsDto.fromJson(response.data);
+
+      return ApiResponse(response: chatDetails);
+    } on DioException catch (e) {
+      return ApiResponse(error: ApiErrorDto.fromDioException(e));
+    }
+  }
+
+  @override
   Future<ApiResponse<ChatDetailsDto>> deleteMessageById(
       {required dynamic id}) async {
     try {
@@ -469,28 +486,43 @@ class ApiImpl extends Api {
 
   @override
   Future<ApiResponse<MessageDto>> sendMessageToChat({
-    required String name,
+    String? name,
     int? chatId,
     required int senderId,
-    required String message,
+    String? message,
     required List<int> participantIds,
     List<File>? uploadedFiles,
   }) async {
     Dio dio = await getIt.getAsync<Dio>();
-    var formData = FormData.fromMap({
-      'name': name,
-      'chat_id': chatId,
+
+    // Kreirajte mapu za formData
+    var formDataMap = {
+      'name': 'Test Radovan',
       'sender_id': senderId,
-      'message': message,
       'chat_participants':
           participantIds.map((id) => {'participant_id': id}).toList(),
-    });
+    };
+
+    if (chatId != null) {
+      formDataMap['chat_id'] = chatId;
+    }
+
+    if (name != null) {
+      formDataMap['name'] = name;
+    }
+
+    if (message != null) {
+      formDataMap['message'] = message;
+    }
+
+    var formData = FormData.fromMap(formDataMap);
 
     try {
       Response response = await dio.post(
         Urls.sentChatMessage,
         data: formData,
       );
+
       if (response.data != null && response.data['messages'] != null) {
         var messages = response.data['messages'] as List;
         var mappedMessages =
@@ -499,6 +531,7 @@ class ApiImpl extends Api {
           return ApiResponse(response: mappedMessages.first);
         }
       }
+
       var messageDto = MessageDto.fromJson(response.data);
       return ApiResponse(response: messageDto);
     } on DioException catch (e) {

@@ -22,16 +22,17 @@ abstract class ChatRepo {
   Stream<List<ChatMessage>> getMessageStream();
   Stream<ChatDetailsDto> getChatDetailsStream();
 
-  Future<void> sendMessageToChatWrapper(int? chatId, String messageContent,
-      int senderId, List<int> participantIds,
+  Future<void> sendMessageToChatWrapper(String? name, int? chatId,
+      String? messageContent, int senderId, List<int> participantIds,
       {List<File>? uploadedFiles});
+  // Future<void> createGroup(String name, int senderId, List<int> participantIds,);
   Future<void> setCurrentParticipant(UserDto user);
   Future<void> setCurrentChat(ChatDto chat);
   Future<void> getChatDetails(int id);
   Future<void> getChatDetailsByParticipiant(int id);
-  Future<void> getEmptyChat();
   Future<void> deleteMessage(int id);
   Future<void> editMessage(int id, String message);
+  Future<void> removeUserFromGroup(int chatId, int userId);
   Future<void> messageSeen(int index);
 
   // Future<void> makeCall(String user);
