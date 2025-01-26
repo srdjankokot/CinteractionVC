@@ -20,7 +20,8 @@ class ChatDto {
         id: json['chat_id'] as int,
         name: json['chat_name'] as String,
         userImage: json['user_image'],
-        lastMessage: json['last_message'] != null
+        lastMessage: (json['last_message'] != null &&
+                json['last_message'] is Map<String, dynamic>)
             ? LastMessageDto.fromJson(json['last_message'])
             : null,
         chatParticipants: json['chat_participants'] != null

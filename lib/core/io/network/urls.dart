@@ -44,4 +44,6 @@ class Urls {
   static String sentChatMessage = '$baseUrl/api/chats/create';
   static String deleteMessageById = '$baseUrl/api/chats/delete/message/';
   static String editMessage = '$baseUrl/api/chats/edit/message/';
+  static String removeUserFromGroupChat =
+      '$baseUrl/api/chats/remove/user/from/chat/';
 }

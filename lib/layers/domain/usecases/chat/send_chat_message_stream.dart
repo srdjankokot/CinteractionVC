@@ -10,13 +10,15 @@ class SendMessageToChatStream {
   final ChatRepo repo;
 
   call({
+    String? name,
     int? chatId,
-    required String messageContent,
+    String? messageContent,
     required int senderId,
     required List<int> participantIds,
     List<File>? uploadedFiles,
   }) {
     return repo.sendMessageToChatWrapper(
+      name,
       chatId,
       messageContent,
       senderId,
