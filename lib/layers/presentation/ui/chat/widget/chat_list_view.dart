@@ -28,7 +28,7 @@ class _ChatsListViewState extends State<ChatsListView> {
   @override
   void didUpdateWidget(ChatsListView oldWidget) {
     super.didUpdateWidget(oldWidget);
-    // Ažuriraj selectedChat samo ako je lista chatova promenjena
+
     if (widget.state.chats!.length != oldWidget.state.chats!.length) {
       _updateSelectedChat();
     }

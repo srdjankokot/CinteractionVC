@@ -385,7 +385,6 @@ class ApiImpl extends Api {
       for (var chat in response.data['data']) {
         var chatDto = ChatDto.fromJson(chat as Map<String, dynamic>);
         chats.add(chatDto);
-        print('chats $chatDto[chat_id]');
       }
 
       return ApiResponse(response: chats);
@@ -426,6 +425,30 @@ class ApiImpl extends Api {
     try {
       Dio dio = await getIt.getAsync<Dio>();
       Response response = await dio.get('${Urls.getChatByParticipiant}$id');
+      var chatDetails = ChatDetailsDto.fromJson(response.data);
+
+      return ApiResponse(response: chatDetails);
+    } on DioException catch (e) {
+      return ApiResponse(error: ApiErrorDto.fromDioException(e));
+    }
+  }
+
+  @override
+  Future<ApiResponse<ChatDetailsDto>> addUserToGroupChat({
+    required int chatId,
+    required int userId,
+    required List<int> participantIds,
+  }) async {
+    try {
+      Dio dio = await getIt.getAsync<Dio>();
+      Response response = await dio.post(
+        "${Urls.addUserOnGroupChat}$chatId",
+        data: {
+          "chat_participants":
+              participantIds.map((id) => {"participant_id": id}).toList(),
+          "user_id": userId,
+        },
+      );
       var chatDetails = ChatDetailsDto.fromJson(response.data);
 
       return ApiResponse(response: chatDetails);

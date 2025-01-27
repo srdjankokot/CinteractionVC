@@ -4,6 +4,7 @@ import 'package:cinteraction_vc/layers/presentation/cubit/chat/chat_state.dart';
 import 'package:flutter/material.dart';
 
 import '../../profile/ui/widget/user_image.dart';
+import 'add_participiant_dialog.dart';
 
 class EditGroupDialog extends StatelessWidget {
   final ChatState state;
@@ -17,70 +18,104 @@ class EditGroupDialog extends StatelessWidget {
   Widget build(BuildContext context) {
     return AlertDialog(
       contentPadding: const EdgeInsets.all(16.0),
-      content: SingleChildScrollView(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            UserImage.medium(
-                "https:\/\/ui-avatars.com\/api\/?name=G+R&color=ffffff&background=f34320"),
-            const SizedBox(height: 16.0),
-
-            Text(
-              state.chatDetails?.chatName ?? "Group Name",
-              style: const TextStyle(
-                fontSize: 20,
-                fontWeight: FontWeight.bold,
-              ),
-              textAlign: TextAlign.center,
-            ),
-            const SizedBox(height: 8.0),
-            // Participants Info
-            Align(
-              alignment: Alignment.centerLeft,
-              child: Text(
-                "${state.chatDetails?.chatParticipants.length} participants",
-                style: const TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.bold,
+      content: Stack(
+        children: [
+          // Glavni sadržaj dijaloga
+          SingleChildScrollView(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                UserImage.medium(
+                    "https:\/\/ui-avatars.com\/api\/?name=G+R&color=ffffff&background=f34320"),
+                const SizedBox(height: 16.0),
+                Text(
+                  state.chatDetails?.chatName ?? "Group Name",
+                  style: const TextStyle(
+                    fontSize: 20,
+                    fontWeight: FontWeight.bold,
+                  ),
+                  textAlign: TextAlign.center,
                 ),
-              ),
-            ),
-            const SizedBox(height: 8.0),
-            // Participants List
-            Container(
-              height: 400,
-              width: 500,
-              child: ListView.builder(
-                shrinkWrap: true,
-                itemCount: state.chatDetails?.chatParticipants.length,
-                itemBuilder: (context, index) {
-                  final participant =
-                      state.chatDetails?.chatParticipants[index];
-                  return HoverParticipantTile(
-                    participant: participant,
-                    onRemove: () {
-                      _showRemoveDialog(context, participant?.name ?? "",
-                          state.chatDetails!.chatId!, participant!.id);
+                const SizedBox(height: 8.0),
+                Align(
+                  alignment: Alignment.center,
+                  child: Text(
+                    "${state.chatDetails?.chatParticipants.length} participants",
+                    style: const TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 40.0),
+                Container(
+                  height: 300,
+                  width: 500,
+                  child: ListView.builder(
+                    shrinkWrap: true,
+                    itemCount: state.chatDetails?.chatParticipants.length,
+                    itemBuilder: (context, index) {
+                      final participant =
+                          state.chatDetails?.chatParticipants[index];
+                      return HoverParticipantTile(
+                        participant: participant,
+                        onRemove: () {
+                          _showRemoveDialog(context, participant?.name ?? "",
+                              state.chatDetails!.chatId!, participant!.id);
+                        },
+                      );
                     },
-                  );
-                },
+                  ),
+                ),
+                const SizedBox(height: 10.0),
+                GestureDetector(
+                  onTap: () {},
+                  child: GestureDetector(
+                    onTap: () async {
+                      Navigator.of(context).pop();
+                      await Future.delayed(Duration.zero);
+                      showDialog(
+                        context: context,
+                        builder: (context) => AddParticipantsDialog(
+                          users: state.users!,
+                          onAddParticipants: (selectedUsers) {},
+                        ),
+                      );
+                    },
+                    child: const Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: const [
+                        Icon(Icons.add, color: Colors.blue),
+                        SizedBox(width: 8.0),
+                        Text(
+                          "Add participants",
+                          style: TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.blue,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+          Positioned(
+            top: 0,
+            right: 0,
+            child: GestureDetector(
+              onTap: () => Navigator.of(context).pop(),
+              child: const Icon(
+                Icons.close,
+                color: Colors.grey,
+                size: 24,
               ),
             ),
-          ],
-        ),
+          ),
+        ],
       ),
-      actions: [
-        TextButton(
-          onPressed: () => Navigator.of(context).pop(),
-          child: const Text("Cancel"),
-        ),
-        ElevatedButton(
-          onPressed: () {
-            // Add your save logic here
-          },
-          child: const Text("Save"),
-        ),
-      ],
     );
   }
 
@@ -98,7 +133,7 @@ class EditGroupDialog extends StatelessWidget {
           actions: [
             TextButton(
               onPressed: () {
-                Navigator.of(context).pop(); // Zatvara mini pop-up
+                Navigator.of(context).pop();
               },
               child: const Text("Cancel"),
             ),
