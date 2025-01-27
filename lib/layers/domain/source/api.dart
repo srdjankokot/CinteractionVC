@@ -65,6 +65,10 @@ abstract class Api {
       {required int id, required String message});
   Future<ApiResponse<ChatDetailsDto>> removeUserFromGroupChat(
       {required int chatId, required int userId});
+  Future<ApiResponse<ChatDetailsDto>> addUserToGroupChat(
+      {required int chatId,
+      required int userId,
+      required List<int> participantIds});
   Future<ApiResponse<MessageDto>> sendMessageToChat({
     required String? name,
     int? chatId,
