@@ -1,6 +1,7 @@
 import 'dart:math';
 
 import 'package:audioplayers/audioplayers.dart';
+import 'package:cinteraction_vc/core/app/injector.dart';
 import 'package:cinteraction_vc/core/app/style.dart';
 import 'package:cinteraction_vc/core/extension/context.dart';
 import 'package:cinteraction_vc/core/extension/context_user.dart';
@@ -11,6 +12,7 @@ import 'package:cinteraction_vc/layers/data/dto/user_dto.dart';
 import 'package:cinteraction_vc/layers/domain/usecases/chat/set_current_chat.dart';
 import 'package:cinteraction_vc/layers/presentation/cubit/chat/chat_cubit.dart';
 import 'package:cinteraction_vc/layers/presentation/cubit/chat/chat_state.dart';
+import 'package:cinteraction_vc/layers/presentation/ui/chat/widget/add_participiant_dialog.dart';
 import 'package:cinteraction_vc/layers/presentation/ui/chat/widget/chat_details_widget.dart';
 import 'package:cinteraction_vc/layers/presentation/ui/chat/widget/editGroupDialog.dart';
 import 'package:cinteraction_vc/layers/presentation/ui/chat/widget/user_list_view.dart';
@@ -176,7 +178,10 @@ class ChatRoomPage extends StatelessWidget {
       return showDialog(
           context: ctx,
           builder: (context) {
-            return EditGroupDialog(state: state);
+            return EditGroupDialog(
+              state: state,
+              context: ctx,
+            );
           });
     }
 
@@ -576,27 +581,29 @@ class ChatRoomPage extends StatelessWidget {
                                         style: titleThemeStyle
                                             .textTheme.titleLarge,
                                       ),
-                                      state.chatDetails!.chatParticipants
-                                                  .length >
-                                              1
-                                          ? GestureDetector(
-                                              onTap: () async {
-                                                await displayEditGroupPopup(
-                                                    context, state);
-                                              },
-                                              child: Row(children: [
-                                                Container(
-                                                    width: 20.0,
-                                                    height: 20.0,
-                                                    child: Text(state
-                                                        .chatDetails!
-                                                        .chatParticipants
-                                                        .length
-                                                        .toString())),
+                                      state.chatDetails!.isGroup
+                                          ? Row(
+                                              children: [
+                                                GestureDetector(
+                                                  onTap: () async {
+                                                    await displayEditGroupPopup(
+                                                        context, state);
+                                                  },
+                                                  child: Row(children: [
+                                                    Container(
+                                                        width: 20.0,
+                                                        height: 20.0,
+                                                        child: Text(state
+                                                            .chatDetails!
+                                                            .chatParticipants
+                                                            .length
+                                                            .toString())),
 
-                                                // const SizedBox(width: 3.0),
-                                                const Text('participiants')
-                                              ]),
+                                                    // const SizedBox(width: 3.0),
+                                                    const Text('participiants'),
+                                                  ]),
+                                                ),
+                                              ],
                                             )
                                           : Row(
                                               children: [
@@ -642,7 +649,7 @@ class ChatRoomPage extends StatelessWidget {
                                       child: CallButtonShape(
                                         image: imageSVGAsset('icon_phone')
                                             as Widget,
-                                        bgColor: ColorConstants.kStateSuccess,
+                                        bgColor: ColorConstants.kGray600,
                                         onClickAction: () async {
                                           await context
                                               .read<ChatCubit>()
@@ -651,7 +658,49 @@ class ChatRoomPage extends StatelessWidget {
 
                                           // await context.read<ChatCubit>().rejectCall();
                                         },
-                                      ))
+                                      )),
+                                  IconButton(
+                                    icon: const Icon(Icons.person_add,
+                                        color: ColorConstants.kSecondaryColor),
+                                    onPressed: () async {
+                                      showDialog(
+                                        context: context,
+                                        builder: (BuildContext context) =>
+                                            AddParticipantsDialog(
+                                          users: state.users!,
+                                          onAddParticipants:
+                                              (selectedUsers) async {
+                                            final participantIds = selectedUsers
+                                                .map((user) =>
+                                                    int.parse(user.id))
+                                                .toList();
+
+                                            state.chatDetails!.isGroup
+                                                ? await getIt
+                                                    .get<ChatCubit>()
+                                                    .chatUseCases
+                                                    .addUserToGroup(
+                                                        state.chatDetails!
+                                                            .chatId!,
+                                                        state.chatDetails!
+                                                            .authUser.id,
+                                                        participantIds)
+                                                : await getIt
+                                                    .get<ChatCubit>()
+                                                    .chatUseCases
+                                                    .sendMessageToChatStream(
+                                                        senderId: state
+                                                            .chatDetails!
+                                                            .authUser
+                                                            .id,
+                                                        participantIds:
+                                                            participantIds);
+                                          },
+                                          context: context,
+                                        ),
+                                      );
+                                    },
+                                  ),
                                 ],
                               ),
                             ),

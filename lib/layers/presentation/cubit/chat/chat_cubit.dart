@@ -150,6 +150,13 @@ class ChatCubit extends Cubit<ChatState> with BlocLoggy {
     emit(state.copyWith(chatDetails: chatDetails));
   }
 
+  Future<void> addUserToGroupChat(
+      int chatId, int userId, List<int> participantIds) async {
+    chatUseCases.addUserToGroup(chatId, userId, participantIds);
+    final chatDetails = await chatUseCases.getChatDetails(chatId);
+    emit(state.copyWith(chatDetails: chatDetails));
+  }
+
   Future<void> chatMessageSeen(int index) async {
     chatUseCases.messageSeen(index: index);
   }

@@ -150,7 +150,7 @@ class ApiImpl extends Api {
       'user_id': userIds,
     });
     Response response = await dio.post(
-      Urls.endCall(callId, userIds), // Dinamički generisan URL
+      Urls.endCall(callId, userIds),
       data: formData,
     );
     print('end call by user $response');
@@ -518,9 +518,9 @@ class ApiImpl extends Api {
   }) async {
     Dio dio = await getIt.getAsync<Dio>();
 
-    // Kreirajte mapu za formData
+    print('Name $name');
+
     var formDataMap = {
-      'name': 'Test Radovan',
       'sender_id': senderId,
       'chat_participants':
           participantIds.map((id) => {'participant_id': id}).toList(),

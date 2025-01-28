@@ -424,6 +424,23 @@ class ChatRepoImpl extends ChatRepo {
   }
 
   @override
+  Future<void> addUserOnGroupChat(
+      int chatId, int userId, List<int> participantIds) async {
+    try {
+      var response = await _api.addUserToGroupChat(
+          chatId: chatId, userId: userId, participantIds: participantIds);
+      if (response.error == null && response.response != null) {
+        _chatDetailsStream.add(response.response!);
+        chatDetailsDto = response.response!;
+      } else {
+        print("Error: ${response.error}");
+      }
+    } catch (e) {
+      print('Error while edit message: $e');
+    }
+  }
+
+  @override
   Future<void> removeUserFromGroup(int chatId, int userId) async {
     try {
       var response =

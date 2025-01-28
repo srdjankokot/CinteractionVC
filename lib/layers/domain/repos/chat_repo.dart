@@ -33,6 +33,8 @@ abstract class ChatRepo {
   Future<void> deleteMessage(int id);
   Future<void> editMessage(int id, String message);
   Future<void> removeUserFromGroup(int chatId, int userId);
+  Future<void> addUserOnGroupChat(
+      int chatId, int userId, List<int> participantIds);
   Future<void> messageSeen(int index);
 
   // Future<void> makeCall(String user);

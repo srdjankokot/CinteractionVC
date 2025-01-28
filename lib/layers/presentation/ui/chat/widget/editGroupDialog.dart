@@ -2,20 +2,23 @@ import 'package:cinteraction_vc/core/app/injector.dart';
 import 'package:cinteraction_vc/layers/presentation/cubit/chat/chat_cubit.dart';
 import 'package:cinteraction_vc/layers/presentation/cubit/chat/chat_state.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../profile/ui/widget/user_image.dart';
 import 'add_participiant_dialog.dart';
 
 class EditGroupDialog extends StatelessWidget {
   final ChatState state;
+  final BuildContext context;
 
   const EditGroupDialog({
     super.key,
     required this.state,
+    required this.context,
   });
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext innerContext) {
     return AlertDialog(
       contentPadding: const EdgeInsets.all(16.0),
       content: Stack(
@@ -76,9 +79,23 @@ class EditGroupDialog extends StatelessWidget {
                       await Future.delayed(Duration.zero);
                       showDialog(
                         context: context,
-                        builder: (context) => AddParticipantsDialog(
+                        builder: (BuildContext context) =>
+                            AddParticipantsDialog(
                           users: state.users!,
-                          onAddParticipants: (selectedUsers) {},
+                          onAddParticipants: (selectedUsers) async {
+                            final participantIds = selectedUsers
+                                .map((user) => int.parse(user.id))
+                                .toList();
+
+                            await getIt
+                                .get<ChatCubit>()
+                                .chatUseCases
+                                .addUserToGroup(
+                                    state.chatDetails!.chatId!,
+                                    state.chatDetails!.authUser.id,
+                                    participantIds);
+                          },
+                          context: context,
                         ),
                       );
                     },
