@@ -69,7 +69,6 @@ class ChatRepoImpl extends ChatRepo {
   UserDto? currentParticipant;
   List<ChatMessage> messages = [];
 
-  List<ChatDto> chats = [];
   ChatDto? currentChat;
 
   @override
@@ -217,7 +216,7 @@ class ChatRepoImpl extends ChatRepo {
           var initChat = chatDetailsDto.chatParticipants
               .firstWhere((item) => '${item.id}' == data['from']);
           var senderId = int.parse(data['from']);
-
+          
           if (initChat != null) {
             chatDetailsDto.messages.add(MessageDto(
                 chatId: chatDetailsDto.chatId!,
@@ -272,8 +271,8 @@ class ChatRepoImpl extends ChatRepo {
               .toList()
               .isEmpty) {
             print("there is no participant with this display name");
-            var participant = Participant(
-                display: data['display'], id: int.parse(data['username']));
+            var participant =
+                Participant(display: data['display'], id: int.parse(data['username']));
 
             subscribers.add(participant);
           }
@@ -290,8 +289,7 @@ class ChatRepoImpl extends ChatRepo {
 
             // var participant = Participant.fromJson(element as Map<String, dynamic>);
             var participant = Participant(
-                display: element['display'],
-                id: int.parse(element['username']));
+                display: element['display'], id: int.parse(element['username']));
             // if(!participant.publisher){
             subscribers.add(participant);
             // }
@@ -348,7 +346,7 @@ class ChatRepoImpl extends ChatRepo {
     var response = await _api.getAllChats();
     print('Response2: $response');
     if (response.error == null) {
-      chats = response.response ?? [];
+      List<ChatDto> chats = response.response ?? [];
       // _matchParticipiantWithChat();
       _chatStream.add(chats);
     } else {
@@ -457,7 +455,7 @@ class ChatRepoImpl extends ChatRepo {
       chatId: chatId,
       senderId: senderId,
       message: messageContent,
-      participantIds: [4, 7],
+      participantIds: participantIds,
     );
 
     //send message throw janus too

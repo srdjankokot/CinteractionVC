@@ -165,11 +165,13 @@ class SchedulePopup extends StatelessWidget {
                   //     "https://cinteractionvc.web.app/home/meeting/$roomIdFromLink");
 
                   try {
-                    var link = response.response ?? '';
+                    var link = response.response??'';
                     // await launchUrl(Uri.parse('https://calendar.google.com/calendar/u/0/r/eventedit?dates=$startDateTimeFormated/$endDateTimeFormated&ctz=UTC&location&text=${nameFieldController.text}&details=$url\nPlease click on the above link to join a video call.'));
-                    if (link.isNotEmpty) {
-                      await launchUrl(Uri.parse(link));
-                    }
+                   if(link.isNotEmpty){
+                     await launchUrl(Uri.parse(link));
+                   }
+
+
                   } on Exception catch (e) {
                     print(e.toString());
                   }
