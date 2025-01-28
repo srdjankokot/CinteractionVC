@@ -7,6 +7,7 @@ class ChatDto {
   final String? userImage;
   final LastMessageDto? lastMessage;
   final List<ChatParticipantDto>? chatParticipants;
+  bool isOnline;
 
   ChatDto({
     required this.id,
@@ -14,6 +15,7 @@ class ChatDto {
     this.userImage,
     this.lastMessage,
     this.chatParticipants,
+    this.isOnline = false,
   });
 
   factory ChatDto.fromJson(Map<String, dynamic> json) => ChatDto(
@@ -40,6 +42,6 @@ class ChatDto {
 
   @override
   String toString() {
-    return 'ChatDto(id: $id, name: $name, userImage: $userImage, lastMessage: $lastMessage, chatParticipants: $chatParticipants)';
+    return 'ChatDto(id: $id, name: $name, userImage: $userImage, lastMessage: $lastMessage, chatParticipants: $chatParticipants, isOnline: $isOnline)';
   }
 }

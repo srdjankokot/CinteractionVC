@@ -1,3 +1,5 @@
+// ignore_for_file: prefer_const_constructors
+
 import 'dart:math';
 
 import 'package:audioplayers/audioplayers.dart';
@@ -12,6 +14,7 @@ import 'package:cinteraction_vc/layers/domain/usecases/chat/set_current_chat.dar
 import 'package:cinteraction_vc/layers/presentation/cubit/chat/chat_cubit.dart';
 import 'package:cinteraction_vc/layers/presentation/cubit/chat/chat_state.dart';
 import 'package:cinteraction_vc/layers/presentation/ui/chat/widget/chat_details_widget.dart';
+import 'package:cinteraction_vc/layers/presentation/ui/chat/widget/group_dialog.dart';
 import 'package:cinteraction_vc/layers/presentation/ui/chat/widget/user_list_view.dart';
 import 'package:cinteraction_vc/layers/presentation/ui/conference/widget/participant_video_widget.dart';
 import 'package:fl_chart/fl_chart.dart';
@@ -160,6 +163,16 @@ class ChatRoomPage extends StatelessWidget {
       );
     }
 
+    Future<void> displayCreateGroupPopup(BuildContext ctx, state) async {
+      return showDialog(
+          context: ctx,
+          builder: (context) {
+            return CreateGroupDialog(
+              state: state,
+            );
+          });
+    }
+
     return BlocConsumer<ChatCubit, ChatState>(listener: (context, state) async {
       if (state.incomingCall ?? false) {
         // String callerName = "Caller Name"; // Replace with actual caller name
@@ -249,18 +262,34 @@ class ChatRoomPage extends StatelessWidget {
                       child: Row(
                         children: ListType.values.map((option) {
                           return Expanded(
-                              child: ListTile(
-                            titleAlignment: ListTileTitleAlignment.center,
-                            title: Text(
-                              option.name,
-                              textAlign: TextAlign.center,
+                            child: ListTile(
+                              titleAlignment: ListTileTitleAlignment.center,
+                              title: option == ListType.Group
+                                  ? GestureDetector(
+                                      onTap: () async {
+                                        displayCreateGroupPopup(context, state);
+                                      },
+                                      child: Icon(
+                                        Icons.group_add,
+                                        size: 24.0,
+                                        color: state.listType == option
+                                            ? ColorConstants.kPrimaryColor
+                                            : Colors.grey,
+                                      ),
+                                    )
+                                  : Text(
+                                      option.name,
+                                      textAlign: TextAlign.center,
+                                    ),
+                              onTap: () {
+                                context
+                                    .read<ChatCubit>()
+                                    .changeListType(option);
+                              },
+                              selected: state.listType == option,
+                              selectedColor: ColorConstants.kPrimaryColor,
                             ),
-                            onTap: () {
-                              context.read<ChatCubit>().changeListType(option);
-                            },
-                            selected: state.listType == option,
-                            selectedColor: ColorConstants.kPrimaryColor,
-                          ));
+                          );
                         }).toList(),
                       ),
                     ),
@@ -543,7 +572,12 @@ class ChatRoomPage extends StatelessWidget {
                                             height: 15.0,
                                             // Adjust the height as needed
                                             decoration: BoxDecoration(
-                                              color: (state.currentParticipant == null ? false : state.currentParticipant!.online)
+                                              color: (state.currentParticipant ==
+                                                          null
+                                                      ? false
+                                                      : state
+                                                          .currentParticipant!
+                                                          .online)
                                                   ? Colors.green
                                                   : Colors.amber,
                                               shape: BoxShape.circle,
@@ -551,7 +585,10 @@ class ChatRoomPage extends StatelessWidget {
                                           ),
                                           const SizedBox(width: 5.0),
                                           Text(
-                                            (state.currentParticipant == null ? false : state.currentParticipant!.online)
+                                            (state.currentParticipant == null
+                                                    ? false
+                                                    : state.currentParticipant!
+                                                        .online)
                                                 ? "Active now"
                                                 : "Away",
                                             style: titleThemeStyle
@@ -563,7 +600,9 @@ class ChatRoomPage extends StatelessWidget {
                                   ),
                                   const Spacer(),
                                   Visibility(
-                                      visible: state.currentParticipant == null ? false:  state.currentParticipant!.online,
+                                      visible: state.currentParticipant == null
+                                          ? false
+                                          : state.currentParticipant!.online,
                                       child: CallButtonShape(
                                         image: imageSVGAsset('icon_phone')
                                             as Widget,
@@ -594,7 +633,7 @@ class ChatRoomPage extends StatelessWidget {
                                         : const Center(
                                             child: CircularProgressIndicator(),
                                           ),
-                                  )
+                                  ),
                                 ],
                               ),
                             ),
