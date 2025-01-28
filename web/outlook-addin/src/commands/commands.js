@@ -22,7 +22,7 @@ function action(event) {
 
   const bodyContent = `
   <div style="font-family:Arial, sans-serif; padding: 10px; font-size: 14px;">
-      <img src="https://cinteraction.nswebdevelopment.com/web/outlook-addin/assets/cinteraction_logo.png" alt="Cinteraction" title="Cinteraction" />
+      <img src="https://cinteraction.nswebdevelopment.com/web/addin/assets/cinteraction_logo.png" alt="Cinteraction" title="Cinteraction" />
       </br>
       </br>
       <p>

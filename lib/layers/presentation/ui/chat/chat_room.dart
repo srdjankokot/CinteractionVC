@@ -72,12 +72,10 @@ class ChatRoomPage extends StatelessWidget {
       await audioPlayer.stop();
     }
 
-    Future<void> sendMessage() async {
+    Future<void> sendMessage(participiantId) async {
       await context
           .read<ChatCubit>()
-          .sendChatMessage(
-          messageContent: messageFieldController.text);
-
+          .sendMessage(messageFieldController.text, participiantId);
       messageFieldController.text = '';
     }
 
@@ -608,14 +606,57 @@ class ChatRoomPage extends StatelessWidget {
                                     textInputAction: TextInputAction.go,
                                     focusNode: messageFocusNode,
                                     onSubmitted: (value) async {
-                                      sendMessage();
+                                      var participiansList = state
+                                          .chatDetails!.chatParticipants
+                                          .map((data) => data.id)
+                                          .toList();
+
+                                      var participantId = state.chatDetails!
+                                          .chatParticipants.first.id;
+
+                                      await context
+                                          .read<ChatCubit>()
+                                          .sendChatMessage(
+                                              chatId: state.chatDetails!.chatId,
+                                              messageContent:
+                                                  messageFieldController.text,
+                                              participiantsId: participiansList,
+                                              senderId: state
+                                                  .chatDetails!.authUser.id);
+
+                                      sendMessage(participantId);
+                                      messageFieldController.text = "";
                                     },
                                     controller: messageFieldController,
                                     decoration: InputDecoration(
                                         hintText: "Send a message",
                                         suffixIcon: IconButton(
                                           onPressed: () async {
-                                            sendMessage();
+                                            var participiansList = state
+                                                .chatDetails!.chatParticipants
+                                                .map((data) => data.id)
+                                                .toList();
+
+                                            var participantId = state
+                                                .chatDetails!
+                                                .chatParticipants
+                                                .first
+                                                .id;
+
+                                            await context
+                                                .read<ChatCubit>()
+                                                .sendChatMessage(
+                                                    chatId: state
+                                                        .chatDetails!.chatId,
+                                                    messageContent:
+                                                        messageFieldController
+                                                            .text,
+                                                    participiantsId:
+                                                        participiansList,
+                                                    senderId: state.chatDetails!
+                                                        .authUser.id);
+                                            sendMessage(participantId);
+                                            messageFieldController.text = "";
                                           },
                                           icon: imageSVGAsset('icon_send')
                                               as Widget,

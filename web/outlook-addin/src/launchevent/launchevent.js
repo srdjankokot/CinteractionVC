@@ -14,12 +14,10 @@ function onMessageSendHandler(event) {
 }
 
 async function fetchMeetingDetails(event) {
-
   const item = Office.context.mailbox.item;
 
   const getSubject = () => {
     return new Promise((resolve, reject) => {
-    
       item.subject.getAsync((result) => {
         if (result.status === Office.AsyncResultStatus.Succeeded) {
           resolve(result.value);

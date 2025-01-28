@@ -3,23 +3,6 @@
   <head>
     <!-- Office JavaScript API -->
     <script type="text/javascript" src="https://appsforoffice.microsoft.com/lib/1.1/hosted/office.js"></script>
-    <script>
-      Office.onReady((info) => {
-        if (info.host === Office.HostType.Outlook) {
-          console.log("Office.js is ready for Outlook");
-          // Initialization code here
-          initializeApp();
-        }
-      });
-  
-      function initializeApp() {
-        console.log("App initialized");
-        // Your custom logic here
-      }
-    </script>
-    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
-    <script type="text/javascript" src="../taskpane/auth.js"></script>
-    
     <link rel="stylesheet" type="text/css" href="taskpane.css" />
   </head>
 
@@ -27,7 +10,7 @@
     <div id="app-body flex-direction: column">
       <div id="login-form">
         <img
-          src="../../assets/cinteraction_logo.png"
+          src="https://cinteraction.nswebdevelopment.com/web/addin/assets/cinteraction_logo.png"
           alt="Cinteraction"
           title="Cinteraction"
         />
@@ -37,7 +20,7 @@
       </div>
       <div id="signOutSection" style="display: flex">
         <img
-          src="../../assets/cinteraction_logo.png"
+          src="https://cinteraction.nswebdevelopment.com/web/addin/assets/cinteraction_logo.png"
           alt="Cinteraction"
           title="Cinteraction"
         />

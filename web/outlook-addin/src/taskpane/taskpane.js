@@ -1,4 +1,4 @@
-// import { signInEmailPass } from "./auth";
+import { signInEmailPass } from "./auth";
 
 Office.onReady((info) => {
   if (info.host === Office.HostType.Outlook) {
@@ -41,7 +41,7 @@ async function runSignIn() {
   }
 
   spinner.style.display = "block";
-  const loginResult = await window.signInEmailPass(email, password);
+  const loginResult = await signInEmailPass(email, password);
   spinner.style.display = "none";
 
   if (loginResult.success) {
