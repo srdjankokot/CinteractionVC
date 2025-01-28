@@ -311,6 +311,39 @@ class ChatRepoImpl extends ChatRepo {
     return List.empty();
   }
 
+  @override
+  Future<void> sendMessage(String msg, int participiantId) async {
+    // currentParticipant.display
+    await _loadChats();
+    await textRoom.sendMessage(room, msg, to: '$participiantId');
+
+    chatDetailsDto.messages.add(MessageDto(
+        chatId: chatDetailsDto.chatId!,
+        senderId: chatDetailsDto.authUser.id,
+        message: msg,
+        createdAt: DateTime.now().toIso8601String(),
+        updatedAt: DateTime.now().toIso8601String()));
+
+    final updatedChatDetails = ChatDetailsDto(
+      chatName: chatDetailsDto.chatName,
+      authUser: chatDetailsDto.authUser,
+      chatId: chatDetailsDto.chatId,
+      chatParticipants: chatDetailsDto.chatParticipants,
+      messages: [...chatDetailsDto.messages],
+    );
+
+    _chatDetailsStream.add(updatedChatDetails);
+    // var send =  await _api.sentChatMessage(text: msg, to: currentParticipant?.display, from: displayName);
+
+    // print(send);
+    // getUserMessages()?.add(ChatMessage(
+    //     message: msg,
+    //     displayName: 'Me',
+    //     time: DateTime.now(),
+    //     avatarUrl: user!.imageUrl,
+    //     seen: true));
+    // _messagesStream.add(getUserMessages()!);
+  }
 
   @override
   Future<void> setCurrentParticipant(UserDto user) async {
@@ -438,18 +471,10 @@ class ChatRepoImpl extends ChatRepo {
     }
   }
 
-
-  @override
-  Future<void> sendMessage(String msg, List<String> participantIds) async {
-    await textRoom.sendMessage(room, msg, tos: participantIds);
-  }
-
-
   @override
   Future<void> sendMessageToChatWrapper(int? chatId, String messageContent,
       int senderId, List<int> participantIds,
       {List<File>? uploadedFiles}) async {
-    //send message to server
     var response = await _api.sendMessageToChat(
       name: 'Test',
       chatId: chatId,
@@ -458,12 +483,10 @@ class ChatRepoImpl extends ChatRepo {
       participantIds: participantIds,
     );
 
-    //send message throw janus too
     if (response.error == null && response.response != null) {
       ////This is used only for first message in users list////
-      List<String> participants = participantIds.map((int value) => value.toString()).toList();
-      sendMessage(messageContent, participants);
-
+      if (chatDetailsDto.chatId == null) {
+        print('____Used_____');
         chatDetailsDto.messages.add(MessageDto(
           chatId: response.response!.chatId,
           createdAt: DateTime.now().toIso8601String(),
@@ -479,9 +502,12 @@ class ChatRepoImpl extends ChatRepo {
           chatParticipants: chatDetailsDto.chatParticipants,
           messages: [...chatDetailsDto.messages],
         );
+
         _chatDetailsStream.add(updatedChatDetails);
         _loadChats();
-
+      } else {
+        print('______notUsED______');
+      }
     } else {
       print("Error: ${response.error}");
     }

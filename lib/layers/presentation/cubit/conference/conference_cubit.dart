@@ -5,7 +5,6 @@ import 'package:cinteraction_vc/core/io/network/models/participant.dart';
 import 'package:cinteraction_vc/core/util/util.dart';
 import 'package:cinteraction_vc/layers/domain/usecases/conference/conference_usecases.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:flutter_screen_recording/flutter_screen_recording.dart';
 import 'package:janus_client/janus_client.dart';
 import 'package:webrtc_interface/webrtc_interface.dart';
 
@@ -198,14 +197,5 @@ class ConferenceCubit extends Cubit<ConferenceState> with BlocLoggy {
 
   Future<void> sendMessage(String msg) async {
     conferenceUseCases.sendMessage(msg);
-  }
-
-  Future<void>  startRecording() async
-  {
-    FlutterScreenRecording.startRecordScreenAndAudio("videoName");
-  }
-  Future<void>  stopRecording() async
-  {
-    FlutterScreenRecording.stopRecordScreen;
   }
 }

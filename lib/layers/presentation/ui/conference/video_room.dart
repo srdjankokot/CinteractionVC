@@ -289,20 +289,6 @@ class VideoRoomPage extends StatelessWidget {
 
                                   const SizedBox(width: 20),
 
-                                  ElevatedButton(onPressed: () async {
-                                    await context
-                                        .read<ConferenceCubit>()
-                                        .startRecording();
-                                  }, child: const Text("Start")),
-
-                                  const SizedBox(width: 20),
-
-                                  ElevatedButton(onPressed: ()async{
-                                    await context
-                                        .read<ConferenceCubit>()
-                                        .stopRecording();
-                                  }, child: const Text("Stop")),
-
                                   PopupMenuButton<String>(
                                     padding: const EdgeInsets.all(0),
                                     icon: Container(
