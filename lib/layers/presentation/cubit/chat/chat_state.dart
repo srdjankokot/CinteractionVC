@@ -8,10 +8,7 @@ import '../../../data/dto/chat/last_message_dto.dart';
 import '../../../data/dto/user_dto.dart';
 import '../../../domain/entities/chat_message.dart';
 
-enum ListType {
-  Chats,
-  Users,
-}
+enum ListType { Chats, Users, Group }
 
 class ChatState extends Equatable {
   final bool isLoading;

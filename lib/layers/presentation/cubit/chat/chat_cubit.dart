@@ -136,11 +136,6 @@ class ChatCubit extends Cubit<ChatState> with BlocLoggy {
     }
   }
 
-  Future<void> getEmptyChat() async {
-    final chatDetails = await chatUseCases.getEmptyChat();
-    emit(state.copyWith(chatDetails: chatDetails, isLoading: true));
-  }
-
   Future<void> deleteChatMessage(int msgId, int chatId) async {
     chatUseCases.chatDeleteMessage(msgId);
     final chatDetails = await chatUseCases.getChatDetails(chatId);
@@ -149,6 +144,19 @@ class ChatCubit extends Cubit<ChatState> with BlocLoggy {
 
   Future<void> editChatMessage(int msgId, String message, int chatId) async {
     chatUseCases.chatEditMessage(msgId, message);
+    final chatDetails = await chatUseCases.getChatDetails(chatId);
+    emit(state.copyWith(chatDetails: chatDetails));
+  }
+
+  Future<void> removeUserFromGroup(int chatId, int userId) async {
+    chatUseCases.removeUserFromGroup(chatId, userId);
+    final chatDetails = await chatUseCases.getChatDetails(chatId);
+    emit(state.copyWith(chatDetails: chatDetails));
+  }
+
+  Future<void> addUserToGroupChat(
+      int chatId, int userId, List<int> participantIds) async {
+    chatUseCases.addUserToGroup(chatId, userId, participantIds);
     final chatDetails = await chatUseCases.getChatDetails(chatId);
     emit(state.copyWith(chatDetails: chatDetails));
   }
@@ -171,6 +179,10 @@ class ChatCubit extends Cubit<ChatState> with BlocLoggy {
     required List<int> participiantsId,
     required int senderId,
   }) async {
+
+    var participiansList =
+        state.chatDetails!.chatParticipants.map((data) => data.id).toList();
+
     chatUseCases.sendMessageToChatStream(
       chatId: chatId,
       messageContent: messageContent,
