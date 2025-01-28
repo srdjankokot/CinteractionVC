@@ -86,6 +86,7 @@ class ChatDetailsDto {
   final List<ChatParticipantDto> chatParticipants;
   final List<MessageDto> messages;
   final bool isOnline;
+  final bool isGroup;
 
   ChatDetailsDto(
       {required this.chatId,
@@ -93,7 +94,8 @@ class ChatDetailsDto {
       required this.authUser,
       required this.chatParticipants,
       required this.messages,
-      this.isOnline = false});
+      this.isOnline = false,
+      this.isGroup = false});
 
   factory ChatDetailsDto.fromJson(Map<String, dynamic> json) => ChatDetailsDto(
         chatId: json['chat_id'] as int?,
@@ -105,6 +107,7 @@ class ChatDetailsDto {
         messages: (json['messages'] as List)
             .map((message) => MessageDto.fromJson(message))
             .toList(),
+        isGroup: (json['chat_group'] as bool?) ?? false,
       );
 
   Map<String, dynamic> toJson() => {
@@ -113,10 +116,11 @@ class ChatDetailsDto {
         'auth_user': authUser.toJson(),
         'chat_participants': chatParticipants.map((p) => p.toJson()).toList(),
         'messages': messages.map((message) => message.toJson()).toList(),
+        'chat_group': isGroup,
       };
 
   @override
   String toString() {
-    return 'ChatDetailsDto(chatId: $chatId, chatName: $chatName, authUser: $authUser, chatParticipants: $chatParticipants, messages: $messages , isOnline: $isOnline)';
+    return 'ChatDetailsDto(chatId: $chatId, chatName: $chatName, authUser: $authUser, chatParticipants: $chatParticipants, messages: $messages , isOnline: $isOnline, isGroup: $isGroup)';
   }
 }

@@ -4,11 +4,13 @@ import 'package:flutter/material.dart';
 class AddParticipantsDialog extends StatefulWidget {
   final List<UserDto> users;
   final Function(List<dynamic>) onAddParticipants;
+  final BuildContext context;
 
   const AddParticipantsDialog({
     super.key,
     required this.users,
     required this.onAddParticipants,
+    required this.context,
   });
 
   @override
@@ -36,7 +38,7 @@ class _AddParticipantsDialogState extends State<AddParticipantsDialog> {
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext innerContext) {
     return AlertDialog(
       title: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,

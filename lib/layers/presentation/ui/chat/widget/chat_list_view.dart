@@ -39,7 +39,6 @@ class _ChatsListViewState extends State<ChatsListView> {
       setState(() {
         selectedChat = widget.state.chats!.first.id;
       });
-      // Opcionalno, odmah učitaj detalje za novi selektovani chat
       WidgetsBinding.instance.addPostFrameCallback((_) {
         context.read<ChatCubit>().getChatDetails(selectedChat);
       });
@@ -48,7 +47,6 @@ class _ChatsListViewState extends State<ChatsListView> {
 
   @override
   Widget build(BuildContext context) {
-    print('ListaChatova: ${widget.state.chats}');
     return widget.state.chats == null || widget.state.chats!.isEmpty
         ? Center(
             child: Text(
