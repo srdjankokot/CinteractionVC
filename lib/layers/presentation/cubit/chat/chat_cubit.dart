@@ -99,8 +99,8 @@ class ChatCubit extends Cubit<ChatState> with BlocLoggy {
     ));
   }
 
-  Future<void> sendMessage(String msg, int participiantId) async {
-    chatUseCases.sendMessage(msg: msg, participiantId: participiantId);
+  Future<void> sendMessage(String msg, List<String> participantIds) async {
+    chatUseCases.sendMessage(msg: msg, participantIds: participantIds);
   }
 
   // Future<void> sendMessageToUser(int senderId, String message, int participiantId ) {
@@ -174,20 +174,16 @@ class ChatCubit extends Cubit<ChatState> with BlocLoggy {
   }
 
   Future<void> sendChatMessage({
-    required int? chatId,
     required String messageContent,
-    required List<int> participiantsId,
-    required int senderId,
   }) async {
-
     var participiansList =
-        state.chatDetails!.chatParticipants.map((data) => data.id).toList();
+    state.chatDetails!.chatParticipants.map((data) => data.id).toList();
 
     chatUseCases.sendMessageToChatStream(
-      chatId: chatId,
+      chatId: state.chatDetails?.chatId,
       messageContent: messageContent,
-      participantIds: participiantsId,
-      senderId: senderId,
+      participantIds: participiansList,
+      senderId: state.chatDetails!.authUser.id,
     );
   }
 

@@ -190,8 +190,16 @@ final GoRouter router = GoRouter(
         // final display =  state.pathParameters['displayName'] ?? 'displayName';
 
         // final roomId = state.pathParameters['roomId'];
-        return BlocProvider(
-          create: (context) => getIt.get<ChatCubit>(),
+        return MultiBlocProvider(
+          providers: [
+            BlocProvider<ChatCubit>(
+              create: (context) =>  getIt.get<ChatCubit>(),
+            ),
+
+            BlocProvider<HomeCubit>(
+              create: (context) =>  getIt.get<HomeCubit>(),
+            ),
+          ],
           child: const ChatRoomPage(),
         );
       },

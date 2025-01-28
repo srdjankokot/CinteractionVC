@@ -1,8 +1,10 @@
 import 'dart:io';
 
+import 'package:cinteraction_vc/layers/presentation/cubit/home/home_cubit.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_facebook_auth/flutter_facebook_auth.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -33,18 +35,18 @@ Future<void> main() async {
 
 
   await Firebase.initializeApp(
-    options: DefaultFirebaseOptions.currentPlatform
+      options: DefaultFirebaseOptions.currentPlatform
   );
 
 
   // if (defaultTargetPlatform != TargetPlatform.windows) {
-    // window currently don't support storage emulator
-    // final emulatorHost =
-    // (!kIsWeb && defaultTargetPlatform == TargetPlatform.android)
-    //     ? '10.0.2.2'
-    //     : 'localhost';
-    //
-    // await FirebaseStorage.instance.useStorageEmulator(emulatorHost, 9199);
+  // window currently don't support storage emulator
+  // final emulatorHost =
+  // (!kIsWeb && defaultTargetPlatform == TargetPlatform.android)
+  //     ? '10.0.2.2'
+  //     : 'localhost';
+  //
+  // await FirebaseStorage.instance.useStorageEmulator(emulatorHost, 9199);
   // }
 
   configureUrl();
