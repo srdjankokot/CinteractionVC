@@ -51,8 +51,7 @@ class _ChatsListViewState extends State<ChatsListView> {
                     selectedChat = chat.id;
                   });
                   await context.read<ChatCubit>().getChatDetails(chat.id);
-                  print(
-                      'chatDetails: ${widget.state.chatDetails!.chatParticipants[0].id}');
+                  print('chatDetails: ${widget.state.chatDetails}');
                 },
                 child: Container(
                   color:
