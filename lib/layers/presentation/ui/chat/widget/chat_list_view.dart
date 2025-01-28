@@ -18,14 +18,29 @@ class ChatsListView extends StatefulWidget {
 
 class _ChatsListViewState extends State<ChatsListView> {
   int? selectedChat;
+
   @override
   void initState() {
     super.initState();
+    _updateSelectedChat();
+  }
+
+  @override
+  void didUpdateWidget(ChatsListView oldWidget) {
+    super.didUpdateWidget(oldWidget);
+
+    if (widget.state.chats!.length != oldWidget.state.chats!.length) {
+      _updateSelectedChat();
+    }
+  }
+
+  void _updateSelectedChat() {
     if (widget.state.chats != null && widget.state.chats!.isNotEmpty) {
-      selectedChat = widget.state.chats!.first.id;
+      setState(() {
+        selectedChat = widget.state.chats!.first.id;
+      });
       WidgetsBinding.instance.addPostFrameCallback((_) {
-        context.read<ChatCubit>().getChatDetails(widget.state.chats![0].id);
-        print('ChatsStata: ${widget.state.chats}');
+        context.read<ChatCubit>().getChatDetails(selectedChat);
       });
     }
   }
@@ -51,7 +66,6 @@ class _ChatsListViewState extends State<ChatsListView> {
                     selectedChat = chat.id;
                   });
                   await context.read<ChatCubit>().getChatDetails(chat.id);
-                  print('chatDetails: ${widget.state.chatDetails}');
                 },
                 child: Container(
                   color:
@@ -65,7 +79,10 @@ class _ChatsListViewState extends State<ChatsListView> {
                         const SizedBox(width: 10),
                         Stack(
                           children: [
-                            UserImage.medium(chat.userImage!),
+                            chat.userImage != null
+                                ? UserImage.medium(chat.userImage!)
+                                : const UserImage.medium(
+                                    "https:\/\/ui-avatars.com\/api\/?name=G+R&color=ffffff&background=f34320"),
                           ],
                         ),
                         const SizedBox(width: 10),
@@ -78,12 +95,12 @@ class _ChatsListViewState extends State<ChatsListView> {
                               style: context.textTheme.titleMedium,
                             ),
                             const SizedBox(height: 4),
-                            Text(
-                              chat.lastMessage?.message ?? "",
-                              style: context.textTheme.bodySmall?.copyWith(
-                                color: Colors.grey,
-                              ),
-                            ),
+                            // Text(
+                            //   chat.lastMessage?.message ?? "",
+                            //   style: context.textTheme.bodySmall?.copyWith(
+                            //     color: Colors.grey,
+                            //   ),
+                            // ),
                           ],
                         ),
                       ],
