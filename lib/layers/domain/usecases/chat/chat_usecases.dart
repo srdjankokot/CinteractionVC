@@ -1,4 +1,5 @@
 import 'package:cinteraction_vc/layers/domain/usecases/chat/add_user_to_group.dart';
+import 'package:cinteraction_vc/layers/domain/usecases/chat/delete_chat.dart';
 import 'package:cinteraction_vc/layers/domain/usecases/chat/delete_message.dart';
 import 'package:cinteraction_vc/layers/domain/usecases/chat/edit_message.dart';
 import 'package:cinteraction_vc/layers/domain/usecases/chat/get_chat_details.dart';
@@ -43,7 +44,8 @@ class ChatUseCases {
         chatDeleteMessage = DeleteMessage(repo: repo),
         chatEditMessage = EditMessage(repo: repo),
         addUserToGroup = AddUserToGroup(repo: repo),
-        removeUserFromGroup = RemoveUserFromGroup(repo: repo);
+        removeUserFromGroup = RemoveUserFromGroup(repo: repo),
+        deleteChat = DeleteChat(repo: repo);
 
   ChatInitialize chatInitialize;
   SendMessage sendMessage;
@@ -64,4 +66,5 @@ class ChatUseCases {
   GetChatDetailsByParticipiant getChatDetailsByParticipiant;
   RemoveUserFromGroup removeUserFromGroup;
   AddUserToGroup addUserToGroup;
+  DeleteChat deleteChat;
 }

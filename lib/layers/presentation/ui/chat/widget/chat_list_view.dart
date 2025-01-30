@@ -29,7 +29,7 @@ class _ChatsListViewState extends State<ChatsListView> {
   void didUpdateWidget(ChatsListView oldWidget) {
     super.didUpdateWidget(oldWidget);
 
-    if (widget.state.chats!.length != oldWidget.state.chats!.length) {
+    if (widget.state.chats != oldWidget.state.chats) {
       _updateSelectedChat();
     }
   }
@@ -42,7 +42,18 @@ class _ChatsListViewState extends State<ChatsListView> {
       WidgetsBinding.instance.addPostFrameCallback((_) {
         context.read<ChatCubit>().getChatDetails(selectedChat);
       });
+    } else {
+      setState(() {
+        selectedChat = null;
+      });
     }
+  }
+
+  void _deleteChat(int chatId) async {
+    await context.read<ChatCubit>().deleteChat(chatId);
+    Future.delayed(Duration(milliseconds: 100), () {
+      _updateSelectedChat();
+    });
   }
 
   @override
@@ -59,6 +70,7 @@ class _ChatsListViewState extends State<ChatsListView> {
             itemCount: widget.state.chats?.length ?? 0,
             itemBuilder: (context, index) {
               var chat = widget.state.chats![index];
+              bool isSelected = chat.id == selectedChat;
 
               return GestureDetector(
                 onTap: () async {
@@ -68,47 +80,73 @@ class _ChatsListViewState extends State<ChatsListView> {
                   await context.read<ChatCubit>().getChatDetails(chat.id);
                 },
                 child: Container(
-                  color:
-                      chat.id == selectedChat ? Colors.blue[100] : Colors.white,
-                  child: Padding(
-                    padding: const EdgeInsets.all(4.0),
-                    child: Row(
-                      crossAxisAlignment: CrossAxisAlignment.center,
-                      mainAxisAlignment: MainAxisAlignment.start,
-                      children: [
-                        const SizedBox(width: 10),
-                        Stack(
-                          children: [
-                            chat.userImage != null
-                                ? UserImage.medium(chat.userImage!)
-                                : const UserImage.medium(
-                                    "https:\/\/ui-avatars.com\/api\/?name=G+R&color=ffffff&background=f34320"),
-                          ],
+                  color: isSelected ? Colors.blue[100] : Colors.white,
+                  padding:
+                      const EdgeInsets.symmetric(vertical: 8, horizontal: 10),
+                  child: Row(
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
+                      Stack(
+                        children: [
+                          chat.userImage != null
+                              ? UserImage.medium(chat.userImage!)
+                              : const UserImage.medium(
+                                  "https:\/\/ui-avatars.com\/api\/?name=G+R&color=ffffff&background=f34320"),
+                        ],
+                      ),
+                      const SizedBox(width: 10),
+                      Expanded(
+                        child: Text(
+                          chat.name,
+                          style: context.textTheme.titleMedium,
                         ),
+                      ),
+                      if (isSelected) ...[
                         const SizedBox(width: 10),
-                        Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              chat.name,
-                              style: context.textTheme.titleMedium,
-                            ),
-                            const SizedBox(height: 4),
-                            // Text(
-                            //   chat.lastMessage?.message ?? "",
-                            //   style: context.textTheme.bodySmall?.copyWith(
-                            //     color: Colors.grey,
-                            //   ),
-                            // ),
-                          ],
+                        IconButton(
+                          icon: Icon(Icons.delete, color: Colors.red),
+                          onPressed: () =>
+                              _showRemoveDialog(chat.id, context, _deleteChat),
                         ),
                       ],
-                    ),
+                    ],
                   ),
                 ),
               );
             },
           );
   }
+}
+
+void _showRemoveDialog(int chatId, context, Function(int) deleteChat) {
+  showDialog(
+    context: context,
+    builder: (BuildContext context) {
+      return AlertDialog(
+        title: const Text("Remove Conversation"),
+        content: const Text(
+          "Are you sure you want to delete this conversation?",
+          style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () {
+              Navigator.of(context).pop();
+            },
+            child: const Text("Cancel"),
+          ),
+          ElevatedButton(
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.red,
+            ),
+            onPressed: () async {
+              deleteChat(chatId);
+              Navigator.of(context).pop();
+            },
+            child: const Text("Delete"),
+          ),
+        ],
+      );
+    },
+  );
 }

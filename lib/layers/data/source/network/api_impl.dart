@@ -394,6 +394,23 @@ class ApiImpl extends Api {
   }
 
   @override
+  Future<ApiResponse<List<ChatDto>>> deleteChat({required int id}) async {
+    try {
+      Dio dio = await getIt.getAsync<Dio>();
+      Response response = await dio.delete('${Urls.deleteChat}$id');
+
+      List<ChatDto> chats = [];
+      for (var chat in response.data['data']) {
+        var chatDto = ChatDto.fromJson(chat as Map<String, dynamic>);
+        chats.add(chatDto);
+      }
+      return ApiResponse(response: chats);
+    } on DioException catch (e) {
+      return ApiResponse(error: ApiErrorDto.fromDioException(e));
+    }
+  }
+
+  @override
   Future<ApiResponse<ChatDetailsDto>> getChatById({dynamic id}) async {
     try {
       Dio dio = await getIt.getAsync<Dio>();

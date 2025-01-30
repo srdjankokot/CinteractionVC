@@ -185,7 +185,6 @@ class ChatRoomPage extends StatelessWidget {
           });
     }
 
-
     return BlocConsumer<ChatCubit, ChatState>(listener: (context, state) async {
       if (state.incomingCall ?? false) {
         // String callerName = "Caller Name"; // Replace with actual caller name
@@ -209,594 +208,623 @@ class ChatRoomPage extends StatelessWidget {
     }, builder: (context, state) {
       return Scaffold(
           body: Stack(
+        children: [
+          Row(
             children: [
-              Row(
-                children: [
-                  // First column
-                  SizedBox(
-                    width: 300,
-                    child: Column(
-                      children: [
-                        Container(
-                          width: double.maxFinite,
-                          padding: const EdgeInsets.all(10),
-                          child: Row(
-                            children: [
-                              Expanded(
-                                child: HomeTabItem.mobile(
-                                  image: const Image(
-                                    image: ImageAsset('stand.png'),
-                                    fit: BoxFit.fill,
-                                  ),
-                                  onClickAction: () {
-                                    context.pushNamed('meeting',
-                                        pathParameters: {
-                                          'roomId':
-                                          Random().nextInt(999999).toString(),
-                                        },
-                                        extra: context.getCurrentUser?.name);
-                                  },
-                                  label: 'Start Meeting',
-                                  textStyle: context.textTheme.labelMedium,
-                                ),
+              // First column
+              SizedBox(
+                width: 300,
+                child: Column(
+                  children: [
+                    Container(
+                      width: double.maxFinite,
+                      padding: const EdgeInsets.all(10),
+                      child: Row(
+                        children: [
+                          Expanded(
+                            child: HomeTabItem.mobile(
+                              image: const Image(
+                                image: ImageAsset('stand.png'),
+                                fit: BoxFit.fill,
                               ),
-                              Expanded(
-                                child: HomeTabItem.mobile(
-                                    image: const Image(
-                                      image: ImageAsset('add_user.png'),
-                                    ),
-                                    bgColor: ColorConstants.kStateSuccess,
-                                    onClickAction: () => {
+                              onClickAction: () {
+                                context.pushNamed('meeting',
+                                    pathParameters: {
+                                      'roomId':
+                                          Random().nextInt(999999).toString(),
+                                    },
+                                    extra: context.getCurrentUser?.name);
+                              },
+                              label: 'Start Meeting',
+                              textStyle: context.textTheme.labelMedium,
+                            ),
+                          ),
+                          Expanded(
+                            child: HomeTabItem.mobile(
+                                image: const Image(
+                                  image: ImageAsset('add_user.png'),
+                                ),
+                                bgColor: ColorConstants.kStateSuccess,
+                                onClickAction: () => {
                                       // AppRoute.meeting.push(context)
                                       displayJoinRoomPopup(context)
                                     },
-                                    label: 'Join',
-                                    textStyle: context.textTheme.labelMedium),
+                                label: 'Join',
+                                textStyle: context.textTheme.labelMedium),
+                          ),
+                          Expanded(
+                            child: HomeTabItem.mobile(
+                                image: const Image(
+                                  image: ImageAsset('calendar-date.png'),
+                                ),
+                                bgColor: ColorConstants.kStateInfo,
+                                onClickAction: () async {
+                                  displayAddScheduleMeetingPopup();
+                                },
+                                label: 'Schedule',
+                                textStyle: context.textTheme.labelMedium),
+                          )
+                        ],
+                      ),
+                    ),
+                    const Divider(),
+                    Container(
+                      width: double.maxFinite,
+                      padding: const EdgeInsets.all(10),
+                      child: Row(
+                        children: ListType.values.map((option) {
+                          return Expanded(
+                            child: ListTile(
+                              titleAlignment: ListTileTitleAlignment.center,
+                              title: Tooltip(
+                                message: option == ListType.Users
+                                    ? "Contacts"
+                                    : option == ListType.Chats
+                                        ? "Chats"
+                                        : option == ListType.Group
+                                            ? "Create Group"
+                                            : "",
+                                child: option == ListType.Group
+                                    ? IconButton(
+                                        icon: Icon(
+                                          Icons.group_add,
+                                          size: 24.0,
+                                          color: state.listType == option
+                                              ? ColorConstants.kPrimaryColor
+                                              : Colors.grey,
+                                        ),
+                                        onPressed: () async {
+                                          await displayCreateGroupPopup(
+                                              context, state);
+                                        },
+                                      )
+                                    : option == ListType.Users
+                                        ? Icon(
+                                            Icons.contacts,
+                                            size: 24.0,
+                                            color: state.listType == option
+                                                ? ColorConstants.kPrimaryColor
+                                                : Colors.grey,
+                                          )
+                                        : option == ListType.Chats
+                                            ? Icon(
+                                                Icons.chat,
+                                                size: 24.0,
+                                                color: state.listType == option
+                                                    ? ColorConstants
+                                                        .kPrimaryColor
+                                                    : Colors.grey,
+                                              )
+                                            : Text(
+                                                option.name,
+                                                textAlign: TextAlign.center,
+                                              ),
                               ),
-                              Expanded(
-                                child: HomeTabItem.mobile(
-                                    image: const Image(
-                                      image: ImageAsset('calendar-date.png'),
-                                    ),
-                                    bgColor: ColorConstants.kStateInfo,
-                                    onClickAction: () async {
-                                      displayAddScheduleMeetingPopup();
-                                    },
-                                    label: 'Schedule',
-                                    textStyle: context.textTheme.labelMedium),
-                              )
-                            ],
-                          ),
-                        ),
-                        const Divider(),
-                        Container(
-                          width: double.maxFinite,
-                          padding: const EdgeInsets.all(10),
-                          child: Row(
-                            children: ListType.values.map((option) {
-                              return Expanded(
-                                  child: ListTile(
-                                    titleAlignment: ListTileTitleAlignment.center,
-                                    title: option == ListType.Group
-                                        ? IconButton(
-                                      icon: Icon(
-                                        Icons.group_add,
-                                        size: 24.0,
-                                        color: state.listType == option
-                                            ? ColorConstants.kPrimaryColor
-                                            : Colors.grey,
-                                      ),
-                                      onPressed: () async {
-                                        await displayCreateGroupPopup(
-                                            context, state);
-                                      },
-                                    )
-                                        : Text(
-                                      option.name,
-                                      textAlign: TextAlign.center,
-                                    ),
-                                    onTap: () {
-                                      context.read<ChatCubit>().changeListType(option);
-                                    },
-                                    selected: state.listType == option,
-                                    selectedColor: ColorConstants.kPrimaryColor,
-                                  ));
-                            }).toList(),
-                          ),
-                        ),
-                        const Divider(),
-                        Expanded(
-                          child: state.listType == ListType.Chats
-                              ? state.chats!.isNotEmpty
+                              onTap: () {
+                                context
+                                    .read<ChatCubit>()
+                                    .changeListType(option);
+                              },
+                              selected: state.listType == option,
+                              selectedColor: ColorConstants.kPrimaryColor,
+                            ),
+                          );
+                        }).toList(),
+                      ),
+                    ),
+                    const Divider(),
+                    Expanded(
+                      child: state.listType == ListType.Chats
+                          ? state.chats!.isNotEmpty
                               ? ChatsListView(state: state)
                               : const Center(
-                            child: Text('There is no chats'),
-                          )
-                              : UsersListView(state: state),
-                        )
-                      ],
-                    ),
-                  ),
+                                  child: Text('There is no chats'),
+                                )
+                          : UsersListView(state: state),
+                    )
+                  ],
+                ),
+              ),
 
-                  const VerticalDivider(
-                    color: Colors.grey, // Color of the divider
-                    thickness: 1, // Thickness of the divider
-                    width: 20, // Width of the space taken by the divider
-                  ),
+              const VerticalDivider(
+                color: Colors.grey, // Color of the divider
+                thickness: 1, // Thickness of the divider
+                width: 20, // Width of the space taken by the divider
+              ),
 
-                  // Second column
-                  Expanded(
-                    flex: 2,
-                    child: Container(
-                      width: double.maxFinite,
-                      height: double.maxFinite,
-                      color: Colors.white,
-                      child: Padding(
-                        padding: const EdgeInsets.all(23.0),
-                        child: () {
-                          if (state.localStream != null) {
-                            if (state.remoteStream == null) {
-                              return ParticipantVideoWidget(
-                                  remoteStream: state.localStream!,
+              // Second column
+              Expanded(
+                flex: 2,
+                child: Container(
+                  width: double.maxFinite,
+                  height: double.maxFinite,
+                  color: Colors.white,
+                  child: Padding(
+                    padding: const EdgeInsets.all(23.0),
+                    child: () {
+                      if (state.localStream != null) {
+                        if (state.remoteStream == null) {
+                          return ParticipantVideoWidget(
+                              remoteStream: state.localStream!,
+                              height: double.maxFinite,
+                              width: double.maxFinite);
+                        } else {
+                          return Stack(
+                            children: [
+                              ParticipantVideoWidget(
+                                  remoteStream: state.remoteStream!,
                                   height: double.maxFinite,
-                                  width: double.maxFinite);
-                            } else {
-                              return Stack(
-                                children: [
-                                  ParticipantVideoWidget(
-                                      remoteStream: state.remoteStream!,
-                                      height: double.maxFinite,
-                                      width: double.maxFinite),
-                                  ParticipantVideoWidget(
-                                      remoteStream: state.localStream!,
-                                      height: 200,
-                                      width: 200),
-                                  Positioned.fill(
-                                    bottom: 20,
-                                    child: Row(
-                                      mainAxisAlignment: MainAxisAlignment.center,
-                                      crossAxisAlignment: CrossAxisAlignment.end,
-                                      children: [
-                                        CallButtonShape(
-                                            image: !state.audioMuted
-                                                ? imageSVGAsset('icon_microphone')
-                                            as Widget
-                                                : imageSVGAsset(
-                                                'icon_microphone_disabled')
-                                            as Widget,
-                                            onClickAction: () async {
-                                              await context
-                                                  .read<ChatCubit>()
-                                                  .audioMute();
-                                            }),
-                                        const SizedBox(width: 20),
-                                        CallButtonShape(
-                                            image: !state.videoMuted
-                                                ? imageSVGAsset(
-                                                'icon_video_recorder') as Widget
-                                                : imageSVGAsset(
-                                                'icon_video_recorder_disabled')
-                                            as Widget,
-                                            onClickAction: () async {
-                                              await context
-                                                  .read<ChatCubit>()
-                                                  .videoMute();
-                                            }),
-                                        const SizedBox(width: 20),
-                                        CallButtonShape(
-                                            image: imageSVGAsset(
-                                                'icon_arrow_square_up') as Widget,
-                                            bgColor: true
-                                                ? ColorConstants.kPrimaryColor
-                                                : ColorConstants.kWhite30,
-                                            onClickAction: () async {}),
-                                        const SizedBox(width: 20),
-                                        CallButtonShape(
-                                          image:
-                                          imageSVGAsset('icon_phone') as Widget,
-                                          bgColor: ColorConstants.kPrimaryColor,
-                                          onClickAction: () async {
-                                            await context
-                                                .read<ChatCubit>()
-                                                .rejectCall();
-                                          },
-                                        ),
-                                      ],
-                                    ),
-                                  ),
-                                ],
-                              );
-                            }
-                          }
-
-                          if (state.currentParticipant != null ||
-                              state.chatDetails != null) {
-                            if (state.localStream != null) {
-                              print("local stream not null");
-                              if (state.remoteStream == null) {
-                                return ParticipantVideoWidget(
-                                    remoteStream: state.localStream!,
-                                    height: double.maxFinite,
-                                    width: double.maxFinite);
-                              } else {
-                                return Stack(
+                                  width: double.maxFinite),
+                              ParticipantVideoWidget(
+                                  remoteStream: state.localStream!,
+                                  height: 200,
+                                  width: 200),
+                              Positioned.fill(
+                                bottom: 20,
+                                child: Row(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  crossAxisAlignment: CrossAxisAlignment.end,
                                   children: [
-                                    ParticipantVideoWidget(
-                                        remoteStream: state.remoteStream!,
-                                        height: double.maxFinite,
-                                        width: double.maxFinite),
-                                    ParticipantVideoWidget(
-                                        remoteStream: state.remoteStream!,
-                                        height: 200,
-                                        width: 200),
-                                    Positioned.fill(
-                                      bottom: 20,
-                                      child: Row(
-                                        mainAxisAlignment: MainAxisAlignment.center,
-                                        crossAxisAlignment: CrossAxisAlignment.end,
-                                        children: [
-                                          CallButtonShape(
-                                              image: false
-                                                  ? imageSVGAsset('icon_microphone')
-                                              as Widget
-                                                  : imageSVGAsset(
-                                                  'icon_microphone_disabled')
-                                              as Widget,
-                                              onClickAction: () async {
-                                                // await context
-                                                //     .read<ConferenceCubit>()
-                                                //     .audioMute();
-                                              }),
-                                          const SizedBox(width: 20),
-                                          CallButtonShape(
-                                              image: false
-                                                  ? imageSVGAsset(
-                                                  'icon_video_recorder')
-                                              as Widget
-                                                  : imageSVGAsset(
-                                                  'icon_video_recorder_disabled')
-                                              as Widget,
-                                              onClickAction: () async {
-                                                // await context
-                                                //     .read<ConferenceCubit>()
-                                                //     .videoMute();
-                                              }),
-                                          const SizedBox(width: 20),
-                                          CallButtonShape(
-                                              image: imageSVGAsset(
-                                                  'icon_arrow_square_up') as Widget,
-                                              bgColor: true
-                                                  ? ColorConstants.kPrimaryColor
-                                                  : ColorConstants.kWhite30,
-                                              onClickAction: () async {}),
-
-                                          // const SizedBox(width: 20),
-
-                                          // Stack(children: [
-                                          //   CallButtonShape(
-                                          //     image: imageSVGAsset('icon_message')
-                                          //     as Widget,
-                                          //     bgColor: ColorConstants.kPrimaryColor
-                                          //         .withOpacity(0.4),
-                                          //     onClickAction: () async {
-                                          //       await context
-                                          //           .read<ConferenceCubit>()
-                                          //           .toggleChatWindow();
-                                          //     },
-                                          //   ),
-                                          //   Positioned(
-                                          //     right: 0,
-                                          //     top: 0,
-                                          //     child: AnimatedOpacity(
-                                          //       opacity:
-                                          //       (state.unreadMessages != null &&
-                                          //           state.unreadMessages! > 0)
-                                          //           ? 1
-                                          //           : 0,
-                                          //       duration:
-                                          //       const Duration(milliseconds: 250),
-                                          //       child: Container(
-                                          //         width: 12,
-                                          //         height: 12,
-                                          //         decoration: const ShapeDecoration(
-                                          //           color: Colors.white,
-                                          //           shape: OvalBorder(),
-                                          //         ),
-                                          //         // child: Text(
-                                          //         //   '1',
-                                          //         //   style: context
-                                          //         //       .primaryTextTheme.labelSmall
-                                          //         //       ?.copyWith(
-                                          //         //           fontSize: 8,
-                                          //         //           fontWeight:
-                                          //         //               FontWeight.w700),
-                                          //         // )
-                                          //       ),
-                                          //     ),
-                                          //   ),
-                                          //   // child: Text('${state.unreadMessages}', style: context.primaryTextTheme.labelSmall,)),
-                                          //   //   child: Text('1', style: context.primaryTextTheme.labelSmall?.copyWith(fontSize: 8, fontWeight: FontWeight.w700),)),,
-                                          // ]),
-
-                                          const SizedBox(width: 20),
-                                          // CallButtonShape(
-                                          //     image: imageSVGAsset('icon_user') as Widget,
-                                          //     // onClickAction: joined ? switchCamera : null),
-                                          //     onClickAction: joined ? null : null),
-                                          // const SizedBox(width: 20),
-                                          CallButtonShape(
-                                            image: imageSVGAsset('icon_phone')
-                                            as Widget,
-                                            bgColor: ColorConstants.kPrimaryColor,
-                                            onClickAction: () async {
-                                              await context
-                                                  .read<ChatCubit>()
-                                                  .rejectCall();
-                                            },
-                                          ),
-
-                                          // const SizedBox(width: 20),
-
-                                          // CallButtonShape(
-                                          //     image: state.engagementEnabled
-                                          //         ? const Icon(Icons.image)
-                                          //         : const Icon(Icons.image_not_supported),
-                                          //     onClickAction: () async {
-                                          //       await context
-                                          //           .read<ConferenceCubit>()
-                                          //           .toggleEngagement();
-                                          //     }),
-                                          //
-                                        ],
-                                      ),
+                                    CallButtonShape(
+                                        image: !state.audioMuted
+                                            ? imageSVGAsset('icon_microphone')
+                                                as Widget
+                                            : imageSVGAsset(
+                                                    'icon_microphone_disabled')
+                                                as Widget,
+                                        onClickAction: () async {
+                                          await context
+                                              .read<ChatCubit>()
+                                              .audioMute();
+                                        }),
+                                    const SizedBox(width: 20),
+                                    CallButtonShape(
+                                        image: !state.videoMuted
+                                            ? imageSVGAsset(
+                                                'icon_video_recorder') as Widget
+                                            : imageSVGAsset(
+                                                    'icon_video_recorder_disabled')
+                                                as Widget,
+                                        onClickAction: () async {
+                                          await context
+                                              .read<ChatCubit>()
+                                              .videoMute();
+                                        }),
+                                    const SizedBox(width: 20),
+                                    CallButtonShape(
+                                        image: imageSVGAsset(
+                                            'icon_arrow_square_up') as Widget,
+                                        bgColor: true
+                                            ? ColorConstants.kPrimaryColor
+                                            : ColorConstants.kWhite30,
+                                        onClickAction: () async {}),
+                                    const SizedBox(width: 20),
+                                    CallButtonShape(
+                                      image:
+                                          imageSVGAsset('icon_phone') as Widget,
+                                      bgColor: ColorConstants.kPrimaryColor,
+                                      onClickAction: () async {
+                                        await context
+                                            .read<ChatCubit>()
+                                            .rejectCall();
+                                      },
                                     ),
                                   ],
-                                );
-                              }
-                            }
+                                ),
+                              ),
+                            ],
+                          );
+                        }
+                      }
 
-                            return Column(
-                              // crossAxisAlignment: CrossAxisAlignment.start,
+                      if (state.currentParticipant != null ||
+                          state.chatDetails != null) {
+                        if (state.localStream != null) {
+                          print("local stream not null");
+                          if (state.remoteStream == null) {
+                            return ParticipantVideoWidget(
+                                remoteStream: state.localStream!,
+                                height: double.maxFinite,
+                                width: double.maxFinite);
+                          } else {
+                            return Stack(
                               children: [
-                                Container(
-                                  padding: const EdgeInsets.all(10),
+                                ParticipantVideoWidget(
+                                    remoteStream: state.remoteStream!,
+                                    height: double.maxFinite,
+                                    width: double.maxFinite),
+                                ParticipantVideoWidget(
+                                    remoteStream: state.remoteStream!,
+                                    height: 200,
+                                    width: 200),
+                                Positioned.fill(
+                                  bottom: 20,
                                   child: Row(
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    crossAxisAlignment: CrossAxisAlignment.end,
                                     children: [
-                                      Column(
-                                        crossAxisAlignment:
-                                        CrossAxisAlignment.start,
-                                        children: [
-                                          Text(
-                                            state.listType == ListType.Chats
-                                                ? (state.chatDetails?.chatName !=
-                                                null
-                                                ? state.chatDetails?.chatName ??
-                                                ""
-                                                : state.chatDetails!
-                                                .chatParticipants
-                                                .map((participant) =>
-                                            participant.name)
-                                                .join(", "))
-                                                : state.currentParticipant?.name ??
-                                                "",
-                                            style: titleThemeStyle
-                                                .textTheme.titleLarge,
-                                          ),
-                                          state.chatDetails!.isGroup
-                                              ? Row(
-                                            children: [
-                                              GestureDetector(
-                                                onTap: () async {
-                                                  await displayEditGroupPopup(
-                                                      context, state);
-                                                },
-                                                child: Row(children: [
-                                                  Container(
-                                                      width: 20.0,
-                                                      height: 20.0,
-                                                      child: Text(state
-                                                          .chatDetails!
-                                                          .chatParticipants
-                                                          .length
-                                                          .toString())),
+                                      CallButtonShape(
+                                          image: false
+                                              ? imageSVGAsset('icon_microphone')
+                                                  as Widget
+                                              : imageSVGAsset(
+                                                      'icon_microphone_disabled')
+                                                  as Widget,
+                                          onClickAction: () async {
+                                            // await context
+                                            //     .read<ConferenceCubit>()
+                                            //     .audioMute();
+                                          }),
+                                      const SizedBox(width: 20),
+                                      CallButtonShape(
+                                          image: false
+                                              ? imageSVGAsset(
+                                                      'icon_video_recorder')
+                                                  as Widget
+                                              : imageSVGAsset(
+                                                      'icon_video_recorder_disabled')
+                                                  as Widget,
+                                          onClickAction: () async {
+                                            // await context
+                                            //     .read<ConferenceCubit>()
+                                            //     .videoMute();
+                                          }),
+                                      const SizedBox(width: 20),
+                                      CallButtonShape(
+                                          image: imageSVGAsset(
+                                              'icon_arrow_square_up') as Widget,
+                                          bgColor: true
+                                              ? ColorConstants.kPrimaryColor
+                                              : ColorConstants.kWhite30,
+                                          onClickAction: () async {}),
 
-                                                  // const SizedBox(width: 3.0),
-                                                  const Text('participiants'),
-                                                ]),
-                                              ),
-                                            ],
-                                          )
-                                              : Row(
-                                            children: [
-                                              Container(
-                                                width: 15.0,
-                                                // Adjust the width as needed
-                                                height: 15.0,
-                                                // Adjust the height as needed
-                                                decoration: BoxDecoration(
-                                                  color: (state.currentParticipant ==
-                                                      null
-                                                      ? false
-                                                      : state
-                                                      .currentParticipant!
-                                                      .online)
-                                                      ? Colors.green
-                                                      : Colors.amber,
-                                                  shape: BoxShape.circle,
-                                                ),
-                                              ),
-                                              const SizedBox(width: 5.0),
-                                              Text(
-                                                (state.currentParticipant ==
-                                                    null
-                                                    ? false
-                                                    : state
-                                                    .currentParticipant!
-                                                    .online)
-                                                    ? "Active now"
-                                                    : "Away",
-                                                style: titleThemeStyle
-                                                    .textTheme.labelLarge,
-                                              ),
-                                            ],
-                                          )
-                                        ],
-                                      ),
-                                      const Spacer(),
-                                      Visibility(
-                                          visible: state.currentParticipant == null
-                                              ? false
-                                              : state.currentParticipant!.online,
-                                          child: CallButtonShape(
-                                            image: imageSVGAsset('icon_phone')
+                                      // const SizedBox(width: 20),
+
+                                      // Stack(children: [
+                                      //   CallButtonShape(
+                                      //     image: imageSVGAsset('icon_message')
+                                      //     as Widget,
+                                      //     bgColor: ColorConstants.kPrimaryColor
+                                      //         .withOpacity(0.4),
+                                      //     onClickAction: () async {
+                                      //       await context
+                                      //           .read<ConferenceCubit>()
+                                      //           .toggleChatWindow();
+                                      //     },
+                                      //   ),
+                                      //   Positioned(
+                                      //     right: 0,
+                                      //     top: 0,
+                                      //     child: AnimatedOpacity(
+                                      //       opacity:
+                                      //       (state.unreadMessages != null &&
+                                      //           state.unreadMessages! > 0)
+                                      //           ? 1
+                                      //           : 0,
+                                      //       duration:
+                                      //       const Duration(milliseconds: 250),
+                                      //       child: Container(
+                                      //         width: 12,
+                                      //         height: 12,
+                                      //         decoration: const ShapeDecoration(
+                                      //           color: Colors.white,
+                                      //           shape: OvalBorder(),
+                                      //         ),
+                                      //         // child: Text(
+                                      //         //   '1',
+                                      //         //   style: context
+                                      //         //       .primaryTextTheme.labelSmall
+                                      //         //       ?.copyWith(
+                                      //         //           fontSize: 8,
+                                      //         //           fontWeight:
+                                      //         //               FontWeight.w700),
+                                      //         // )
+                                      //       ),
+                                      //     ),
+                                      //   ),
+                                      //   // child: Text('${state.unreadMessages}', style: context.primaryTextTheme.labelSmall,)),
+                                      //   //   child: Text('1', style: context.primaryTextTheme.labelSmall?.copyWith(fontSize: 8, fontWeight: FontWeight.w700),)),,
+                                      // ]),
+
+                                      const SizedBox(width: 20),
+                                      // CallButtonShape(
+                                      //     image: imageSVGAsset('icon_user') as Widget,
+                                      //     // onClickAction: joined ? switchCamera : null),
+                                      //     onClickAction: joined ? null : null),
+                                      // const SizedBox(width: 20),
+                                      CallButtonShape(
+                                        image: imageSVGAsset('icon_phone')
                                             as Widget,
-                                            bgColor: ColorConstants.kGray600,
-                                            onClickAction: () async {
-                                              await context
-                                                  .read<ChatCubit>()
-                                                  .makeCall(
+                                        bgColor: ColorConstants.kPrimaryColor,
+                                        onClickAction: () async {
+                                          await context
+                                              .read<ChatCubit>()
+                                              .rejectCall();
+                                        },
+                                      ),
+
+                                      // const SizedBox(width: 20),
+
+                                      // CallButtonShape(
+                                      //     image: state.engagementEnabled
+                                      //         ? const Icon(Icons.image)
+                                      //         : const Icon(Icons.image_not_supported),
+                                      //     onClickAction: () async {
+                                      //       await context
+                                      //           .read<ConferenceCubit>()
+                                      //           .toggleEngagement();
+                                      //     }),
+                                      //
+                                    ],
+                                  ),
+                                ),
+                              ],
+                            );
+                          }
+                        }
+
+                        return Column(
+                          // crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Container(
+                              padding: const EdgeInsets.all(10),
+                              child: Row(
+                                children: [
+                                  Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      Text(
+                                        state.listType == ListType.Chats
+                                            ? (state.chatDetails?.chatName !=
+                                                    null
+                                                ? state.chatDetails?.chatName ??
+                                                    ""
+                                                : state.chatDetails!
+                                                    .chatParticipants
+                                                    .map((participant) =>
+                                                        participant.name)
+                                                    .join(", "))
+                                            : state.currentParticipant?.name ??
+                                                "",
+                                        style: titleThemeStyle
+                                            .textTheme.titleLarge,
+                                      ),
+                                      state.chatDetails!.isGroup
+                                          ? Row(
+                                              children: [
+                                                GestureDetector(
+                                                  onTap: () async {
+                                                    await displayEditGroupPopup(
+                                                        context, state);
+                                                  },
+                                                  child: Row(children: [
+                                                    Container(
+                                                        width: 20.0,
+                                                        height: 20.0,
+                                                        child: Text(state
+                                                            .chatDetails!
+                                                            .chatParticipants
+                                                            .length
+                                                            .toString())),
+
+                                                    // const SizedBox(width: 3.0),
+                                                    const Text('participiants'),
+                                                  ]),
+                                                ),
+                                              ],
+                                            )
+                                          : Row(
+                                              children: [
+                                                Container(
+                                                  width: 15.0,
+                                                  // Adjust the width as needed
+                                                  height: 15.0,
+                                                  // Adjust the height as needed
+                                                  decoration: BoxDecoration(
+                                                    color: (state.currentParticipant ==
+                                                                null
+                                                            ? false
+                                                            : state
+                                                                .currentParticipant!
+                                                                .online)
+                                                        ? Colors.green
+                                                        : Colors.amber,
+                                                    shape: BoxShape.circle,
+                                                  ),
+                                                ),
+                                                const SizedBox(width: 5.0),
+                                                Text(
+                                                  (state.currentParticipant ==
+                                                              null
+                                                          ? false
+                                                          : state
+                                                              .currentParticipant!
+                                                              .online)
+                                                      ? "Active now"
+                                                      : "Away",
+                                                  style: titleThemeStyle
+                                                      .textTheme.labelLarge,
+                                                ),
+                                              ],
+                                            )
+                                    ],
+                                  ),
+                                  const Spacer(),
+                                  Visibility(
+                                      visible: state.currentParticipant == null
+                                          ? false
+                                          : state.currentParticipant!.online,
+                                      child: CallButtonShape(
+                                        image: imageSVGAsset('icon_phone')
+                                            as Widget,
+                                        bgColor: ColorConstants.kGray600,
+                                        onClickAction: () async {
+                                          await context
+                                              .read<ChatCubit>()
+                                              .makeCall(
                                                   state.currentParticipant!.id);
 
-                                              // await context.read<ChatCubit>().rejectCall();
-                                            },
-                                          )),
-                                      IconButton(
-                                        icon: const Icon(Icons.person_add,
-                                            color: ColorConstants.kSecondaryColor),
-                                        onPressed: () async {
-                                          showDialog(
-                                            context: context,
-                                            builder: (BuildContext context) =>
-                                                AddParticipantsDialog(
-                                                  users: state.users!,
-                                                  onAddParticipants:
-                                                      (selectedUsers) async {
-                                                    final participantIds = selectedUsers
-                                                        .map((user) =>
-                                                        int.parse(user.id))
-                                                        .toList();
+                                          // await context.read<ChatCubit>().rejectCall();
+                                        },
+                                      )),
+                                  IconButton(
+                                    icon: const Icon(Icons.person_add,
+                                        color: ColorConstants.kSecondaryColor),
+                                    onPressed: () async {
+                                      showDialog(
+                                        context: context,
+                                        builder: (BuildContext context) =>
+                                            AddParticipantsDialog(
+                                          users: state.users!,
+                                          onAddParticipants:
+                                              (selectedUsers) async {
+                                            final participantIds = selectedUsers
+                                                .map((user) =>
+                                                    int.parse(user.id))
+                                                .toList();
 
-                                                    state.chatDetails!.isGroup
-                                                        ? await getIt
-                                                        .get<ChatCubit>()
-                                                        .chatUseCases
-                                                        .addUserToGroup(
+                                            state.chatDetails!.isGroup
+                                                ? await getIt
+                                                    .get<ChatCubit>()
+                                                    .chatUseCases
+                                                    .addUserToGroup(
                                                         state.chatDetails!
                                                             .chatId!,
                                                         state.chatDetails!
                                                             .authUser.id,
                                                         participantIds)
-                                                        : await getIt
-                                                        .get<ChatCubit>()
-                                                        .chatUseCases
-                                                        .sendMessageToChatStream(
+                                                : await getIt
+                                                    .get<ChatCubit>()
+                                                    .chatUseCases
+                                                    .sendMessageToChatStream(
                                                         senderId: state
                                                             .chatDetails!
                                                             .authUser
                                                             .id,
                                                         participantIds:
-                                                        participantIds);
-                                                  },
-                                                  context: context,
-                                                ),
-                                          );
-                                        },
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                                const Divider(),
-                                Expanded(
-                                  child: Stack(
-                                    children: [
-                                      DropzoneView(
-                                        onCreated: (ctrl) => controller = ctrl,
-                                        onDrop: onFileDropped,
-                                      ),
-                                      Container(
-                                        child: !state.isLoading
-                                            ? ChatDetailsWidget(state)
-                                            : const Center(
-                                          child: CircularProgressIndicator(),
+                                                            participantIds);
+                                          },
+                                          context: context,
                                         ),
-                                      )
-                                    ],
-                                  ),
-                                ),
-                                const SizedBox(
-                                  height: 5,
-                                ),
-                                Row(
-                                  children: [
-                                    Expanded(
-                                      child: TextField(
-                                        textInputAction: TextInputAction.go,
-                                        focusNode: messageFocusNode,
-                                        onSubmitted: (value) async {
-                                          sendMessage();
-                                        },
-                                        controller: messageFieldController,
-                                        decoration: InputDecoration(
-                                            hintText: "Send a message",
-                                            suffixIcon: IconButton(
-                                              onPressed: () async {
-                                                sendMessage();
-                                              },
-                                              icon: imageSVGAsset('icon_send')
-                                              as Widget,
-                                            )),
-                                      ),
-                                    ),
-                                    IconButton(
-                                      onPressed: () async {
-                                        await context
-                                            .read<ChatCubit>()
-                                            .chooseFile();
-                                      },
-                                      icon: imageSVGAsset('three_dots') as Widget,
-                                    )
-                                  ],
-                                ),
-                              ],
-                            );
-                          }
-                          return Row(
-                            crossAxisAlignment: CrossAxisAlignment.center,
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              const SizedBox(
-                                width: 10,
-                              ),
-                              UserImage.large(user!.imageUrl),
-                              const SizedBox(
-                                width: 10,
-                              ),
-                              Column(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Text(
-                                    'Welcome!',
-                                    textAlign: TextAlign.center,
-                                    style: context.textTheme.titleLarge,
-                                  ),
-                                  Text(
-                                    user.name,
-                                    textAlign: TextAlign.center,
-                                    style: context.textTheme.titleLarge,
+                                      );
+                                    },
                                   ),
                                 ],
                               ),
+                            ),
+                            const Divider(),
+                            Expanded(
+                              child: Stack(
+                                children: [
+                                  DropzoneView(
+                                    onCreated: (ctrl) => controller = ctrl,
+                                    onDrop: onFileDropped,
+                                  ),
+                                  Container(
+                                    child: !state.isLoading
+                                        ? ChatDetailsWidget(state)
+                                        : const Center(
+                                            child: CircularProgressIndicator(),
+                                          ),
+                                  )
+                                ],
+                              ),
+                            ),
+                            const SizedBox(
+                              height: 5,
+                            ),
+                            Row(
+                              children: [
+                                Expanded(
+                                  child: TextField(
+                                    textInputAction: TextInputAction.go,
+                                    focusNode: messageFocusNode,
+                                    onSubmitted: (value) async {
+                                      sendMessage();
+                                    },
+                                    controller: messageFieldController,
+                                    decoration: InputDecoration(
+                                        hintText: "Send a message",
+                                        suffixIcon: IconButton(
+                                          onPressed: () async {
+                                            sendMessage();
+                                          },
+                                          icon: imageSVGAsset('icon_send')
+                                              as Widget,
+                                        )),
+                                  ),
+                                ),
+                                IconButton(
+                                  onPressed: () async {
+                                    await context
+                                        .read<ChatCubit>()
+                                        .chooseFile();
+                                  },
+                                  icon: imageSVGAsset('three_dots') as Widget,
+                                )
+                              ],
+                            ),
+                          ],
+                        );
+                      }
+                      return Row(
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          const SizedBox(
+                            width: 10,
+                          ),
+                          UserImage.large(user!.imageUrl),
+                          const SizedBox(
+                            width: 10,
+                          ),
+                          Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                'Welcome!',
+                                textAlign: TextAlign.center,
+                                style: context.textTheme.titleLarge,
+                              ),
+                              Text(
+                                user.name,
+                                textAlign: TextAlign.center,
+                                style: context.textTheme.titleLarge,
+                              ),
                             ],
-                          );
-                        }(),
-                      ),
-                    ),
+                          ),
+                        ],
+                      );
+                    }(),
                   ),
-                ],
+                ),
               ),
             ],
-          ));
+          ),
+        ],
+      ));
     });
   }
 }
