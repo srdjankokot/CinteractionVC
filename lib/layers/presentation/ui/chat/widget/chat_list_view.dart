@@ -29,7 +29,7 @@ class _ChatsListViewState extends State<ChatsListView> {
   void didUpdateWidget(ChatsListView oldWidget) {
     super.didUpdateWidget(oldWidget);
 
-    if (widget.state.chats != oldWidget.state.chats) {
+    if (widget.state.chats!.length != oldWidget.state.chats!.length) {
       _updateSelectedChat();
     }
   }
