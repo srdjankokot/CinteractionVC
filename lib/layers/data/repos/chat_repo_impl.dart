@@ -346,7 +346,6 @@ class ChatRepoImpl extends ChatRepo {
   //   // _messagesStream.add(getUserMessages()!);
   // }
 
-
   @override
   Future<void> setCurrentParticipant(UserDto user) async {
     currentParticipant = user;
@@ -376,10 +375,22 @@ class ChatRepoImpl extends ChatRepo {
   }
 
   /////////////CHAT API FUNCTIONS/////////////////
-
   _loadChats() async {
     var response = await _api.getAllChats();
     print('Response2: $response');
+    if (response.error == null) {
+      List<ChatDto> chats = response.response ?? [];
+      // _matchParticipiantWithChat();
+
+      _chatStream.add(chats);
+    } else {
+      print('Error: ${response.error}');
+    }
+  }
+
+  @override
+  deleteChat(int id) async {
+    var response = await _api.deleteChat(id: id);
     if (response.error == null) {
       List<ChatDto> chats = response.response ?? [];
       // _matchParticipiantWithChat();
@@ -458,7 +469,6 @@ class ChatRepoImpl extends ChatRepo {
     }
   }
 
-
   @override
   Future<void> addUserOnGroupChat(
       int chatId, int userId, List<int> participantIds) async {
@@ -532,7 +542,6 @@ class ChatRepoImpl extends ChatRepo {
       );
       _chatDetailsStream.add(updatedChatDetails);
       _loadChats();
-
     } else {
       print("Error: ${response.error}");
     }

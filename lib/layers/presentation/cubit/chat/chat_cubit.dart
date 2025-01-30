@@ -117,6 +117,15 @@ class ChatCubit extends Cubit<ChatState> with BlocLoggy {
     emit(state.copyWith(currentChat: chat));
   }
 
+  Future<void> deleteChat(int id) async {
+    try {
+      final chats = await chatUseCases.deleteChat(id);
+      emit(state.copyWith(chats: chats));
+    } catch (e) {
+      print("Error fetching chat details: $e");
+    }
+  }
+
   Future<void> getChatDetails(int? chatId) async {
     try {
       final chatDetails = await chatUseCases.getChatDetails(chatId!);
@@ -177,7 +186,7 @@ class ChatCubit extends Cubit<ChatState> with BlocLoggy {
     required String messageContent,
   }) async {
     var participiansList =
-    state.chatDetails!.chatParticipants.map((data) => data.id).toList();
+        state.chatDetails!.chatParticipants.map((data) => data.id).toList();
 
     chatUseCases.sendMessageToChatStream(
       chatId: state.chatDetails?.chatId,
