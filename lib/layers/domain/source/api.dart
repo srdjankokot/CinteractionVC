@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:cinteraction_vc/layers/data/dto/meetings/meeting_dto.dart';
 import 'package:cinteraction_vc/layers/domain/entities/dashboard/dashboard_response.dart';
+import 'package:file_picker/file_picker.dart';
 
 import '../../../core/io/network/models/login_response.dart';
 import '../../data/dto/chat/chat_detail_dto.dart';
@@ -56,7 +57,8 @@ abstract class Api {
 
   Future<ApiResponse<List<UserDto>>> getCompanyUsers();
 
-  Future<ApiResponse<List<ChatDto>>> getAllChats();
+  Future<ApiResponse<List<ChatDto>>> getAllChats(
+      {required int page, required int paginate});
   Future<ApiResponse<List<ChatDto>>> deleteChat({required int id});
   Future<ApiResponse<ChatDetailsDto>> getChatById({id});
   Future<ApiResponse<ChatDetailsDto>> getChat();
@@ -76,6 +78,6 @@ abstract class Api {
     required int senderId,
     String? message,
     required List<int> participantIds,
-    List<File>? uploadedFiles,
+    List<PlatformFile>? uploadedFiles,
   });
 }

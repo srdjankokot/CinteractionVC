@@ -9,6 +9,7 @@ import 'package:cinteraction_vc/layers/domain/usecases/chat/get_chats_stream.dar
 import 'package:cinteraction_vc/layers/domain/usecases/chat/get_messages.dart';
 import 'package:cinteraction_vc/layers/domain/usecases/chat/get_participants.dart';
 import 'package:cinteraction_vc/layers/domain/usecases/chat/get_users.dart';
+import 'package:cinteraction_vc/layers/domain/usecases/chat/load_chats.dart';
 import 'package:cinteraction_vc/layers/domain/usecases/chat/message_seen.dart';
 import 'package:cinteraction_vc/layers/domain/usecases/chat/remove_user_from_group.dart';
 import 'package:cinteraction_vc/layers/domain/usecases/chat/send_chat_message_stream.dart';
@@ -36,6 +37,7 @@ class ChatUseCases {
         sendFile = SendFile(repo: repo),
         chooseFile = ChooseFile(repo: repo),
         getChatsStream = GetChatsStream(repo: repo),
+        loadChats = LoadChats(repo: repo),
         setCurrentChat = SetCurrentChat(repo: repo),
         getChatDetails = GetChatDetails(repo: repo),
         getChatDetailsByParticipiant = GetChatDetailsByParticipiant(repo: repo),
@@ -67,4 +69,5 @@ class ChatUseCases {
   RemoveUserFromGroup removeUserFromGroup;
   AddUserToGroup addUserToGroup;
   DeleteChat deleteChat;
+  LoadChats loadChats;
 }

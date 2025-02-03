@@ -5,6 +5,7 @@ import 'package:cinteraction_vc/layers/data/dto/chat/chat_detail_dto.dart';
 import 'package:cinteraction_vc/layers/data/dto/user_dto.dart';
 import 'package:cinteraction_vc/layers/domain/usecases/chat/get_chat_details.dart';
 import 'package:cinteraction_vc/layers/domain/usecases/chat/send_message.dart';
+import 'package:file_picker/file_picker.dart';
 import 'package:webrtc_interface/webrtc_interface.dart';
 
 import '../../../core/io/network/models/participant.dart';
@@ -25,8 +26,9 @@ abstract class ChatRepo {
 
   Future<void> sendMessageToChatWrapper(String? name, int? chatId,
       String? messageContent, int senderId, List<int> participantIds,
-      {List<File>? uploadedFiles});
+      {List<PlatformFile>? uploadedFiles});
   // Future<void> createGroup(String name, int senderId, List<int> participantIds,);
+  Future<void> loadChats(int page, int paginate);
   Future<void> setCurrentParticipant(UserDto user);
   Future<void> setCurrentChat(ChatDto chat);
   Future<void> getChatDetails(int id);

@@ -1,10 +1,12 @@
 import 'dart:async';
+import 'dart:io';
 import 'dart:math';
 import 'dart:typed_data';
 
 import 'package:cinteraction_vc/layers/data/dto/chat/chat_detail_dto.dart';
 import 'package:cinteraction_vc/layers/data/dto/chat/chat_dto.dart';
 import 'package:cinteraction_vc/layers/presentation/cubit/chat/chat_state.dart';
+import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:janus_client/janus_client.dart';
 
@@ -117,12 +119,21 @@ class ChatCubit extends Cubit<ChatState> with BlocLoggy {
     emit(state.copyWith(currentChat: chat));
   }
 
+  Future<void> loadChats(int page, int paginate) async {
+    try {
+      final chats = await chatUseCases.loadChats(page, paginate);
+      emit(state.copyWith(chats: chats));
+    } catch (e) {
+      print("Error loading chats: $e");
+    }
+  }
+
   Future<void> deleteChat(int id) async {
     try {
       final chats = await chatUseCases.deleteChat(id);
       emit(state.copyWith(chats: chats));
     } catch (e) {
-      print("Error fetching chat details: $e");
+      print("Error delete chat: $e");
     }
   }
 
@@ -182,18 +193,18 @@ class ChatCubit extends Cubit<ChatState> with BlocLoggy {
     chatUseCases.chooseFile();
   }
 
-  Future<void> sendChatMessage({
-    required String messageContent,
-  }) async {
+  Future<void> sendChatMessage(
+      {required String messageContent,
+      List<PlatformFile>? uploadedFiles}) async {
     var participiansList =
         state.chatDetails!.chatParticipants.map((data) => data.id).toList();
 
     chatUseCases.sendMessageToChatStream(
-      chatId: state.chatDetails?.chatId,
-      messageContent: messageContent,
-      participantIds: participiansList,
-      senderId: state.chatDetails!.authUser.id,
-    );
+        chatId: state.chatDetails?.chatId,
+        messageContent: messageContent,
+        participantIds: participiansList,
+        senderId: state.chatDetails!.authUser.id,
+        uploadedFiles: uploadedFiles);
   }
 
   void _onVideoCall(Result result) {

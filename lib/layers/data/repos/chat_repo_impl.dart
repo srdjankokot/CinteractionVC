@@ -76,7 +76,7 @@ class ChatRepoImpl extends ChatRepo {
     _session = await getIt.getAsync<JanusSession>();
     await _attachPlugin();
     _loadUsers();
-    _loadChats();
+    loadChats(1, 20);
     _setup();
   }
 
@@ -375,9 +375,9 @@ class ChatRepoImpl extends ChatRepo {
   }
 
   /////////////CHAT API FUNCTIONS/////////////////
-  _loadChats() async {
-    var response = await _api.getAllChats();
-    print('Response2: $response');
+  @override
+  loadChats(int page, int paginate) async {
+    var response = await _api.getAllChats(page: page, paginate: paginate);
     if (response.error == null) {
       List<ChatDto> chats = response.response ?? [];
       // _matchParticipiantWithChat();
@@ -510,13 +510,14 @@ class ChatRepoImpl extends ChatRepo {
   @override
   Future<void> sendMessageToChatWrapper(String? name, int? chatId,
       String? messageContent, int senderId, List<int> participantIds,
-      {List<File>? uploadedFiles}) async {
+      {List<PlatformFile>? uploadedFiles}) async {
     var response = await _api.sendMessageToChat(
       name: name,
       chatId: chatId,
       senderId: senderId,
       message: messageContent,
       participantIds: participantIds,
+      uploadedFiles: uploadedFiles,
     );
 
     if (response.error == null && response.response != null) {
@@ -541,16 +542,11 @@ class ChatRepoImpl extends ChatRepo {
         messages: [...chatDetailsDto.messages],
       );
       _chatDetailsStream.add(updatedChatDetails);
-      _loadChats();
+      loadChats(1, 20);
     } else {
       print("Error: ${response.error}");
     }
   }
-
-  // @override
-  // Future<void> createGroup(String name, int senderId, List<int> participantIds) async {
-  //     var response = await _api.crea
-  // }
 
   //////////////////////////////////////
 
@@ -560,7 +556,8 @@ class ChatRepoImpl extends ChatRepo {
 
     if (result != null) {
       PlatformFile file = result.files.first;
-      uploadImageToStorage(file.name, file.bytes);
+
+      // uploadImageToStorage(file.name, file.bytes);
     } else {
       // User canceled the picker
     }

@@ -1,3 +1,4 @@
+import 'dart:io';
 import 'dart:math';
 
 import 'package:audioplayers/audioplayers.dart';
@@ -18,6 +19,7 @@ import 'package:cinteraction_vc/layers/presentation/ui/chat/widget/editGroupDial
 import 'package:cinteraction_vc/layers/presentation/ui/chat/widget/user_list_view.dart';
 import 'package:cinteraction_vc/layers/presentation/ui/conference/widget/participant_video_widget.dart';
 import 'package:cinteraction_vc/layers/presentation/ui/chat/widget/group_dialog.dart';
+import 'package:file_picker/file_picker.dart';
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -59,16 +61,14 @@ class ChatRoomPage extends StatelessWidget {
 
       final bytes = await controller.getFileData(event);
       await context.read<ChatCubit>().sendFile(name.toString(), bytes);
-      // You can process the file bytes as needed here
     }
 
     void playIncomingCallSound() async {
-      // Play the sound
       try {
         await audioPlayer.setSource(AssetSource('discord_incoming_call.mp3'));
         audioPlayer.resume();
       } catch (e) {
-        print('Error playing sound: $e'); // Log any errors
+        print('Error playing sound: $e');
       }
     }
 
@@ -76,10 +76,11 @@ class ChatRoomPage extends StatelessWidget {
       await audioPlayer.stop();
     }
 
-    Future<void> sendMessage() async {
-      await context
-          .read<ChatCubit>()
-          .sendChatMessage(messageContent: messageFieldController.text);
+    Future<void> sendMessage({List<PlatformFile>? uploadedFiles}) async {
+      await context.read<ChatCubit>().sendChatMessage(
+            messageContent: messageFieldController.text,
+            uploadedFiles: uploadedFiles,
+          );
 
       messageFieldController.text = '';
     }
@@ -777,12 +778,23 @@ class ChatRoomPage extends StatelessWidget {
                                 ),
                                 IconButton(
                                   onPressed: () async {
-                                    await context
-                                        .read<ChatCubit>()
-                                        .chooseFile();
+                                    FilePickerResult? result =
+                                        await FilePicker.platform.pickFiles();
+                                    if (result != null) {
+                                      PlatformFile file = result.files.first;
+
+                                      print('Odabrani fajl: ${file.name}');
+
+                                      await sendMessage(uploadedFiles: [
+                                        file
+                                      ]); // Prosleđujemo PlatformFile listu
+                                    } else {
+                                      print(
+                                          'Korisnik je otkazao odabir fajla.');
+                                    }
                                   },
                                   icon: imageSVGAsset('three_dots') as Widget,
-                                )
+                                ),
                               ],
                             ),
                           ],
