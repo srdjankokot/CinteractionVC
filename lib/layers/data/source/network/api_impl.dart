@@ -9,6 +9,7 @@ import 'package:cinteraction_vc/layers/data/dto/user_dto.dart';
 import 'package:cinteraction_vc/layers/domain/entities/dashboard/dashboard_response.dart';
 import 'package:cinteraction_vc/layers/domain/source/api.dart';
 import 'package:dio/dio.dart';
+import 'package:file_picker/file_picker.dart';
 import 'package:intl/intl.dart';
 
 import '../../../../core/io/network/urls.dart';
@@ -377,10 +378,12 @@ class ApiImpl extends Api {
   }
 
   @override
-  Future<ApiResponse<List<ChatDto>>> getAllChats() async {
+  Future<ApiResponse<List<ChatDto>>> getAllChats(
+      {required int page, required int paginate}) async {
     try {
       Dio dio = await getIt.getAsync<Dio>();
-      Response response = await dio.get(Urls.getAllChats);
+      Response response =
+          await dio.get('${Urls.getAllChats}?page=$page&paginate=$paginate');
       List<ChatDto> chats = [];
       for (var chat in response.data['data']) {
         var chatDto = ChatDto.fromJson(chat as Map<String, dynamic>);
@@ -531,7 +534,7 @@ class ApiImpl extends Api {
     required int senderId,
     String? message,
     required List<int> participantIds,
-    List<File>? uploadedFiles,
+    List<PlatformFile>? uploadedFiles,
   }) async {
     Dio dio = await getIt.getAsync<Dio>();
 
@@ -553,6 +556,24 @@ class ApiImpl extends Api {
 
     if (message != null) {
       formDataMap['message'] = message;
+    }
+
+    // Dodaj fajlove kao multipart
+    if (uploadedFiles != null && uploadedFiles.isNotEmpty) {
+      List<MultipartFile> files = [];
+
+      for (var file in uploadedFiles) {
+        if (file.bytes != null) {
+          files.add(
+            MultipartFile.fromBytes(
+              file.bytes!,
+              filename: file.name,
+            ),
+          );
+        }
+      }
+
+      formDataMap['uploaded_files'] = files;
     }
 
     var formData = FormData.fromMap(formDataMap);
