@@ -25,7 +25,7 @@ import 'package:janus_client/janus_client.dart';
 
 
 //HUAWEI
-String url = "wss://cinteraction.nswebdevelopment.com:8189";
+String url = "wss://huawei.nswebdevelopment.com:8189";
 bool withCredentials = false;
 String apiSecret = "";
 
