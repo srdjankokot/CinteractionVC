@@ -1,3 +1,5 @@
+import 'dart:typed_data';
+
 class ChatParticipantDto {
   final int id;
   final String image;
@@ -34,12 +36,43 @@ class ChatParticipantDto {
   }
 }
 
+class FileDto {
+  final int id;
+  final String path;
+  final Uint8List? bytes;
+
+  FileDto({required this.id, required this.path, this.bytes});
+
+  FileDto copyWith({String? path, Uint8List? bytes}) {
+    return FileDto(
+      id: id,
+      path: path ?? this.path,
+      bytes: bytes ?? this.bytes,
+    );
+  }
+
+  factory FileDto.fromJson(Map<String, dynamic> json) => FileDto(
+        id: json['id'] as int? ?? 0,
+        path: json['path'] as String? ?? '',
+      );
+
+  Map<String, dynamic> toJson() => {
+        'id': id,
+        'path': path,
+      };
+
+  @override
+  String toString() {
+    return 'FileDto(id: $id, path: $path, bytes: ${bytes != null ? "Loaded" : "Not Loaded"})';
+  }
+}
+
 class MessageDto {
   final int? id;
   final int chatId;
   final int senderId;
   final String? message;
-  final List<String>? filePath;
+  final List<FileDto>? files;
   final String createdAt;
   final String updatedAt;
 
@@ -48,7 +81,7 @@ class MessageDto {
     required this.chatId,
     required this.senderId,
     this.message,
-    this.filePath,
+    this.files,
     required this.createdAt,
     required this.updatedAt,
   });
@@ -58,7 +91,9 @@ class MessageDto {
         chatId: json['chat_id'] as int? ?? 0,
         senderId: json['sender_id'] as int? ?? 0,
         message: json['message'] as String?,
-        filePath: List<String>.from(json['file_path'] ?? []),
+        files: (json['files'] as List<dynamic>?)
+            ?.map((file) => FileDto.fromJson(file as Map<String, dynamic>))
+            .toList(),
         createdAt: json['created_at'] as String? ?? '',
         updatedAt: json['updated_at'] as String? ?? '',
       );
@@ -68,15 +103,43 @@ class MessageDto {
         'chat_id': chatId,
         'sender_id': senderId,
         'message': message,
-        'file_path': filePath,
+        'files': files?.map((file) => file.toJson()).toList(),
         'created_at': createdAt,
         'updated_at': updatedAt,
       };
 
   @override
   String toString() {
-    return 'MessageDto(id: $id, chatId: $chatId, senderId: $senderId, message: $message, filePath: $filePath, createdAt: $createdAt, updatedAt: $updatedAt)';
+    return 'MessageDto(id: $id, chatId: $chatId, senderId: $senderId, message: $message, files: $files, createdAt: $createdAt, updatedAt: $updatedAt)';
   }
+}
+
+class ChatPaginationDto {
+  final List<MessageDto> messages;
+  final Map<String, dynamic>? links;
+  final Map<String, dynamic>? meta;
+
+  ChatPaginationDto({
+    required this.messages,
+    this.links,
+    this.meta,
+  });
+
+  factory ChatPaginationDto.fromJson(Map<String, dynamic> json) =>
+      ChatPaginationDto(
+        messages: (json['data'] as List<dynamic>)
+            .map((message) =>
+                MessageDto.fromJson(message as Map<String, dynamic>))
+            .toList(),
+        links: json['links'] as Map<String, dynamic>?,
+        meta: json['meta'] as Map<String, dynamic>?,
+      );
+
+  Map<String, dynamic> toJson() => {
+        'data': messages.map((message) => message.toJson()).toList(),
+        'links': links,
+        'meta': meta,
+      };
 }
 
 class ChatDetailsDto {
@@ -84,29 +147,27 @@ class ChatDetailsDto {
   final String? chatName;
   final ChatParticipantDto authUser;
   final List<ChatParticipantDto> chatParticipants;
-  final List<MessageDto> messages;
-  final bool isOnline;
+  final ChatPaginationDto messages;
   final bool isGroup;
 
-  ChatDetailsDto(
-      {required this.chatId,
-      required this.chatName,
-      required this.authUser,
-      required this.chatParticipants,
-      required this.messages,
-      this.isOnline = false,
-      this.isGroup = false});
+  ChatDetailsDto({
+    required this.chatId,
+    required this.chatName,
+    required this.authUser,
+    required this.chatParticipants,
+    required this.messages,
+    this.isGroup = false,
+  });
 
   factory ChatDetailsDto.fromJson(Map<String, dynamic> json) => ChatDetailsDto(
         chatId: json['chat_id'] as int?,
         chatName: json['chat_name'] as String?,
         authUser: ChatParticipantDto.fromJson(json['auth_user']),
-        chatParticipants: (json['chat_participants'] as List)
-            .map((participant) => ChatParticipantDto.fromJson(participant))
+        chatParticipants: (json['chat_participants'] as List<dynamic>)
+            .map((participant) => ChatParticipantDto.fromJson(
+                participant as Map<String, dynamic>))
             .toList(),
-        messages: (json['messages'] as List)
-            .map((message) => MessageDto.fromJson(message))
-            .toList(),
+        messages: ChatPaginationDto.fromJson(json['messages']),
         isGroup: (json['chat_group'] as bool?) ?? false,
       );
 
@@ -115,12 +176,12 @@ class ChatDetailsDto {
         'chat_name': chatName,
         'auth_user': authUser.toJson(),
         'chat_participants': chatParticipants.map((p) => p.toJson()).toList(),
-        'messages': messages.map((message) => message.toJson()).toList(),
+        'messages': messages.toJson(),
         'chat_group': isGroup,
       };
 
   @override
   String toString() {
-    return 'ChatDetailsDto(chatId: $chatId, chatName: $chatName, authUser: $authUser, chatParticipants: $chatParticipants, messages: $messages , isOnline: $isOnline, isGroup: $isGroup)';
+    return 'ChatDetailsDto(chatId: $chatId, chatName: $chatName, authUser: $authUser, chatParticipants: $chatParticipants, messages: $messages, isGroup: $isGroup)';
   }
 }

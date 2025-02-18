@@ -4,7 +4,7 @@ import 'package:cinteraction_vc/layers/presentation/cubit/chat/chat_state.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
-import '../../profile/ui/widget/user_image.dart';
+import '../../../profile/ui/widget/user_image.dart';
 import 'add_participiant_dialog.dart';
 
 class EditGroupDialog extends StatelessWidget {
@@ -23,7 +23,6 @@ class EditGroupDialog extends StatelessWidget {
       contentPadding: const EdgeInsets.all(16.0),
       content: Stack(
         children: [
-          // Glavni sadržaj dijaloga
           SingleChildScrollView(
             child: Column(
               mainAxisSize: MainAxisSize.min,
@@ -77,11 +76,20 @@ class EditGroupDialog extends StatelessWidget {
                     onTap: () async {
                       Navigator.of(context).pop();
                       await Future.delayed(Duration.zero);
+                      final currentParticipants = state
+                          .chatDetails!.chatParticipants
+                          .map((p) => p.id.toString())
+                          .toSet();
+
+                      final availableUsers = state.users!
+                          .where((user) =>
+                              !currentParticipants.contains(user.id.toString()))
+                          .toList();
                       showDialog(
                         context: context,
                         builder: (BuildContext context) =>
                             AddParticipantsDialog(
-                          users: state.users!,
+                          users: availableUsers,
                           onAddParticipants: (selectedUsers) async {
                             final participantIds = selectedUsers
                                 .map((user) => int.parse(user.id))

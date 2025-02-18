@@ -1,6 +1,6 @@
 class Urls {
   // static String baseUrl = 'https://vc.cinteraction.com';
-  static String baseUrl = 'https://cinteraction.nswebdevelopment.com';
+  static String baseUrl = 'https://huawei.nswebdevelopment.com';
   // static String baseUrl = 'https://80d0-24-135-247-244.ngrok-free.app/api';
 
   static String loginEndpoint = '$baseUrl/api/login';
@@ -48,4 +48,5 @@ class Urls {
   static String removeUserFromGroupChat =
       '$baseUrl/api/chats/remove/user/from/chat/';
   static String addUserOnGroupChat = '$baseUrl/api/chats/add/user/';
+  static String downloadMedia = '$baseUrl/api/chats/show/media/';
 }

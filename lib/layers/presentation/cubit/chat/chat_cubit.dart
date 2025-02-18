@@ -39,7 +39,7 @@ class ChatCubit extends Cubit<ChatState> with BlocLoggy {
     chatUseCases.getChatsStream().listen(_onChats);
     chatUseCases.getMessageStream().listen(_onMessages);
     chatUseCases.getChatDetailsStream().listen(_onChatDetails);
-
+    chatUseCases.getPaginationStream().listen(_onPagination);
     callUseCases.videoCallStream().listen(_onVideoCall);
     callUseCases.getLocalStream().listen(_onLocalStream);
     callUseCases.getRemoteStream().listen(_onRemoteStream);
@@ -70,6 +70,10 @@ class ChatCubit extends Cubit<ChatState> with BlocLoggy {
         numberOfParticipants: Random().nextInt(10000)));
 
     print('remote stream changed');
+  }
+
+  void _onPagination(ChatPagination pagination) {
+    emit(state.copyWith(pagination: pagination));
   }
 
   void _onParticipants(List<Participant> participants) {
@@ -119,7 +123,12 @@ class ChatCubit extends Cubit<ChatState> with BlocLoggy {
     emit(state.copyWith(currentChat: chat));
   }
 
+  Future<void> openDownloadMedia(int id, String fileName) async {
+    chatUseCases.downloadMedia(id, fileName);
+  }
+
   Future<void> loadChats(int page, int paginate) async {
+    print('CalledFunc');
     try {
       final chats = await chatUseCases.loadChats(page, paginate);
       emit(state.copyWith(chats: chats));
