@@ -9,6 +9,8 @@ import 'package:cinteraction_vc/layers/data/dto/user_dto.dart';
 import 'package:cinteraction_vc/layers/domain/entities/dashboard/dashboard_response.dart';
 import 'package:cinteraction_vc/layers/domain/source/api.dart';
 import 'package:dio/dio.dart';
+import 'package:file_picker/file_picker.dart';
+import 'dart:typed_data';
 import 'package:intl/intl.dart';
 
 import '../../../../core/io/network/urls.dart';
@@ -377,17 +379,19 @@ class ApiImpl extends Api {
   }
 
   @override
-  Future<ApiResponse<List<ChatDto>>> getAllChats() async {
+  Future<ApiResponse<ChatPagination>> getAllChats({
+    required int page,
+    required int paginate,
+  }) async {
     try {
       Dio dio = await getIt.getAsync<Dio>();
-      Response response = await dio.get(Urls.getAllChats);
-      List<ChatDto> chats = [];
-      for (var chat in response.data['data']) {
-        var chatDto = ChatDto.fromJson(chat as Map<String, dynamic>);
-        chats.add(chatDto);
-      }
+      Response response =
+          await dio.get('${Urls.getAllChats}?page=$page&paginate=$paginate');
 
-      return ApiResponse(response: chats);
+      ChatPagination chatPagination =
+          ChatPagination.fromJson(response.data as Map<String, dynamic>);
+
+      return ApiResponse(response: chatPagination);
     } on DioException catch (e) {
       return ApiResponse(error: ApiErrorDto.fromDioException(e));
     }
@@ -418,6 +422,29 @@ class ApiImpl extends Api {
       var chatDetails = ChatDetailsDto.fromJson(response.data);
 
       return ApiResponse(response: chatDetails);
+    } on DioException catch (e) {
+      return ApiResponse(error: ApiErrorDto.fromDioException(e));
+    }
+  }
+
+  @override
+  Future<ApiResponse<Uint8List>> downloadMedia({required int id}) async {
+    try {
+      Dio dio = await getIt.getAsync<Dio>();
+      Response<List<int>> response = await dio.get<List<int>>(
+        '${Urls.downloadMedia}$id',
+        options: Options(
+          responseType: ResponseType.bytes,
+        ),
+      );
+
+      print('ResponseMedia: $response');
+
+      if (response.data == null) {
+        print('There is no file!');
+      }
+
+      return ApiResponse(response: Uint8List.fromList(response.data!));
     } on DioException catch (e) {
       return ApiResponse(error: ApiErrorDto.fromDioException(e));
     }
@@ -531,7 +558,7 @@ class ApiImpl extends Api {
     required int senderId,
     String? message,
     required List<int> participantIds,
-    List<File>? uploadedFiles,
+    List<PlatformFile>? uploadedFiles,
   }) async {
     Dio dio = await getIt.getAsync<Dio>();
 
@@ -551,8 +578,24 @@ class ApiImpl extends Api {
       formDataMap['name'] = name;
     }
 
-    if (message != null) {
+    if (message != null && message.trim().isNotEmpty) {
       formDataMap['message'] = message;
+    }
+    if (uploadedFiles != null && uploadedFiles.isNotEmpty) {
+      List<MultipartFile> files = [];
+
+      for (var file in uploadedFiles) {
+        if (file.bytes != null) {
+          files.add(
+            MultipartFile.fromBytes(
+              file.bytes!,
+              filename: file.name,
+            ),
+          );
+        }
+      }
+
+      formDataMap['uploaded_files'] = files;
     }
 
     var formData = FormData.fromMap(formDataMap);
@@ -563,15 +606,20 @@ class ApiImpl extends Api {
         data: formData,
       );
 
-      if (response.data != null && response.data['messages'] != null) {
-        var messages = response.data['messages'] as List;
-        var mappedMessages =
-            messages.map((msg) => MessageDto.fromJson(msg)).toList();
-        if (mappedMessages.isNotEmpty) {
-          return ApiResponse(response: mappedMessages.first);
+      if (response.data != null &&
+          response.data['messages'] is Map<String, dynamic>) {
+        final messagesMap = response.data['messages'] as Map<String, dynamic>;
+
+        if (messagesMap.containsKey('data') && messagesMap['data'] is List) {
+          final List<MessageDto> parsedMessages = (messagesMap['data']
+                  as List<dynamic>)
+              .map((msg) => MessageDto.fromJson(msg as Map<String, dynamic>))
+              .toList();
+          if (parsedMessages.isNotEmpty) {
+            return ApiResponse(response: parsedMessages.first);
+          }
         }
       }
-
       var messageDto = MessageDto.fromJson(response.data);
       return ApiResponse(response: messageDto);
     } on DioException catch (e) {

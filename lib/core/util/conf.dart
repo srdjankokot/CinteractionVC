@@ -1,4 +1,3 @@
-
 import 'package:janus_client/janus_client.dart';
 
 // String url = 'wss://vc.cinteraction.com:8088';
@@ -23,7 +22,6 @@ import 'package:janus_client/janus_client.dart';
 //       credential: mixTurnServerCredential),
 // ];
 
-
 //HUAWEI
 String url = "wss://huawei.nswebdevelopment.com:8189";
 bool withCredentials = false;
@@ -35,16 +33,10 @@ String mixTurnServerCredential = 'test123';
 int maxPublishersDefault = 9;
 
 List<RTCIceServer> iceServers = <RTCIceServer>[
-
-  RTCIceServer(urls: 'stun:cinteraction.nswebdevelopment.com:3478', username: "", credential: ""),
-  // RTCIceServer(
-  //     urls: 'turn:test.nswebdevelopment.com:3478?transport=udp',
-  //     username: mixTurnServerUsername,
-  //     credential: mixTurnServerCredential),
-  // RTCIceServer(
-  //     urls: 'turn:test.nswebdevelopment.com:3478?transport=tcp',
-  //     username: mixTurnServerUsername,
-  //     credential: mixTurnServerCredential),
+  RTCIceServer(
+      urls: 'stun:huawei.nswebdevelopment.com:3478',
+      username: "",
+      credential: ""),
   RTCIceServer(
       urls: 'turn:huawei.nswebdevelopment.com:3478?transport=udp',
       username: mixTurnServerUsername,

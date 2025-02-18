@@ -1,14 +1,17 @@
 import 'package:cinteraction_vc/layers/domain/usecases/chat/add_user_to_group.dart';
 import 'package:cinteraction_vc/layers/domain/usecases/chat/delete_chat.dart';
 import 'package:cinteraction_vc/layers/domain/usecases/chat/delete_message.dart';
+import 'package:cinteraction_vc/layers/domain/usecases/chat/download_media.dart';
 import 'package:cinteraction_vc/layers/domain/usecases/chat/edit_message.dart';
 import 'package:cinteraction_vc/layers/domain/usecases/chat/get_chat_details.dart';
 import 'package:cinteraction_vc/layers/domain/usecases/chat/get_chat_details_by_participiant.dart';
 import 'package:cinteraction_vc/layers/domain/usecases/chat/get_chat_details_stream.dart';
 import 'package:cinteraction_vc/layers/domain/usecases/chat/get_chats_stream.dart';
 import 'package:cinteraction_vc/layers/domain/usecases/chat/get_messages.dart';
+import 'package:cinteraction_vc/layers/domain/usecases/chat/get_pagination_stream.dart';
 import 'package:cinteraction_vc/layers/domain/usecases/chat/get_participants.dart';
 import 'package:cinteraction_vc/layers/domain/usecases/chat/get_users.dart';
+import 'package:cinteraction_vc/layers/domain/usecases/chat/load_chats.dart';
 import 'package:cinteraction_vc/layers/domain/usecases/chat/message_seen.dart';
 import 'package:cinteraction_vc/layers/domain/usecases/chat/remove_user_from_group.dart';
 import 'package:cinteraction_vc/layers/domain/usecases/chat/send_chat_message_stream.dart';
@@ -36,16 +39,19 @@ class ChatUseCases {
         sendFile = SendFile(repo: repo),
         chooseFile = ChooseFile(repo: repo),
         getChatsStream = GetChatsStream(repo: repo),
+        loadChats = LoadChats(repo: repo),
         setCurrentChat = SetCurrentChat(repo: repo),
         getChatDetails = GetChatDetails(repo: repo),
         getChatDetailsByParticipiant = GetChatDetailsByParticipiant(repo: repo),
         getChatDetailsStream = GetChatDetailsStream(repo: repo),
+        getPaginationStream = GetPaginationStream(repo: repo),
         sendMessageToChatStream = SendMessageToChatStream(repo: repo),
         chatDeleteMessage = DeleteMessage(repo: repo),
         chatEditMessage = EditMessage(repo: repo),
         addUserToGroup = AddUserToGroup(repo: repo),
         removeUserFromGroup = RemoveUserFromGroup(repo: repo),
-        deleteChat = DeleteChat(repo: repo);
+        deleteChat = DeleteChat(repo: repo),
+        downloadMedia = DownloadMedia(repo: repo);
 
   ChatInitialize chatInitialize;
   SendMessage sendMessage;
@@ -67,4 +73,7 @@ class ChatUseCases {
   RemoveUserFromGroup removeUserFromGroup;
   AddUserToGroup addUserToGroup;
   DeleteChat deleteChat;
+  LoadChats loadChats;
+  GetPaginationStream getPaginationStream;
+  DownloadMedia downloadMedia;
 }

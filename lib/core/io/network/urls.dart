@@ -48,4 +48,5 @@ class Urls {
   static String removeUserFromGroupChat =
       '$baseUrl/api/chats/remove/user/from/chat/';
   static String addUserOnGroupChat = '$baseUrl/api/chats/add/user/';
+  static String downloadMedia = '$baseUrl/api/chats/show/media/';
 }

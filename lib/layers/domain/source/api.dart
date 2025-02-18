@@ -1,7 +1,9 @@
 import 'dart:io';
+import 'dart:typed_data';
 
 import 'package:cinteraction_vc/layers/data/dto/meetings/meeting_dto.dart';
 import 'package:cinteraction_vc/layers/domain/entities/dashboard/dashboard_response.dart';
+import 'package:file_picker/file_picker.dart';
 
 import '../../../core/io/network/models/login_response.dart';
 import '../../data/dto/chat/chat_detail_dto.dart';
@@ -56,12 +58,14 @@ abstract class Api {
 
   Future<ApiResponse<List<UserDto>>> getCompanyUsers();
 
-  Future<ApiResponse<List<ChatDto>>> getAllChats();
+  Future<ApiResponse<ChatPagination>> getAllChats(
+      {required int page, required int paginate});
   Future<ApiResponse<List<ChatDto>>> deleteChat({required int id});
   Future<ApiResponse<ChatDetailsDto>> getChatById({id});
   Future<ApiResponse<ChatDetailsDto>> getChat();
   Future<ApiResponse<ChatDetailsDto>> getChatByParticipiant({required id});
   Future<ApiResponse<ChatDetailsDto>> deleteMessageById({required int id});
+  Future<ApiResponse<Uint8List>> downloadMedia({required int id});
   Future<ApiResponse<ChatDetailsDto>> editMessageById(
       {required int id, required String message});
   Future<ApiResponse<ChatDetailsDto>> removeUserFromGroupChat(
@@ -76,6 +80,6 @@ abstract class Api {
     required int senderId,
     String? message,
     required List<int> participantIds,
-    List<File>? uploadedFiles,
+    List<PlatformFile>? uploadedFiles,
   });
 }

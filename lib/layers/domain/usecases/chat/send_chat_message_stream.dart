@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:cinteraction_vc/layers/data/dto/chat/chat_detail_dto.dart';
+import 'package:file_picker/file_picker.dart';
 
 import '../../repos/chat_repo.dart';
 
@@ -15,7 +16,7 @@ class SendMessageToChatStream {
     String? messageContent,
     required int senderId,
     required List<int> participantIds,
-    List<File>? uploadedFiles,
+    List<PlatformFile>? uploadedFiles,
   }) {
     return repo.sendMessageToChatWrapper(
       name,
