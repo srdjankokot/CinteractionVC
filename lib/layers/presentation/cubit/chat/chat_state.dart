@@ -20,6 +20,7 @@ class ChatState extends Equatable {
   final List<UserDto>? users;
   final List<ChatMessage>? messages;
   final List<ChatDto>? chats;
+  final ChatPagination? pagination;
   final ChatDetailsDto? chatDetails;
   final LastMessageDto? lastMessage;
 
@@ -52,6 +53,7 @@ class ChatState extends Equatable {
     this.chats,
     this.lastMessage,
     this.chatDetails,
+    this.pagination,
     required this.audioMuted,
     required this.videoMuted,
     required this.listType,
@@ -98,6 +100,7 @@ class ChatState extends Equatable {
         videoMuted,
         listType,
         chatDetails,
+        pagination,
       ];
 
   ChatState copyWith({
@@ -121,6 +124,7 @@ class ChatState extends Equatable {
     bool? audioMuted,
     bool? videoMuted,
     ListType? listType,
+    ChatPagination? pagination,
   }) {
     return ChatState(
       isLoading: isLoading ?? this.isLoading,
@@ -143,6 +147,7 @@ class ChatState extends Equatable {
       videoMuted: videoMuted ?? this.videoMuted,
       listType: listType ?? this.listType,
       chatDetails: chatDetails ?? this.chatDetails,
+      pagination: pagination ?? this.pagination,
     );
   }
 
@@ -154,6 +159,7 @@ class ChatState extends Equatable {
       users: users,
       messages: messages,
       chats: chats,
+      pagination: pagination,
       lastMessage: lastMessage,
       participants: participants,
       unreadMessages: unreadMessages,

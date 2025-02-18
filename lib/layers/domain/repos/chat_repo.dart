@@ -5,6 +5,7 @@ import 'package:cinteraction_vc/layers/data/dto/chat/chat_detail_dto.dart';
 import 'package:cinteraction_vc/layers/data/dto/user_dto.dart';
 import 'package:cinteraction_vc/layers/domain/usecases/chat/get_chat_details.dart';
 import 'package:cinteraction_vc/layers/domain/usecases/chat/send_message.dart';
+import 'package:file_picker/file_picker.dart';
 import 'package:webrtc_interface/webrtc_interface.dart';
 
 import '../../../core/io/network/models/participant.dart';
@@ -22,11 +23,13 @@ abstract class ChatRepo {
   Stream<List<ChatDto>> getChatsStream();
   Stream<List<ChatMessage>> getMessageStream();
   Stream<ChatDetailsDto> getChatDetailsStream();
+  Stream<ChatPagination> getPaginationStream();
 
   Future<void> sendMessageToChatWrapper(String? name, int? chatId,
       String? messageContent, int senderId, List<int> participantIds,
-      {List<File>? uploadedFiles});
+      {List<PlatformFile>? uploadedFiles});
   // Future<void> createGroup(String name, int senderId, List<int> participantIds,);
+  Future<void> loadChats(int page, int paginate);
   Future<void> setCurrentParticipant(UserDto user);
   Future<void> setCurrentChat(ChatDto chat);
   Future<void> getChatDetails(int id);
@@ -35,6 +38,7 @@ abstract class ChatRepo {
   Future<void> deleteMessage(int id);
   Future<void> editMessage(int id, String message);
   Future<void> removeUserFromGroup(int chatId, int userId);
+  Future<void> openDownloadedMedia(int id, String fileName);
   Future<void> addUserOnGroupChat(
       int chatId, int userId, List<int> participantIds);
   Future<void> messageSeen(int index);
