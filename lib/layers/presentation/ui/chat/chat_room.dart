@@ -13,16 +13,19 @@ import 'package:cinteraction_vc/layers/data/dto/user_dto.dart';
 import 'package:cinteraction_vc/layers/domain/usecases/chat/set_current_chat.dart';
 import 'package:cinteraction_vc/layers/presentation/cubit/chat/chat_cubit.dart';
 import 'package:cinteraction_vc/layers/presentation/cubit/chat/chat_state.dart';
-import 'package:cinteraction_vc/layers/presentation/ui/chat/widget/add_participiant_dialog.dart';
+import 'package:cinteraction_vc/layers/presentation/ui/chat/widget/chat_dropzone.dart';
+import 'package:cinteraction_vc/layers/presentation/ui/chat/widget/dialogs/add_participiant_dialog.dart';
 import 'package:cinteraction_vc/layers/presentation/ui/chat/widget/chat_details_widget.dart';
-import 'package:cinteraction_vc/layers/presentation/ui/chat/widget/editGroupDialog.dart';
+import 'package:cinteraction_vc/layers/presentation/ui/chat/widget/dialogs/editGroupDialog.dart';
 import 'package:cinteraction_vc/layers/presentation/ui/chat/widget/user_list_view.dart';
 import 'package:cinteraction_vc/layers/presentation/ui/conference/widget/participant_video_widget.dart';
-import 'package:cinteraction_vc/layers/presentation/ui/chat/widget/group_dialog.dart';
+import 'package:cinteraction_vc/layers/presentation/ui/chat/widget/dialogs/group_dialog.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_dropzone/flutter_dropzone.dart';
 import 'package:go_router/go_router.dart';
@@ -60,7 +63,9 @@ class ChatRoomPage extends StatelessWidget {
       print(name);
 
       final bytes = await controller.getFileData(event);
-      await context.read<ChatCubit>().sendFile(name.toString(), bytes);
+
+      print(bytes);
+      // await context.read<ChatCubit>().sendFile(name.toString(), bytes);
     }
 
     void playIncomingCallSound() async {
@@ -83,6 +88,41 @@ class ChatRoomPage extends StatelessWidget {
           );
 
       messageFieldController.text = '';
+    }
+
+    Future<void> pickAndSendFile() async {
+      FilePickerResult? result = await FilePicker.platform.pickFiles(
+        withData: kIsWeb,
+      );
+
+      if (result != null) {
+        PlatformFile file = result.files.first;
+
+        Uint8List? fileBytes;
+
+        if (kIsWeb) {
+          fileBytes = file.bytes;
+        } else if (file.bytes != null) {
+          fileBytes = file.bytes;
+        } else if (file.path != null) {
+          File selectedFile = File(file.path!);
+          fileBytes = await selectedFile.readAsBytes();
+        }
+
+        if (fileBytes != null) {
+          PlatformFile fileWithBytes = PlatformFile(
+            name: file.name,
+            size: fileBytes.length,
+            bytes: fileBytes,
+          );
+
+          await sendMessage(uploadedFiles: [fileWithBytes]);
+        } else {
+          print('Error: Bites not readed.');
+        }
+      } else {
+        print('User cancel choose file');
+      }
     }
 
     AlertDialog? callDialog;
@@ -620,16 +660,10 @@ class ChatRoomPage extends StatelessWidget {
                                                         context, state);
                                                   },
                                                   child: Row(children: [
-                                                    Container(
-                                                        width: 20.0,
-                                                        height: 20.0,
-                                                        child: Text(state
-                                                            .chatDetails!
-                                                            .chatParticipants
-                                                            .length
-                                                            .toString())),
-
-                                                    // const SizedBox(width: 3.0),
+                                                    Text(state.chatDetails!
+                                                        .chatParticipants.length
+                                                        .toString()),
+                                                    const SizedBox(width: 3.0),
                                                     const Text('participiants'),
                                                   ]),
                                                 ),
@@ -693,11 +727,20 @@ class ChatRoomPage extends StatelessWidget {
                                     icon: const Icon(Icons.person_add,
                                         color: ColorConstants.kSecondaryColor),
                                     onPressed: () async {
+                                      final currentParticipants = state
+                                          .chatDetails!.chatParticipants
+                                          .map((p) => p.id.toString())
+                                          .toSet();
+
+                                      final availableUsers = state.users!
+                                          .where((user) => !currentParticipants
+                                              .contains(user.id.toString()))
+                                          .toList();
                                       showDialog(
                                         context: context,
                                         builder: (BuildContext context) =>
                                             AddParticipantsDialog(
-                                          users: state.users!,
+                                          users: availableUsers,
                                           onAddParticipants:
                                               (selectedUsers) async {
                                             final participantIds = selectedUsers
@@ -740,14 +783,17 @@ class ChatRoomPage extends StatelessWidget {
                                 children: [
                                   DropzoneView(
                                     onCreated: (ctrl) => controller = ctrl,
-                                    onDrop: onFileDropped,
+                                    onDropFile: onFileDropped,
+                                    onHover: () => print('eeeeeeeeeeeee'),
                                   ),
-                                  Container(
-                                    child: !state.isLoading
-                                        ? ChatDetailsWidget(state)
-                                        : const Center(
-                                            child: CircularProgressIndicator(),
-                                          ),
+                                  ChatDropzone(
+                                    child: Container(
+                                      child: !state.isLoading
+                                          ? ChatDetailsWidget(state)
+                                          : const Center(
+                                              child:
+                                                  CircularProgressIndicator()),
+                                    ),
                                   )
                                 ],
                               ),
@@ -778,20 +824,7 @@ class ChatRoomPage extends StatelessWidget {
                                 ),
                                 IconButton(
                                   onPressed: () async {
-                                    FilePickerResult? result =
-                                        await FilePicker.platform.pickFiles();
-                                    if (result != null) {
-                                      PlatformFile file = result.files.first;
-
-                                      print('Odabrani fajl: ${file.name}');
-
-                                      await sendMessage(uploadedFiles: [
-                                        file
-                                      ]); // Prosleđujemo PlatformFile listu
-                                    } else {
-                                      print(
-                                          'Korisnik je otkazao odabir fajla.');
-                                    }
+                                    await pickAndSendFile();
                                   },
                                   icon: imageSVGAsset('three_dots') as Widget,
                                 ),

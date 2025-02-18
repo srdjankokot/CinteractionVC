@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:io';
 import 'dart:math';
+// import 'dart:html' as html;
 
 import 'package:cinteraction_vc/layers/data/dto/chat/chat_detail_dto.dart';
 import 'package:cinteraction_vc/layers/data/dto/chat/chat_dto.dart';
@@ -12,7 +13,7 @@ import 'package:flutter/foundation.dart';
 import 'package:janus_client/janus_client.dart';
 import 'package:logging/logging.dart';
 import 'package:webrtc_interface/webrtc_interface.dart';
-
+import 'dart:convert';
 import '../../../core/app/injector.dart';
 import '../../../core/io/network/models/participant.dart';
 import '../../../core/util/util.dart';
@@ -21,7 +22,7 @@ import '../../domain/entities/user.dart';
 import '../../domain/source/api.dart';
 import '../dto/chat/last_message_dto.dart';
 import '../source/local/local_storage.dart';
-
+import 'package:open_file/open_file.dart';
 import '../../../core/util//conf.dart';
 
 import 'package:firebase_storage/firebase_storage.dart';
@@ -56,6 +57,8 @@ class ChatRepoImpl extends ChatRepo {
   final _chatStream = StreamController<List<ChatDto>>.broadcast();
 
   final _chatDetailsStream = StreamController<ChatDetailsDto>.broadcast();
+
+  final _paginationStream = StreamController<ChatPagination>.broadcast();
 
   final _chatMessagesStream = StreamController<List<MessageDto>>.broadcast();
 
@@ -98,6 +101,11 @@ class ChatRepoImpl extends ChatRepo {
   @override
   Stream<ChatDetailsDto> getChatDetailsStream() {
     return _chatDetailsStream.stream;
+  }
+
+  @override
+  Stream<ChatPagination> getPaginationStream() {
+    return _paginationStream.stream;
   }
 
   @override
@@ -218,12 +226,30 @@ class ChatRepoImpl extends ChatRepo {
           var senderId = int.parse(data['from']);
 
           if (initChat != null) {
-            chatDetailsDto.messages.add(MessageDto(
-                chatId: chatDetailsDto.chatId!,
-                senderId: senderId,
-                createdAt: data['date'],
-                message: data['text'],
-                updatedAt: data['date']));
+            final newMessage = MessageDto(
+              chatId: chatDetailsDto.chatId!,
+              senderId: senderId,
+              createdAt: data['date'],
+              message: data['text'],
+              updatedAt: data['date'],
+            );
+
+            final updatedMessages = ChatPaginationDto(
+              messages: [
+                ...chatDetailsDto.messages.messages,
+                newMessage,
+              ],
+              links: chatDetailsDto.messages.links,
+              meta: chatDetailsDto.messages.meta,
+            );
+
+            chatDetailsDto = ChatDetailsDto(
+              chatName: chatDetailsDto.chatName,
+              authUser: chatDetailsDto.authUser,
+              chatId: chatDetailsDto.chatId,
+              chatParticipants: chatDetailsDto.chatParticipants,
+              messages: updatedMessages,
+            );
           }
           _chatDetailsStream.add(chatDetailsDto);
 
@@ -368,6 +394,37 @@ class ChatRepoImpl extends ChatRepo {
     _matchParticipantWithUser();
   }
 
+  // void _updateChatWithDownloadedImage(int fileId, Uint8List imageBytes) {
+  //   if (chatDetailsDto == null) return;
+  //   FileDto newFile = FileDto(
+  //     id: fileId,
+  //     path: "data:image/jpeg;base64,${base64Encode(imageBytes)}",
+  //   );
+
+  //   MessageDto newMessage = MessageDto(
+  //     chatId: chatDetailsDto.chatId!,
+  //     senderId: chatDetailsDto.authUser.id,
+  //     message: null,
+  //     files: [newFile],
+  //     createdAt: DateTime.now().toIso8601String(),
+  //     updatedAt: DateTime.now().toIso8601String(),
+  //   );
+
+  //   final updatedChatDetails = ChatDetailsDto(
+  //     chatName: chatDetailsDto.chatName,
+  //     authUser: chatDetailsDto.authUser,
+  //     chatId: chatDetailsDto.chatId,
+  //     chatParticipants: chatDetailsDto.chatParticipants,
+  //     messages: ChatPaginationDto(
+  //       messages: [...chatDetailsDto.messages.messages, newMessage],
+  //       links: chatDetailsDto.messages.links,
+  //       meta: chatDetailsDto.messages.meta,
+  //     ),
+  //   );
+
+  //   _chatDetailsStream.add(updatedChatDetails);
+  // }
+
   _loadUsers() async {
     var response = await _api.getCompanyUsers();
     users = response.response!.where((element) => element.id != myId).toList();
@@ -375,14 +432,31 @@ class ChatRepoImpl extends ChatRepo {
   }
 
   /////////////CHAT API FUNCTIONS/////////////////
+  Set<int> _loadedChatIds = {};
+  List<ChatDto> _allChats = [];
+
   @override
   loadChats(int page, int paginate) async {
     var response = await _api.getAllChats(page: page, paginate: paginate);
-    if (response.error == null) {
-      List<ChatDto> chats = response.response ?? [];
-      // _matchParticipiantWithChat();
 
-      _chatStream.add(chats);
+    if (response.error == null) {
+      ChatPagination pagination = response.response!;
+      List<ChatDto> newChats = pagination.chats;
+
+      if (page == 1) {
+        _allChats.clear();
+        _loadedChatIds.clear();
+      }
+
+      for (var chat in newChats) {
+        if (!_loadedChatIds.contains(chat.id)) {
+          _allChats.add(chat);
+          _loadedChatIds.add(chat.id);
+        }
+      }
+
+      _chatStream.add(List.from(_allChats));
+      _paginationStream.add(pagination);
     } else {
       print('Error: ${response.error}');
     }
@@ -428,8 +502,8 @@ class ChatRepoImpl extends ChatRepo {
     try {
       var response = await _api.getChatByParticipiant(id: id);
       if (response.error == null && response.response != null) {
-        chatDetailsDto = response.response!;
         _chatDetailsStream.add(response.response!);
+        chatDetailsDto = response.response!;
       } else {
         print("Errors: ${response.error}");
       }
@@ -451,6 +525,61 @@ class ChatRepoImpl extends ChatRepo {
       }
     } catch (e) {
       print("Error while delete message: $e");
+    }
+  }
+
+  Future<void> openDownloadedMedia(int id, String fileName) async {
+    try {
+      var response = await _api.downloadMedia(id: id);
+
+      if (response.error == null) {
+        Uint8List fileBytes = response.response!;
+
+        if (fileBytes.isEmpty) {
+          print("❌ Greška: Bajtovi fajla su prazni!");
+          return;
+        }
+
+        if (kIsWeb) {
+          final updatedMessages =
+              chatDetailsDto.messages.messages.map((message) {
+            final updatedFiles = message.files?.map((file) {
+              if (file.id == id) {
+                return FileDto(id: file.id, path: file.path, bytes: fileBytes);
+              }
+              return file;
+            }).toList();
+
+            return MessageDto(
+              id: message.id,
+              chatId: message.chatId,
+              senderId: message.senderId,
+              message: message.message,
+              files: updatedFiles,
+              createdAt: message.createdAt,
+              updatedAt: message.updatedAt,
+            );
+          }).toList();
+
+          final updatedChatDetails = ChatDetailsDto(
+            chatId: chatDetailsDto.chatId,
+            chatName: chatDetailsDto.chatName,
+            authUser: chatDetailsDto.authUser,
+            chatParticipants: chatDetailsDto.chatParticipants,
+            messages: ChatPaginationDto(
+              messages: updatedMessages ?? chatDetailsDto.messages.messages,
+              links: chatDetailsDto.messages.links,
+              meta: chatDetailsDto.messages.meta,
+            ),
+          );
+
+          _chatDetailsStream.add(updatedChatDetails);
+        }
+      } else {
+        print("❌ Greška pri preuzimanju: ${response.error}");
+      }
+    } catch (e) {
+      print("🚨 Exception in openDownloadedMedia: $e");
     }
   }
 
@@ -521,26 +650,34 @@ class ChatRepoImpl extends ChatRepo {
     );
 
     if (response.error == null && response.response != null) {
-      ////This is used only for first message in users list////
       List<String> participants =
           participantIds.map((int value) => value.toString()).toList();
       sendMessage(messageContent, participants);
-
-      chatDetailsDto.messages.add(MessageDto(
+      chatDetailsDto.messages.messages.add(MessageDto(
         chatId: response.response!.chatId,
         createdAt: DateTime.now().toIso8601String(),
         message: response.response!.message,
         senderId: response.response!.senderId,
         updatedAt: DateTime.now().toIso8601String(),
         id: response.response!.id,
+        files: response.response!.files is List<Map<String, dynamic>>
+            ? (response.response!.files as List<Map<String, dynamic>>)
+                .map((file) => FileDto.fromJson(file))
+                .toList()
+            : response.response!.files,
       ));
       final updatedChatDetails = ChatDetailsDto(
         chatName: chatDetailsDto.chatName,
         authUser: chatDetailsDto.authUser,
         chatId: response.response!.chatId,
         chatParticipants: chatDetailsDto.chatParticipants,
-        messages: [...chatDetailsDto.messages],
+        messages: ChatPaginationDto(
+          messages: [...chatDetailsDto.messages.messages],
+          links: chatDetailsDto.messages.links,
+          meta: chatDetailsDto.messages.meta,
+        ),
       );
+
       _chatDetailsStream.add(updatedChatDetails);
       loadChats(1, 20);
     } else {

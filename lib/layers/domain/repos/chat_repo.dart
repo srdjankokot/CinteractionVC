@@ -23,6 +23,7 @@ abstract class ChatRepo {
   Stream<List<ChatDto>> getChatsStream();
   Stream<List<ChatMessage>> getMessageStream();
   Stream<ChatDetailsDto> getChatDetailsStream();
+  Stream<ChatPagination> getPaginationStream();
 
   Future<void> sendMessageToChatWrapper(String? name, int? chatId,
       String? messageContent, int senderId, List<int> participantIds,
@@ -37,6 +38,7 @@ abstract class ChatRepo {
   Future<void> deleteMessage(int id);
   Future<void> editMessage(int id, String message);
   Future<void> removeUserFromGroup(int chatId, int userId);
+  Future<void> openDownloadedMedia(int id, String fileName);
   Future<void> addUserOnGroupChat(
       int chatId, int userId, List<int> participantIds);
   Future<void> messageSeen(int index);
