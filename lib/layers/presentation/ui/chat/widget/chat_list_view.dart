@@ -1,4 +1,5 @@
 import 'package:cinteraction_vc/core/extension/context.dart';
+import 'package:cinteraction_vc/layers/data/dto/chat/chat_dto.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
@@ -40,9 +41,28 @@ class _ChatsListViewState extends State<ChatsListView> {
 
   void _updateSelectedChat() {
     if (widget.state.chats != null && widget.state.chats!.isNotEmpty) {
+      List<ChatDto> sortedChats = List.from(widget.state.chats!)
+        ..sort((a, b) {
+          bool aIsNewGroup = a.lastMessage == null;
+          bool bIsNewGroup = b.lastMessage == null;
+
+          if (aIsNewGroup && !bIsNewGroup) return -1;
+          if (!aIsNewGroup && bIsNewGroup) return 1;
+
+          DateTime? aTime = a.lastMessage?.createdAt;
+          DateTime? bTime = b.lastMessage?.createdAt;
+
+          if (aTime == null && bTime == null) return 0;
+          if (aTime == null) return 1;
+          if (bTime == null) return -1;
+
+          return bTime.compareTo(aTime);
+        });
+
       setState(() {
-        selectedChat = widget.state.chats!.first.id;
+        selectedChat = sortedChats.first.id;
       });
+
       WidgetsBinding.instance.addPostFrameCallback((_) {
         context.read<ChatCubit>().getChatDetails(selectedChat);
       });
@@ -101,6 +121,17 @@ class _ChatsListViewState extends State<ChatsListView> {
 
   @override
   Widget build(BuildContext context) {
+    List<ChatDto> sortedChats = List.from(widget.state.chats!)
+      ..sort((a, b) {
+        DateTime? aTime = a.lastMessage?.createdAt;
+        DateTime? bTime = b.lastMessage?.createdAt;
+
+        if (aTime == null && bTime == null) return 0;
+        if (aTime == null) return 1;
+        if (bTime == null) return -1;
+
+        return bTime.compareTo(aTime);
+      });
     return widget.state.chats == null || widget.state.chats!.isEmpty
         ? Center(
             child: Text(
@@ -111,14 +142,14 @@ class _ChatsListViewState extends State<ChatsListView> {
           )
         : ListView.builder(
             controller: _scrollController,
-            itemCount: widget.state.chats!.length +
+            itemCount: sortedChats.length +
                 ((isLoading && widget.state.pagination?.nextPageUrl != null)
                     ? 1
                     : 0),
             padding: const EdgeInsets.only(bottom: 100),
             itemBuilder: (context, index) {
-              if (index < widget.state.chats!.length) {
-                var chat = widget.state.chats![index];
+              if (index < sortedChats.length) {
+                var chat = sortedChats[index];
                 bool isSelected = chat.id == selectedChat;
 
                 return MouseRegion(
@@ -129,7 +160,6 @@ class _ChatsListViewState extends State<ChatsListView> {
                         selectedChat = chat.id;
                       });
                       await context.read<ChatCubit>().getChatDetails(chat.id);
-                      print('lastMessage: ${chat.lastMessage!.filePath}');
                     },
                     child: Container(
                       decoration: BoxDecoration(
@@ -201,19 +231,16 @@ class _ChatsListViewState extends State<ChatsListView> {
                   ),
                 );
               } else {
-                // Dodaj spinner na kraju liste ako se učitavaju novi podaci
                 return Padding(
                   padding: const EdgeInsets.symmetric(vertical: 16.0),
                   child: Center(
                     child: Container(
                       width: 50,
                       height: 50,
-                      // color: Colors.red, // TEST: Prikazuje crveni kvadrat
                       child: CircularProgressIndicator(),
                     ),
                   ),
                 );
-// Prazan prostor ako nije loading
               }
             },
           );

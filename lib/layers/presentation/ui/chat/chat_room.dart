@@ -59,13 +59,9 @@ class ChatRoomPage extends StatelessWidget {
 
     Future<void> onFileDropped(dynamic event) async {
       final name = await controller.getFilename(event);
-
-      print(name);
-
       final bytes = await controller.getFileData(event);
 
-      print(bytes);
-      // await context.read<ChatCubit>().sendFile(name.toString(), bytes);
+      await context.read<ChatCubit>().sendFile(name.toString(), bytes);
     }
 
     void playIncomingCallSound() async {
@@ -82,12 +78,14 @@ class ChatRoomPage extends StatelessWidget {
     }
 
     Future<void> sendMessage({List<PlatformFile>? uploadedFiles}) async {
+      if (messageFieldController.text.trim().isEmpty) return;
       await context.read<ChatCubit>().sendChatMessage(
             messageContent: messageFieldController.text,
             uploadedFiles: uploadedFiles,
           );
 
-      messageFieldController.text = '';
+      messageFieldController.clear();
+      messageFocusNode.requestFocus();
     }
 
     Future<void> pickAndSendFile() async {
@@ -804,14 +802,25 @@ class ChatRoomPage extends StatelessWidget {
                             Row(
                               children: [
                                 Expanded(
-                                  child: TextField(
-                                    textInputAction: TextInputAction.go,
-                                    focusNode: messageFocusNode,
-                                    onSubmitted: (value) async {
-                                      sendMessage();
+                                  child: KeyboardListener(
+                                    focusNode: FocusNode(),
+                                    onKeyEvent: (KeyEvent event) {
+                                      if (event is KeyDownEvent &&
+                                          event.logicalKey ==
+                                              LogicalKeyboardKey.enter) {
+                                        if (!HardwareKeyboard
+                                            .instance.isShiftPressed) {
+                                          sendMessage();
+                                        }
+                                      }
                                     },
-                                    controller: messageFieldController,
-                                    decoration: InputDecoration(
+                                    child: TextField(
+                                      textInputAction: TextInputAction.newline,
+                                      focusNode: messageFocusNode,
+                                      controller: messageFieldController,
+                                      keyboardType: TextInputType.multiline,
+                                      maxLines: null,
+                                      decoration: InputDecoration(
                                         hintText: "Send a message",
                                         suffixIcon: IconButton(
                                           onPressed: () async {
@@ -819,7 +828,9 @@ class ChatRoomPage extends StatelessWidget {
                                           },
                                           icon: imageSVGAsset('icon_send')
                                               as Widget,
-                                        )),
+                                        ),
+                                      ),
+                                    ),
                                   ),
                                 ),
                                 IconButton(
