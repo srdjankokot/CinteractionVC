@@ -11,6 +11,8 @@ class ChatDto {
   final int lastPage;
   final String? nextPageUrl;
   final String? prevPageUrl;
+  final DateTime? createdAt; // Dodato kao nullable
+  bool isOnline;
 
   ChatDto({
     required this.id,
@@ -22,6 +24,8 @@ class ChatDto {
     this.lastPage = 1,
     this.nextPageUrl,
     this.prevPageUrl,
+    this.createdAt,
+    this.isOnline = false,
   });
 
   factory ChatDto.fromJson(Map<String, dynamic> json) => ChatDto(
@@ -29,7 +33,8 @@ class ChatDto {
         name: json['chat_name'] as String,
         userImage: json['user_image'] as String?,
         lastMessage: (json['last_message'] != null &&
-                json['last_message'] is Map<String, dynamic>)
+                json['last_message'] is Map<String, dynamic> &&
+                json['last_message'].isNotEmpty)
             ? LastMessageDto.fromJson(json['last_message'])
             : null,
         chatParticipants: json['chat_participants'] != null
@@ -37,6 +42,9 @@ class ChatDto {
                 .map((participant) => ChatParticipantDto.fromJson(participant))
                 .toList()
             : [],
+        createdAt: json['created_at'] != null
+            ? DateTime.tryParse(json['created_at'])
+            : null, // Parsiranje datuma ako postoji
         currentPage: json['meta']?['current_page'] as int? ?? 1,
         lastPage: json['meta']?['last_page'] as int? ?? 1,
         nextPageUrl: json['links']?['next'] as String?,
@@ -49,6 +57,7 @@ class ChatDto {
         'user_image': userImage,
         'last_message': lastMessage?.toJson(),
         'chat_participants': chatParticipants?.map((p) => p.toJson()).toList(),
+        'created_at': createdAt?.toIso8601String(), // Konverzija ako postoji
         'meta': {
           'current_page': currentPage,
           'last_page': lastPage,
@@ -61,7 +70,7 @@ class ChatDto {
 
   @override
   String toString() {
-    return 'ChatDto(id: $id, name: $name, userImage: $userImage, lastMessage: $lastMessage, chatParticipants: $chatParticipants, currentPage: $currentPage, lastPage: $lastPage, nextPageUrl: $nextPageUrl, prevPageUrl: $prevPageUrl)';
+    return 'ChatDto(id: $id, name: $name, userImage: $userImage, lastMessage: $lastMessage, chatParticipants: $chatParticipants, createdAt: $createdAt, currentPage: $currentPage, lastPage: $lastPage, nextPageUrl: $nextPageUrl, prevPageUrl: $prevPageUrl, isOnline: $isOnline)';
   }
 }
 

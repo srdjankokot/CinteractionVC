@@ -658,11 +658,14 @@ class ChatRoomPage extends StatelessWidget {
                                                         context, state);
                                                   },
                                                   child: Row(children: [
-                                                    Text(state.chatDetails!
-                                                        .chatParticipants.length
+                                                    Text((state
+                                                                .chatDetails!
+                                                                .chatParticipants
+                                                                .length +
+                                                            1)
                                                         .toString()),
                                                     const SizedBox(width: 3.0),
-                                                    const Text('participiants'),
+                                                    const Text('participants'),
                                                   ]),
                                                 ),
                                               ],
@@ -745,6 +748,13 @@ class ChatRoomPage extends StatelessWidget {
                                                 .map((user) =>
                                                     int.parse(user.id))
                                                 .toList();
+
+                                            if (!state.chatDetails!.isGroup) {
+                                              participantIds.add(state
+                                                  .chatDetails!
+                                                  .chatParticipants[0]
+                                                  .id);
+                                            }
 
                                             state.chatDetails!.isGroup
                                                 ? await getIt
