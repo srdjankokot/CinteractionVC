@@ -31,6 +31,7 @@ class _ChatsListViewState extends State<ChatsListView> {
     super.initState();
     _scrollController = ScrollController()..addListener(_scrollListener);
     _updateSelectedChat();
+    context.read<ChatCubit>().setCurrentChat(widget.state.chats![0]);
   }
 
   @override
@@ -156,8 +157,7 @@ class _ChatsListViewState extends State<ChatsListView> {
                         selectedChat = chat.id;
                       });
                       await context.read<ChatCubit>().getChatDetails(chat.id);
-                      print(
-                          'prtId: ${widget.state.chatDetails?.chatParticipants[0].id}');
+                      await context.read<ChatCubit>().setCurrentChat(chat);
                     },
                     child: Container(
                       decoration: BoxDecoration(
