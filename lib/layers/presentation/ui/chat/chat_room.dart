@@ -78,13 +78,12 @@ class ChatRoomPage extends StatelessWidget {
     }
 
     Future<void> sendMessage({List<PlatformFile>? uploadedFiles}) async {
-      if (messageFieldController.text.trim().isEmpty) return;
       await context.read<ChatCubit>().sendChatMessage(
             messageContent: messageFieldController.text,
             uploadedFiles: uploadedFiles,
           );
 
-      messageFieldController.clear();
+      messageFieldController.text = '';
       messageFocusNode.requestFocus();
     }
 
@@ -113,7 +112,7 @@ class ChatRoomPage extends StatelessWidget {
             size: fileBytes.length,
             bytes: fileBytes,
           );
-
+          print('fileSSSS:  $file');
           await sendMessage(uploadedFiles: [fileWithBytes]);
         } else {
           print('Error: Bites not readed.');
@@ -649,7 +648,8 @@ class ChatRoomPage extends StatelessWidget {
                                         style: titleThemeStyle
                                             .textTheme.titleLarge,
                                       ),
-                                      state.chatDetails!.isGroup
+                                      state.listType == ListType.Chats &&
+                                              state.chatDetails!.isGroup
                                           ? Row(
                                               children: [
                                                 GestureDetector(
@@ -673,17 +673,19 @@ class ChatRoomPage extends StatelessWidget {
                                           : Row(
                                               children: [
                                                 Container(
-                                                  width: 15.0,
-                                                  // Adjust the width as needed
-                                                  height: 15.0,
-                                                  // Adjust the height as needed
+                                                  width:
+                                                      15.0, // Adjust the width as needed
+                                                  height:
+                                                      15.0, // Adjust the height as needed
                                                   decoration: BoxDecoration(
-                                                    color: (state.currentParticipant ==
-                                                                null
-                                                            ? false
-                                                            : state
-                                                                .currentParticipant!
-                                                                .online)
+                                                    color: (state.listType ==
+                                                                ListType.Chats
+                                                            ? state.currentChat
+                                                                    ?.isOnline ==
+                                                                true
+                                                            : state.currentParticipant
+                                                                    ?.online ==
+                                                                true)
                                                         ? Colors.green
                                                         : Colors.amber,
                                                     shape: BoxShape.circle,
@@ -691,12 +693,14 @@ class ChatRoomPage extends StatelessWidget {
                                                 ),
                                                 const SizedBox(width: 5.0),
                                                 Text(
-                                                  (state.currentParticipant ==
-                                                              null
-                                                          ? false
-                                                          : state
-                                                              .currentParticipant!
-                                                              .online)
+                                                  (state.listType ==
+                                                              ListType.Chats
+                                                          ? state.currentChat
+                                                                  ?.isOnline ==
+                                                              true
+                                                          : state.currentParticipant
+                                                                  ?.online ==
+                                                              true)
                                                       ? "Active now"
                                                       : "Away",
                                                   style: titleThemeStyle
@@ -708,9 +712,10 @@ class ChatRoomPage extends StatelessWidget {
                                   ),
                                   const Spacer(),
                                   Visibility(
-                                      visible: state.currentParticipant == null
-                                          ? false
-                                          : state.currentParticipant!.online,
+                                      visible: state.listType == ListType.Chats
+                                          ? state.currentChat?.isOnline == true
+                                          : state.currentParticipant?.online ==
+                                              true,
                                       child: CallButtonShape(
                                         image: imageSVGAsset('icon_phone')
                                             as Widget,
@@ -812,33 +817,28 @@ class ChatRoomPage extends StatelessWidget {
                             Row(
                               children: [
                                 Expanded(
-                                  child: KeyboardListener(
-                                    focusNode: FocusNode(),
-                                    onKeyEvent: (KeyEvent event) {
-                                      if (event is KeyDownEvent &&
-                                          event.logicalKey ==
-                                              LogicalKeyboardKey.enter) {
-                                        if (!HardwareKeyboard
-                                            .instance.isShiftPressed) {
-                                          sendMessage();
-                                        }
+                                  child: TextField(
+                                    textInputAction: TextInputAction.done,
+                                    focusNode: messageFocusNode,
+                                    controller: messageFieldController,
+                                    keyboardType: TextInputType.multiline,
+                                    minLines: 1,
+                                    maxLines: 8,
+                                    onEditingComplete: () {
+                                      if (messageFieldController.text
+                                          .trim()
+                                          .isNotEmpty) {
+                                        sendMessage();
                                       }
                                     },
-                                    child: TextField(
-                                      textInputAction: TextInputAction.newline,
-                                      focusNode: messageFocusNode,
-                                      controller: messageFieldController,
-                                      keyboardType: TextInputType.multiline,
-                                      maxLines: null,
-                                      decoration: InputDecoration(
-                                        hintText: "Send a message",
-                                        suffixIcon: IconButton(
-                                          onPressed: () async {
-                                            sendMessage();
-                                          },
-                                          icon: imageSVGAsset('icon_send')
-                                              as Widget,
-                                        ),
+                                    decoration: InputDecoration(
+                                      hintText: "Send a message",
+                                      suffixIcon: IconButton(
+                                        onPressed: () async {
+                                          sendMessage();
+                                        },
+                                        icon: imageSVGAsset('icon_send')
+                                            as Widget,
                                       ),
                                     ),
                                   ),
@@ -850,7 +850,7 @@ class ChatRoomPage extends StatelessWidget {
                                   icon: imageSVGAsset('three_dots') as Widget,
                                 ),
                               ],
-                            ),
+                            )
                           ],
                         );
                       }
