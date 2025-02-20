@@ -19,6 +19,11 @@ class EditGroupDialog extends StatelessWidget {
 
   @override
   Widget build(BuildContext innerContext) {
+    final allParticipants = [
+      ...state.chatDetails!.chatParticipants,
+      state.chatDetails!.authUser,
+    ];
+
     return AlertDialog(
       contentPadding: const EdgeInsets.all(16.0),
       content: Stack(
@@ -28,7 +33,7 @@ class EditGroupDialog extends StatelessWidget {
               mainAxisSize: MainAxisSize.min,
               children: [
                 UserImage.medium(
-                    "https:\/\/ui-avatars.com\/api\/?name=G+R&color=ffffff&background=f34320"),
+                    "https://ui-avatars.com/api/?name=G+R&color=ffffff&background=f34320"),
                 const SizedBox(height: 16.0),
                 Text(
                   state.chatDetails?.chatName ?? "Group Name",
@@ -42,7 +47,7 @@ class EditGroupDialog extends StatelessWidget {
                 Align(
                   alignment: Alignment.center,
                   child: Text(
-                    "${state.chatDetails?.chatParticipants.length} participants",
+                    "${allParticipants.length} participants", // Sada uključuje authUser-a
                     style: const TextStyle(
                       fontSize: 16,
                       fontWeight: FontWeight.bold,
@@ -55,15 +60,21 @@ class EditGroupDialog extends StatelessWidget {
                   width: 500,
                   child: ListView.builder(
                     shrinkWrap: true,
-                    itemCount: state.chatDetails?.chatParticipants.length,
+                    itemCount: allParticipants.length,
                     itemBuilder: (context, index) {
-                      final participant =
-                          state.chatDetails?.chatParticipants[index];
+                      final participant = allParticipants[index];
+                      final isAuthUser =
+                          participant.id == state.chatDetails!.authUser.id;
+
                       return HoverParticipantTile(
                         participant: participant,
+                        isAuthUser:
+                            isAuthUser, // Prosleđuje se informacija da li je auth user
                         onRemove: () {
-                          _showRemoveDialog(context, participant?.name ?? "",
-                              state.chatDetails!.chatId!, participant!.id);
+                          if (!isAuthUser) {
+                            _showRemoveDialog(context, participant.name,
+                                state.chatDetails!.chatId!, participant.id);
+                          }
                         },
                       );
                     },
@@ -71,57 +82,55 @@ class EditGroupDialog extends StatelessWidget {
                 ),
                 const SizedBox(height: 10.0),
                 GestureDetector(
-                  onTap: () {},
-                  child: GestureDetector(
-                    onTap: () async {
-                      Navigator.of(context).pop();
-                      await Future.delayed(Duration.zero);
-                      final currentParticipants = state
-                          .chatDetails!.chatParticipants
-                          .map((p) => p.id.toString())
-                          .toSet();
+                  onTap: () async {
+                    Navigator.of(context).pop();
+                    await Future.delayed(Duration.zero);
 
-                      final availableUsers = state.users!
-                          .where((user) =>
-                              !currentParticipants.contains(user.id.toString()))
-                          .toList();
-                      showDialog(
+                    final currentParticipants = state
+                        .chatDetails!.chatParticipants
+                        .map((p) => p.id.toString())
+                        .toSet();
+
+                    final availableUsers = state.users!
+                        .where((user) =>
+                            !currentParticipants.contains(user.id.toString()))
+                        .toList();
+
+                    showDialog(
+                      context: context,
+                      builder: (BuildContext context) => AddParticipantsDialog(
+                        users: availableUsers,
+                        onAddParticipants: (selectedUsers) async {
+                          final participantIds = selectedUsers
+                              .map((user) => int.parse(user.id))
+                              .toList();
+
+                          await getIt
+                              .get<ChatCubit>()
+                              .chatUseCases
+                              .addUserToGroup(
+                                  state.chatDetails!.chatId!,
+                                  state.chatDetails!.authUser.id,
+                                  participantIds);
+                        },
                         context: context,
-                        builder: (BuildContext context) =>
-                            AddParticipantsDialog(
-                          users: availableUsers,
-                          onAddParticipants: (selectedUsers) async {
-                            final participantIds = selectedUsers
-                                .map((user) => int.parse(user.id))
-                                .toList();
-
-                            await getIt
-                                .get<ChatCubit>()
-                                .chatUseCases
-                                .addUserToGroup(
-                                    state.chatDetails!.chatId!,
-                                    state.chatDetails!.authUser.id,
-                                    participantIds);
-                          },
-                          context: context,
+                      ),
+                    );
+                  },
+                  child: const Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Icon(Icons.add, color: Colors.blue),
+                      SizedBox(width: 8.0),
+                      Text(
+                        "Add participants",
+                        style: TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.blue,
                         ),
-                      );
-                    },
-                    child: const Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: const [
-                        Icon(Icons.add, color: Colors.blue),
-                        SizedBox(width: 8.0),
-                        Text(
-                          "Add participants",
-                          style: TextStyle(
-                            fontSize: 16,
-                            fontWeight: FontWeight.bold,
-                            color: Colors.blue,
-                          ),
-                        ),
-                      ],
-                    ),
+                      ),
+                    ],
                   ),
                 ),
               ],
@@ -184,11 +193,13 @@ class EditGroupDialog extends StatelessWidget {
 
 class HoverParticipantTile extends StatefulWidget {
   final dynamic participant;
+  final bool isAuthUser;
   final VoidCallback onRemove;
 
   const HoverParticipantTile({
     super.key,
     required this.participant,
+    required this.isAuthUser,
     required this.onRemove,
   });
 
@@ -215,7 +226,7 @@ class _HoverParticipantTileState extends State<HoverParticipantTile> {
           "${widget.participant?.name}",
           style: const TextStyle(fontSize: 16),
         ),
-        trailing: _isHovered
+        trailing: (_isHovered && !widget.isAuthUser)
             ? TextButton(
                 onPressed: widget.onRemove,
                 child: const Text(
