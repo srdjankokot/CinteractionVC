@@ -62,9 +62,6 @@ class ApiImpl extends Api {
     try {
       Dio dio = await getIt.getAsync<Dio>();
       Response response = await dio.get(Urls.getCompanyUsers);
-
-      print('Responsee: $response');
-
       List<UserDto> users = [];
       for (var u in response.data['data']) {
         var user = UserDto.fromJson(u as Map<String, dynamic>);
