@@ -1,4 +1,7 @@
+// ignore_for_file: prefer_const_constructors
+
 import 'package:cinteraction_vc/core/extension/context.dart';
+import 'package:cinteraction_vc/layers/data/dto/chat/chat_dto.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
@@ -40,9 +43,22 @@ class _ChatsListViewState extends State<ChatsListView> {
 
   void _updateSelectedChat() {
     if (widget.state.chats != null && widget.state.chats!.isNotEmpty) {
+      List<ChatDto> sortedChats = List.from(widget.state.chats!)
+        ..sort((a, b) {
+          DateTime? aTime = a.lastMessage?.createdAt ?? a.createdAt;
+          DateTime? bTime = b.lastMessage?.createdAt ?? b.createdAt;
+
+          if (aTime == null && bTime == null) return 0;
+          if (aTime == null) return 1;
+          if (bTime == null) return -1;
+
+          return bTime.compareTo(aTime);
+        });
+
       setState(() {
-        selectedChat = widget.state.chats!.first.id;
+        selectedChat = sortedChats.first.id;
       });
+
       WidgetsBinding.instance.addPostFrameCallback((_) {
         context.read<ChatCubit>().getChatDetails(selectedChat);
       });
@@ -51,6 +67,7 @@ class _ChatsListViewState extends State<ChatsListView> {
         selectedChat = null;
       });
     }
+    print('selectedChat $selectedChat');
   }
 
   void _scrollListener() {
@@ -63,13 +80,13 @@ class _ChatsListViewState extends State<ChatsListView> {
 
   Future<void> _loadMoreChats() async {
     if (isLoading || widget.state.pagination?.nextPageUrl == null) {
-      debugPrint("⛔ Nema više stranica za učitavanje.");
+      debugPrint("No more pages.");
       return;
     }
 
     setState(() {
       isLoading = true;
-      debugPrint("🚀 Paginacija započeta - isLoading: $isLoading");
+      debugPrint(" Pagination started - isLoading: $isLoading");
     });
 
     try {
@@ -82,7 +99,7 @@ class _ChatsListViewState extends State<ChatsListView> {
 
     setState(() {
       isLoading = false;
-      debugPrint("✅ Paginacija završena - isLoading: $isLoading");
+      debugPrint("✅ Pagination finished - isLoading: $isLoading");
     });
   }
 
@@ -101,6 +118,17 @@ class _ChatsListViewState extends State<ChatsListView> {
 
   @override
   Widget build(BuildContext context) {
+    List<ChatDto> sortedChats = List.from(widget.state.chats!)
+      ..sort((a, b) {
+        DateTime? aTime = a.lastMessage?.createdAt ?? a.createdAt;
+        DateTime? bTime = b.lastMessage?.createdAt ?? b.createdAt;
+
+        if (aTime == null && bTime == null) return 0;
+        if (aTime == null) return 1;
+        if (bTime == null) return -1;
+
+        return bTime.compareTo(aTime);
+      });
     return widget.state.chats == null || widget.state.chats!.isEmpty
         ? Center(
             child: Text(
@@ -111,14 +139,13 @@ class _ChatsListViewState extends State<ChatsListView> {
           )
         : ListView.builder(
             controller: _scrollController,
-            itemCount: widget.state.chats!.length +
+            itemCount: sortedChats.length +
                 ((isLoading && widget.state.pagination?.nextPageUrl != null)
                     ? 1
                     : 0),
-            padding: const EdgeInsets.only(bottom: 100),
             itemBuilder: (context, index) {
-              if (index < widget.state.chats!.length) {
-                var chat = widget.state.chats![index];
+              if (index < sortedChats.length) {
+                var chat = sortedChats[index];
                 bool isSelected = chat.id == selectedChat;
 
                 return MouseRegion(
@@ -129,7 +156,8 @@ class _ChatsListViewState extends State<ChatsListView> {
                         selectedChat = chat.id;
                       });
                       await context.read<ChatCubit>().getChatDetails(chat.id);
-                      print('lastMessage: ${chat.lastMessage!.filePath}');
+                      print(
+                          'prtId: ${widget.state.chatDetails?.chatParticipants[0].id}');
                     },
                     child: Container(
                       decoration: BoxDecoration(
@@ -140,80 +168,103 @@ class _ChatsListViewState extends State<ChatsListView> {
                       ),
                       padding: const EdgeInsets.symmetric(
                           vertical: 10, horizontal: 12),
-                      child: Row(
-                        crossAxisAlignment: CrossAxisAlignment.center,
+                      child: Stack(
                         children: [
-                          chat.userImage != null
-                              ? UserImage.medium(chat.userImage!)
-                              : const UserImage.medium(
-                                  "https://ui-avatars.com/api/?name=G+R&color=ffffff&background=f34320"),
-                          const SizedBox(width: 12),
-                          Expanded(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  chat.name,
-                                  style: const TextStyle(
-                                    fontFamily: 'Montserrat',
-                                    fontSize: 16,
-                                    fontWeight: FontWeight.w500,
-                                    color: Colors.black87,
-                                  ),
+                          // Glavni red sa podacima o četu
+                          Row(
+                            crossAxisAlignment: CrossAxisAlignment.center,
+                            children: [
+                              // Profilna slika korisnika
+                              UserImage.medium(
+                                chat.userImage ??
+                                    "https://ui-avatars.com/api/?name=G+R&color=ffffff&background=f34320",
+                              ),
+                              const SizedBox(width: 12),
+                              Expanded(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      chat.name,
+                                      style: const TextStyle(
+                                        fontFamily: 'Montserrat',
+                                        fontSize: 16,
+                                        fontWeight: FontWeight.w500,
+                                        color: Colors.black87,
+                                      ),
+                                    ),
+                                    const SizedBox(height: 3),
+                                    Text(
+                                      chat.lastMessage?.message?.isNotEmpty ==
+                                              true
+                                          ? chat.lastMessage!.message!
+                                          : (chat.lastMessage?.filePath !=
+                                                      null &&
+                                                  chat.lastMessage!.filePath!
+                                                      .isNotEmpty
+                                              ? "File"
+                                              : "No messages"),
+                                      style: const TextStyle(
+                                        fontSize: 14,
+                                        color: Colors.black54,
+                                      ),
+                                      maxLines: 1,
+                                      overflow: TextOverflow.ellipsis,
+                                    ),
+                                  ],
                                 ),
-                                const SizedBox(height: 3),
-                                Text(
-                                  chat.lastMessage?.message?.isNotEmpty == true
-                                      ? chat.lastMessage!.message!
-                                      : (chat.lastMessage?.filePath != null &&
-                                              chat.lastMessage!.filePath!
-                                                  .isNotEmpty
-                                          ? "File"
-                                          : "No messages"),
-                                  style: const TextStyle(
-                                    fontSize: 14,
-                                    color: Colors.black54,
-                                  ),
-                                  maxLines: 1,
-                                  overflow: TextOverflow.ellipsis,
+                              ),
+
+                              Text(
+                                formatTime(chat.lastMessage?.createdAt
+                                    .toIso8601String()),
+                                style: const TextStyle(
+                                    fontSize: 12, color: Colors.black45),
+                              ),
+                            ],
+                          ),
+
+                          if (chat.isOnline &&
+                              chat.chatParticipants!.length < 2)
+                            Positioned(
+                              left: 35,
+                              top: 35,
+                              child: ClipOval(
+                                child: Container(
+                                  width: 10.0,
+                                  height: 10.0,
+                                  color: Colors.green,
                                 ),
-                              ],
+                              ),
                             ),
-                          ),
-                          Text(
-                            formatTime(
-                                chat.lastMessage?.createdAt.toIso8601String()),
-                            style: const TextStyle(
-                                fontSize: 12, color: Colors.black45),
-                          ),
-                          if (isSelected) ...[
-                            const SizedBox(width: 10),
-                            IconButton(
-                              icon: Icon(Icons.delete,
-                                  color: Colors.redAccent.shade700),
-                              onPressed: () => _showRemoveDialog(
-                                  chat.id, context, _deleteChat),
+
+                          if (isSelected)
+                            Positioned(
+                              right: 25,
+                              top: 5,
+                              child: IconButton(
+                                icon: Icon(Icons.delete,
+                                    color: Colors.redAccent.shade700),
+                                onPressed: () => _showRemoveDialog(
+                                    chat.id, context, _deleteChat),
+                              ),
                             ),
-                          ],
                         ],
                       ),
                     ),
                   ),
                 );
               } else {
-                // Dodaj spinner na kraju liste ako se učitavaju novi podaci
                 return Padding(
                   padding: const EdgeInsets.symmetric(vertical: 16.0),
                   child: Center(
-                    child: Container(
+                    child: SizedBox(
                       width: 50,
                       height: 50,
-                      // color: Colors.red, // TEST: Prikazuje crveni kvadrat
                       child: CircularProgressIndicator(),
                     ),
                   ),
                 );
-// Prazan prostor ako nije loading
               }
             },
           );

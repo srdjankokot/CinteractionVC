@@ -74,6 +74,8 @@ class ChatRepoImpl extends ChatRepo {
 
   ChatDto? currentChat;
 
+  List<ChatDto> chats = [];
+
   @override
   Future<void> initialize() async {
     _session = await getIt.getAsync<JanusSession>();
@@ -211,7 +213,28 @@ class ChatRepoImpl extends ChatRepo {
           .online = true;
     }
     print('Users: $users');
+
     _usersStream.add(users);
+  }
+
+  void _matchParticipantWithChat() {
+    for (var element in chats) {
+      element.isOnline = false;
+    }
+
+    for (var subscriber in subscribers) {
+      for (var chat in chats) {
+        bool isParticipantOnline =
+            chat.chatParticipants?.any((data) => data.id == subscriber.id) ??
+                false;
+
+        if (isParticipantOnline) {
+          chat.isOnline = true;
+        }
+      }
+    }
+
+    _chatStream.add(chats);
   }
 
   _setListener() {
@@ -273,6 +296,7 @@ class ChatRepoImpl extends ChatRepo {
           _messagesStream.add(getUserMessages()!);
           _participantsStream.add(subscribers);
           _matchParticipantWithUser();
+          _matchParticipantWithChat();
           // _matchParticipiantWithChat();
           print(data);
         }
@@ -284,6 +308,7 @@ class ChatRepoImpl extends ChatRepo {
           _participantsStream.add(subscribers);
 
           _matchParticipantWithUser();
+          _matchParticipantWithChat();
         }
         if (data['textroom'] == 'join') {
           print('from: ${data['username']} Joined The Chat!');
@@ -305,6 +330,7 @@ class ChatRepoImpl extends ChatRepo {
 
           _participantsStream.add(subscribers);
           _matchParticipantWithUser();
+          _matchParticipantWithChat();
           // if (currentParticipant == null) setCurrentParticipant(subscribers.first);
         }
         if (data['participants'] != null) {
@@ -322,6 +348,7 @@ class ChatRepoImpl extends ChatRepo {
             // }
             _participantsStream.add(subscribers);
             _matchParticipantWithUser();
+            _matchParticipantWithChat();
           }
         }
       }
@@ -441,14 +468,14 @@ class ChatRepoImpl extends ChatRepo {
 
     if (response.error == null) {
       ChatPagination pagination = response.response!;
-      List<ChatDto> newChats = pagination.chats;
+      chats = pagination.chats;
 
       if (page == 1) {
         _allChats.clear();
         _loadedChatIds.clear();
       }
 
-      for (var chat in newChats) {
+      for (var chat in chats) {
         if (!_loadedChatIds.contains(chat.id)) {
           _allChats.add(chat);
           _loadedChatIds.add(chat.id);
@@ -457,6 +484,7 @@ class ChatRepoImpl extends ChatRepo {
 
       _chatStream.add(List.from(_allChats));
       _paginationStream.add(pagination);
+      _matchParticipantWithChat();
     } else {
       print('Error: ${response.error}');
     }

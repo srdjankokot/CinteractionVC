@@ -145,7 +145,7 @@ class _ChatDetailsWidgetState extends State<ChatDetailsWidget> {
                         child: Stack(
                           clipBehavior: Clip.none,
                           children: [
-                            if (_hoverStates[index] == true)
+                            if (_hoverStates[index] == true && isSentByUser)
                               Positioned(
                                 top: 0,
                                 right: isSentByUser ? 5 : null,
@@ -292,13 +292,41 @@ class _ChatDetailsWidgetState extends State<ChatDetailsWidget> {
                                                             null &&
                                                         message.message!
                                                             .isNotEmpty)
-                                                      Text(
+                                                      SelectableText(
                                                         message.message!,
                                                         style: const TextStyle(
                                                           color: Colors.black,
-                                                          fontSize: 18,
+                                                          fontSize: 15,
                                                           fontFamily: 'Roboto',
                                                         ),
+                                                        contextMenuBuilder:
+                                                            (context,
+                                                                editableTextState) {
+                                                          return AdaptiveTextSelectionToolbar(
+                                                            anchors:
+                                                                editableTextState
+                                                                    .contextMenuAnchors,
+                                                            children: [
+                                                              TextButton(
+                                                                onPressed: () {
+                                                                  final text =
+                                                                      message
+                                                                          .message!;
+                                                                  Clipboard.setData(
+                                                                      ClipboardData(
+                                                                          text:
+                                                                              text));
+                                                                  Navigator.of(
+                                                                          context)
+                                                                      .maybePop();
+                                                                },
+                                                                child:
+                                                                    const Text(
+                                                                        'Copy'),
+                                                              ),
+                                                            ],
+                                                          );
+                                                        },
                                                       ),
                                                     if (message.files != null &&
                                                         message
