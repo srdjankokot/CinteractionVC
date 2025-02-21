@@ -188,6 +188,13 @@ class _ChatDetailsWidgetState extends State<ChatDetailsWidget> {
                                         } else if (value == 'copy') {
                                           Clipboard.setData(ClipboardData(
                                               text: message.message ?? ""));
+                                        } else if (value == 'edit') {
+                                          context
+                                              .read<ChatCubit>()
+                                              .editChatMessage(
+                                                  message.id!,
+                                                  message.message!,
+                                                  message.chatId);
                                         }
                                       }
                                     });
