@@ -1,5 +1,6 @@
 import 'dart:convert';
 
+import 'package:cinteraction_vc/core/app/injector.dart';
 import 'package:cinteraction_vc/layers/presentation/cubit/home/home_cubit.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -21,12 +22,12 @@ class SchedulePopup extends StatelessWidget {
     final formKey = GlobalKey<FormState>();
 
     return BlocProvider.value(
-      value: context.watch<HomeCubit>(),
+      value: getIt.get<HomeCubit>(),
       child: BlocConsumer<HomeCubit, HomeState>(
         listener: (c, s) {
           print('state');
         },
-        builder: (context, state) => AlertDialog(
+        builder: (innerContext, state) => AlertDialog(
           content: AlertDialog(
             title: const Text('Schedule a meeting'),
             content: Form(
@@ -76,8 +77,9 @@ class SchedulePopup extends StatelessWidget {
                                   lastDate: DateTime.now()
                                       .add(const Duration(days: 90)),
                                 ).then((selectedDate) {
-                                  context
-                                      .read<HomeCubit>()
+                                  print('selectedDatee: $selectedDate');
+                                  getIt
+                                      .get<HomeCubit>()
                                       .setScheduleDate(selectedDate!);
                                 });
                               },
@@ -103,8 +105,8 @@ class SchedulePopup extends StatelessWidget {
                                         initialTime: TimeOfDay.fromDateTime(
                                             state.scheduleStartDateTime!))
                                     .then((selectedTime) {
-                                  context
-                                      .read<HomeCubit>()
+                                  getIt
+                                      .get<HomeCubit>()
                                       .setScheduleTime(selectedTime);
                                 });
                               },
@@ -132,12 +134,10 @@ class SchedulePopup extends StatelessWidget {
                   }
                   Navigator.pop(context);
 
-                  var response = await context
-                      .read<HomeCubit>()
-                      .scheduleMeeting(
-                          nameFieldController.value.text,
-                          descFieldController.value.text,
-                          tagNameFieldController.value.text);
+                  var response = await getIt.get<HomeCubit>().scheduleMeeting(
+                      nameFieldController.value.text,
+                      descFieldController.value.text,
+                      tagNameFieldController.value.text);
                   // print(link);
 
                   // var startDateTime = state.scheduleStartDateTime?.toUtc();
