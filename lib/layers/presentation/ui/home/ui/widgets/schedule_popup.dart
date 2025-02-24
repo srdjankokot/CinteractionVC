@@ -78,8 +78,8 @@ class SchedulePopup extends StatelessWidget {
                                       .add(const Duration(days: 90)),
                                 ).then((selectedDate) {
                                   print('selectedDatee: $selectedDate');
-                                  getIt
-                                      .get<HomeCubit>()
+                                  innerContext
+                                      .read<HomeCubit>()
                                       .setScheduleDate(selectedDate!);
                                 });
                               },
@@ -105,8 +105,8 @@ class SchedulePopup extends StatelessWidget {
                                         initialTime: TimeOfDay.fromDateTime(
                                             state.scheduleStartDateTime!))
                                     .then((selectedTime) {
-                                  getIt
-                                      .get<HomeCubit>()
+                                  innerContext
+                                      .read<HomeCubit>()
                                       .setScheduleTime(selectedTime);
                                 });
                               },
@@ -134,10 +134,12 @@ class SchedulePopup extends StatelessWidget {
                   }
                   Navigator.pop(context);
 
-                  var response = await getIt.get<HomeCubit>().scheduleMeeting(
-                      nameFieldController.value.text,
-                      descFieldController.value.text,
-                      tagNameFieldController.value.text);
+                  var response = await innerContext
+                      .read<HomeCubit>()
+                      .scheduleMeeting(
+                          nameFieldController.value.text,
+                          descFieldController.value.text,
+                          tagNameFieldController.value.text);
                   // print(link);
 
                   // var startDateTime = state.scheduleStartDateTime?.toUtc();

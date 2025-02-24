@@ -91,10 +91,17 @@ class ChatCubit extends Cubit<ChatState> with BlocLoggy {
         numberOfParticipants: Random().nextInt(10000)));
   }
 
-  void _onChats(List<ChatDto> chats) {
+  ///Updated because of pagination on scroll///
+  void _onChats(List<ChatDto> newChats) {
+    List<ChatDto> updatedChats = List.from(state.chats ?? []);
+    for (var chat in newChats) {
+      if (!updatedChats.any((c) => c.id == chat.id)) {
+        updatedChats.add(chat);
+      }
+    }
     emit(state.copyWith(
       isLoading: false,
-      chats: chats,
+      chats: updatedChats,
     ));
   }
 
@@ -131,7 +138,7 @@ class ChatCubit extends Cubit<ChatState> with BlocLoggy {
     print('CalledFunc');
     try {
       final chats = await chatUseCases.loadChats(page, paginate);
-      emit(state.copyWith(chats: chats));
+      // emit(state.copyWith(chats: chats));
     } catch (e) {
       print("Error loading chats: $e");
     }
@@ -139,10 +146,13 @@ class ChatCubit extends Cubit<ChatState> with BlocLoggy {
 
   Future<void> deleteChat(int id) async {
     try {
-      final chats = await chatUseCases.deleteChat(id);
-      emit(state.copyWith(chats: chats));
+      //Updated becasue of pagination on scroll//
+      List<ChatDto> updatedChats = List.from(state.chats ?? []);
+      updatedChats.removeWhere((chat) => chat.id == id);
+      emit(state.copyWith(chats: updatedChats));
+      await chatUseCases.deleteChat(id);
     } catch (e) {
-      print("Error delete chat: $e");
+      print("❌ Error delete chat: $e");
     }
   }
 

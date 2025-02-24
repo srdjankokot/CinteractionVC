@@ -11,7 +11,11 @@ import '../../../domain/entities/meetings/meeting.dart';
 part 'home_state.dart';
 
 class HomeCubit extends Cubit<HomeState> with BlocLoggy {
-  HomeCubit({required this.homeUseCases}) : super( HomeState.initial(scheduleDate: DateTime.now().copyWith(minute: 0).add(const Duration(hours: 2)))) {
+  HomeCubit({required this.homeUseCases})
+      : super(HomeState.initial(
+            scheduleDate: DateTime.now()
+                .copyWith(minute: 0)
+                .add(const Duration(hours: 2)))) {
     init();
   }
 
@@ -28,16 +32,22 @@ class HomeCubit extends Cubit<HomeState> with BlocLoggy {
   }
 
   void setScheduleDate(DateTime date) {
+    print('DATEE: $date');
     emit(state.copyWith(scheduleDate: date));
   }
 
   void setScheduleTime(TimeOfDay? timeOfDay) {
-    emit(state.copyWith(scheduleDate: state.scheduleStartDateTime?.copyWith(hour: timeOfDay?.hour,  minute: timeOfDay?.minute)));
+    print('time: $timeOfDay');
+    emit(state.copyWith(
+        scheduleDate: state.scheduleStartDateTime
+            ?.copyWith(hour: timeOfDay?.hour, minute: timeOfDay?.minute)));
   }
 
-  Future<ApiResponse<String>> scheduleMeeting(String name, String desc, String tag) async {
+  Future<ApiResponse<String>> scheduleMeeting(
+      String name, String desc, String tag) async {
     emit(state.copyWith(loading: true));
-    var response = await homeUseCases.scheduleMeetingUseCase(name, desc, tag, state.scheduleStartDateTime!);
+    var response = await homeUseCases.scheduleMeetingUseCase(
+        name, desc, tag, state.scheduleStartDateTime!);
     emit(state.copyWith(loading: false));
     getNextMeeting();
 
