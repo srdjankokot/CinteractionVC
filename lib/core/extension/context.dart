@@ -66,6 +66,7 @@ extension Context on BuildContext {
   void logOut() async {
     saveAccessToken(null);
     getIt.get<LocalStorage>().clearUser();
+    resetAndReinitialize();
     GoRouter.of(this).clearStackAndNavigate('/auth');
   }
 

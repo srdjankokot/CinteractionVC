@@ -47,6 +47,13 @@ import '../util/conf.dart';
 
 GetIt getIt = GetIt.instance;
 
+
+void resetAndReinitialize() async {
+  await getIt.reset(); // Clears all registered instances
+  initializeGetIt(); // Re-register instances
+}
+
+
 Future<void> initializeGetIt() async {
   getIt.registerFactoryAsync<Dio>(() async {
     final accessToken = await getAccessToken();
