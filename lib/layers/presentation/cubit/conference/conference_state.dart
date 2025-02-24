@@ -23,6 +23,8 @@ class ConferenceState extends Equatable {
   final int numberOfStreamsCopy;
   final bool isGridLayout;
   final String? error;
+  final bool recording;
+
 
   const ConferenceState({
     required this.isInitial,
@@ -41,7 +43,7 @@ class ConferenceState extends Equatable {
     required this.numberOfStreamsCopy,
     required this.isGridLayout,
     this.error,
-
+    required this.recording
   });
 
 
@@ -58,7 +60,8 @@ class ConferenceState extends Equatable {
     int? isGridLayout,
     int? avgEngagement = 0,
     int? unreadMessages = 0,
-  }) : this(isInitial: isInitial, isEnded: isEnded, audioMuted: audioMuted, videoMuted: videoMuted, numberOfStreamsCopy: 1, isGridLayout: true, engagementEnabled: engagementEnabled, avgEngagement: avgEngagement, screenShared:screenShared, showingChat: showingChat);
+    bool recording = false
+  }) : this(isInitial: isInitial, isEnded: isEnded, audioMuted: audioMuted, videoMuted: videoMuted, numberOfStreamsCopy: 1, isGridLayout: true, engagementEnabled: engagementEnabled, avgEngagement: avgEngagement, screenShared:screenShared, showingChat: showingChat, recording: recording);
 
 
   const ConferenceState.ended({
@@ -70,7 +73,8 @@ class ConferenceState extends Equatable {
     bool screenShared = false,
     bool engagementEnabled = true,
     bool showingChat = false,
-  }) : this(isInitial: isInitial, isEnded: isEnded, audioMuted: audioMuted, videoMuted: videoMuted, numberOfStreamsCopy: 1, isGridLayout: true, engagementEnabled : engagementEnabled, screenShared:screenShared, showingChat:showingChat);
+    bool recording = false
+  }) : this(isInitial: isInitial, isEnded: isEnded, audioMuted: audioMuted, videoMuted: videoMuted, numberOfStreamsCopy: 1, isGridLayout: true, engagementEnabled : engagementEnabled, screenShared:screenShared, showingChat:showingChat,  recording: recording);
 
 
   const ConferenceState.error({
@@ -83,7 +87,9 @@ class ConferenceState extends Equatable {
     bool engagementEnabled = true,
     bool showingChat = false,
     required String error,
-  }) : this(isInitial: isInitial, isEnded: isEnded, audioMuted: audioMuted, videoMuted: videoMuted, numberOfStreamsCopy: 1, isGridLayout: true, engagementEnabled : engagementEnabled, screenShared:screenShared, error: error, showingChat:showingChat);
+    bool recording = false
+
+  }) : this(isInitial: isInitial, isEnded: isEnded, audioMuted: audioMuted, videoMuted: videoMuted, numberOfStreamsCopy: 1, isGridLayout: true, engagementEnabled : engagementEnabled, screenShared:screenShared, error: error, showingChat:showingChat,  recording: recording);
 
 
 
@@ -104,6 +110,7 @@ class ConferenceState extends Equatable {
     bool? engagementEnabled,
     bool? showingChat,
     bool? isGridLayout,
+    bool? recording
   }) {
     return ConferenceState(
       isInitial: isInitial ?? this.isInitial,
@@ -121,9 +128,10 @@ class ConferenceState extends Equatable {
       showingChat: showingChat ?? this.showingChat,
       messages: messages ?? this.messages,
       unreadMessages: unreadMessages ?? this.unreadMessages,
+      recording: recording ?? this.recording
     );
   }
 
   @override
-  List<Object?> get props => [isInitial, isEnded, streamRenderers, streamSubscribers, numberOfStreams, audioMuted, videoMuted, numberOfStreamsCopy, isGridLayout, engagementEnabled, avgEngagement, screenShared, showingChat, messages, unreadMessages];
+  List<Object?> get props => [isInitial, isEnded, streamRenderers, streamSubscribers, numberOfStreams, audioMuted, videoMuted, numberOfStreamsCopy, isGridLayout, engagementEnabled, avgEngagement, screenShared, showingChat, messages, unreadMessages, recording];
 }

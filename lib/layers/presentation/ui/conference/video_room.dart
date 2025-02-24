@@ -7,9 +7,11 @@ import 'package:cinteraction_vc/core/ui/widget/call_button_shape.dart';
 import 'package:cinteraction_vc/core/ui/widget/engagement_progress.dart';
 import 'package:cinteraction_vc/layers/presentation/ui/conference/widget/chat_message_widget.dart';
 import 'package:cinteraction_vc/layers/presentation/ui/conference/widget/participant_video_widget.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_screen_recording/flutter_screen_recording.dart';
 import 'package:flutter_webrtc/flutter_webrtc.dart';
 import 'package:visibility_detector/visibility_detector.dart';
 
@@ -256,6 +258,16 @@ class VideoRoomPage extends StatelessWidget {
                                     // child: Text('${state.unreadMessages}', style: context.primaryTextTheme.labelSmall,)),
                                     //   child: Text('1', style: context.primaryTextTheme.labelSmall?.copyWith(fontSize: 8, fontWeight: FontWeight.w700),)),,
                                   ]),
+
+                                    const SizedBox(width: 20),
+                                      CallButtonShape(
+                                        image: state.recording ? const Icon(Icons.stop, size: 30, color: Colors.red): const  Icon(Icons.fiber_manual_record, size: 30, color: Colors.red),
+                                        onClickAction: () async {
+                                          await context.read<ConferenceCubit>().recordingMeet();
+                                        },
+                                      ),
+
+
 
                                   const SizedBox(width: 20),
                                   // CallButtonShape(
