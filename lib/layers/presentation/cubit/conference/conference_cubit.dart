@@ -5,6 +5,7 @@ import 'package:cinteraction_vc/core/io/network/models/participant.dart';
 import 'package:cinteraction_vc/core/util/util.dart';
 import 'package:cinteraction_vc/layers/domain/usecases/conference/conference_usecases.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_screen_recording/flutter_screen_recording.dart';
 import 'package:janus_client/janus_client.dart';
 import 'package:webrtc_interface/webrtc_interface.dart';
 
@@ -71,16 +72,16 @@ class ConferenceCubit extends Cubit<ConferenceState> with BlocLoggy {
     conferenceUseCases.finishCall();
   }
 
-  Future<void> toggleChatWindow()
-  async {
+  Future<void> toggleChatWindow() async {
     emit(state.copyWith(showingChat: !state.showingChat));
   }
 
-  Future<void> chatMessageSeen(int index)
-  async {
-
+  Future<void> chatMessageSeen(int index) async {
     state.messages![index].seen = true;
-    emit(state.copyWith(unreadMessages: state.messages!.where((element) => !(element.seen?? true)).length));
+    emit(state.copyWith(
+        unreadMessages: state.messages!
+            .where((element) => !(element.seen ?? true))
+            .length));
   }
 
   // bool audioMuted = false;
@@ -125,7 +126,11 @@ class ConferenceCubit extends Cubit<ConferenceState> with BlocLoggy {
   }
 
   void _onMessageReceived(List<ChatMessage> chat) {
-    emit(state.copyWith(messages: chat, numberOfStreams: Random().nextInt(10000), unreadMessages: chat.where((element) => !(element.seen?? true)).length));
+    emit(state.copyWith(
+        messages: chat,
+        numberOfStreams: Random().nextInt(10000),
+        unreadMessages:
+            chat.where((element) => !(element.seen ?? true)).length));
   }
 
   void _onEngagementChanged(int avgEngagement) {
@@ -190,12 +195,22 @@ class ConferenceCubit extends Cubit<ConferenceState> with BlocLoggy {
     conferenceUseCases.publishById(id);
   }
 
-  Future<void> changeSubStream(ConfigureStreamQuality quality, StreamRenderer remoteStream) async {
+  Future<void> changeSubStream(
+      ConfigureStreamQuality quality, StreamRenderer remoteStream) async {
     conferenceUseCases.changeSubStream(quality, remoteStream);
   }
 
-
   Future<void> sendMessage(String msg) async {
     conferenceUseCases.sendMessage(msg);
+  }
+
+  Future<void> recordingMeet() async {
+    if (!state.recording) {
+       bool recording = await FlutterScreenRecording.startRecordScreenAndAudio("videoName");
+       emit(state.copyWith(recording: recording));
+    } else {
+      FlutterScreenRecording.stopRecordScreen;
+      emit(state.copyWith(recording: false));
+    }
   }
 }
