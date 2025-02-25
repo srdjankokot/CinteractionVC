@@ -11,7 +11,7 @@ class ChatDto {
   final int lastPage;
   final String? nextPageUrl;
   final String? prevPageUrl;
-  final DateTime? createdAt; // Dodato kao nullable
+  final DateTime? createdAt;
   bool isOnline;
 
   ChatDto({
@@ -28,28 +28,59 @@ class ChatDto {
     this.isOnline = false,
   });
 
-  factory ChatDto.fromJson(Map<String, dynamic> json) => ChatDto(
-        id: json['chat_id'] as int,
-        name: json['chat_name'] as String,
-        userImage: json['user_image'] as String?,
-        lastMessage: (json['last_message'] != null &&
-                json['last_message'] is Map<String, dynamic> &&
-                json['last_message'].isNotEmpty)
-            ? LastMessageDto.fromJson(json['last_message'])
-            : null,
-        chatParticipants: json['chat_participants'] != null
-            ? (json['chat_participants'] as List)
-                .map((participant) => ChatParticipantDto.fromJson(participant))
-                .toList()
-            : [],
-        createdAt: json['created_at'] != null
-            ? DateTime.tryParse(json['created_at'])
-            : null, // Parsiranje datuma ako postoji
-        currentPage: json['meta']?['current_page'] as int? ?? 1,
-        lastPage: json['meta']?['last_page'] as int? ?? 1,
-        nextPageUrl: json['links']?['next'] as String?,
-        prevPageUrl: json['links']?['prev'] as String?,
-      );
+  ChatDto copyWith({
+    int? id,
+    String? name,
+    String? userImage,
+    LastMessageDto? lastMessage,
+    List<ChatParticipantDto>? chatParticipants,
+    int? currentPage,
+    int? lastPage,
+    String? nextPageUrl,
+    String? prevPageUrl,
+    DateTime? createdAt,
+    bool? isOnline,
+  }) {
+    return ChatDto(
+      id: id ?? this.id,
+      name: name ?? this.name,
+      userImage: userImage ?? this.userImage,
+      lastMessage: lastMessage ?? this.lastMessage,
+      chatParticipants: chatParticipants ?? this.chatParticipants,
+      currentPage: currentPage ?? this.currentPage,
+      lastPage: lastPage ?? this.lastPage,
+      nextPageUrl: nextPageUrl ?? this.nextPageUrl,
+      prevPageUrl: prevPageUrl ?? this.prevPageUrl,
+      createdAt: createdAt ?? this.createdAt,
+      isOnline: isOnline ?? this.isOnline,
+    );
+  }
+
+  factory ChatDto.fromJson(Map<String, dynamic> json) {
+    return ChatDto(
+      id: json['chat_id'] as int,
+      name: json['chat_name'] as String,
+      userImage: json['user_image'] as String?,
+      lastMessage: (json['last_message'] != null &&
+              json['last_message'] is Map<String, dynamic> &&
+              json['last_message'].isNotEmpty)
+          ? LastMessageDto.fromJson(json['last_message'])
+          : null,
+      chatParticipants: json['chat_participants'] != null
+          ? (json['chat_participants'] as List)
+              .map((participant) => ChatParticipantDto.fromJson(participant))
+              .toList()
+          : [],
+      createdAt: json['created_at'] != null
+          ? DateTime.tryParse(json['created_at'])
+          : null,
+      currentPage: json['meta']?['current_page'] as int? ?? 1,
+      lastPage: json['meta']?['last_page'] as int? ?? 1,
+      nextPageUrl: json['links']?['next'] as String?,
+      prevPageUrl: json['links']?['prev'] as String?,
+      isOnline: json['is_online'] as bool? ?? false,
+    );
+  }
 
   Map<String, dynamic> toJson() => {
         'chat_id': id,
@@ -57,7 +88,7 @@ class ChatDto {
         'user_image': userImage,
         'last_message': lastMessage?.toJson(),
         'chat_participants': chatParticipants?.map((p) => p.toJson()).toList(),
-        'created_at': createdAt?.toIso8601String(), // Konverzija ako postoji
+        'created_at': createdAt?.toIso8601String(),
         'meta': {
           'current_page': currentPage,
           'last_page': lastPage,
