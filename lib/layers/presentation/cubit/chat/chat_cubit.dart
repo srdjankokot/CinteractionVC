@@ -94,11 +94,19 @@ class ChatCubit extends Cubit<ChatState> with BlocLoggy {
   ///Updated because of pagination on scroll///
   void _onChats(List<ChatDto> newChats) {
     List<ChatDto> updatedChats = List.from(state.chats ?? []);
+
     for (var chat in newChats) {
-      if (!updatedChats.any((c) => c.id == chat.id)) {
+      int existingIndex = updatedChats.indexWhere((c) => c.id == chat.id);
+
+      if (existingIndex != -1) {
+        updatedChats[existingIndex] = updatedChats[existingIndex].copyWith(
+          lastMessage: chat.lastMessage,
+        );
+      } else {
         updatedChats.add(chat);
       }
     }
+
     emit(state.copyWith(
       isLoading: false,
       chats: updatedChats,
