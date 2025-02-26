@@ -3,7 +3,7 @@ import axios from "axios";
 export async function signInEmailPass(email, password) {
   console.log("calledFunc");
 
-  const loginUrl = "https://cinteraction.nswebdevelopment.com/api/login";
+  const loginUrl = "https://huawei.nswebdevelopment.com/api/login";
 
   try {
     const response = await axios.post(
@@ -27,7 +27,7 @@ export async function signInEmailPass(email, password) {
 }
 
 export async function scheduleMeet(name, description, tag, startDateTime, localTimeZone, accessToken) {
-  const scheduleUrl = "https://cinteraction.nswebdevelopment.com/api/schedule/meeting";
+  const scheduleUrl = "https://huawei.nswebdevelopment.com/api/schedule/meeting";
 
   const params = {
     name,

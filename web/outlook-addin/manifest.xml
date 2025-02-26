@@ -9,11 +9,11 @@
   <DefaultLocale>en-US</DefaultLocale>
   <DisplayName DefaultValue="Cinteraction Add-In"/>
   <Description DefaultValue="Add Cinteraction Meet video meetings in Outlook"/>
-  <IconUrl DefaultValue="https://cinteraction.nswebdevelopment.com/web/addin/assets/icon-64.png"/>
-  <HighResolutionIconUrl DefaultValue="https://cinteraction.nswebdevelopment.com/web/addin/assets/icon-128.png"/>
-  <SupportUrl DefaultValue="https://cinteraction.nswebdevelopment.com/web/"/>
+  <IconUrl DefaultValue="https://huawei.nswebdevelopment.com/web/addin/assets/icon-64.png"/>
+  <HighResolutionIconUrl DefaultValue="https://huawei.nswebdevelopment.com/web/addin/assets/icon-128.png"/>
+  <SupportUrl DefaultValue="https://huawei.nswebdevelopment.com/web/"/>
   <AppDomains>
-    <AppDomain>https://cinteraction.nswebdevelopment.com/</AppDomain>
+    <AppDomain>https://huawei.nswebdevelopment.com/</AppDomain>
   </AppDomains>
   <Hosts>
     <Host Name="Mailbox"/>
@@ -26,7 +26,7 @@
   <FormSettings>
     <Form xsi:type="ItemRead">
       <DesktopSettings>
-         <SourceLocation DefaultValue="https://cinteraction.nswebdevelopment.com/web/addin/taskpane.html"/>
+         <SourceLocation DefaultValue="https://huawei.nswebdevelopment.com/web/addin/taskpane.html"/>
         <RequestedHeight>250</RequestedHeight>
       </DesktopSettings>
     </Form>
@@ -149,22 +149,22 @@
     </Hosts>
     <Resources>
       <bt:Images>
-        <bt:Image id="Icon.16x16" DefaultValue="https://cinteraction.nswebdevelopment.com/web/addin/assets/icon-16.png"/>
-        <bt:Image id="Icon.32x32" DefaultValue="https://cinteraction.nswebdevelopment.com/web/addin/assets/icon-32.png"/>
-        <bt:Image id="Icon.80x80" DefaultValue="https://cinteraction.nswebdevelopment.com/web/addin/assets/icon-80.png"/>
+        <bt:Image id="Icon.16x16" DefaultValue="https://huawei.nswebdevelopment.com/web/addin/assets/icon-16.png"/>
+        <bt:Image id="Icon.32x32" DefaultValue="https://huawei.nswebdevelopment.com/web/addin/assets/icon-32.png"/>
+        <bt:Image id="Icon.80x80" DefaultValue="https://huawei.nswebdevelopment.com/web/addin/assets/icon-80.png"/>
 
-        <bt:Image id="Icon.Gear.16" DefaultValue="https://cinteraction.nswebdevelopment.com/web/addin/assets/gear.png"/>
-        <bt:Image id="Icon.Gear.32" DefaultValue="https://cinteraction.nswebdevelopment.com/web/addin/assets/gear-32.png"/>
-        <bt:Image id="Icon.Gear.80" DefaultValue="https://cinteraction.nswebdevelopment.com/web/addin/assets/gear-64.png"/>
-        <bt:Image id="Icon.Plus.16" DefaultValue="https://cinteraction.nswebdevelopment.com/web/addin/assets/plus.png"/>
-        <bt:Image id="Icon.Plus.32" DefaultValue="https://cinteraction.nswebdevelopment.com/web/addin/assets/plus-32.png"/>
-        <bt:Image id="Icon.Plus.80" DefaultValue="https://cinteraction.nswebdevelopment.com/web/addin/assets/plus-64.png"/>
+        <bt:Image id="Icon.Gear.16" DefaultValue="https://huawei.nswebdevelopment.com/web/addin/assets/gear.png"/>
+        <bt:Image id="Icon.Gear.32" DefaultValue="https://huawei.nswebdevelopment.com/web/addin/assets/gear-32.png"/>
+        <bt:Image id="Icon.Gear.80" DefaultValue="https://huawei.nswebdevelopment.com/web/addin/assets/gear-64.png"/>
+        <bt:Image id="Icon.Plus.16" DefaultValue="https://huawei.nswebdevelopment.com/web/addin/assets/plus.png"/>
+        <bt:Image id="Icon.Plus.32" DefaultValue="https://huawei.nswebdevelopment.com/web/addin/assets/plus-32.png"/>
+        <bt:Image id="Icon.Plus.80" DefaultValue="https://huawei.nswebdevelopment.com/web/addin/assets/plus-64.png"/>
       </bt:Images>
       <bt:Urls>
-        <bt:Url id="Commands.Url" DefaultValue="https://cinteraction.nswebdevelopment.com/web/addin/commands.html" />
-        <bt:Url id="Taskpane.Url" DefaultValue="https://cinteraction.nswebdevelopment.com/web/addin/taskpane.html" />
-        <bt:Url id="WebViewRuntime.Url" DefaultValue="https://cinteraction.nswebdevelopment.com/web/addin/commands.html" />
-        <bt:Url id="JSRuntime.Url" DefaultValue="https://cinteraction.nswebdevelopment.com/web/addin/launchevent.js" />
+        <bt:Url id="Commands.Url" DefaultValue="https://huawei.nswebdevelopment.com/web/addin/commands.html" />
+        <bt:Url id="Taskpane.Url" DefaultValue="https://huawei.nswebdevelopment.com/web/addin/taskpane.html" />
+        <bt:Url id="WebViewRuntime.Url" DefaultValue="https://huawei.nswebdevelopment.com/web/addin/commands.html" />
+        <bt:Url id="JSRuntime.Url" DefaultValue="https://huawei.nswebdevelopment.com/web/addin/launchevent.js" />
       </bt:Urls>
       <bt:ShortStrings>
         <bt:String id="GroupLabel" DefaultValue="Cinteraction Add-in"/>
