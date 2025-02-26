@@ -94,6 +94,9 @@ class _ChatDetailsWidgetState extends State<ChatDetailsWidget> {
     );
   }
 
+  String? _editingMessageId;
+  String _editingText = "";
+
   @override
   Widget build(BuildContext context) {
     final sortedMessages =
@@ -180,6 +183,12 @@ class _ChatDetailsWidgetState extends State<ChatDetailsWidget> {
                                     ).then((value) {
                                       if (value != null) {
                                         if (value == 'edit') {
+                                          setState(() {
+                                            _editingMessageId =
+                                                message.id.toString();
+                                            _editingText =
+                                                message.message ?? "";
+                                          });
                                         } else if (value == 'delete') {
                                           context
                                               .read<ChatCubit>()
@@ -292,42 +301,80 @@ class _ChatDetailsWidgetState extends State<ChatDetailsWidget> {
                                                             null &&
                                                         message.message!
                                                             .isNotEmpty)
-                                                      SelectableText(
-                                                        message.message!,
-                                                        style: const TextStyle(
-                                                          color: Colors.black,
-                                                          fontSize: 15,
-                                                          fontFamily: 'Roboto',
+                                                      if (_editingMessageId ==
+                                                          message.id.toString())
+                                                        TextField(
+                                                          controller: TextEditingController(
+                                                              text:
+                                                                  _editingText)
+                                                            ..selection =
+                                                                TextSelection
+                                                                    .fromPosition(
+                                                              TextPosition(
+                                                                  offset:
+                                                                      _editingText
+                                                                          .length),
+                                                            ),
+                                                          onChanged: (value) {
+                                                            setState(() {
+                                                              _editingText =
+                                                                  value;
+                                                            });
+                                                          },
+                                                          onSubmitted: (value) {
+                                                            _saveEditedMessage(
+                                                                message.id!,
+                                                                message.chatId);
+                                                          },
+                                                          autofocus: true,
+                                                          decoration:
+                                                              const InputDecoration(
+                                                            hintText:
+                                                                'Edit message...',
+                                                            border:
+                                                                OutlineInputBorder(),
+                                                          ),
+                                                        )
+                                                      else
+                                                        SelectableText(
+                                                          message.message!,
+                                                          style:
+                                                              const TextStyle(
+                                                            color: Colors.black,
+                                                            fontSize: 15,
+                                                            fontFamily:
+                                                                'Roboto',
+                                                          ),
+                                                          contextMenuBuilder:
+                                                              (context,
+                                                                  editableTextState) {
+                                                            return AdaptiveTextSelectionToolbar(
+                                                              anchors:
+                                                                  editableTextState
+                                                                      .contextMenuAnchors,
+                                                              children: [
+                                                                TextButton(
+                                                                  onPressed:
+                                                                      () {
+                                                                    final text =
+                                                                        message
+                                                                            .message!;
+                                                                    Clipboard.setData(
+                                                                        ClipboardData(
+                                                                            text:
+                                                                                text));
+                                                                    Navigator.of(
+                                                                            context)
+                                                                        .maybePop();
+                                                                  },
+                                                                  child:
+                                                                      const Text(
+                                                                          'Copy'),
+                                                                ),
+                                                              ],
+                                                            );
+                                                          },
                                                         ),
-                                                        contextMenuBuilder:
-                                                            (context,
-                                                                editableTextState) {
-                                                          return AdaptiveTextSelectionToolbar(
-                                                            anchors:
-                                                                editableTextState
-                                                                    .contextMenuAnchors,
-                                                            children: [
-                                                              TextButton(
-                                                                onPressed: () {
-                                                                  final text =
-                                                                      message
-                                                                          .message!;
-                                                                  Clipboard.setData(
-                                                                      ClipboardData(
-                                                                          text:
-                                                                              text));
-                                                                  Navigator.of(
-                                                                          context)
-                                                                      .maybePop();
-                                                                },
-                                                                child:
-                                                                    const Text(
-                                                                        'Copy'),
-                                                              ),
-                                                            ],
-                                                          );
-                                                        },
-                                                      ),
                                                     if (message.files != null &&
                                                         message
                                                             .files!.isNotEmpty)
@@ -438,6 +485,21 @@ class _ChatDetailsWidgetState extends State<ChatDetailsWidget> {
   void dispose() {
     _scrollController.dispose();
     super.dispose();
+  }
+
+  void _saveEditedMessage(int messageId, int chatId) {
+    if (_editingText.trim().isEmpty) return;
+
+    context.read<ChatCubit>().editChatMessage(
+          messageId,
+          _editingText.trim(),
+          chatId,
+        );
+
+    setState(() {
+      _editingMessageId = null;
+      _editingText = "";
+    });
   }
 
   Widget _buildFileButton(

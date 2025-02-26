@@ -91,7 +91,10 @@ class ChatRepoImpl extends ChatRepo {
 
   @override
   Stream<List<ChatDto>> getChatsStream() {
-    return _chatStream.stream;
+    return _chatStream.stream.map((chats) {
+      print("📡 Stream emituje ${chats.length} chatova");
+      return chats;
+    });
   }
 
   @override
@@ -463,20 +466,7 @@ class ChatRepoImpl extends ChatRepo {
     if (response.error == null) {
       ChatPagination pagination = response.response!;
       chats = pagination.chats;
-
-      if (page == 1) {
-        _allChats.clear();
-        _loadedChatIds.clear();
-      }
-
-      for (var chat in chats) {
-        if (!_loadedChatIds.contains(chat.id)) {
-          _allChats.add(chat);
-          _loadedChatIds.add(chat.id);
-        }
-      }
-
-      _chatStream.add(List.from(_allChats));
+      _chatStream.add(List.from(chats));
       _paginationStream.add(pagination);
       _matchParticipantWithChat();
     } else {

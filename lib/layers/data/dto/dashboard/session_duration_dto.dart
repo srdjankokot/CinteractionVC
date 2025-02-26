@@ -16,9 +16,14 @@ class SessionDurationDto extends SessionDuration {
     var meetings = json["meetings"];
 
     return SessionDurationDto(
-        averageDuration: json['avg_duration'] as double,
-        averageUsers: json['avg_users'] as double,
-        meetings: List<SessionMeetingDto>.from(
-            meetings[0].map((e) => SessionMeetingDto.fromJson(e))));
+      averageDuration: (json['avg_duration'] is int)
+          ? (json['avg_duration'] as int).toDouble()
+          : json['avg_duration'] as double,
+      averageUsers: (json['avg_users'] is int)
+          ? (json['avg_users'] as int).toDouble()
+          : json['avg_users'] as double,
+      meetings: List<SessionMeetingDto>.from(
+          meetings[0].map((e) => SessionMeetingDto.fromJson(e))),
+    );
   }
 }
