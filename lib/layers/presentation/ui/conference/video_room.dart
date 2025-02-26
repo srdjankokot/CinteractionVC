@@ -30,7 +30,13 @@ class VideoRoomPage extends StatelessWidget {
     }
 
     if (state.isEnded) {
-      Navigator.of(context).pop();
+      // Navigator.of(context).pop();
+      if (Navigator.of(context).canPop()) {
+        Navigator.of(context).pop();
+      } else {
+        print("No route to pop.");
+        AppRoute.home.pushReplacement(context);
+      }
       // AppRoute.home.pushReplacement(context);
     }
   }
