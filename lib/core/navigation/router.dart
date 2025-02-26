@@ -122,7 +122,6 @@ final GoRouter router = GoRouter(
       },
     ),
 
-
     // Meeting
     GoRoute(
       path: AppRoute.meeting.path,
@@ -192,12 +191,11 @@ final GoRouter router = GoRouter(
         // final roomId = state.pathParameters['roomId'];
         return MultiBlocProvider(
           providers: [
-            BlocProvider<ChatCubit>(
-              create: (context) =>  getIt.get<ChatCubit>(),
-            ),
-
             BlocProvider<HomeCubit>(
-              create: (context) =>  getIt.get<HomeCubit>(),
+              create: (context) => getIt.get<HomeCubit>(),
+            ),
+            BlocProvider<ChatCubit>(
+              create: (context) => getIt.get<ChatCubit>(),
             ),
           ],
           child: const ChatRoomPage(),

@@ -81,13 +81,13 @@ class _ChatsListViewState extends State<ChatsListView> {
 
   Future<void> _loadMoreChats() async {
     if (isLoading || widget.state.pagination?.nextPageUrl == null) {
-      debugPrint("No more pages.");
+      // debugPrint("No more pages");
       return;
     }
 
     setState(() {
       isLoading = true;
-      debugPrint(" Pagination started - isLoading: $isLoading");
+      // debugPrint(" Pagination started - isLoading: $isLoading");
     });
 
     try {
@@ -95,7 +95,7 @@ class _ChatsListViewState extends State<ChatsListView> {
           .read<ChatCubit>()
           .loadChats(widget.state.pagination!.currentPage + 1, 20);
     } catch (e) {
-      debugPrint("⚠️ Greška pri učitavanju poruka: $e");
+      // debugPrint("⚠️ Greška pri učitavanju poruka: $e");
     }
 
     setState(() {
@@ -119,17 +119,6 @@ class _ChatsListViewState extends State<ChatsListView> {
 
   @override
   Widget build(BuildContext context) {
-    List<ChatDto> sortedChats = List.from(widget.state.chats!)
-      ..sort((a, b) {
-        DateTime? aTime = a.lastMessage?.createdAt ?? a.createdAt;
-        DateTime? bTime = b.lastMessage?.createdAt ?? b.createdAt;
-
-        if (aTime == null && bTime == null) return 0;
-        if (aTime == null) return 1;
-        if (bTime == null) return -1;
-
-        return bTime.compareTo(aTime);
-      });
     return widget.state.chats == null || widget.state.chats!.isEmpty
         ? Center(
             child: Text(
@@ -138,134 +127,146 @@ class _ChatsListViewState extends State<ChatsListView> {
                   context.textTheme.titleMedium?.copyWith(color: Colors.grey),
             ),
           )
-        : ListView.builder(
-            controller: _scrollController,
-            itemCount: sortedChats.length +
-                ((isLoading && widget.state.pagination?.nextPageUrl != null)
-                    ? 1
-                    : 0),
-            itemBuilder: (context, index) {
-              if (index < sortedChats.length) {
-                var chat = sortedChats[index];
-                bool isSelected = chat.id == selectedChat;
+        : BlocBuilder<ChatCubit, ChatState>(
+            builder: (context, state) {
+              print('📌 UI osvežen, prikazuje ${state.chats?.length} chatova');
 
-                return MouseRegion(
-                  cursor: SystemMouseCursors.click,
-                  child: GestureDetector(
-                    onTap: () async {
-                      setState(() {
-                        selectedChat = chat.id;
-                      });
-                      await context.read<ChatCubit>().getChatDetails(chat.id);
-                      await context.read<ChatCubit>().setCurrentChat(chat);
-                    },
-                    child: Container(
-                      decoration: BoxDecoration(
-                        color: isSelected ? Colors.blue[100] : Colors.white,
-                        border: Border(
-                          bottom: BorderSide(color: Colors.grey.shade300),
-                        ),
-                      ),
-                      padding: const EdgeInsets.symmetric(
-                          vertical: 10, horizontal: 12),
-                      child: Stack(
-                        children: [
-                          // Glavni red sa podacima o četu
-                          Row(
-                            crossAxisAlignment: CrossAxisAlignment.center,
+              List<ChatDto> sortedChats = List.from(state.chats ?? [])
+                ..sort((a, b) {
+                  DateTime? aTime = a.lastMessage?.createdAt ?? a.createdAt;
+                  DateTime? bTime = b.lastMessage?.createdAt ?? b.createdAt;
+                  return (bTime ?? DateTime(0)).compareTo(aTime ?? DateTime(0));
+                });
+
+              return ListView.builder(
+                controller: _scrollController,
+                itemCount: sortedChats.length +
+                    ((isLoading && widget.state.pagination?.nextPageUrl != null)
+                        ? 1
+                        : 0),
+                itemBuilder: (context, index) {
+                  if (index < sortedChats.length) {
+                    var chat = sortedChats[index];
+                    bool isSelected = chat.id == selectedChat;
+
+                    return MouseRegion(
+                      cursor: SystemMouseCursors.click,
+                      child: GestureDetector(
+                        onTap: () async {
+                          setState(() {
+                            selectedChat = chat.id;
+                          });
+                          await context
+                              .read<ChatCubit>()
+                              .getChatDetails(chat.id);
+                          await context.read<ChatCubit>().setCurrentChat(chat);
+                        },
+                        child: Container(
+                          decoration: BoxDecoration(
+                            color: isSelected ? Colors.blue[100] : Colors.white,
+                            border: Border(
+                              bottom: BorderSide(color: Colors.grey.shade300),
+                            ),
+                          ),
+                          padding: const EdgeInsets.symmetric(
+                              vertical: 10, horizontal: 12),
+                          child: Stack(
                             children: [
-                              // Profilna slika korisnika
-                              UserImage.medium(
-                                chat.userImage ??
-                                    "https://ui-avatars.com/api/?name=G+R&color=ffffff&background=f34320",
+                              Row(
+                                crossAxisAlignment: CrossAxisAlignment.center,
+                                children: [
+                                  UserImage.medium(
+                                    chat.userImage ??
+                                        "https://ui-avatars.com/api/?name=G+R&color=ffffff&background=f34320",
+                                  ),
+                                  const SizedBox(width: 12),
+                                  Expanded(
+                                    child: Column(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
+                                      children: [
+                                        Text(
+                                          chat.name,
+                                          style: const TextStyle(
+                                            fontFamily: 'Montserrat',
+                                            fontSize: 16,
+                                            fontWeight: FontWeight.w500,
+                                            color: Colors.black87,
+                                          ),
+                                        ),
+                                        const SizedBox(height: 3),
+                                        Text(
+                                          chat.lastMessage?.message
+                                                      ?.isNotEmpty ==
+                                                  true
+                                              ? chat.lastMessage!.message!
+                                              : (chat.lastMessage?.filePath !=
+                                                          null &&
+                                                      chat.lastMessage!
+                                                          .filePath!.isNotEmpty
+                                                  ? "File"
+                                                  : "No messages"),
+                                          style: const TextStyle(
+                                            fontSize: 14,
+                                            color: Colors.black54,
+                                          ),
+                                          maxLines: 1,
+                                          overflow: TextOverflow.ellipsis,
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                  Text(
+                                    formatTime(chat.lastMessage?.createdAt
+                                        .toIso8601String()),
+                                    style: const TextStyle(
+                                        fontSize: 12, color: Colors.black45),
+                                  ),
+                                ],
                               ),
-                              const SizedBox(width: 12),
-                              Expanded(
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Text(
-                                      chat.name,
-                                      style: const TextStyle(
-                                        fontFamily: 'Montserrat',
-                                        fontSize: 16,
-                                        fontWeight: FontWeight.w500,
-                                        color: Colors.black87,
-                                      ),
+                              if (chat.isOnline &&
+                                  chat.chatParticipants!.length < 2)
+                                Positioned(
+                                  left: 35,
+                                  top: 35,
+                                  child: ClipOval(
+                                    child: Container(
+                                      width: 10.0,
+                                      height: 10.0,
+                                      color: Colors.green,
                                     ),
-                                    const SizedBox(height: 3),
-                                    Text(
-                                      chat.lastMessage?.message?.isNotEmpty ==
-                                              true
-                                          ? chat.lastMessage!.message!
-                                          : (chat.lastMessage?.filePath !=
-                                                      null &&
-                                                  chat.lastMessage!.filePath!
-                                                      .isNotEmpty
-                                              ? "File"
-                                              : "No messages"),
-                                      style: const TextStyle(
-                                        fontSize: 14,
-                                        color: Colors.black54,
-                                      ),
-                                      maxLines: 1,
-                                      overflow: TextOverflow.ellipsis,
-                                    ),
-                                  ],
+                                  ),
                                 ),
-                              ),
-
-                              Text(
-                                formatTime(chat.lastMessage?.createdAt
-                                    .toIso8601String()),
-                                style: const TextStyle(
-                                    fontSize: 12, color: Colors.black45),
-                              ),
+                              if (isSelected)
+                                Positioned(
+                                  right: 25,
+                                  top: 5,
+                                  child: IconButton(
+                                    icon: Icon(Icons.delete,
+                                        color: Colors.redAccent.shade700),
+                                    onPressed: () => _showRemoveDialog(
+                                        chat.id, context, _deleteChat),
+                                  ),
+                                ),
                             ],
                           ),
-
-                          if (chat.isOnline &&
-                              chat.chatParticipants!.length < 2)
-                            Positioned(
-                              left: 35,
-                              top: 35,
-                              child: ClipOval(
-                                child: Container(
-                                  width: 10.0,
-                                  height: 10.0,
-                                  color: Colors.green,
-                                ),
-                              ),
-                            ),
-
-                          if (isSelected)
-                            Positioned(
-                              right: 25,
-                              top: 5,
-                              child: IconButton(
-                                icon: Icon(Icons.delete,
-                                    color: Colors.redAccent.shade700),
-                                onPressed: () => _showRemoveDialog(
-                                    chat.id, context, _deleteChat),
-                              ),
-                            ),
-                        ],
+                        ),
                       ),
-                    ),
-                  ),
-                );
-              } else {
-                return Padding(
-                  padding: const EdgeInsets.symmetric(vertical: 16.0),
-                  child: Center(
-                    child: SizedBox(
-                      width: 50,
-                      height: 50,
-                      child: CircularProgressIndicator(),
-                    ),
-                  ),
-                );
-              }
+                    );
+                  } else {
+                    return Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 16.0),
+                      child: Center(
+                        child: SizedBox(
+                          width: 50,
+                          height: 50,
+                          child: CircularProgressIndicator(),
+                        ),
+                      ),
+                    );
+                  }
+                },
+              );
             },
           );
   }
