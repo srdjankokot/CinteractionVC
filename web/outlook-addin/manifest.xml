@@ -5,7 +5,7 @@
   xmlns:mailappor="http://schemas.microsoft.com/office/mailappversionoverrides/1.0" xsi:type="MailApp">
   <Id>36e0cf2d-93d7-4549-9aba-d56b7b88a44a</Id>
   <Version>1.0.0.0</Version>
-  <ProviderName>Contoso</ProviderName>
+  <ProviderName>Cinteraction</ProviderName>
   <DefaultLocale>en-US</DefaultLocale>
   <DisplayName DefaultValue="Cinteraction Add-In"/>
   <Description DefaultValue="Add Cinteraction Meet video meetings in Outlook"/>
@@ -26,7 +26,7 @@
   <FormSettings>
     <Form xsi:type="ItemRead">
       <DesktopSettings>
-         <SourceLocation DefaultValue="https://huawei.nswebdevelopment.com/web/addin/taskpane.html"/>
+         <SourceLocation DefaultValue="https://178.220.126.196:3003/taskpane.html"/>
         <RequestedHeight>250</RequestedHeight>
       </DesktopSettings>
     </Form>
