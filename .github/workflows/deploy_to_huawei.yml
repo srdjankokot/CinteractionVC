@@ -18,19 +18,35 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22.2.0'
+
+      - name: Install node dependencies
+        run: npm install
+        working-directory: web/addin/  # Change this to the correct folder
+
+      - name: Build outlook addin
+        run: npm run build
+        working-directory: web/addin/  # Change this to the correct folder
+
+
       # Include the flutter action
       - uses: subosito/flutter-action@v1
         with:
           flutter-version: 3.24.5
           channel: 'stable'
 
-      - name: Install dependencies
+      - name: Install flutter dependencies
         run: flutter pub get
       - name: Build Web Release
         run: flutter build web --release
-      - name: Flutter version
-        run: flutter --version
+#      - name: Flutter version
+#        run: flutter --version
 
 
       - name: FTP Deploy
