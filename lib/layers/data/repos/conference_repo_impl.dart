@@ -65,7 +65,6 @@ class ConferenceRepoImpl extends ConferenceRepo {
   late String myId = user?.id ?? "";
   late String displayName = user?.name ?? 'User $myId';
 
-  get screenShareId => myId + "_screen_share";
 
   int? callId;
 
