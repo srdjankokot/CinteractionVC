@@ -125,21 +125,36 @@ class ChatPaginationDto {
     this.meta,
   });
 
-  factory ChatPaginationDto.fromJson(Map<String, dynamic> json) =>
-      ChatPaginationDto(
-        messages: (json['data'] as List<dynamic>)
-            .map((message) =>
-                MessageDto.fromJson(message as Map<String, dynamic>))
-            .toList(),
-        links: json['links'] as Map<String, dynamic>?,
-        meta: json['meta'] as Map<String, dynamic>?,
-      );
+  ChatPaginationDto copyWith({
+    List<MessageDto>? messages,
+    Map<String, dynamic>? links,
+    Map<String, dynamic>? meta,
+  }) {
+    return ChatPaginationDto(
+      messages: messages ?? this.messages,
+      links: links ?? this.links,
+      meta: meta ?? this.meta,
+    );
+  }
 
-  Map<String, dynamic> toJson() => {
-        'data': messages.map((message) => message.toJson()).toList(),
-        'links': links,
-        'meta': meta,
-      };
+  factory ChatPaginationDto.fromJson(Map<String, dynamic> json) {
+    return ChatPaginationDto(
+      messages: (json['data'] as List<dynamic>)
+          .map(
+              (message) => MessageDto.fromJson(message as Map<String, dynamic>))
+          .toList(),
+      links: json['links'] as Map<String, dynamic>?,
+      meta: json['meta'] as Map<String, dynamic>?,
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'data': messages.map((message) => message.toJson()).toList(),
+      'links': links,
+      'meta': meta,
+    };
+  }
 }
 
 class ChatDetailsDto {
@@ -159,26 +174,48 @@ class ChatDetailsDto {
     this.isGroup = false,
   });
 
-  factory ChatDetailsDto.fromJson(Map<String, dynamic> json) => ChatDetailsDto(
-        chatId: json['chat_id'] as int?,
-        chatName: json['chat_name'] as String?,
-        authUser: ChatParticipantDto.fromJson(json['auth_user']),
-        chatParticipants: (json['chat_participants'] as List<dynamic>)
-            .map((participant) => ChatParticipantDto.fromJson(
-                participant as Map<String, dynamic>))
-            .toList(),
-        messages: ChatPaginationDto.fromJson(json['messages']),
-        isGroup: (json['chat_group'] as bool?) ?? false,
-      );
+  ChatDetailsDto copyWith({
+    int? chatId,
+    String? chatName,
+    ChatParticipantDto? authUser,
+    List<ChatParticipantDto>? chatParticipants,
+    ChatPaginationDto? messages,
+    bool? isGroup,
+  }) {
+    return ChatDetailsDto(
+      chatId: chatId ?? this.chatId,
+      chatName: chatName ?? this.chatName,
+      authUser: authUser ?? this.authUser,
+      chatParticipants: chatParticipants ?? this.chatParticipants,
+      messages: messages ?? this.messages,
+      isGroup: isGroup ?? this.isGroup,
+    );
+  }
 
-  Map<String, dynamic> toJson() => {
-        'chat_id': chatId,
-        'chat_name': chatName,
-        'auth_user': authUser.toJson(),
-        'chat_participants': chatParticipants.map((p) => p.toJson()).toList(),
-        'messages': messages.toJson(),
-        'chat_group': isGroup,
-      };
+  factory ChatDetailsDto.fromJson(Map<String, dynamic> json) {
+    return ChatDetailsDto(
+      chatId: json['chat_id'] as int?,
+      chatName: json['chat_name'] as String?,
+      authUser: ChatParticipantDto.fromJson(json['auth_user']),
+      chatParticipants: (json['chat_participants'] as List<dynamic>)
+          .map((participant) =>
+              ChatParticipantDto.fromJson(participant as Map<String, dynamic>))
+          .toList(),
+      messages: ChatPaginationDto.fromJson(json['messages']),
+      isGroup: (json['chat_group'] as bool?) ?? false,
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'chat_id': chatId,
+      'chat_name': chatName,
+      'auth_user': authUser.toJson(),
+      'chat_participants': chatParticipants.map((p) => p.toJson()).toList(),
+      'messages': messages.toJson(),
+      'chat_group': isGroup,
+    };
+  }
 
   @override
   String toString() {

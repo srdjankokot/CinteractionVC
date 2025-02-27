@@ -61,14 +61,13 @@ class _ChatsListViewState extends State<ChatsListView> {
       });
 
       WidgetsBinding.instance.addPostFrameCallback((_) {
-        context.read<ChatCubit>().getChatDetails(selectedChat);
+        context.read<ChatCubit>().getChatDetails(selectedChat, 1);
       });
     } else {
       setState(() {
         selectedChat = null;
       });
     }
-    print('selectedChat $selectedChat');
   }
 
   void _scrollListener() {
@@ -129,8 +128,6 @@ class _ChatsListViewState extends State<ChatsListView> {
           )
         : BlocBuilder<ChatCubit, ChatState>(
             builder: (context, state) {
-              print('📌 UI osvežen, prikazuje ${state.chats?.length} chatova');
-
               List<ChatDto> sortedChats = List.from(state.chats ?? [])
                 ..sort((a, b) {
                   DateTime? aTime = a.lastMessage?.createdAt ?? a.createdAt;
@@ -158,8 +155,10 @@ class _ChatsListViewState extends State<ChatsListView> {
                           });
                           await context
                               .read<ChatCubit>()
-                              .getChatDetails(chat.id);
+                              .getChatDetails(chat.id, 1);
                           await context.read<ChatCubit>().setCurrentChat(chat);
+                          print(
+                              'chatIsOnline: ${chat.chatParticipants?[0].id}');
                         },
                         child: Container(
                           decoration: BoxDecoration(
@@ -193,6 +192,8 @@ class _ChatsListViewState extends State<ChatsListView> {
                                             fontWeight: FontWeight.w500,
                                             color: Colors.black87,
                                           ),
+                                          overflow: TextOverflow.ellipsis,
+                                          maxLines: 1,
                                         ),
                                         const SizedBox(height: 3),
                                         Text(
@@ -242,8 +243,11 @@ class _ChatsListViewState extends State<ChatsListView> {
                                   right: 25,
                                   top: 5,
                                   child: IconButton(
-                                    icon: Icon(Icons.delete,
-                                        color: Colors.redAccent.shade700),
+                                    icon: Icon(
+                                      Icons.delete_forever,
+                                      color: Color(0xFFFF6B6B),
+                                      size: 26,
+                                    ),
                                     onPressed: () => _showRemoveDialog(
                                         chat.id, context, _deleteChat),
                                   ),
