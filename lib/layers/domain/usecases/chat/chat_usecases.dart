@@ -11,7 +11,9 @@ import 'package:cinteraction_vc/layers/domain/usecases/chat/get_messages.dart';
 import 'package:cinteraction_vc/layers/domain/usecases/chat/get_pagination_stream.dart';
 import 'package:cinteraction_vc/layers/domain/usecases/chat/get_participants.dart';
 import 'package:cinteraction_vc/layers/domain/usecases/chat/get_users.dart';
+import 'package:cinteraction_vc/layers/domain/usecases/chat/get_users_pagination_stream.dart';
 import 'package:cinteraction_vc/layers/domain/usecases/chat/load_chats.dart';
+import 'package:cinteraction_vc/layers/domain/usecases/chat/load_users.dart';
 import 'package:cinteraction_vc/layers/domain/usecases/chat/message_seen.dart';
 import 'package:cinteraction_vc/layers/domain/usecases/chat/remove_user_from_group.dart';
 import 'package:cinteraction_vc/layers/domain/usecases/chat/send_chat_message_stream.dart';
@@ -40,11 +42,13 @@ class ChatUseCases {
         chooseFile = ChooseFile(repo: repo),
         getChatsStream = GetChatsStream(repo: repo),
         loadChats = LoadChats(repo: repo),
+        loadUsers = LoadUsers(repo: repo),
         setCurrentChat = SetCurrentChat(repo: repo),
         getChatDetails = GetChatDetails(repo: repo),
         getChatDetailsByParticipiant = GetChatDetailsByParticipiant(repo: repo),
         getChatDetailsStream = GetChatDetailsStream(repo: repo),
         getPaginationStream = GetPaginationStream(repo: repo),
+        getUsersPaginationStream = GetUsersPaginationStream(repo: repo),
         sendMessageToChatStream = SendMessageToChatStream(repo: repo),
         chatDeleteMessage = DeleteMessage(repo: repo),
         chatEditMessage = EditMessage(repo: repo),
@@ -74,6 +78,8 @@ class ChatUseCases {
   AddUserToGroup addUserToGroup;
   DeleteChat deleteChat;
   LoadChats loadChats;
+  LoadUsers loadUsers;
   GetPaginationStream getPaginationStream;
+  GetUsersPaginationStream getUsersPaginationStream;
   DownloadMedia downloadMedia;
 }

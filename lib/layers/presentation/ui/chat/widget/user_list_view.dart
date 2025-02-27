@@ -18,85 +18,170 @@ class UsersListView extends StatefulWidget {
 
 class _UsersListViewState extends State<UsersListView> {
   int? selectedUserId;
+  late ScrollController _scrollController;
+  bool isLoading = false;
 
   @override
   void initState() {
     super.initState();
+    _scrollController = ScrollController()..addListener(_scrollListener);
+    _updateSelectedUser();
+  }
+
+  @override
+  void didUpdateWidget(UsersListView oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (widget.state.users!.length != oldWidget.state.users!.length) {
+      _updateSelectedUser();
+    }
+  }
+
+  void _updateSelectedUser() {
     if (widget.state.users != null && widget.state.users!.isNotEmpty) {
-      selectedUserId = int.parse(widget.state.users!.first.id);
+      setState(() {
+        selectedUserId = int.parse(widget.state.users!.first.id);
+      });
 
       WidgetsBinding.instance.addPostFrameCallback((_) {
-        context.read<ChatCubit>().getChatDetailsByParticipiant(selectedUserId!);
+        context
+            .read<ChatCubit>()
+            .getChatDetailsByParticipiant(selectedUserId!, 1);
         context.read<ChatCubit>().setCurrentParticipant(widget.state.users![0]);
+      });
+    } else {
+      setState(() {
+        selectedUserId = null;
       });
     }
   }
 
+  void _scrollListener() {
+    if (_scrollController.position.pixels >=
+            _scrollController.position.maxScrollExtent - 100 &&
+        !isLoading) {
+      _loadMoreUsers();
+    }
+  }
+
+  Future<void> _loadMoreUsers() async {
+    if (isLoading || widget.state.usersPagination!.links.next == null) {
+      return;
+    }
+
+    setState(() {
+      isLoading = true;
+    });
+
+    try {
+      await context
+          .read<ChatCubit>()
+          .loadUsers(widget.state.usersPagination!.meta.currentPage + 1, 10);
+    } catch (e) {
+      debugPrint("⚠️ Greška pri učitavanju korisnika: $e");
+    }
+
+    setState(() {
+      isLoading = false;
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
-    return ListView.builder(
-      itemCount: widget.state.users?.length ?? 0,
-      itemBuilder: (context, index) {
-        var user = widget.state.users![index];
-        int userId = int.parse(user.id);
-
-        return GestureDetector(
-          onTap: () async {
-            setState(() {
-              selectedUserId = userId;
-            });
-            await context
-                .read<ChatCubit>()
-                .getChatDetailsByParticipiant(userId);
-            await context.read<ChatCubit>().setCurrentParticipant(user);
-            print('UserId: ${user.id}');
-          },
-          child: Container(
-            color: userId == selectedUserId ? Colors.blue[100] : Colors.white,
-            child: Padding(
-              padding: const EdgeInsets.all(4.0),
-              child: Row(
-                crossAxisAlignment: CrossAxisAlignment.center,
-                mainAxisAlignment: MainAxisAlignment.start,
-                children: [
-                  const SizedBox(width: 10),
-                  Stack(
-                    children: [
-                      UserImage.medium(user.imageUrl),
-                      Visibility(
-                        visible: user.online,
-                        child: Positioned(
-                          bottom: 2,
-                          right: 4,
-                          child: ClipOval(
-                            child: Container(
-                              width: 10.0,
-                              height: 10.0,
-                              color: Colors.green,
-                            ),
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(width: 10),
-                  Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        user.name,
-                        textAlign: TextAlign.center,
-                        style: context.textTheme.titleMedium,
-                      ),
-                    ],
-                  ),
-                ],
-              ),
+    return widget.state.users == null || widget.state.users!.isEmpty
+        ? Center(
+            child: Text(
+              'No users found',
+              style:
+                  context.textTheme.titleMedium?.copyWith(color: Colors.grey),
             ),
-          ),
-        );
-      },
-    );
+          )
+        : ListView.builder(
+            controller: _scrollController,
+            itemCount: widget.state.users!.length +
+                ((isLoading && widget.state.pagination?.nextPageUrl != null)
+                    ? 1
+                    : 0),
+            itemBuilder: (context, index) {
+              if (index < widget.state.users!.length) {
+                var user = widget.state.users![index];
+                int userId = int.parse(user.id);
+                bool isSelected = userId == selectedUserId;
+
+                return GestureDetector(
+                  onTap: () async {
+                    setState(() {
+                      selectedUserId = userId;
+                    });
+                    await context
+                        .read<ChatCubit>()
+                        .getChatDetailsByParticipiant(userId, 1);
+                    await context.read<ChatCubit>().setCurrentParticipant(user);
+                  },
+                  child: Container(
+                    color: isSelected ? Colors.blue[100] : Colors.white,
+                    child: Padding(
+                      padding: const EdgeInsets.all(4.0),
+                      child: Row(
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                        mainAxisAlignment: MainAxisAlignment.start,
+                        children: [
+                          const SizedBox(width: 10),
+                          Stack(
+                            children: [
+                              UserImage.medium(user.imageUrl),
+                              Visibility(
+                                visible: user.online,
+                                child: Positioned(
+                                  bottom: 2,
+                                  right: 4,
+                                  child: ClipOval(
+                                    child: Container(
+                                      width: 10.0,
+                                      height: 10.0,
+                                      color: Colors.green,
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                          const SizedBox(width: 10),
+                          Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                user.name,
+                                textAlign: TextAlign.center,
+                                style: context.textTheme.titleMedium,
+                              ),
+                            ],
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                );
+              } else {
+                return const Padding(
+                  padding: EdgeInsets.symmetric(vertical: 16.0),
+                  child: Center(
+                    child: SizedBox(
+                      width: 50,
+                      height: 50,
+                      child: CircularProgressIndicator(),
+                    ),
+                  ),
+                );
+              }
+            },
+          );
+  }
+
+  @override
+  void dispose() {
+    _scrollController.removeListener(_scrollListener);
+    _scrollController.dispose();
+    super.dispose();
   }
 }

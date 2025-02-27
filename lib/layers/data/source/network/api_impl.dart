@@ -58,17 +58,16 @@ class ApiImpl extends Api {
   }
 
   @override
-  Future<ApiResponse<List<UserDto>>> getCompanyUsers() async {
+  Future<ApiResponse<UserListResponse>> getCompanyUsers(
+      int page, int paginate) async {
     try {
       Dio dio = await getIt.getAsync<Dio>();
-      Response response = await dio.get(Urls.getCompanyUsers);
-      List<UserDto> users = [];
-      for (var u in response.data['data']) {
-        var user = UserDto.fromJson(u as Map<String, dynamic>);
-        users.add(user);
-      }
+      Response response = await dio
+          .get('${Urls.getCompanyUsers}?page=$page&paginate=$paginate');
 
-      return ApiResponse(response: users);
+      var userListResponse = UserListResponse.fromJson(response.data);
+
+      return ApiResponse(response: userListResponse);
     } on DioException catch (e) {
       return ApiResponse(error: ApiErrorDto.fromDioException(e));
     }
@@ -412,10 +411,11 @@ class ApiImpl extends Api {
   }
 
   @override
-  Future<ApiResponse<ChatDetailsDto>> getChatById({dynamic id}) async {
+  Future<ApiResponse<ChatDetailsDto>> getChatById(
+      {required id, required page}) async {
     try {
       Dio dio = await getIt.getAsync<Dio>();
-      Response response = await dio.get('${Urls.getChatById}$id');
+      Response response = await dio.get('${Urls.getChatById}$id?page=$page');
       var chatDetails = ChatDetailsDto.fromJson(response.data);
 
       return ApiResponse(response: chatDetails);
@@ -462,10 +462,11 @@ class ApiImpl extends Api {
 
   @override
   Future<ApiResponse<ChatDetailsDto>> getChatByParticipiant(
-      {required dynamic id}) async {
+      {required int id, required int page}) async {
     try {
       Dio dio = await getIt.getAsync<Dio>();
-      Response response = await dio.get('${Urls.getChatByParticipiant}$id');
+      Response response =
+          await dio.get('${Urls.getChatByParticipiant}$id?page=$page');
       var chatDetails = ChatDetailsDto.fromJson(response.data);
 
       return ApiResponse(response: chatDetails);

@@ -89,7 +89,7 @@ class ChatRoomPage extends StatelessWidget {
 
     Future<void> pickAndSendFile() async {
       FilePickerResult? result = await FilePicker.platform.pickFiles(
-        withData: kIsWeb,
+        withData: true,
       );
 
       if (result != null) {
@@ -97,13 +97,18 @@ class ChatRoomPage extends StatelessWidget {
 
         Uint8List? fileBytes;
 
-        if (kIsWeb) {
+        if (file.bytes != null) {
           fileBytes = file.bytes;
-        } else if (file.bytes != null) {
-          fileBytes = file.bytes;
+          print('Bytes read from picker');
         } else if (file.path != null) {
+          print('File path: ${file.path}');
           File selectedFile = File(file.path!);
-          fileBytes = await selectedFile.readAsBytes();
+          if (await selectedFile.exists()) {
+            fileBytes = await selectedFile.readAsBytes();
+            print('Bytes read from file: ${fileBytes.length}');
+          } else {
+            print('Error: File does not exist.');
+          }
         }
 
         if (fileBytes != null) {
@@ -112,13 +117,13 @@ class ChatRoomPage extends StatelessWidget {
             size: fileBytes.length,
             bytes: fileBytes,
           );
-          print('fileSSSS:  $file');
+          print('sendedFiles:  $fileWithBytes');
           await sendMessage(uploadedFiles: [fileWithBytes]);
         } else {
-          print('Error: Bites not readed.');
+          print('Error: Bytes not read.');
         }
       } else {
-        print('User cancel choose file');
+        print('User canceled file selection');
       }
     }
 
@@ -373,7 +378,7 @@ class ChatRoomPage extends StatelessWidget {
                     const Divider(),
                     Expanded(
                       child: state.listType == ListType.Chats
-                          ? state.chats!.isNotEmpty
+                          ? (state.chats?.isNotEmpty ?? false)
                               ? ChatsListView(state: state)
                               : const Center(
                                   child: Text('There is no chats'),

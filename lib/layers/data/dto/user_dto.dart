@@ -7,16 +7,18 @@ class UserDto extends User {
     required super.email,
     required super.imageUrl,
     this.chatId,
+    super.online = false,
   });
 
   final int? chatId;
 
   factory UserDto.fromJson(Map<String, dynamic> json) => UserDto(
-      id: "${json['id']}",
-      name: json['name'] as String,
-      email: json['email'] as String,
-      imageUrl: json['profile_photo_path'] as String,
-      chatId: json['chat_id'] as int?);
+        id: "${json['id']}",
+        name: json['name'] as String,
+        email: json['email'] as String,
+        imageUrl: json['profile_photo_path'] as String,
+        chatId: json['chat_id'] as int?,
+      );
 
   Map<String, dynamic> toJson() => <String, dynamic>{
         'id': id,
@@ -25,6 +27,24 @@ class UserDto extends User {
         'profile_photo_path': imageUrl,
         'chat_id': chatId,
       };
+
+  UserDto copyWith({
+    String? id,
+    String? name,
+    String? email,
+    String? imageUrl,
+    int? chatId,
+    bool? online, // Dodato
+  }) {
+    return UserDto(
+      id: id ?? this.id,
+      name: name ?? this.name,
+      email: email ?? this.email,
+      imageUrl: imageUrl ?? this.imageUrl,
+      chatId: chatId ?? this.chatId,
+      online: online ?? this.online,
+    );
+  }
 }
 
 class UserListResponse {

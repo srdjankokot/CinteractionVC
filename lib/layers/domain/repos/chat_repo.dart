@@ -24,16 +24,18 @@ abstract class ChatRepo {
   Stream<List<ChatMessage>> getMessageStream();
   Stream<ChatDetailsDto> getChatDetailsStream();
   Stream<ChatPagination> getPaginationStream();
+  Stream<UserListResponse> getUsersPaginationStream();
 
   Future<void> sendMessageToChatWrapper(String? name, int? chatId,
       String? messageContent, int senderId, List<int> participantIds,
       {List<PlatformFile>? uploadedFiles});
   // Future<void> createGroup(String name, int senderId, List<int> participantIds,);
   Future<void> loadChats(int page, int paginate);
+  Future<void> loadUsers(int page, int paginate);
   Future<void> setCurrentParticipant(UserDto user);
   Future<void> setCurrentChat(ChatDto chat);
-  Future<void> getChatDetails(int id);
-  Future<void> getChatDetailsByParticipiant(int id);
+  Future<void> getChatDetails(int id, int page);
+  Future<void> getChatDetailsByParticipiant(int id, int page);
   Future<void> deleteChat(int id);
   Future<void> deleteMessage(int id);
   Future<void> editMessage(int id, String message);
