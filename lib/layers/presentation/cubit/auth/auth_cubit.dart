@@ -42,8 +42,8 @@ class AuthCubit extends Cubit<AuthState> with BlocLoggy {
 
     final response = await _authUseCases.signUpWithEmailAndPassword(
         email, password, name, true);
-    if (response.response ?? false) {
-      emit(const AuthState.registerSuccess());
+    if (response.response != null) {
+      emit(AuthState.registerSuccess(message: response.response));
     } else {
       emit(state.error(errorMessage: response.error!.errorMessage));
     }

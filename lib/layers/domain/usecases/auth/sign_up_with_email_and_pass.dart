@@ -11,7 +11,7 @@ class SignUpWithEmailAndPassword{
 
   final AuthRepo _repo = getIt.get<AuthRepo>();
 
-  Future<ApiResponse<bool>> call( String email,
+  Future<ApiResponse<String>> call( String email,
        String password,
        String name,
        bool terms) async{

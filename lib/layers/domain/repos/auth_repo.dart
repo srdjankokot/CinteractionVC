@@ -8,7 +8,7 @@ abstract class AuthRepo
 {
   const AuthRepo();
 
-  Future<ApiResponse<bool>> signUpWithEmailAndPassword({
+  Future<ApiResponse<String>> signUpWithEmailAndPassword({
     required String email,
     required String password,
     required String name,

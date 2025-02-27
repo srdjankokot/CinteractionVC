@@ -16,7 +16,7 @@ import '../entities/meetings/meeting_response.dart';
 abstract class Api {
   Future<ApiResponse<LoginResponse?>> signInEmailPass(
       {required email, required pass});
-  Future<ApiResponse<bool>> signUpEmailPass(
+  Future<ApiResponse<String>> signUpEmailPass(
       {required email, required pass, required name, required terms});
   Future<String?> socialLogin({required provider, required token});
   Future<ApiResponse<UserDto?>> getUserDetails();
