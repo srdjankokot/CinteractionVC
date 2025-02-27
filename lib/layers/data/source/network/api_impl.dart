@@ -17,7 +17,6 @@ import '../../dto/chat/chat_dto.dart';
 import '../../dto/dashboard/dashboard_response_dto.dart';
 import '../../dto/meetings/meeting_dto.dart';
 import '../../dto/meetings/meeting_response_dto.dart';
-import 'dart:html' as html;
 
 class ApiImpl extends Api {
   T? _parseResponseData<T>(
@@ -25,28 +24,10 @@ class ApiImpl extends Api {
     return fromJson(data);
   }
 
-  void clearDioCookies(Dio dio) {
-    dio.interceptors.clear();
-  }
-
-  String? getCookie(String name) {
-    final cookies = html.document.cookie?.split('; ') ?? [];
-    for (var cookie in cookies) {
-      final parts = cookie.split('=');
-      if (parts.length == 2 && parts[0] == name) {
-        return parts[1];
-      }
-    }
-    return null;
-  }
-
   @override
   Future<ApiResponse<LoginResponse?>> signInEmailPass(
       {required email, required pass}) async {
     try {
-      print("XSRF-TOKEN: ${getCookie('XSRF-TOKEN')}");
-      
-      
       var formData = FormData.fromMap({'email': email, 'password': pass});
       Dio dio = await getIt.getAsync<Dio>();
 
