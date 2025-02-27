@@ -65,6 +65,7 @@ class ConferenceRepoImpl extends ConferenceRepo {
   late String myId = user?.id ?? "";
   late String displayName = user?.name ?? 'User $myId';
 
+  get screenShareId => int.parse(myId) * 774352;
 
   int? callId;
 
@@ -180,7 +181,7 @@ class ConferenceRepoImpl extends ConferenceRepo {
 
     List<List<Map>> sources = [];
     for (Map publisher in publishers) {
-      if ([myId, screenShareId].contains(publisher['id'])) {
+      if ([myId, screenShareId.toString()].contains(publisher['id'])) {
         print('PUBLISHER CHANGE: publishers: its me');
         continue;
       }
