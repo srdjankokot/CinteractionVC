@@ -27,12 +27,19 @@ class ApiImpl extends Api {
     return fromJson(data);
   }
 
+  void clearDioCookies(Dio dio) {
+    dio.interceptors.clear();
+  }
+
   @override
   Future<ApiResponse<LoginResponse?>> signInEmailPass(
       {required email, required pass}) async {
     try {
       var formData = FormData.fromMap({'email': email, 'password': pass});
       Dio dio = await getIt.getAsync<Dio>();
+
+      clearDioCookies(dio);
+
       Response response = await dio.post(Urls.loginEndpoint, data: formData);
       LoginResponse? login =
           _parseResponseData(response.data, LoginResponse.fromJson);
@@ -216,7 +223,7 @@ class ApiImpl extends Api {
   }
 
   @override
-  Future<ApiResponse<bool>> signUpEmailPass(
+  Future<ApiResponse<String>> signUpEmailPass(
       {required email, required pass, required name, required terms}) async {
     Dio dio = await getIt.getAsync<Dio>();
 
@@ -230,8 +237,7 @@ class ApiImpl extends Api {
 
     try {
       Response response = await dio.post(Urls.registerEndpoint, data: formData);
-      return ApiResponse(
-          response: response.statusCode! > 200 && response.statusCode! < 300);
+      return ApiResponse(response: response.data["message"]);
     } on DioException catch (e, s) {
       return ApiResponse(error: ApiErrorDto.fromDioException(e));
     }

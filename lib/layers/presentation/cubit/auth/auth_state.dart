@@ -9,6 +9,7 @@ class AuthState extends Equatable {
       this.loading,
       required this.isChecked,
       this.errorMessage,
+      this.message,
       this.resetPassword});
 
   @override
@@ -21,6 +22,7 @@ class AuthState extends Equatable {
   final bool? loading;
   final bool isChecked;
   final String? errorMessage;
+  final String? message;
   final bool? resetPassword;
 
   const AuthState.initial({
@@ -32,32 +34,30 @@ class AuthState extends Equatable {
     bool isChecked = false,
     bool resetPassword = false,
   }) : this(
-      isLogged: isLogged,
-      isSignUp: isSignUp,
-      loading: loading,
-      isChecked: isChecked,
-      loginSuccess: loginSuccess,
-      registerSuccess: registerSuccess,
-      resetPassword: resetPassword
-  );
-
-  const AuthState.register(
-      {bool isLogged = false,
-      bool loginSuccess = false,
-      bool registerSuccess = false,
-      bool isSignUp = true,
-      bool loading = false,
-      bool isChecked = false,
-      bool resetPassword = false,
-      })
-      : this(
             isLogged: isLogged,
             isSignUp: isSignUp,
             loading: loading,
             isChecked: isChecked,
             loginSuccess: loginSuccess,
             registerSuccess: registerSuccess,
-      resetPassword: resetPassword);
+            resetPassword: resetPassword);
+
+  const AuthState.register({
+    bool isLogged = false,
+    bool loginSuccess = false,
+    bool registerSuccess = false,
+    bool isSignUp = true,
+    bool loading = false,
+    bool isChecked = false,
+    bool resetPassword = false,
+  }) : this(
+            isLogged: isLogged,
+            isSignUp: isSignUp,
+            loading: loading,
+            isChecked: isChecked,
+            loginSuccess: loginSuccess,
+            registerSuccess: registerSuccess,
+            resetPassword: resetPassword);
 
   const AuthState.loginSuccess({
     bool isLogged = false,
@@ -74,7 +74,7 @@ class AuthState extends Equatable {
             isChecked: isChecked,
             loginSuccess: loginSuccess,
             registerSuccess: registerSuccess,
-      resetPassword: resetPassword);
+            resetPassword: resetPassword);
 
   const AuthState.registerSuccess(
       {bool isLogged = false,
@@ -83,7 +83,8 @@ class AuthState extends Equatable {
       bool isSignUp = false,
       bool loading = false,
       bool isChecked = false,
-        bool resetPassword = false,})
+      bool resetPassword = false,
+      String? message})
       : this(
             isLogged: isLogged,
             isSignUp: isSignUp,
@@ -91,7 +92,9 @@ class AuthState extends Equatable {
             isChecked: isChecked,
             loginSuccess: loginSuccess,
             registerSuccess: registerSuccess,
-      resetPassword: resetPassword);
+            resetPassword: resetPassword,
+            message: message
+  );
 
   AuthState copyWith(
       {bool? isSignUp,
@@ -99,7 +102,7 @@ class AuthState extends Equatable {
       bool? isChecked,
       String? errorMessage,
       bool? isLogged,
-        bool? resetPassword}) {
+      bool? resetPassword}) {
     return AuthState(
         isLogged: isLogged ?? this.isLogged,
         isSignUp: isSignUp ?? this.isSignUp,

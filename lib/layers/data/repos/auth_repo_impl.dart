@@ -98,7 +98,7 @@ class AuthRepoImpl extends AuthRepo {
   }
 
   @override
-  Future<ApiResponse<bool>> signUpWithEmailAndPassword(
+  Future<ApiResponse<String>> signUpWithEmailAndPassword(
       {required String email,
       required String password,
       required String name,

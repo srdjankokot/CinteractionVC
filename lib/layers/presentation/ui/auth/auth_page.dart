@@ -67,7 +67,7 @@ class AuthPage extends StatelessWidget {
         _emailController.clear();
 
         context.showSnackBarMessage(
-          'You successfully registered account',
+          state.message ?? 'You successfully registered account',
           isError: false,
         );
 
