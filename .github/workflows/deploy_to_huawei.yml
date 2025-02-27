@@ -21,18 +21,18 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Set up Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: '22.2.0'
-
-      - name: Install node dependencies
-        run: npm install
-        working-directory: web/addin/  # Change this to the correct folder
-
-      - name: Build outlook addin
-        run: npm run build
-        working-directory: web/addin/  # Change this to the correct folder
+#      - name: Set up Node.js
+#        uses: actions/setup-node@v4
+#        with:
+#          node-version: '22.2.0'
+#
+#      - name: Install node dependencies
+#        run: npm install
+#        working-directory: web/addin/  # Change this to the correct folder
+#
+#      - name: Build outlook addin
+#        run: npm run build
+#        working-directory: web/addin/  # Change this to the correct folder
 
 
       # Include the flutter action
@@ -62,4 +62,4 @@ jobs:
           local_path: build/web/*
           remote_path: /var/www/cinteraction/front
           sftp_only: true
-          rsyncArgs: '--exclude=index.html --exclude=.htaccess'
+          rsyncArgs: '--exclude=index.html --exclude=.htaccess --exclude=/addin/node_modules/'
