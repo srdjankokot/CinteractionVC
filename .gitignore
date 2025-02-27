@@ -37,4 +37,4 @@ google-services.json
 # FVM Version Cache
 .fvm/
 
-web/outlook-addin/node_modules/
+web/addin/node_modules/
