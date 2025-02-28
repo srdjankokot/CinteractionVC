@@ -800,12 +800,13 @@ class ChatRoomPage extends StatelessWidget {
                                     onHover: () => print('eeeeeeeeeeeee'),
                                   ),
                                   ChatDropzone(
+                                    sendFile: sendMessage,
                                     child: Container(
                                       child: !state.isLoading
                                           ? ChatDetailsWidget(state)
                                           : const Center(
-                                              child:
-                                                  CircularProgressIndicator()),
+                                          child:
+                                          CircularProgressIndicator()),
                                     ),
                                   )
                                 ],

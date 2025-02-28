@@ -4,8 +4,9 @@ import 'package:flutter_dropzone/flutter_dropzone.dart';
 
 class ChatDropzone extends StatefulWidget {
   final Widget child;
+  final Future<void> Function({List<PlatformFile>? uploadedFiles}) sendFile;
 
-  const ChatDropzone({Key? key, required this.child}) : super(key: key);
+  const ChatDropzone({Key? key, required this.child, required this.sendFile}) : super(key: key);
 
   @override
   _ChatDropzoneState createState() => _ChatDropzoneState();
@@ -30,6 +31,7 @@ class _ChatDropzoneState extends State<ChatDropzone> {
       bytes: bytes,
     );
 
+    await widget.sendFile(uploadedFiles: [droppedFile]);
     // await sendMessage(uploadedFiles: [droppedFile]);
   }
 
