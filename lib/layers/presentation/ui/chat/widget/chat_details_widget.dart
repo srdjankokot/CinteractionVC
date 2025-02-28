@@ -351,6 +351,77 @@ class _ChatDetailsWidgetState extends State<ChatDetailsWidget> {
                                                           CrossAxisAlignment
                                                               .start,
                                                       children: [
+                                                        if (message.files !=
+                                                                null &&
+                                                            message.files!
+                                                                .isNotEmpty)
+                                                          Column(
+                                                              crossAxisAlignment:
+                                                                  CrossAxisAlignment
+                                                                      .start,
+                                                              children: message
+                                                                  .files!
+                                                                  .map((file) {
+                                                                if (_isImage(file
+                                                                    .path)) {
+                                                                  return GestureDetector(
+                                                                    onTap:
+                                                                        () async {
+                                                                      String updatedImagePath = file
+                                                                          .path
+                                                                          .replaceAll(
+                                                                              "cinteraction",
+                                                                              "huawei");
+
+                                                                      _showImageDialog(
+                                                                          context,
+                                                                          updatedImagePath);
+                                                                    },
+                                                                    child:
+                                                                        Padding(
+                                                                      padding: const EdgeInsets
+                                                                          .only(
+                                                                          top:
+                                                                              8.0),
+                                                                      child:
+                                                                          ClipRRect(
+                                                                        borderRadius:
+                                                                            BorderRadius.circular(8.0),
+                                                                        child: file.bytes !=
+                                                                                null
+                                                                            ? Image.memory(
+                                                                                file.bytes!,
+                                                                                width: 200,
+                                                                                height: 200,
+                                                                                fit: BoxFit.cover,
+                                                                              )
+                                                                            : Image.network(
+                                                                                file.path.replaceAll("cinteraction", "huawei"),
+                                                                                width: 200,
+                                                                                height: 200,
+                                                                                fit: BoxFit.cover,
+                                                                                errorBuilder: (context, error, stackTrace) => const Icon(Icons.image_not_supported, color: Colors.red),
+                                                                              ),
+                                                                      ),
+                                                                    ),
+                                                                  );
+                                                                } else if (_isTextFile(
+                                                                    file.path)) {
+                                                                  return _buildFileButton(
+                                                                      context,
+                                                                      file.path,
+                                                                      Icons
+                                                                          .description,
+                                                                      'Otvori Tekst');
+                                                                } else {
+                                                                  return _buildFileButton(
+                                                                      context,
+                                                                      file.path,
+                                                                      Icons
+                                                                          .attach_file,
+                                                                      'Otvori Fajl');
+                                                                }
+                                                              }).toList()),
                                                         if (message.message !=
                                                                 null &&
                                                             message.message!
