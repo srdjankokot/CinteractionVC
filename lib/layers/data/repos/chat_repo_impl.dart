@@ -74,7 +74,7 @@ class ChatRepoImpl extends ChatRepo {
   Future<void> initialize() async {
     _session = await getIt.getAsync<JanusSession>();
     await _attachPlugin();
-    loadUsers(1, 10);
+    loadUsers(1, 20);
     loadChats(1, 20);
     _setup();
   }
