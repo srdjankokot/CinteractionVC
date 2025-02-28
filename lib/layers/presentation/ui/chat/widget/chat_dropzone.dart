@@ -1,11 +1,14 @@
+import 'package:cinteraction_vc/layers/domain/usecases/chat/send_file.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_dropzone/flutter_dropzone.dart';
 
 class ChatDropzone extends StatefulWidget {
   final Widget child;
+  final Future<void> Function({List<PlatformFile>? uploadedFiles}) sendFile;
 
-  const ChatDropzone({Key? key, required this.child}) : super(key: key);
+  const ChatDropzone({Key? key, required this.child, required this.sendFile})
+      : super(key: key);
 
   @override
   _ChatDropzoneState createState() => _ChatDropzoneState();
@@ -30,7 +33,7 @@ class _ChatDropzoneState extends State<ChatDropzone> {
       bytes: bytes,
     );
 
-    // await sendMessage(uploadedFiles: [droppedFile]);
+    await widget.sendFile(uploadedFiles: [droppedFile]);
   }
 
   @override
