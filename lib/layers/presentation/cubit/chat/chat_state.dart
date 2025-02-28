@@ -13,17 +13,20 @@ enum ListType { Chats, Users, Group }
 class ChatState extends Equatable {
   final bool isLoading;
   final bool isInitial;
+  final bool isInitialLoading;
   final List<Participant>? participants;
+
   final UserDto? currentParticipant;
   final ChatDto? currentChat;
 
   final List<UserDto>? users;
   final List<ChatMessage>? messages;
   final List<ChatDto>? chats;
+  final List<MessageDto>? chatMessages;
   final ChatPagination? pagination;
+  final UserListResponse? usersPagination;
   final ChatDetailsDto? chatDetails;
   final LastMessageDto? lastMessage;
-
   final int? stateIndex;
   final int unreadMessages;
   final bool? incomingCall;
@@ -37,6 +40,7 @@ class ChatState extends Equatable {
 
   const ChatState({
     required this.isLoading,
+    required this.isInitialLoading,
     required this.isInitial,
     this.messages,
     this.participants,
@@ -54,6 +58,8 @@ class ChatState extends Equatable {
     this.lastMessage,
     this.chatDetails,
     this.pagination,
+    this.usersPagination,
+    this.chatMessages,
     required this.audioMuted,
     required this.videoMuted,
     required this.listType,
@@ -62,6 +68,7 @@ class ChatState extends Equatable {
   const ChatState.initial({
     bool isLoading = true,
     bool isInitial = true,
+    bool isInitialLoading = true,
     int unreadMessages = 0,
     bool audioMuted = false,
     bool videoMuted = false,
@@ -70,6 +77,7 @@ class ChatState extends Equatable {
   }) : this(
           isLoading: isLoading,
           isInitial: isInitial,
+          isInitialLoading: isInitialLoading,
           unreadMessages: unreadMessages,
           audioMuted: audioMuted,
           videoMuted: videoMuted,
@@ -82,6 +90,7 @@ class ChatState extends Equatable {
   List<Object?> get props => [
         isLoading,
         isInitial,
+        isInitialLoading,
         participants,
         stateIndex,
         messages,
@@ -101,11 +110,14 @@ class ChatState extends Equatable {
         listType,
         chatDetails,
         pagination,
+        usersPagination,
+        chatMessages
       ];
 
   ChatState copyWith({
     bool? isLoading,
     bool? isInitial,
+    bool? isInitialLoading,
     List<Participant>? participants,
     List<ChatMessage>? messages,
     List<ChatDto>? chats,
@@ -125,10 +137,13 @@ class ChatState extends Equatable {
     bool? videoMuted,
     ListType? listType,
     ChatPagination? pagination,
+    UserListResponse? usersPagination,
+    List<MessageDto>? chatMessages,
   }) {
     return ChatState(
       isLoading: isLoading ?? this.isLoading,
       isInitial: isInitial ?? this.isInitial,
+      isInitialLoading: isInitialLoading ?? this.isInitialLoading,
       stateIndex: numberOfParticipants ?? this.stateIndex,
       messages: messages ?? this.messages,
       chats: chats ?? this.chats,
@@ -148,6 +163,8 @@ class ChatState extends Equatable {
       listType: listType ?? this.listType,
       chatDetails: chatDetails ?? this.chatDetails,
       pagination: pagination ?? this.pagination,
+      usersPagination: usersPagination ?? this.usersPagination,
+      chatMessages: chatMessages ?? this.chatMessages,
     );
   }
 
@@ -155,6 +172,7 @@ class ChatState extends Equatable {
     return ChatState(
       isLoading: isLoading,
       isInitial: isInitial,
+      isInitialLoading: isInitialLoading,
       stateIndex: stateIndex,
       users: users,
       messages: messages,
@@ -174,6 +192,7 @@ class ChatState extends Equatable {
       videoMuted: videoMuted,
       listType: ListType.Chats,
       chatDetails: chatDetails,
+      chatMessages: chatMessages,
     );
   }
 }

@@ -54,7 +54,7 @@ class ChatRepoImpl extends ChatRepo {
 
   final _paginationStream = StreamController<ChatPagination>.broadcast();
 
-  final _chatMessagesStream = StreamController<List<MessageDto>>.broadcast();
+  final _usersPaginationStream = StreamController<UserListResponse>.broadcast();
 
   final _messagesStream = StreamController<List<ChatMessage>>.broadcast();
 
@@ -74,7 +74,7 @@ class ChatRepoImpl extends ChatRepo {
   Future<void> initialize() async {
     _session = await getIt.getAsync<JanusSession>();
     await _attachPlugin();
-    _loadUsers();
+    loadUsers(1, 10);
     loadChats(1, 20);
     _setup();
   }
@@ -92,7 +92,6 @@ class ChatRepoImpl extends ChatRepo {
   @override
   Stream<List<ChatDto>> getChatsStream() {
     return _chatStream.stream.map((chats) {
-      print("📡 Stream emituje ${chats.length} chatova");
       return chats;
     });
   }
@@ -108,8 +107,8 @@ class ChatRepoImpl extends ChatRepo {
   }
 
   @override
-  Stream<List<MessageDto>> sendMessageToChat() {
-    return _chatMessagesStream.stream;
+  Stream<UserListResponse> getUsersPaginationStream() {
+    return _usersPaginationStream.stream;
   }
 
   @override
@@ -191,42 +190,32 @@ class ChatRepoImpl extends ChatRepo {
     return false;
   }
 
-  _matchParticipantWithUser() {
-    for (var element in users) {
-      element.online = false;
-    }
+  void _matchParticipantWithUser() {
+    users = users.map((user) => user.copyWith(online: false)).toList();
+
     for (var subscriber in subscribers) {
-      UserDto fallbackUser = UserDto(
-        id: "0",
-        name: "name",
-        email: "email",
-        imageUrl: "imageUrl",
-      );
-      users
-          .firstWhere(
-            (item) => int.parse(item.id) == subscriber.id,
-            orElse: () => fallbackUser,
-          )
-          .online = true;
+      for (var i = 0; i < users.length; i++) {
+        if (int.parse(users[i].id) == subscriber.id) {
+          users[i] = users[i].copyWith(online: true);
+        }
+      }
     }
-    print('Users: $users');
 
     _usersStream.add(users);
   }
 
   void _matchParticipantWithChat() {
-    for (var element in chats) {
-      element.isOnline = false;
-    }
+    chats = chats.map((chat) => chat.copyWith(isOnline: false)).toList();
 
     for (var subscriber in subscribers) {
-      for (var chat in chats) {
-        bool isParticipantOnline =
-            chat.chatParticipants?.any((data) => data.id == subscriber.id) ??
-                false;
+      for (var i = 0; i < chats.length; i++) {
+        bool isParticipantOnline = chats[i]
+                .chatParticipants
+                ?.any((data) => data.id == subscriber.id) ??
+            false;
 
         if (isParticipantOnline) {
-          chat.isOnline = true;
+          chats[i] = chats[i].copyWith(isOnline: true);
         }
       }
     }
@@ -448,16 +437,21 @@ class ChatRepoImpl extends ChatRepo {
 
   //   _chatDetailsStream.add(updatedChatDetails);
   // }
+  @override
+  loadUsers(int page, int paginate) async {
+    var response = await _api.getCompanyUsers(page, paginate);
 
-  _loadUsers() async {
-    var response = await _api.getCompanyUsers();
-    users = response.response!.where((element) => element.id != myId).toList();
-    _matchParticipantWithUser();
+    if (response.response != null) {
+      var newUsers = response.response!.users
+          .where((element) => element.id != myId)
+          .toList();
+      users.addAll(newUsers);
+      _usersPaginationStream.add(response.response!);
+      _matchParticipantWithUser();
+    }
   }
 
   /////////////CHAT API FUNCTIONS/////////////////
-  Set<int> _loadedChatIds = {};
-  List<ChatDto> _allChats = [];
 
   @override
   loadChats(int page, int paginate) async {
@@ -495,9 +489,9 @@ class ChatRepoImpl extends ChatRepo {
   }
 
   @override
-  Future<void> getChatDetails(int id) async {
+  Future<void> getChatDetails(int id, int page) async {
     try {
-      var response = await _api.getChatById(id: id);
+      var response = await _api.getChatById(id: id, page: page);
       if (response.error == null && response.response != null) {
         _chatDetailsStream.add(response.response!);
         chatDetailsDto = response.response!;
@@ -510,9 +504,9 @@ class ChatRepoImpl extends ChatRepo {
   }
 
   @override
-  Future<void> getChatDetailsByParticipiant(int id) async {
+  Future<void> getChatDetailsByParticipiant(int id, int page) async {
     try {
-      var response = await _api.getChatByParticipiant(id: id);
+      var response = await _api.getChatByParticipiant(id: id, page: page);
       if (response.error == null && response.response != null) {
         _chatDetailsStream.add(response.response!);
         chatDetailsDto = response.response!;

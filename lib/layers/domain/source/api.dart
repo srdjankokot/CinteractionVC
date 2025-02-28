@@ -56,14 +56,16 @@ abstract class Api {
   Future<ApiResponse<bool>> sentChatMessage(
       {required text, required from, required to});
 
-  Future<ApiResponse<List<UserDto>>> getCompanyUsers();
+  Future<ApiResponse<UserListResponse>> getCompanyUsers(int page, int paginate);
 
   Future<ApiResponse<ChatPagination>> getAllChats(
       {required int page, required int paginate});
   Future<ApiResponse<List<ChatDto>>> deleteChat({required int id});
-  Future<ApiResponse<ChatDetailsDto>> getChatById({id});
+  Future<ApiResponse<ChatDetailsDto>> getChatById(
+      {required int id, required int page});
   Future<ApiResponse<ChatDetailsDto>> getChat();
-  Future<ApiResponse<ChatDetailsDto>> getChatByParticipiant({required id});
+  Future<ApiResponse<ChatDetailsDto>> getChatByParticipiant(
+      {required int id, required int page});
   Future<ApiResponse<ChatDetailsDto>> deleteMessageById({required int id});
   Future<ApiResponse<Uint8List>> downloadMedia({required int id});
   Future<ApiResponse<ChatDetailsDto>> editMessageById(

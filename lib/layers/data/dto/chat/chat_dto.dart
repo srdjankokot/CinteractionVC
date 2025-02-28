@@ -78,7 +78,6 @@ class ChatDto {
       lastPage: json['meta']?['last_page'] as int? ?? 1,
       nextPageUrl: json['links']?['next'] as String?,
       prevPageUrl: json['links']?['prev'] as String?,
-      isOnline: json['is_online'] as bool? ?? false,
     );
   }
 

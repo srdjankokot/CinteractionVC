@@ -5,7 +5,7 @@ class GetChatDetails {
 
   final ChatRepo repo;
 
-  call(int id) {
-    repo.getChatDetails(id);
+  call(int id, int page) {
+    repo.getChatDetails(id, page);
   }
 }
