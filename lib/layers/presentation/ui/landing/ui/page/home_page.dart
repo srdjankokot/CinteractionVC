@@ -1,4 +1,3 @@
-
 import 'package:cinteraction_vc/assets/colors/Colors.dart';
 import 'package:cinteraction_vc/core/extension/context.dart';
 import 'package:cinteraction_vc/core/extension/context_user.dart';
@@ -45,210 +44,203 @@ class _HomePageState extends State<HomePage> {
 
     // return BlocConsumer<ChatCubit, ChatState>(
     //   builder: (context, state) {
-        final Widget body;
-        final Widget? bottomNavigationBar;
+    final Widget body;
+    final Widget? bottomNavigationBar;
 
-        if (context.isWide) {
-          body = Row(
-            children: [
-
-             Visibility(
-                 visible: _selectedIndex != 3,
-                 child: Drawer(
-                   child: Container(
-                     color: Colors.white,
-                     padding: const EdgeInsets.only(top: 20),
-                     child: Column(
-                       children: [
-                         for (final (index, item) in tabs.indexed)
-                           Column(
-                             children: [
-                               Visibility(
-                                   visible: index == 4,
-                                   child: Container(
-                                     margin: const EdgeInsets.all(16),
-                                     child: Column(
-                                       crossAxisAlignment:
-                                       CrossAxisAlignment.start,
-                                       children: [
-                                         const Divider(),
-                                         const SizedBox(height: 16),
-                                         Container(
-                                           margin: const EdgeInsets.only(left: 10),
-                                           child: Text('Admin',
-                                               textAlign: TextAlign.left,
-                                               style: context.textTheme.labelSmall
-                                                   ?.copyWith(
-                                                   color:
-                                                   ColorConstants.kGray3)),
-                                         ),
-                                       ],
-                                     ),
-                                   )),
-                               Stack(
-                                 children: [
-                                   Visibility(
-                                     visible: _selectedIndex == index,
-                                     child: Row(
-                                       children: [
-                                         Container(
-                                             width: 2,
-                                             height: 50,
-                                             color: ColorConstants.kPrimaryColor),
-                                         Expanded(
-                                           flex: 1,
-                                           child: Container(
-                                               height: 50,
-                                               color: ColorConstants.kPrimaryColor
-                                                   .withOpacity(0.05)),
-                                         ),
-                                       ],
-                                     ),
-                                   ),
-                                   Container(
-                                     height: 50,
-                                     margin: const EdgeInsets.only(left: 20),
-                                     child: ListTile(
-                                       selected: _selectedIndex == index,
-                                       trailing: item.label == "Chat" &&
-                                           chatCubit.state.unreadMessages > 0
-                                           ? Text(chatCubit.state.unreadMessages.toString())
-                                           : null,
-                                       title: Text(item.label,
-                                           style: context.textTheme.labelMedium
-                                               ?.copyWith(
-                                             color: _selectedIndex == index
-                                                 ? ColorConstants.kPrimaryColor
-                                                 : ColorConstants.kGray2,
-                                           )),
-                                       leading: _selectedIndex == index
-                                           ? imageSVGAsset(item.assetName)
-                                           ?.copyWith(
-                                           colorFilter:
-                                           const ColorFilter.mode(
-                                               ColorConstants
-                                                   .kPrimaryColor,
-                                               BlendMode.srcIn))
-                                           : imageSVGAsset(item.assetName),
-                                       onTap: () => {
-                                         setState(() => _selectedIndex = index)
-                                       },
-                                     ),
-                                   ),
-                                 ],
-                               ),
-                             ],
-                           ),
-                       ],
-                     ),
-                   ),
-                 ),
-             ),
-
-              const VerticalDivider(thickness: 1, width: 1),
-              Expanded(child: content),
-            ],
-          );
-          bottomNavigationBar = null;
-        } else {
-          body = SafeArea(child: content);
-          bottomNavigationBar = BottomNavigationBar(
-            currentIndex: _selectedIndex,
-            onTap: (index) => setState(() => _selectedIndex = index),
-            items: [
-              for (final tab in tabs)
-                BottomNavigationBarItem(
-                  label: tab.label,
-                  icon: imageSVGAsset(tab.assetName) as Widget,
-                  activeIcon: imageSVGAsset(tab.assetName)?.copyWith(
-                          colorFilter: const ColorFilter.mode(
-                              ColorConstants.kPrimaryColor, BlendMode.srcIn))
-                      as Widget,
-                ),
-            ],
-          );
-        }
-
-        return Scaffold(
-          appBar: context.isWide
-              ? PreferredSize(
-                  preferredSize: const Size.fromHeight(97),
-                  child: Container(
-                    height: 97,
-                    padding: const EdgeInsets.only(left: 30, right: 30),
-                    decoration: const BoxDecoration(
-                      color: Colors.white,
-                      boxShadow: [
-                        BoxShadow(
-                          color: Color(0x14000000),
-                          blurRadius: 8,
-                          offset: Offset(0, 4),
-                          spreadRadius: 0,
-                        )
-                      ],
-                    ),
-                    child: Row(
-                      children: [
-                        imageSVGAsset('original_long_logo') as Widget,
-                        const Spacer(),
-                        if (user != null)
-                          PopupMenuButton<String>(
-                            tooltip: '',
-                            child: Row(
-                              children: [
-                                // CallButtonShape(
-                                //     image: imageSVGAsset('menu_notifications') as Widget,
-                                //     bgColor: ColorConstants.kGrey100,
-                                //     onClickAction: () => {}),
-                                const SizedBox(
-                                  width: 10,
-                                ),
-                                UserImage.medium(user.imageUrl),
-                                const SizedBox(
-                                  width: 10,
-                                ),
-
-                                Column(
-                                  mainAxisAlignment: MainAxisAlignment.center,
+    if (context.isWide) {
+      body = Row(
+        children: [
+          Visibility(
+            visible: _selectedIndex != 3,
+            child: Drawer(
+              child: Container(
+                color: Colors.white,
+                padding: const EdgeInsets.only(top: 20),
+                child: Column(
+                  children: [
+                    for (final (index, item) in tabs.indexed)
+                      Column(
+                        children: [
+                          Visibility(
+                              visible: index == 4,
+                              child: Container(
+                                margin: const EdgeInsets.all(16),
+                                child: Column(
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
-                                    Text(
-                                      user.name,
-                                      textAlign: TextAlign.center,
-                                      style: context.textTheme.titleSmall,
-                                    ),
-                                    Text(
-                                      'Participant',
-                                      textAlign: TextAlign.center,
-                                      style: context.textTheme.labelSmall,
+                                    const Divider(),
+                                    const SizedBox(height: 16),
+                                    Container(
+                                      margin: const EdgeInsets.only(left: 10),
+                                      child: Text('Admin',
+                                          textAlign: TextAlign.left,
+                                          style: context.textTheme.labelSmall
+                                              ?.copyWith(
+                                                  color:
+                                                      ColorConstants.kGray3)),
                                     ),
                                   ],
                                 ),
+                              )),
+                          Stack(
+                            children: [
+                              Visibility(
+                                visible: _selectedIndex == index,
+                                child: Row(
+                                  children: [
+                                    Container(
+                                        width: 2,
+                                        height: 50,
+                                        color: ColorConstants.kPrimaryColor),
+                                    Expanded(
+                                      flex: 1,
+                                      child: Container(
+                                          height: 50,
+                                          color: ColorConstants.kPrimaryColor
+                                              .withOpacity(0.05)),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                              Container(
+                                height: 50,
+                                margin: const EdgeInsets.only(left: 20),
+                                child: ListTile(
+                                  selected: _selectedIndex == index,
+                                  trailing: item.label == "Chat" &&
+                                          chatCubit.state.unreadMessages > 0
+                                      ? Text(chatCubit.state.unreadMessages
+                                          .toString())
+                                      : null,
+                                  title: Text(item.label,
+                                      style: context.textTheme.labelMedium
+                                          ?.copyWith(
+                                        color: _selectedIndex == index
+                                            ? ColorConstants.kPrimaryColor
+                                            : ColorConstants.kGray2,
+                                      )),
+                                  leading: _selectedIndex == index
+                                      ? imageSVGAsset(item.assetName)?.copyWith(
+                                          colorFilter: const ColorFilter.mode(
+                                              ColorConstants.kPrimaryColor,
+                                              BlendMode.srcIn))
+                                      : imageSVGAsset(item.assetName),
+                                  onTap: () =>
+                                      {setState(() => _selectedIndex = index)},
+                                ),
+                              ),
+                            ],
+                          ),
+                        ],
+                      ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+          const VerticalDivider(thickness: 1, width: 1),
+          Expanded(child: content),
+        ],
+      );
+      bottomNavigationBar = null;
+    } else {
+      body = SafeArea(child: content);
+      bottomNavigationBar = BottomNavigationBar(
+        currentIndex: _selectedIndex,
+        onTap: (index) => setState(() => _selectedIndex = index),
+        items: [
+          for (final tab in tabs)
+            BottomNavigationBarItem(
+              label: tab.label,
+              icon: imageSVGAsset(tab.assetName) as Widget,
+              activeIcon: imageSVGAsset(tab.assetName)?.copyWith(
+                  colorFilter: const ColorFilter.mode(
+                      ColorConstants.kPrimaryColor, BlendMode.srcIn)) as Widget,
+            ),
+        ],
+      );
+    }
+
+    return Scaffold(
+      appBar: context.isWide
+          ? PreferredSize(
+              preferredSize: const Size.fromHeight(97),
+              child: Container(
+                height: 97,
+                padding: const EdgeInsets.only(left: 30, right: 30),
+                decoration: const BoxDecoration(
+                  color: Colors.white,
+                  boxShadow: [
+                    BoxShadow(
+                      color: Color(0x14000000),
+                      blurRadius: 8,
+                      offset: Offset(0, 4),
+                      spreadRadius: 0,
+                    )
+                  ],
+                ),
+                child: Row(
+                  children: [
+                    imageSVGAsset('original_long_logo') as Widget,
+                    const Spacer(),
+                    if (user != null)
+                      PopupMenuButton<String>(
+                        tooltip: '',
+                        child: Row(
+                          children: [
+                            // CallButtonShape(
+                            //     image: imageSVGAsset('menu_notifications') as Widget,
+                            //     bgColor: ColorConstants.kGrey100,
+                            //     onClickAction: () => {}),
+                            const SizedBox(
+                              width: 10,
+                            ),
+                            UserImage.medium(user.imageUrl),
+                            const SizedBox(
+                              width: 10,
+                            ),
+
+                            Column(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  user.name,
+                                  textAlign: TextAlign.center,
+                                  style: context.textTheme.titleSmall,
+                                ),
+                                Text(
+                                  'Participant',
+                                  textAlign: TextAlign.center,
+                                  style: context.textTheme.labelSmall,
+                                ),
                               ],
                             ),
-                            onSelected: (item) {
-                              handleClick(context, item);
-                            },
-                            itemBuilder: (BuildContext context) {
-                              return {'LogOut'}.map((String choice) {
-                                return PopupMenuItem<String>(
-                                  value: choice,
-                                  child: Text(choice),
-                                );
-                              }).toList();
-                            },
-                          )
-                      ],
-                    ),
-                  ),
-                )
-              : null,
-          body:  BlocProvider.value(
-                value: context.read<ChatCubit>(),  // Keep using the same ChatCubit
-                child: body,
-            ),
-          bottomNavigationBar: bottomNavigationBar,
-        );
+                          ],
+                        ),
+                        onSelected: (item) {
+                          handleClick(context, item);
+                        },
+                        itemBuilder: (BuildContext context) {
+                          return {'LogOut'}.map((String choice) {
+                            return PopupMenuItem<String>(
+                              value: choice,
+                              child: Text(choice),
+                            );
+                          }).toList();
+                        },
+                      )
+                  ],
+                ),
+              ),
+            )
+          : null,
+      body: BlocProvider.value(
+        value: context.read<ChatCubit>(), // Keep using the same ChatCubit
+        child: body,
+      ),
+      bottomNavigationBar: bottomNavigationBar,
+    );
     //   },
     //   listener: (BuildContext context, ChatState state) {
     //     print(state);
@@ -257,21 +249,15 @@ class _HomePageState extends State<HomePage> {
   }
 }
 
-
-
 // Child widget
 class ChildWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    return BlocBuilder<ChatCubit, ChatState>(
-        builder: (context, state) {
-          if (state.isInitial) {
-            return Text('Initial State');
-          } else
-            return Text('Loaded State: ${state.unreadMessages}');
-        }
-
-    );
+    return BlocBuilder<ChatCubit, ChatState>(builder: (context, state) {
+      if (state.isInitial) {
+        return Text('Initial State');
+      } else
+        return Text('Loaded State: ${state.unreadMessages}');
+    });
   }
 }
-
