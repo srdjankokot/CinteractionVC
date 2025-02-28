@@ -34,6 +34,19 @@ int maxPublishersDefault = 9;
 
 List<RTCIceServer> iceServers = <RTCIceServer>[
   RTCIceServer(
+      urls: 'stun:cinteraction.nswebdevelopment.com:3478',
+      username: "",
+      credential: ""),
+  RTCIceServer(
+      urls: 'turn:cinteraction.nswebdevelopment.com:3478?transport=udp',
+      username: mixTurnServerUsername,
+      credential: mixTurnServerCredential),
+  RTCIceServer(
+      urls: 'turn:cinteraction.nswebdevelopment.com:3478?transport=tcp',
+      username: mixTurnServerUsername,
+      credential: mixTurnServerCredential),
+
+  RTCIceServer(
       urls: 'stun:huawei.nswebdevelopment.com:3478',
       username: "",
       credential: ""),
@@ -45,4 +58,7 @@ List<RTCIceServer> iceServers = <RTCIceServer>[
       urls: 'turn:huawei.nswebdevelopment.com:3478?transport=tcp',
       username: mixTurnServerUsername,
       credential: mixTurnServerCredential),
+
+
+
 ];

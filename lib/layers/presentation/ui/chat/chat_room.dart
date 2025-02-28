@@ -89,7 +89,7 @@ class ChatRoomPage extends StatelessWidget {
 
     Future<void> pickAndSendFile() async {
       FilePickerResult? result = await FilePicker.platform.pickFiles(
-        withData: true,
+        withData: kIsWeb,
       );
 
       if (result != null) {
@@ -97,18 +97,13 @@ class ChatRoomPage extends StatelessWidget {
 
         Uint8List? fileBytes;
 
-        if (file.bytes != null) {
+        if (kIsWeb) {
           fileBytes = file.bytes;
-          print('Bytes read from picker');
+        } else if (file.bytes != null) {
+          fileBytes = file.bytes;
         } else if (file.path != null) {
-          print('File path: ${file.path}');
           File selectedFile = File(file.path!);
-          if (await selectedFile.exists()) {
-            fileBytes = await selectedFile.readAsBytes();
-            print('Bytes read from file: ${fileBytes.length}');
-          } else {
-            print('Error: File does not exist.');
-          }
+          fileBytes = await selectedFile.readAsBytes();
         }
 
         if (fileBytes != null) {
