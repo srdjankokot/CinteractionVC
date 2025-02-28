@@ -802,9 +802,9 @@ class ChatRoomPage extends StatelessWidget {
                                   DropzoneView(
                                     onCreated: (ctrl) => controller = ctrl,
                                     onDropFile: onFileDropped,
-                                    onHover: () => print('eeeeeeeeeeeee'),
                                   ),
                                   ChatDropzone(
+                                    sendFile: sendMessage,
                                     child: Container(
                                       child: !state.isLoading
                                           ? ChatDetailsWidget(state)
