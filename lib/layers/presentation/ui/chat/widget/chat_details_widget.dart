@@ -17,6 +17,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart';
+import 'package:path_provider/path_provider.dart';
 
 class ChatDetailsWidget extends StatefulWidget {
   final ChatState chatState;
@@ -102,15 +103,43 @@ class _ChatDetailsWidgetState extends State<ChatDetailsWidget> {
     return url.split('/').last;
   }
 
-  _showImageDialog(BuildContext context, String imagePath) {
+  void _showImageDialog(BuildContext context, String imagePath) {
     showDialog(
       context: context,
       builder: (context) {
         return AlertDialog(
-          content: Image.network(imagePath, fit: BoxFit.cover),
+          contentPadding: EdgeInsets.zero,
+          content: Stack(
+            children: [
+              Image.network(imagePath, fit: BoxFit.cover),
+              Positioned(
+                top: 10,
+                right: 10,
+                child: IconButton(
+                  icon: const Icon(Icons.download, color: Colors.black),
+                  onPressed: () async {
+                    await _downloadImage(imagePath);
+                  },
+                ),
+              ),
+            ],
+          ),
         );
       },
     );
+  }
+
+  Future<void> _downloadImage(String url) async {
+    try {
+      final directory = await getApplicationDocumentsDirectory();
+      final filePath = '${directory.path}/downloaded_image.jpg';
+
+      await Dio().download(url, filePath);
+
+      print("Image downloaded: $filePath");
+    } catch (e) {
+      print("Error while downloading: $e");
+    }
   }
 
   String? _editingMessageId;
