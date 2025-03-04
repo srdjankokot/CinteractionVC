@@ -46,18 +46,18 @@ List<RTCIceServer> iceServers = <RTCIceServer>[
       username: mixTurnServerUsername,
       credential: mixTurnServerCredential),
 
-  // RTCIceServer(
-  //     urls: 'stun:huawei.nswebdevelopment.com:3478',
-  //     username: "",
-  //     credential: ""),
-  // RTCIceServer(
-  //     urls: 'turn:huawei.nswebdevelopment.com:3478?transport=udp',
-  //     username: mixTurnServerUsername,
-  //     credential: mixTurnServerCredential),
-  // RTCIceServer(
-  //     urls: 'turn:huawei.nswebdevelopment.com:3478?transport=tcp',
-  //     username: mixTurnServerUsername,
-  //     credential: mixTurnServerCredential),
+  RTCIceServer(
+      urls: 'stun:huawei.nswebdevelopment.com:3478',
+      username: "",
+      credential: ""),
+  RTCIceServer(
+      urls: 'turn:huawei.nswebdevelopment.com:3478?transport=udp',
+      username: mixTurnServerUsername,
+      credential: mixTurnServerCredential),
+  RTCIceServer(
+      urls: 'turn:huawei.nswebdevelopment.com:3478?transport=tcp',
+      username: mixTurnServerUsername,
+      credential: mixTurnServerCredential),
 
 
 
