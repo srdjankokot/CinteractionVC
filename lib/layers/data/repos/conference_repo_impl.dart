@@ -348,32 +348,34 @@ class ConferenceRepoImpl extends ConferenceRepo {
 
     localVideoRenderer.mediaStream =
         await videoPlugin?.initializeMediaDevices(simulcastSendEncodings: [
-      RTCRtpEncoding(
-          rid: "h",
-          minBitrate: 256000,
-          maxBitrate: 512000,
-          active: true,
-          scalabilityMode: 'L1T2'),
-      RTCRtpEncoding(
-        rid: "m",
-        minBitrate: 128000,
-        maxBitrate: 256000,
-        active: true,
-        scalabilityMode: 'L1T2',
-        scaleResolutionDownBy: 2,
-      ),
-      RTCRtpEncoding(
-        rid: "l",
-        minBitrate: 96000,
-        maxBitrate: 128000,
-        active: true,
-        scalabilityMode: 'L1T2',
-        scaleResolutionDownBy: 8,
-      ),
-    ], mediaConstraints: {
-      'video': {'width': 640, 'height': 360},
-      'audio': true
-    });
+          RTCRtpEncoding(
+            rid: "h",
+            minBitrate: 256000, // 256 kbps
+            maxBitrate: 512000, // 512 kbps
+            active: true,
+            scalabilityMode: 'L2T2',
+          ),
+          RTCRtpEncoding(
+            rid: "m",
+            minBitrate: 128000, // 128 kbps
+            maxBitrate: 256000, // 256 kbps
+            active: true,
+            scalabilityMode: 'L2T2',
+            scaleResolutionDownBy: 2, // 240p
+          ),
+          RTCRtpEncoding(
+            rid: "l",
+            minBitrate: 64000,  // 64 kbps
+            maxBitrate: 128000, // 128 kbps
+            active: true,
+            scalabilityMode: 'L2T2',
+            scaleResolutionDownBy: 4, // 180p
+          ),
+        ],
+            mediaConstraints: {
+              'video': {'width': 1280, 'height': 720}, // 720p max for higher quality
+              'audio': true,
+            });
     localVideoRenderer.videoRenderer.srcObject = localVideoRenderer.mediaStream;
     localVideoRenderer.publisherName = displayName;
     localVideoRenderer.publisherId = myId.toString();
