@@ -1,66 +1,68 @@
-import 'dart:io';
 import 'package:flutter/material.dart';
-import 'package:syncfusion_flutter_pdfviewer/pdfviewer.dart';
+import 'package:flutter/services.dart';
 import 'package:path_provider/path_provider.dart';
+import 'package:syncfusion_flutter_pdfviewer/pdfviewer.dart';
 import 'package:http/http.dart' as http;
+import 'dart:io';
 
-class PdfViewerScreen extends StatefulWidget {
-  final String pdfUrl;
-  const PdfViewerScreen({Key? key, required this.pdfUrl}) : super(key: key);
+void showPdfDialog(BuildContext context, String pdfUrl) async {
+  File? pdfFile;
 
-  @override
-  _PdfViewerScreenState createState() => _PdfViewerScreenState();
-}
-
-class _PdfViewerScreenState extends State<PdfViewerScreen> {
-  Future<void> _downloadPdf() async {
-    try {
-      Uri uri = Uri.parse(widget.pdfUrl);
-      String fileName = uri.pathSegments.last;
-      final directory = await getDownloadsDirectory();
-      final filePath = '${directory!.path}/$fileName';
-      final response = await http.get(Uri.parse(widget.pdfUrl));
-
-      if (response.statusCode == 200) {
-        final file = File(filePath);
-        await file.writeAsBytes(response.bodyBytes);
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-              content: Text(
-            "File downloaded at: $filePath",
-            style: const TextStyle(
-                fontWeight: FontWeight.bold, color: Colors.white),
-          )),
-        );
-      } else {
-        throw Exception("Neuspelo preuzimanje PDF-a");
-      }
-    } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text("Download error: $e")),
-      );
+  try {
+    final response = await http.get(Uri.parse(pdfUrl));
+    if (response.statusCode == 200) {
+      final dir = await getTemporaryDirectory();
+      pdfFile = File('${dir.path}/temp.pdf');
+      await pdfFile.writeAsBytes(response.bodyBytes);
+    } else {
+      throw Exception("Download failed PDF-a");
     }
+  } catch (e) {
+    print("Error downloading PDF: $e");
   }
 
-  @override
-  Widget build(BuildContext context) {
-    Uri uri = Uri.parse(widget.pdfUrl);
-    String fileName = uri.pathSegments.last;
-    return Scaffold(
-      appBar: AppBar(
-        title: Text(
-          fileName,
-          style:
-              const TextStyle(fontWeight: FontWeight.bold, color: Colors.white),
+  if (pdfFile != null) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        contentPadding: EdgeInsets.zero,
+        content: Stack(
+          children: [
+            SizedBox(
+              width: MediaQuery.of(context).size.width * 0.9,
+              height: MediaQuery.of(context).size.height * 0.8,
+              child: SfPdfViewer.file(pdfFile!),
+            ),
+            Positioned(
+              top: 10,
+              right: 10,
+              child: IconButton(
+                icon: Icon(Icons.download, color: Colors.black),
+                onPressed: () async {
+                  await saveFile(pdfFile!);
+                },
+              ),
+            ),
+          ],
         ),
         actions: [
-          IconButton(
-            icon: const Icon(Icons.download),
-            onPressed: _downloadPdf,
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text("Close"),
           ),
         ],
       ),
-      body: SfPdfViewer.network(widget.pdfUrl),
     );
+  }
+}
+
+Future<void> saveFile(File file) async {
+  try {
+    final dir = await getApplicationDocumentsDirectory();
+    final newPath = '${dir.path}/downloaded.pdf';
+    await file.copy(newPath);
+    print("PDF saved: $newPath");
+  } catch (e) {
+    print("Error while saving PDF-a: $e");
   }
 }
