@@ -1,66 +1,89 @@
-import 'dart:io';
 import 'package:flutter/material.dart';
-import 'package:syncfusion_flutter_pdfviewer/pdfviewer.dart';
-import 'package:path_provider/path_provider.dart';
-import 'package:http/http.dart' as http;
+import 'package:dio/dio.dart';
+import 'package:universal_html/html.dart' as html;
 
-class PdfViewerScreen extends StatefulWidget {
-  final String pdfUrl;
-  const PdfViewerScreen({Key? key, required this.pdfUrl}) : super(key: key);
-
-  @override
-  _PdfViewerScreenState createState() => _PdfViewerScreenState();
-}
-
-class _PdfViewerScreenState extends State<PdfViewerScreen> {
-  Future<void> _downloadPdf() async {
-    try {
-      Uri uri = Uri.parse(widget.pdfUrl);
-      String fileName = uri.pathSegments.last;
-      final directory = await getDownloadsDirectory();
-      final filePath = '${directory!.path}/$fileName';
-      final response = await http.get(Uri.parse(widget.pdfUrl));
-
-      if (response.statusCode == 200) {
-        final file = File(filePath);
-        await file.writeAsBytes(response.bodyBytes);
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-              content: Text(
-            "File downloaded at: $filePath",
-            style: const TextStyle(
-                fontWeight: FontWeight.bold, color: Colors.white),
-          )),
-        );
-      } else {
-        throw Exception("Neuspelo preuzimanje PDF-a");
-      }
-    } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text("Download error: $e")),
-      );
-    }
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    Uri uri = Uri.parse(widget.pdfUrl);
+Future<void> downloadPdfFile(BuildContext context, String fileUrl) async {
+  try {
+    Dio dio = Dio();
+    Uri uri = Uri.parse(fileUrl);
     String fileName = uri.pathSegments.last;
-    return Scaffold(
-      appBar: AppBar(
-        title: Text(
-          fileName,
-          style:
-              const TextStyle(fontWeight: FontWeight.bold, color: Colors.white),
-        ),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.download),
-            onPressed: _downloadPdf,
-          ),
-        ],
-      ),
-      body: SfPdfViewer.network(widget.pdfUrl),
+
+    Response response = await dio.get(
+      fileUrl,
+      options: Options(responseType: ResponseType.bytes),
+    );
+
+    if (response.statusCode == 200) {
+      final blob = html.Blob([response.data]);
+      final url = html.Url.createObjectUrlFromBlob(blob);
+      _showDownloadDialog(context, url, fileName);
+    } else {
+      throw Exception("Erorr while download PDF-a: ${response.statusCode}");
+    }
+  } catch (e) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text("Error: $e")),
     );
   }
+}
+
+void showPdfDialog(BuildContext context, String pdfUrl) async {
+  try {
+    Response response = await Dio()
+        .get(pdfUrl, options: Options(responseType: ResponseType.bytes));
+    if (response.statusCode == 200) {
+      final blob = html.Blob([response.data]);
+      final url = html.Url.createObjectUrlFromBlob(blob);
+
+      html.IFrameElement iframe = html.IFrameElement()
+        ..src = url
+        ..style.border = 'none'
+        ..style.width = '100%'
+        ..style.height = '100%';
+
+      showDialog(
+        context: context,
+        builder: (context) => AlertDialog(
+          contentPadding: EdgeInsets.zero,
+          content: const SizedBox(
+            width: double.infinity,
+            height: 400,
+            child: HtmlElementView(
+              viewType: 'pdf-viewer',
+            ),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () {
+                html.Url.revokeObjectUrl(url);
+                Navigator.pop(context);
+              },
+              child: const Text("Close"),
+            ),
+          ],
+        ),
+      );
+
+      html.document.getElementById('pdf-viewer')?.append(iframe);
+    }
+  } catch (e) {
+    print("Erorr download PDF: $e");
+  }
+}
+
+void _showDownloadDialog(
+    BuildContext context, String fileUrl, String fileName) {
+  showDialog(
+    context: context,
+    builder: (context) => AlertDialog(
+      title: const Text("Download success"),
+      content: Text("File saved: $fileName"),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.pop(context),
+          child: const Text("OK"),
+        ),
+      ],
+    ),
+  );
 }

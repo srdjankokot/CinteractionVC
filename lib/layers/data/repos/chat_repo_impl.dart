@@ -235,12 +235,26 @@ class ChatRepoImpl extends ChatRepo {
           var senderId = int.parse(data['from']);
 
           if (initChat != null) {
+            final text = data['text'] as String;
+            final isFile =
+                text.startsWith('http') || text.contains('/storage/');
+
             final newMessage = MessageDto(
               chatId: chatDetailsDto.chatId!,
               senderId: senderId,
               createdAt: data['date'],
-              message: data['text'],
               updatedAt: data['date'],
+              message: isFile ? null : text,
+              files: isFile
+                  ? [
+                      FileDto(
+                          id: int.parse(RegExp(r'/storage/(\d+)/')
+                                  .firstMatch(text)
+                                  ?.group(1) ??
+                              '0'),
+                          path: text)
+                    ]
+                  : null,
             );
 
             final updatedMessages = ChatPaginationDto(
@@ -658,7 +672,11 @@ class ChatRepoImpl extends ChatRepo {
     if (response.error == null && response.response != null) {
       List<String> participants =
           participantIds.map((int value) => value.toString()).toList();
-      sendMessage(messageContent, participants);
+      sendMessage(
+          response.response?.files?.isNotEmpty == true
+              ? response.response!.files![0].path
+              : messageContent,
+          participants);
       chatDetailsDto.messages.messages.add(MessageDto(
         chatId: response.response!.chatId,
         createdAt: DateTime.now().toIso8601String(),
