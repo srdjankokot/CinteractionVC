@@ -17,6 +17,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart';
+import 'package:universal_html/html.dart' as html;
 
 class ChatDetailsWidget extends StatefulWidget {
   final ChatState chatState;
@@ -88,6 +89,7 @@ class _ChatDetailsWidgetState extends State<ChatDetailsWidget> {
   }
 
   bool _isPdf(String url) {
+    print("Checking if PDF: $url");
     return url.toLowerCase().endsWith('.pdf');
   }
 
@@ -101,24 +103,55 @@ class _ChatDetailsWidgetState extends State<ChatDetailsWidget> {
     return url.split('/').last;
   }
 
-  void _openPdf(BuildContext context, String pdfUrl) {
-    Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (context) => PdfViewerScreen(pdfUrl: pdfUrl),
-      ),
-    );
-  }
-
-  _showImageDialog(BuildContext context, String imagePath) {
+  void _showImageDialog(BuildContext context, String imagePath) {
     showDialog(
       context: context,
       builder: (context) {
         return AlertDialog(
-          content: Image.network(imagePath, fit: BoxFit.cover),
+          contentPadding: EdgeInsets.zero,
+          content: Stack(
+            children: [
+              Image.network(imagePath, fit: BoxFit.cover),
+              Positioned(
+                top: 10,
+                right: 10,
+                child: IconButton(
+                  icon: const Icon(Icons.download, color: Colors.red),
+                  onPressed: () async {
+                    await _downloadImage(imagePath);
+                  },
+                ),
+              ),
+            ],
+          ),
         );
       },
     );
+  }
+
+  Future<void> _downloadImage(String url) async {
+    try {
+      Response response = await Dio()
+          .get(url, options: Options(responseType: ResponseType.bytes));
+
+      if (response.statusCode == 200) {
+        final blob = html.Blob([response.data]);
+        final url = html.Url.createObjectUrlFromBlob(blob);
+        final anchor = html.AnchorElement(href: url)
+          ..target = 'blank'
+          ..download = 'downloaded_image.jpg';
+
+        anchor.click();
+        html.Url.revokeObjectUrl(url);
+
+        print("Image downloaded successfully!");
+      } else {
+        throw Exception(
+            "Error while downloading image: ${response.statusCode}");
+      }
+    } catch (e) {
+      print("Error while downloading: $e");
+    }
   }
 
   String? _editingMessageId;
@@ -209,20 +242,28 @@ class _ChatDetailsWidgetState extends State<ChatDetailsWidget> {
                                                 const Size(40, 40),
                                             Offset.zero & overlay.size,
                                           ),
-                                          items: [
-                                            const PopupMenuItem(
-                                              value: 'edit',
-                                              child: Text('Edit'),
-                                            ),
-                                            const PopupMenuItem(
-                                              value: 'delete',
-                                              child: Text('Delete'),
-                                            ),
-                                            const PopupMenuItem(
-                                              value: 'copy',
-                                              child: Text('Copy'),
-                                            ),
-                                          ],
+                                          items: message.files != null &&
+                                                  message.files!.isNotEmpty
+                                              ? [
+                                                  const PopupMenuItem(
+                                                    value: 'delete',
+                                                    child: Text('Delete'),
+                                                  ),
+                                                ]
+                                              : [
+                                                  const PopupMenuItem(
+                                                    value: 'edit',
+                                                    child: Text('Edit'),
+                                                  ),
+                                                  const PopupMenuItem(
+                                                    value: 'copy',
+                                                    child: Text('Copy'),
+                                                  ),
+                                                  const PopupMenuItem(
+                                                    value: 'delete',
+                                                    child: Text('Delete'),
+                                                  ),
+                                                ],
                                         ).then((value) {
                                           if (value != null) {
                                             if (value == 'edit') {
@@ -412,14 +453,14 @@ class _ChatDetailsWidgetState extends State<ChatDetailsWidget> {
                                                                       file.path,
                                                                       Icons
                                                                           .description,
-                                                                      'Otvori Tekst');
+                                                                      'Open TextFile');
                                                                 } else {
                                                                   return _buildFileButton(
                                                                       context,
                                                                       file.path,
                                                                       Icons
-                                                                          .attach_file,
-                                                                      'Otvori Fajl');
+                                                                          .picture_as_pdf,
+                                                                      'Open PDF file');
                                                                 }
                                                               }).toList()),
                                                         if (message.message !=
@@ -527,7 +568,7 @@ class _ChatDetailsWidgetState extends State<ChatDetailsWidget> {
       child: GestureDetector(
         onTap: () {
           if (_isPdf(fileUrl)) {
-            _openPdf(context, fileUrl);
+            showPdfDialog(context, fileUrl);
           } else if (_isTextFile(fileUrl)) {
             openTextFile(context, fileUrl);
           } else {
