@@ -157,8 +157,6 @@ class _ChatsListViewState extends State<ChatsListView> {
                               .read<ChatCubit>()
                               .getChatDetails(chat.id, 1);
                           await context.read<ChatCubit>().setCurrentChat(chat);
-                          print(
-                              'chatIsOnline: ${chat.chatParticipants?[0].id}');
                         },
                         child: Container(
                           decoration: BoxDecoration(
