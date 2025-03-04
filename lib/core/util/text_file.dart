@@ -1,7 +1,6 @@
-import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:dio/dio.dart';
-import 'package:path_provider/path_provider.dart';
+import 'package:universal_html/html.dart' as html;
 
 void openTextFile(BuildContext context, String fileUrl) async {
   try {
@@ -23,7 +22,7 @@ void openTextFile(BuildContext context, String fileUrl) async {
             children: [
               Text(
                 fileName,
-                style: TextStyle(color: Colors.red),
+                style: const TextStyle(color: Colors.red),
               ),
               IconButton(
                 icon: const Icon(Icons.download),
@@ -72,25 +71,29 @@ Future<void> downloadTextFile(BuildContext context, String fileUrl) async {
     Uri uri = Uri.parse(fileUrl);
     String fileName = uri.pathSegments.last;
 
-    final directory = await getDownloadsDirectory();
-    final filePath = '${directory!.path}/$fileName';
-
     Response response = await dio.get(
       fileUrl,
       options: Options(responseType: ResponseType.bytes),
     );
 
     if (response.statusCode == 200) {
-      final file = File(filePath);
-      await file.writeAsBytes(response.data);
+      final blob = html.Blob([response.data]);
+      final url = html.Url.createObjectUrlFromBlob(blob);
 
-      _showDownloadDialog(context, filePath);
+      final anchor = html.AnchorElement(href: url)
+        ..target = 'blank'
+        ..download = fileName
+        ..click();
+
+      html.Url.revokeObjectUrl(url);
+
+      _showDownloadDialog(context, fileName);
     } else {
-      throw Exception("Greška pri preuzimanju fajla: ${response.statusCode}");
+      throw Exception("Error while downloading: ${response.statusCode}");
     }
   } catch (e) {
     ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text("Greška: $e")),
+      SnackBar(content: Text("Error: $e")),
     );
   }
 }

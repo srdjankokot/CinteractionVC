@@ -17,7 +17,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart';
-import 'package:path_provider/path_provider.dart';
+import 'package:universal_html/html.dart' as html;
 
 class ChatDetailsWidget extends StatefulWidget {
   final ChatState chatState;
@@ -116,7 +116,7 @@ class _ChatDetailsWidgetState extends State<ChatDetailsWidget> {
                 top: 10,
                 right: 10,
                 child: IconButton(
-                  icon: const Icon(Icons.download, color: Colors.black),
+                  icon: const Icon(Icons.download, color: Colors.red),
                   onPressed: () async {
                     await _downloadImage(imagePath);
                   },
@@ -131,12 +131,24 @@ class _ChatDetailsWidgetState extends State<ChatDetailsWidget> {
 
   Future<void> _downloadImage(String url) async {
     try {
-      final directory = await getApplicationDocumentsDirectory();
-      final filePath = '${directory.path}/downloaded_image.jpg';
+      Response response = await Dio()
+          .get(url, options: Options(responseType: ResponseType.bytes));
 
-      await Dio().download(url, filePath);
+      if (response.statusCode == 200) {
+        final blob = html.Blob([response.data]);
+        final url = html.Url.createObjectUrlFromBlob(blob);
+        final anchor = html.AnchorElement(href: url)
+          ..target = 'blank'
+          ..download = 'downloaded_image.jpg';
 
-      print("Image downloaded: $filePath");
+        anchor.click();
+        html.Url.revokeObjectUrl(url);
+
+        print("Image downloaded successfully!");
+      } else {
+        throw Exception(
+            "Error while downloading image: ${response.statusCode}");
+      }
     } catch (e) {
       print("Error while downloading: $e");
     }
