@@ -6,7 +6,6 @@ Future<void> downloadPdfFile(BuildContext context, String fileUrl) async {
   try {
     Dio dio = Dio();
     Uri uri = Uri.parse(fileUrl);
-    String fileName = uri.pathSegments.last;
 
     Response response = await dio.get(
       fileUrl,
@@ -14,11 +13,13 @@ Future<void> downloadPdfFile(BuildContext context, String fileUrl) async {
     );
 
     if (response.statusCode == 200) {
-      final blob = html.Blob([response.data]);
+      final blob = html.Blob([response.data], 'application/pdf');
       final url = html.Url.createObjectUrlFromBlob(blob);
-      _showDownloadDialog(context, url, fileName);
+
+      html.window.open(url, '_blank');
+      html.Url.revokeObjectUrl(url);
     } else {
-      throw Exception("Erorr while download PDF-a: ${response.statusCode}");
+      throw Exception("Error while downloading PDF: ${response.statusCode}");
     }
   } catch (e) {
     ScaffoldMessenger.of(context).showSnackBar(
@@ -29,61 +30,18 @@ Future<void> downloadPdfFile(BuildContext context, String fileUrl) async {
 
 void showPdfDialog(BuildContext context, String pdfUrl) async {
   try {
-    Response response = await Dio()
-        .get(pdfUrl, options: Options(responseType: ResponseType.bytes));
+    Response response = await Dio().get(
+      pdfUrl,
+      options: Options(responseType: ResponseType.bytes),
+    );
     if (response.statusCode == 200) {
-      final blob = html.Blob([response.data]);
+      final blob = html.Blob([response.data], 'application/pdf');
       final url = html.Url.createObjectUrlFromBlob(blob);
 
-      html.IFrameElement iframe = html.IFrameElement()
-        ..src = url
-        ..style.border = 'none'
-        ..style.width = '100%'
-        ..style.height = '100%';
-
-      showDialog(
-        context: context,
-        builder: (context) => AlertDialog(
-          contentPadding: EdgeInsets.zero,
-          content: const SizedBox(
-            width: double.infinity,
-            height: 400,
-            child: HtmlElementView(
-              viewType: 'pdf-viewer',
-            ),
-          ),
-          actions: [
-            TextButton(
-              onPressed: () {
-                html.Url.revokeObjectUrl(url);
-                Navigator.pop(context);
-              },
-              child: const Text("Close"),
-            ),
-          ],
-        ),
-      );
-
-      html.document.getElementById('pdf-viewer')?.append(iframe);
+      html.window.open(url, '_blank');
+      html.Url.revokeObjectUrl(url);
     }
   } catch (e) {
-    print("Erorr download PDF: $e");
+    print("Error downloading PDF: $e");
   }
-}
-
-void _showDownloadDialog(
-    BuildContext context, String fileUrl, String fileName) {
-  showDialog(
-    context: context,
-    builder: (context) => AlertDialog(
-      title: const Text("Download success"),
-      content: Text("File saved: $fileName"),
-      actions: [
-        TextButton(
-          onPressed: () => Navigator.pop(context),
-          child: const Text("OK"),
-        ),
-      ],
-    ),
-  );
 }
