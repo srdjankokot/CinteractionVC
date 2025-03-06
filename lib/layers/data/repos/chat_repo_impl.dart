@@ -169,17 +169,6 @@ class ChatRepoImpl extends ChatRepo {
     _setListener();
   }
 
-  leaveRoom() async {
-    print('Try to leave $room');
-    try {
-      await textRoom.leaveRoom(room);
-      textRoom.dispose();
-      _session.dispose();
-    } catch (e) {
-      print('no connection skipping');
-    }
-  }
-
   bool _haveUnread(Participant participant) {
     for (var message in participant.messages) {
       if (message.seen == false) {
@@ -225,7 +214,6 @@ class ChatRepoImpl extends ChatRepo {
 
   _setListener() {
     textRoom.data?.listen((event) {
-      print('recieved message from data channel $event');
       dynamic data = parse(event.text);
       if (data != null) {
         if (data['textroom'] == 'message') {
@@ -288,9 +276,6 @@ class ChatRepoImpl extends ChatRepo {
           //     time: DateTime.parse(data['date']),
           //     avatarUrl: data['avatarUrl'] ?? "",
           //     seen: false));
-
-          print("Unreaded messages: ${participant.haveUnreadMessages}");
-
           // messages.add(data['text']);
 
           _messagesStream.add(getUserMessages()!);
@@ -353,6 +338,17 @@ class ChatRepoImpl extends ChatRepo {
         }
       }
     });
+  }
+
+  @override
+  leaveRoom() async {
+    try {
+      await textRoom.leaveRoom(room);
+      textRoom.dispose();
+      _session.dispose();
+    } catch (e) {
+      print('no connection skipping $e');
+    }
   }
 
   List<ChatMessage>? getUserMessages() {

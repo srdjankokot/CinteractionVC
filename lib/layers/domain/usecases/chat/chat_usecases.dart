@@ -12,6 +12,7 @@ import 'package:cinteraction_vc/layers/domain/usecases/chat/get_pagination_strea
 import 'package:cinteraction_vc/layers/domain/usecases/chat/get_participants.dart';
 import 'package:cinteraction_vc/layers/domain/usecases/chat/get_users.dart';
 import 'package:cinteraction_vc/layers/domain/usecases/chat/get_users_pagination_stream.dart';
+import 'package:cinteraction_vc/layers/domain/usecases/chat/leave_room.dart';
 import 'package:cinteraction_vc/layers/domain/usecases/chat/load_chats.dart';
 import 'package:cinteraction_vc/layers/domain/usecases/chat/load_users.dart';
 import 'package:cinteraction_vc/layers/domain/usecases/chat/message_seen.dart';
@@ -55,7 +56,8 @@ class ChatUseCases {
         addUserToGroup = AddUserToGroup(repo: repo),
         removeUserFromGroup = RemoveUserFromGroup(repo: repo),
         deleteChat = DeleteChat(repo: repo),
-        downloadMedia = DownloadMedia(repo: repo);
+        downloadMedia = DownloadMedia(repo: repo),
+        leaveRoom = LeaveRoom(repo: repo);
 
   ChatInitialize chatInitialize;
   SendMessage sendMessage;
@@ -82,4 +84,5 @@ class ChatUseCases {
   GetPaginationStream getPaginationStream;
   GetUsersPaginationStream getUsersPaginationStream;
   DownloadMedia downloadMedia;
+  LeaveRoom leaveRoom;
 }
