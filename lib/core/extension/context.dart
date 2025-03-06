@@ -5,6 +5,7 @@ import 'package:cinteraction_vc/layers/data/repos/auth_repo_impl.dart';
 import 'package:cinteraction_vc/layers/data/repos/chat_repo_impl.dart';
 import 'package:cinteraction_vc/layers/data/source/network/api_impl.dart';
 import 'package:cinteraction_vc/layers/domain/repos/chat_repo.dart';
+import 'package:cinteraction_vc/layers/presentation/cubit/chat/chat_cubit.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
@@ -85,8 +86,8 @@ extension Context on BuildContext {
     if (response.statusCode == 200) {
       print('Logout successful.');
       await saveAccessToken(null);
+      getIt.get<ChatCubit>().chatUseCases.leaveRoom();
       getIt.get<LocalStorage>().clearUser();
-      getIt.get<ChatRepo>().leaveRoom();
       resetAndReinitialize();
       GoRouter.of(this).clearStackAndNavigate('/auth');
     } else {

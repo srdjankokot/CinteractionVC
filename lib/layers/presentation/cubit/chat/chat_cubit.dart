@@ -282,6 +282,10 @@ class ChatCubit extends Cubit<ChatState> with BlocLoggy {
     chatUseCases.chooseFile();
   }
 
+  Future<void> leaveRoom() async {
+    chatUseCases.leaveRoom();
+  }
+
   Future<void> sendChatMessage(
       {required String messageContent,
       List<PlatformFile>? uploadedFiles}) async {
