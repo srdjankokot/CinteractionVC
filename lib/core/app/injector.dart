@@ -1,3 +1,5 @@
+import 'package:cinteraction_vc/core/navigation/route.dart';
+import 'package:cinteraction_vc/core/navigation/router.dart';
 import 'package:cinteraction_vc/core/util/secure_local_storage.dart';
 import 'package:cinteraction_vc/layers/data/repos/chat_repo_impl.dart';
 import 'package:cinteraction_vc/layers/data/repos/conference_repo_impl.dart';
@@ -14,6 +16,7 @@ import 'package:cinteraction_vc/layers/domain/usecases/chat/chat_usecases.dart';
 import 'package:cinteraction_vc/layers/domain/usecases/dashboard/dashboard_usecases.dart';
 import 'package:cinteraction_vc/layers/domain/usecases/home/home_use_cases.dart';
 import 'package:cinteraction_vc/layers/presentation/cubit/chat/chat_cubit.dart';
+import 'package:cinteraction_vc/main.dart';
 import 'package:dio/dio.dart';
 import 'package:get_it/get_it.dart';
 import 'package:janus_client/janus_client.dart';
@@ -42,22 +45,20 @@ import '../../layers/presentation/ui/roles/provider/roles_provider.dart';
 import '../../layers/presentation/ui/roles/repository/roles_repository.dart';
 import '../../layers/presentation/ui/users/provider/users_provider.dart';
 import '../../layers/presentation/ui/users/repository/users_repository.dart';
-import '../../main.dart';
 import '../util/conf.dart';
 
 GetIt getIt = GetIt.instance;
-
 
 void resetAndReinitialize() async {
   await getIt.reset(); // Clears all registered instances
   initializeGetIt(); // Re-register instances
 }
 
-
 Future<void> initializeGetIt() async {
   getIt.registerFactoryAsync<Dio>(() async {
     final accessToken = await getAccessToken();
-    return Dio(BaseOptions(
+    print('ACCESS: $accessToken');
+    final dio = Dio(BaseOptions(
       headers: {
         'Accept': 'application/json',
         'Content-Type': 'application/json',
@@ -70,11 +71,29 @@ Future<void> initializeGetIt() async {
 
         return statusCode >= 200 && statusCode < 300;
         if (statusCode == 422) {
-          // your http status code
           return true;
-        } else {}
+        }
       },
     ));
+    dio.interceptors.add(
+      InterceptorsWrapper(
+        onError: (
+          DioException e,
+          handler,
+        ) async {
+          if (e.response?.statusCode == 401) {
+            print("Token expired. Logging out...");
+            await getIt.get<LocalStorage>().clearUser();
+            // getIt.get<ChatCubit>().chatUseCases.leaveRoom();
+            resetAndReinitialize();
+            router.replace(AppRoute.auth.path);
+          }
+          return handler.next(e);
+        },
+      ),
+    );
+
+    return dio;
   });
 
   // getIt.registerFactory<Dio>(() => Dio(
@@ -98,6 +117,8 @@ Future<void> initializeGetIt() async {
   // )));
 
   getIt.registerSingleton<Api>(ApiImpl());
+
+  // getIt.registerSingleton<GoRouter>(router);
 
   getIt.registerFactory<LocalStorage>(
     () => LocalStorageImpl(sharedPreferences: sharedPref),
