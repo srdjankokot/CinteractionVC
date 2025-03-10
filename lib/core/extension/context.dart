@@ -21,7 +21,6 @@ extension Context on BuildContext {
   TextTheme get textTheme => Theme.of(this).textTheme;
   TextTheme get titleTheme => titleThemeStyle.textTheme;
   TextTheme get primaryTextTheme => Theme.of(this).primaryTextTheme;
-
   ColorScheme get colorScheme => Theme.of(this).colorScheme;
 
   void closeKeyboard() => FocusScope.of(this).unfocus();
@@ -75,23 +74,38 @@ extension Context on BuildContext {
     Dio dio = await getIt.getAsync<Dio>();
     final accessToken = await getAccessToken();
     print('accessToken $accessToken');
-    Response response = await dio.post(
-      Urls.logOutEndpoint,
-      options: Options(
-        headers: {
-          'Authorization': 'Bearer $accessToken',
-        },
-      ),
-    );
-    if (response.statusCode == 200) {
-      print('Logout successful.');
-      await saveAccessToken(null);
-      getIt.get<ChatCubit>().chatUseCases.leaveRoom();
-      getIt.get<LocalStorage>().clearUser();
-      resetAndReinitialize();
-      GoRouter.of(this).clearStackAndNavigate('/auth');
-    } else {
-      print('LogOut failed, ${response.statusCode}');
+
+    try {
+      Response response = await dio.post(
+        Urls.logOutEndpoint,
+        options: Options(
+          headers: {
+            'Authorization': 'Bearer $accessToken',
+          },
+        ),
+      );
+
+      if (response.statusCode == 200) {
+        print('Logout successful.');
+        await handleLogout();
+      } else {
+        print('LogOut failed, ${response.statusCode}');
+      }
+    } catch (e) {
+      if (e is DioException && e.response?.statusCode == 401) {
+        print('Unauthorized request. Clearing cache and logging out...');
+        await handleLogout();
+      } else {
+        print('Logout error: $e');
+      }
     }
+  }
+
+  Future<void> handleLogout() async {
+    await saveAccessToken(null);
+    getIt.get<ChatCubit>().chatUseCases.leaveRoom();
+    getIt.get<LocalStorage>().clearUser();
+    resetAndReinitialize();
+    GoRouter.of(this).clearStackAndNavigate('/auth');
   }
 }
