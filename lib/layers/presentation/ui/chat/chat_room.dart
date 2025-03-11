@@ -6,11 +6,6 @@ import 'package:cinteraction_vc/core/app/injector.dart';
 import 'package:cinteraction_vc/core/app/style.dart';
 import 'package:cinteraction_vc/core/extension/context.dart';
 import 'package:cinteraction_vc/core/extension/context_user.dart';
-import 'package:cinteraction_vc/core/extension/image.dart';
-import 'package:cinteraction_vc/layers/data/dto/chat/chat_detail_dto.dart';
-import 'package:cinteraction_vc/layers/data/dto/chat/last_message_dto.dart';
-import 'package:cinteraction_vc/layers/data/dto/user_dto.dart';
-import 'package:cinteraction_vc/layers/domain/usecases/chat/set_current_chat.dart';
 import 'package:cinteraction_vc/layers/presentation/cubit/chat/chat_cubit.dart';
 import 'package:cinteraction_vc/layers/presentation/cubit/chat/chat_state.dart';
 import 'package:cinteraction_vc/layers/presentation/ui/chat/widget/chat_dropzone.dart';
@@ -21,21 +16,17 @@ import 'package:cinteraction_vc/layers/presentation/ui/chat/widget/user_list_vie
 import 'package:cinteraction_vc/layers/presentation/ui/conference/widget/participant_video_widget.dart';
 import 'package:cinteraction_vc/layers/presentation/ui/chat/widget/dialogs/group_dialog.dart';
 import 'package:file_picker/file_picker.dart';
-import 'package:fl_chart/fl_chart.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_dropzone/flutter_dropzone.dart';
 import 'package:go_router/go_router.dart';
-import 'package:visibility_detector/visibility_detector.dart';
 
 import '../../../../assets/colors/Colors.dart';
 import '../../../../core/ui/images/image.dart';
 import '../../../../core/ui/widget/call_button_shape.dart';
 import 'widget/chat_list_view.dart';
-import '../conference/widget/chat_message_widget.dart';
 import '../home/ui/widgets/home_item.dart';
 import '../home/ui/widgets/join_popup.dart';
 import '../home/ui/widgets/schedule_popup.dart';
@@ -805,8 +796,8 @@ class ChatRoomPage extends StatelessWidget {
                                       child: !state.isLoading
                                           ? ChatDetailsWidget(state)
                                           : const Center(
-                                          child:
-                                          CircularProgressIndicator()),
+                                              child:
+                                                  CircularProgressIndicator()),
                                     ),
                                   )
                                 ],
