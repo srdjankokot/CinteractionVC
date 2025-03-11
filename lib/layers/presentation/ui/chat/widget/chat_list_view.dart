@@ -240,7 +240,6 @@ class _ChatsListViewState extends State<ChatsListView> {
                                 Positioned(
                                   right: 25,
                                   top: 5,
-                                  left: 5,
                                   child: IconButton(
                                     icon: Icon(
                                       Icons.delete_forever,
