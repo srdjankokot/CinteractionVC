@@ -54,4 +54,7 @@ abstract class ConferenceRepo{
 
   Future<ApiResponse<bool>> sendMessage(String msg);
 
+  Future<void> startRecording();
+  Future<void> stopRecording();
+
 }

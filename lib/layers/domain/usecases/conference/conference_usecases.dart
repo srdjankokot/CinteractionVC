@@ -18,6 +18,8 @@ import 'conference_publish.dart';
 import 'conference_publish_by_id.dart';
 import 'conference_send_message.dart';
 import 'conference_start_call.dart';
+import 'conference_start_recording.dart';
+import 'conference_stop_recording.dart';
 import 'conference_switch_camera.dart';
 import 'conference_toggle_engagement.dart';
 import 'conference_unpublish.dart';
@@ -45,7 +47,10 @@ class ConferenceUseCases {
         getAvgEngagementStream = GetAvgEngagementStream(repo: repo),
         startCall = ConferenceStartCall(repo: repo),
         sendMessage = ConferenceSendMessage(repo: repo),
-        getMessageStream = ConferenceMessageStream(repo: repo);
+        getMessageStream = ConferenceMessageStream(repo: repo),
+        startRecording = ConferenceStartRecording(repo: repo),
+        stopRecording = ConferenceStopRecording(repo: repo)
+  ;
 
   final ConferenceRepo repo;
 
@@ -70,4 +75,6 @@ class ConferenceUseCases {
   ConferenceStartCall startCall;
   ConferenceSendMessage sendMessage;
   ConferenceMessageStream getMessageStream;
+  ConferenceStartRecording startRecording;
+  ConferenceStopRecording stopRecording;
 }
