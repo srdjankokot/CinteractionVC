@@ -5,6 +5,12 @@ import 'package:equatable/equatable.dart';
 import '../../../../core/util/util.dart';
 import '../../../domain/entities/chat_message.dart';
 
+enum RecordingStatus {
+  loading,
+  recording,
+  notRecording,
+}
+
 
 class ConferenceState extends Equatable {
   final bool isInitial;
@@ -23,7 +29,7 @@ class ConferenceState extends Equatable {
   final int numberOfStreamsCopy;
   final bool isGridLayout;
   final String? error;
-  final bool recording;
+  final RecordingStatus recording;
 
 
   const ConferenceState({
@@ -60,7 +66,7 @@ class ConferenceState extends Equatable {
     int? isGridLayout,
     int? avgEngagement = 0,
     int? unreadMessages = 0,
-    bool recording = false
+    RecordingStatus recording = RecordingStatus.notRecording
   }) : this(isInitial: isInitial, isEnded: isEnded, audioMuted: audioMuted, videoMuted: videoMuted, numberOfStreamsCopy: 1, isGridLayout: true, engagementEnabled: engagementEnabled, avgEngagement: avgEngagement, screenShared:screenShared, showingChat: showingChat, recording: recording);
 
 
@@ -73,7 +79,7 @@ class ConferenceState extends Equatable {
     bool screenShared = false,
     bool engagementEnabled = true,
     bool showingChat = false,
-    bool recording = false
+    RecordingStatus recording = RecordingStatus.notRecording
   }) : this(isInitial: isInitial, isEnded: isEnded, audioMuted: audioMuted, videoMuted: videoMuted, numberOfStreamsCopy: 1, isGridLayout: true, engagementEnabled : engagementEnabled, screenShared:screenShared, showingChat:showingChat,  recording: recording);
 
 
@@ -87,7 +93,7 @@ class ConferenceState extends Equatable {
     bool engagementEnabled = true,
     bool showingChat = false,
     required String error,
-    bool recording = false
+    RecordingStatus recording = RecordingStatus.notRecording
 
   }) : this(isInitial: isInitial, isEnded: isEnded, audioMuted: audioMuted, videoMuted: videoMuted, numberOfStreamsCopy: 1, isGridLayout: true, engagementEnabled : engagementEnabled, screenShared:screenShared, error: error, showingChat:showingChat,  recording: recording);
 
@@ -110,7 +116,7 @@ class ConferenceState extends Equatable {
     bool? engagementEnabled,
     bool? showingChat,
     bool? isGridLayout,
-    bool? recording
+    RecordingStatus? recording
   }) {
     return ConferenceState(
       isInitial: isInitial ?? this.isInitial,

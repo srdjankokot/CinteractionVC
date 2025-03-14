@@ -7,7 +7,7 @@ class ConferenceStartRecording {
 
   final ConferenceRepo repo;
 
-  Future<void> call() {
+  Future<bool> call()  {
      return repo.startRecording();
   }
 }
