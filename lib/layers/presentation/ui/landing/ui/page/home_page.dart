@@ -2,6 +2,8 @@ import 'package:cinteraction_vc/assets/colors/Colors.dart';
 import 'package:cinteraction_vc/core/extension/context.dart';
 import 'package:cinteraction_vc/core/extension/context_user.dart';
 import 'package:cinteraction_vc/core/extension/image.dart';
+import 'package:cinteraction_vc/core/navigation/route.dart';
+import 'package:cinteraction_vc/core/navigation/router.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
@@ -181,7 +183,16 @@ class _HomePageState extends State<HomePage> {
                 ),
                 child: Row(
                   children: [
-                    imageSVGAsset('original_long_logo') as Widget,
+                    MouseRegion(
+                      cursor: SystemMouseCursors.click,
+                      child: GestureDetector(
+                          onTap: () => {
+                                setState(() {
+                                  _selectedIndex = 0;
+                                }),
+                              },
+                          child: imageSVGAsset('original_long_logo') as Widget),
+                    ),
                     const Spacer(),
                     if (user != null)
                       PopupMenuButton<String>(
