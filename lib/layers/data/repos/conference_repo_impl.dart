@@ -1248,8 +1248,8 @@ class ConferenceRepoImpl extends ConferenceRepo {
   {
     flutterWebRTC.MediaRecorder? mediaRecorder = flutterWebRTC.MediaRecorder();
     try {
-      await Future.delayed(
-          const Duration(milliseconds: 500)); // Ensure mediaRecorder is ready
+      // await Future.delayed(
+      //     const Duration(milliseconds: 500)); // Ensure mediaRecorder is ready
 
       if (stream.getAudioTracks().isNotEmpty) {
         print('Audio track in the stream');
@@ -1272,17 +1272,20 @@ class ConferenceRepoImpl extends ConferenceRepo {
 
 
   @override
-  Future<void> startRecording() async {
+  Future<bool> startRecording() async {
     try {
       Map<dynamic, StreamRenderer> streams = await _conferenceStream.stream.first;
 
       streams.entries.forEach((stream){
         startRecordStream(stream.value.mediaStream!);
       });
+
+      return true;
       // startRecordStream(firstValue.entries.first.value.mediaStream!);
       // startRecordStream(localVideoRenderer.mediaStream!);
     } catch (e) {
       print("Error starting recording: $e");
+      return false;
     }
   }
 

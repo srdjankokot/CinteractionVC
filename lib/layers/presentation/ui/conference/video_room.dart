@@ -93,7 +93,14 @@ class VideoRoomPage extends StatelessWidget {
               child: Container(
                   width: double.maxFinite,
                   height: double.maxFinite,
-                  color: ColorConstants.kBlack3,
+                  // color: ColorConstants.kBlack3,
+                  decoration: BoxDecoration(
+                    color: ColorConstants.kBlack3, // Background color
+                    border: state.recording == RecordingStatus.recording ?  Border.all(
+                      color: ColorConstants.kPrimaryColor, // Border color
+                      width: 3.0, // Border width
+                    ) : null, // Rounded corners
+                  ),
                   child: Builder(
                     builder: (context) {
                       if (context.isWide) {
@@ -266,14 +273,35 @@ class VideoRoomPage extends StatelessWidget {
                                   ]),
 
                                     const SizedBox(width: 20),
+                                      // ElevatedButton(
+                                      //     onPressed: () async {
+                                      //       await context.read<ConferenceCubit>().recordingMeet();
+                                      //     },
+                                      //
+                                      //     child: AnimatedSwitcher(duration: const Duration(milliseconds: 300),
+                                      //     transitionBuilder: (child, animation) => ScaleTransition(scale: animation, child: child),
+                                      //     child:
+                                      //
+                                      //
+                                      //
+                                      //       ,
+                                      //     )
+                                      //
+                                      // )
+
                                       CallButtonShape(
-                                        image: state.recording ? const Icon(Icons.stop, size: 30, color: Colors.red): const  Icon(Icons.fiber_manual_record, size: 30, color: Colors.red),
+                                        // image: state.recording ? const Icon(Icons.stop, size: 30, color: Colors.red): const  Icon(Icons.fiber_manual_record, size: 30, color: Colors.red),
+                                        image:
+                                        state.recording == RecordingStatus.notRecording ?
+                                        const  Icon(Icons.fiber_manual_record, size: 30, color: Colors.red) :
+                                            state.recording == RecordingStatus.loading ?    const CircularProgressIndicator(
+                                              strokeWidth: 2,
+                                              color: Colors.white,
+                                            ) : const Icon(Icons.stop, size: 30, color: Colors.red),
                                         onClickAction: () async {
                                           await context.read<ConferenceCubit>().recordingMeet();
                                         },
                                       ),
-
-
 
                                   const SizedBox(width: 20),
                                   // CallButtonShape(
