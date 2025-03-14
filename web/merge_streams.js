@@ -25,10 +25,19 @@
 
   async function mergeVideos(blobUrls) {
 //    const blobUrls = urls.flatMap(url => [url]);
+  // Write the Blob files to FFmpeg
+  console.log("-----------mergeVideos------------");
+    for (let i = 0; i < blobUrls.length; i++) {
+      console.log(blobUrls[i]);
+    }
+  console.log("-----------------------------------");
+
 
     const { createFFmpeg, fetchFile } = FFmpeg;
     const ffmpeg = createFFmpeg({ log: true });
     await ffmpeg.load();
+
+     console.log("------------ ffmpeg loaded -------------");
     // Convert Blob URLs to Blobs
     const blobs = await Promise.all(blobUrls.map(getBlobFromUrl));
 

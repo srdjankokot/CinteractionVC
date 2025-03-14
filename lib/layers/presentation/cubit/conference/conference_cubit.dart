@@ -205,18 +205,17 @@ class ConferenceCubit extends Cubit<ConferenceState> with BlocLoggy {
   }
 
   Future<void> recordingMeet() async {
-    if (!state.recording) {
+    if (state.recording == RecordingStatus.notRecording) {
        // bool recording = await FlutterScreenRecording.startRecordScreenAndAudio("videoName");
-       bool recording = true;
-       conferenceUseCases.startRecording();
-
-       emit(state.copyWith(recording: recording));
+        emit(state.copyWith(recording: RecordingStatus.loading));
+       var recordingStarted = await conferenceUseCases.startRecording();
+       emit(state.copyWith(recording: recordingStarted ? RecordingStatus.recording: RecordingStatus.notRecording));
     } else {
       // FlutterScreenRecording.stopRecordScreen;
       conferenceUseCases.stopRecording();
 
 
-      emit(state.copyWith(recording: false));
+      emit(state.copyWith(recording: RecordingStatus.notRecording));
     }
   }
 }
