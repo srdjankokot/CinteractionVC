@@ -26,9 +26,102 @@ GoogleSignIn _googleSignIn = GoogleSignIn(
 class AuthRepoImpl extends AuthRepo {
   AuthRepoImpl({
     required Api api,
-  }) : _api = api;
+  }) : _api = api {
+    // _initialize();
+  }
 
   final Api _api;
+
+//   Future<ApiResponse<UserDto?>>  _signInGoogle() async{
+//
+//     var googleUser = await _googleSignIn.signInSilently();
+//
+//
+//     _googleSignIn.onCurrentUserChanged.listen((GoogleSignInAccount? account) async {
+// // #docregion CanAccessScopes
+//       // In mobile, being authenticated means being authorized...
+//       bool isAuthorized = account != null;
+//       // However, on web...
+//       if (kIsWeb && account != null) {
+//         isAuthorized = await _googleSignIn.canAccessScopes(scopes);
+//
+//         print("----------------");
+//         print(isAuthorized);
+//         print("----------------");
+//       }
+// // #enddocregion CanAccessScopes
+//
+//       if (isAuthorized && account != null) {
+//         // await saveAccessToken(accessToken!);
+//       }
+//
+//
+//       //
+//       // // Now that we know that the user can access the required scopes, the app
+//       // // can call the REST API.
+//       // if (isAuthorized) {
+//       //   unawaited(_handleGetContact(account!));
+//       // }
+//     });
+//
+//     // In the web, _googleSignIn.signInSilently() triggers the One Tap UX.
+//     //
+//     // It is recommended by Google Identity Services to render both the One Tap UX
+//     // and the Google Sign In button together to "reduce friction and improve
+//     // sign-in rates" ([docs](https://developers.google.com/identity/gsi/web/guides/display-button#html)).
+//     _googleSignIn.signInSilently();
+//
+//
+//
+//     // var googleUsers = await _googleSignIn.signIn();
+//   }
+
+  @override
+  Future<ApiResponse<UserDto?>> signWithGoogleAccount() async {
+
+    var googleUser = await _googleSignIn.signInSilently();
+    final GoogleSignInAuthentication? googleAuth =
+    await googleUser?.authentication;
+
+    bool isAuthorized = googleUser != null;
+    if (kIsWeb && googleUser != null) {
+      isAuthorized = await _googleSignIn.canAccessScopes(scopes);
+    }
+
+    if (isAuthorized && googleUser != null) {
+      String? accessToken = await _api.socialLogin(
+          provider: 'google', token: googleAuth?.accessToken);
+      await saveAccessToken(accessToken!);
+      return getUserDetails();
+    }
+
+    return ApiResponse(
+        error: ApiError(errorCode: 0, errorMessage: 'Unknown Error'));
+
+    // var googleUser = await _googleSignIn.signIn();
+    //
+    // final GoogleSignInAuthentication? googleAuth =
+    //     await googleUser?.authentication;
+    //
+    // bool isAuthorized = googleUser != null;
+    // if (kIsWeb && googleUser != null) {
+    //   isAuthorized = await _googleSignIn.canAccessScopes(scopes);
+    // }
+    //
+    // if (isAuthorized && googleUser != null) {
+    //   String? accessToken = await _api.socialLogin(
+    //       provider: 'google', token: googleAuth?.accessToken);
+    //   await saveAccessToken(accessToken!);
+    //   return getUserDetails();
+    // }
+    //
+    return ApiResponse(
+        error: ApiError(errorCode: 0, errorMessage: 'Unknown Error'));
+  }
+
+
+
+
 
   @override
   Future<ApiResponse<UserDto?>> signInWithEmailAndPassword(
@@ -66,28 +159,6 @@ class AuthRepoImpl extends AuthRepo {
     }
 
     // _userStream.add(null);
-    return ApiResponse(
-        error: ApiError(errorCode: 0, errorMessage: 'Unknown Error'));
-  }
-
-  @override
-  Future<ApiResponse<UserDto?>> signWithGoogleAccount() async {
-    var googleUser = await _googleSignIn.signIn();
-    final GoogleSignInAuthentication? googleAuth =
-        await googleUser?.authentication;
-
-    bool isAuthorized = googleUser != null;
-    if (kIsWeb && googleUser != null) {
-      isAuthorized = await _googleSignIn.canAccessScopes(scopes);
-    }
-
-    if (isAuthorized && googleUser != null) {
-      String? accessToken = await _api.socialLogin(
-          provider: 'google', token: googleAuth?.accessToken);
-      await saveAccessToken(accessToken!);
-      return getUserDetails();
-    }
-
     return ApiResponse(
         error: ApiError(errorCode: 0, errorMessage: 'Unknown Error'));
   }

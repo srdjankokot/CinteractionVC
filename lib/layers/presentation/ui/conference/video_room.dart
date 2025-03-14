@@ -2,7 +2,6 @@ import 'dart:math';
 
 import 'package:cinteraction_vc/assets/colors/Colors.dart';
 import 'package:cinteraction_vc/core/extension/context.dart';
-import 'package:cinteraction_vc/core/extension/string.dart';
 import 'package:cinteraction_vc/core/ui/widget/call_button_shape.dart';
 import 'package:cinteraction_vc/core/ui/widget/engagement_progress.dart';
 import 'package:cinteraction_vc/layers/presentation/ui/conference/widget/chat_message_widget.dart';
@@ -11,7 +10,6 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:flutter_screen_recording/flutter_screen_recording.dart';
 import 'package:flutter_webrtc/flutter_webrtc.dart';
 import 'package:visibility_detector/visibility_detector.dart';
 
