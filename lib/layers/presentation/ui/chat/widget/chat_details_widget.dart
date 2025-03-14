@@ -405,44 +405,47 @@ class _ChatDetailsWidgetState extends State<ChatDetailsWidget> {
                                                                   .map((file) {
                                                                 if (_isImage(file
                                                                     .path)) {
-                                                                  return GestureDetector(
-                                                                    onTap:
-                                                                        () async {
-                                                                      String updatedImagePath = file
-                                                                          .path
-                                                                          .replaceAll(
-                                                                              "cinteraction",
-                                                                              "huawei");
-
-                                                                      _showImageDialog(
-                                                                          context,
-                                                                          updatedImagePath);
-                                                                    },
+                                                                  return MouseRegion(
+                                                                    cursor:
+                                                                        SystemMouseCursors
+                                                                            .click,
                                                                     child:
-                                                                        Padding(
-                                                                      padding: const EdgeInsets
-                                                                          .only(
-                                                                          top:
-                                                                              8.0),
+                                                                        GestureDetector(
+                                                                      onTap:
+                                                                          () async {
+                                                                        String updatedImagePath = file.path.replaceAll(
+                                                                            "cinteraction",
+                                                                            "huawei");
+
+                                                                        _showImageDialog(
+                                                                            context,
+                                                                            updatedImagePath);
+                                                                      },
                                                                       child:
-                                                                          ClipRRect(
-                                                                        borderRadius:
-                                                                            BorderRadius.circular(8.0),
-                                                                        child: file.bytes !=
-                                                                                null
-                                                                            ? Image.memory(
-                                                                                file.bytes!,
-                                                                                width: 200,
-                                                                                height: 200,
-                                                                                fit: BoxFit.cover,
-                                                                              )
-                                                                            : Image.network(
-                                                                                file.path.replaceAll("cinteraction", "huawei"),
-                                                                                width: 200,
-                                                                                height: 200,
-                                                                                fit: BoxFit.cover,
-                                                                                errorBuilder: (context, error, stackTrace) => const Icon(Icons.image_not_supported, color: Colors.red),
-                                                                              ),
+                                                                          Padding(
+                                                                        padding: const EdgeInsets
+                                                                            .only(
+                                                                            top:
+                                                                                8.0),
+                                                                        child:
+                                                                            ClipRRect(
+                                                                          borderRadius:
+                                                                              BorderRadius.circular(8.0),
+                                                                          child: file.bytes != null
+                                                                              ? Image.memory(
+                                                                                  file.bytes!,
+                                                                                  width: 200,
+                                                                                  height: 200,
+                                                                                  fit: BoxFit.cover,
+                                                                                )
+                                                                              : Image.network(
+                                                                                  file.path.replaceAll("cinteraction", "huawei"),
+                                                                                  width: 200,
+                                                                                  height: 200,
+                                                                                  fit: BoxFit.cover,
+                                                                                  errorBuilder: (context, error, stackTrace) => const Icon(Icons.image_not_supported, color: Colors.red),
+                                                                                ),
+                                                                        ),
                                                                       ),
                                                                     ),
                                                                   );
