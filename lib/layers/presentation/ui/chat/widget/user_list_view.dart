@@ -107,57 +107,63 @@ class _UsersListViewState extends State<UsersListView> {
                 int userId = int.parse(user.id);
                 bool isSelected = userId == selectedUserId;
 
-                return GestureDetector(
-                  onTap: () async {
-                    setState(() {
-                      selectedUserId = userId;
-                    });
-                    await context
-                        .read<ChatCubit>()
-                        .getChatDetailsByParticipiant(userId, 1);
-                    await context.read<ChatCubit>().setCurrentParticipant(user);
-                  },
-                  child: Container(
-                    color: isSelected ? Colors.blue[100] : Colors.white,
-                    child: Padding(
-                      padding: const EdgeInsets.all(4.0),
-                      child: Row(
-                        crossAxisAlignment: CrossAxisAlignment.center,
-                        mainAxisAlignment: MainAxisAlignment.start,
-                        children: [
-                          const SizedBox(width: 10),
-                          Stack(
-                            children: [
-                              UserImage.medium(user.imageUrl),
-                              Visibility(
-                                visible: user.online,
-                                child: Positioned(
-                                  bottom: 2,
-                                  right: 4,
-                                  child: ClipOval(
-                                    child: Container(
-                                      width: 10.0,
-                                      height: 10.0,
-                                      color: Colors.green,
+                return MouseRegion(
+                  cursor: SystemMouseCursors.click,
+                  child: GestureDetector(
+                    onTap: () async {
+                      setState(() {
+                        selectedUserId = userId;
+                      });
+                      await context
+                          .read<ChatCubit>()
+                          .getChatDetailsByParticipiant(userId, 1);
+                      await context
+                          .read<ChatCubit>()
+                          .setCurrentParticipant(user);
+                      print('userEmail: ${user.email}');
+                    },
+                    child: Container(
+                      color: isSelected ? Colors.blue[100] : Colors.white,
+                      child: Padding(
+                        padding: const EdgeInsets.all(4.0),
+                        child: Row(
+                          crossAxisAlignment: CrossAxisAlignment.center,
+                          mainAxisAlignment: MainAxisAlignment.start,
+                          children: [
+                            const SizedBox(width: 10),
+                            Stack(
+                              children: [
+                                UserImage.medium(user.imageUrl),
+                                Visibility(
+                                  visible: user.online,
+                                  child: Positioned(
+                                    bottom: 2,
+                                    right: 4,
+                                    child: ClipOval(
+                                      child: Container(
+                                        width: 10.0,
+                                        height: 10.0,
+                                        color: Colors.green,
+                                      ),
                                     ),
                                   ),
                                 ),
-                              ),
-                            ],
-                          ),
-                          const SizedBox(width: 10),
-                          Column(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                user.name,
-                                textAlign: TextAlign.center,
-                                style: context.textTheme.titleMedium,
-                              ),
-                            ],
-                          ),
-                        ],
+                              ],
+                            ),
+                            const SizedBox(width: 10),
+                            Column(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  user.name,
+                                  textAlign: TextAlign.center,
+                                  style: context.textTheme.titleMedium,
+                                ),
+                              ],
+                            ),
+                          ],
+                        ),
                       ),
                     ),
                   ),
