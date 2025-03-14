@@ -1,5 +1,6 @@
 import 'package:cinteraction_vc/core/extension/context.dart';
 import 'package:cinteraction_vc/core/ui/images/image.dart';
+import 'package:cinteraction_vc/layers/presentation/ui/auth/sign_in_button/mobile.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -286,30 +287,39 @@ class AuthPage extends StatelessWidget {
                                   Row(
                                     mainAxisAlignment: MainAxisAlignment.center,
                                     children: [
-                                      SizedBox(
-                                        width: 70,
-                                        height: 60,
-                                        child: OutlinedButton(
-                                            onPressed: () => {
-                                                  context
-                                                      .read<AuthCubit>()
-                                                      .signInWithGoogle()
-                                                },
-                                            style: OutlinedButton.styleFrom(
-                                              side: const BorderSide(
-                                                  width: 1,
-                                                  color: Color(0xFFBDBDBD)),
-                                              shape: RoundedRectangleBorder(
-                                                side: const BorderSide(
-                                                    width: 1,
-                                                    color: Color(0xFFBDBDBD)),
-                                                borderRadius:
-                                                    BorderRadius.circular(18),
-                                              ),
-                                            ),
-                                            child:
-                                                imageSVGAsset('google_logo')),
+
+                                      buildSignInButton(
+                                       onPressed: () async {
+                                          await context
+                                             .read<AuthCubit>()
+                                             .signInWithGoogle();
+                                       }
                                       ),
+
+                                      // SizedBox(
+                                      //   width: 70,
+                                      //   height: 60,
+                                      //   child: OutlinedButton(
+                                      //       onPressed: () => {
+                                      //             context
+                                      //                 .read<AuthCubit>()
+                                      //                 .signInWithGoogle()
+                                      //           },
+                                      //       style: OutlinedButton.styleFrom(
+                                      //         side: const BorderSide(
+                                      //             width: 1,
+                                      //             color: Color(0xFFBDBDBD)),
+                                      //         shape: RoundedRectangleBorder(
+                                      //           side: const BorderSide(
+                                      //               width: 1,
+                                      //               color: Color(0xFFBDBDBD)),
+                                      //           borderRadius:
+                                      //               BorderRadius.circular(18),
+                                      //         ),
+                                      //       ),
+                                      //       child:
+                                      //           imageSVGAsset('google_logo')),
+                                      // ),
                                       // const SizedBox(width: 34),
                                       // SizedBox(
                                       //   width: 70,
