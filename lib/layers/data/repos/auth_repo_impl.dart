@@ -15,7 +15,11 @@ import '../dto/user_dto.dart';
 import '../source/local/local_storage.dart';
 
 /// The scopes required by this application.
-const List<String> scopes = <String>['email', 'profile', 'openid'];
+const List<String> scopes = <String>[
+  'email',
+  'https://www.googleapis.com/auth/userinfo.email',
+  'https://www.googleapis.com/auth/userinfo.profile',
+  'openid'];
 
 GoogleSignIn _googleSignIn = GoogleSignIn(
   // Optional clientId
@@ -79,13 +83,15 @@ class AuthRepoImpl extends AuthRepo {
   @override
   Future<ApiResponse<UserDto?>> signWithGoogleAccount() async {
 
-    var googleUser = await _googleSignIn.signInSilently();
-    final GoogleSignInAuthentication? googleAuth =
-    await googleUser?.authentication;
+    var googleUser = await _googleSignIn.signIn();
+    final GoogleSignInAuthentication? googleAuth = await googleUser?.authentication;
 
     bool isAuthorized = googleUser != null;
     if (kIsWeb && googleUser != null) {
       isAuthorized = await _googleSignIn.canAccessScopes(scopes);
+    }
+    if (!isAuthorized) {
+      await _googleSignIn.requestScopes(scopes);
     }
 
     if (isAuthorized && googleUser != null) {
