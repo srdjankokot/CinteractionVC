@@ -21,9 +21,21 @@ const List<String> scopes = <String>[
   'https://www.googleapis.com/auth/userinfo.profile',
   'openid'];
 
-GoogleSignIn _googleSignIn = GoogleSignIn(
-  // Optional clientId
-  // clientId: '86369065781-lpajm2ln4bu8ds7vlb6780rmq0evae3o.apps.googleusercontent.com',
+// GoogleSignIn _googleSignIn = GoogleSignIn(
+//   // Optional clientId
+//   // clientId: '86369065781-lpajm2ln4bu8ds7vlb6780rmq0evae3o.apps.googleusercontent.com',
+//   scopes: scopes,
+// );
+
+GoogleSignIn _googleSignIn = (kIsWeb)
+    ? GoogleSignIn(
+  clientId: "86369065781-lpajm2ln4bu8ds7vlb6780rmq0evae3o.apps.googleusercontent.com",
+
+  forceCodeForRefreshToken: true,
+  scopes: scopes,
+)
+    : GoogleSignIn(
+  forceCodeForRefreshToken: true,
   scopes: scopes,
 );
 
