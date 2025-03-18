@@ -83,7 +83,7 @@ class AuthRepoImpl extends AuthRepo {
   @override
   Future<ApiResponse<UserDto?>> signWithGoogleAccount() async {
 
-    var googleUser = await _googleSignIn.signIn();
+    var googleUser = await _googleSignIn.signInSilently();
     final GoogleSignInAuthentication? googleAuth = await googleUser?.authentication;
 
     bool isAuthorized = googleUser != null;
