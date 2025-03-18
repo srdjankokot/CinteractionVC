@@ -2,14 +2,17 @@
 <html>
   <head>
     <!-- Office JavaScript API -->
-    <script type="text/javascript" src="https://appsforoffice.microsoft.com/lib/1.1/hosted/office.js"></script>
+    <!-- <script type="text/javascript" src="https://appsforoffice.microsoft.com/lib/1.1/hosted/office.js"></script> -->
+    <script type="text/javascript" src="https://appsforoffice.microsoft.com/lib/1/hosted/office.js"></script>
     <script>
       Office.onReady((info) => {
+        initializeApp();
         if (info.host === Office.HostType.Outlook) {
           console.log("Office.js is ready for Outlook");
           // Initialization code here
           initializeApp();
         }
+
       });
   
       function initializeApp() {
@@ -17,10 +20,12 @@
         // Your custom logic here
       }
     </script>
+    <link rel="stylesheet" type="text/css" href="taskpane.css" />
     <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    <script type="text/javascript" src="../taskpane/taskpane.js"></script>
     <script type="text/javascript" src="../taskpane/auth.js"></script>
     
-    <link rel="stylesheet" type="text/css" href="taskpane.css" />
+
   </head>
 
   <body>
