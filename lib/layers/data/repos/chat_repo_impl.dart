@@ -224,6 +224,11 @@ class ChatRepoImpl extends ChatRepo {
 
           if (initChat != null) {
             final text = data['text'] as String;
+
+            if (data['text'] == '!@checkList') {
+              print('Here it is');
+              loadChats(1, 20);
+            }
             final isFile =
                 text.startsWith('http') || text.contains('/storage/');
 
@@ -232,7 +237,7 @@ class ChatRepoImpl extends ChatRepo {
               senderId: senderId,
               createdAt: data['date'],
               updatedAt: data['date'],
-              message: isFile ? null : text,
+              message: isFile || data['text'] == '!@checkList' ? null : text,
               files: isFile
                   ? [
                       FileDto(
@@ -623,6 +628,9 @@ class ChatRepoImpl extends ChatRepo {
       if (response.error == null && response.response != null) {
         _chatDetailsStream.add(response.response!);
         chatDetailsDto = response.response!;
+        print('test: ${participantIds.map((id) => id.toString()).toList()}');
+        sendMessage(
+            '!@checkList', participantIds.map((id) => id.toString()).toList());
       } else {
         print("Error: ${response.error}");
       }
@@ -637,6 +645,7 @@ class ChatRepoImpl extends ChatRepo {
       var response =
           await _api.removeUserFromGroupChat(chatId: chatId, userId: userId);
       if (response.error == null && response.response != null) {
+        print('Responsee: ${response.response}');
         _chatDetailsStream.add(response.response!);
         chatDetailsDto = response.response!;
       } else {
