@@ -86,25 +86,28 @@ class VideoRoomPage extends StatelessWidget {
 
           var subscribers = state.streamSubscribers?.toList();
 
+          var borderWidth = state.recording == RecordingStatus.recording? 3.0 : 0.0;
+
           return Material(
             child: Center(
-              child: Container(
+              child:
+              Container(
                   width: double.maxFinite,
                   height: double.maxFinite,
                   // color: ColorConstants.kBlack3,
                   decoration: BoxDecoration(
                     color: ColorConstants.kBlack3, // Background color
-                    border: state.recording == RecordingStatus.recording ?  Border.all(
+                    border:  Border.all(
                       color: ColorConstants.kPrimaryColor, // Border color
-                      width: 3.0, // Border width
-                    ) : null, // Rounded corners
+                      width: borderWidth, // Border width
+                    ), // Rounded corners
                   ),
                   child: Builder(
                     builder: (context) {
                       if (context.isWide) {
                         return Stack(
                           children: [
-                            getLayout(context, items, state.isGridLayout),
+                            getLayout(context, items, state.isGridLayout, borderWidth),
                             // Positioned(
                             //     top: 20,
                             //     left: 20,
@@ -556,7 +559,7 @@ class VideoRoomPage extends StatelessWidget {
                                   ),
                                   Expanded(
                                     child: getLayout(
-                                        context, items, state.isGridLayout),
+                                        context, items, state.isGridLayout, borderWidth),
                                   ),
                                   Padding(
                                     padding: const EdgeInsets.only(
@@ -816,7 +819,7 @@ class VideoRoomPage extends StatelessWidget {
   }
 
   Widget getLayout(
-      BuildContext context, List<StreamRenderer> items, bool isGrid) {
+      BuildContext context, List<StreamRenderer> items, bool isGrid, double borderWidth) {
     StreamRenderer? screenshared;
 
     try {
@@ -837,6 +840,7 @@ class VideoRoomPage extends StatelessWidget {
     var row = sqrt(numberStream).round();
     var col = ((numberStream) / row).ceil();
 
+    // var size = MediaQuery.of(context).size;
     var size = MediaQuery.of(context).size;
     // final double itemHeight = (size.height - kToolbarHeight - 24) / row;
 
@@ -844,8 +848,8 @@ class VideoRoomPage extends StatelessWidget {
       // if (isGrid) {
       if (screenshared == null) {
         // desktop grid layout
-        final double itemHeight = (size.height) / row;
-        final double itemWidth = size.width / col;
+        final double itemHeight = (size.height - borderWidth * 2) / row;
+        final double itemWidth = (size.width - borderWidth * 2)  / col ;
 
         return Wrap(
           runSpacing: 0,
