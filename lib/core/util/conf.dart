@@ -20,6 +20,23 @@ List<RTCIceServer> iceServers = <RTCIceServer>[
       urls: "turn:vc.cinteraction.com:3478?transport=tcp",
       username: mixTurnServerUsername,
       credential: mixTurnServerCredential),
+
+
+
+    RTCIceServer(
+      urls: 'stun:huawei.nswebdevelopment.com:3478',
+      username: "",
+      credential: ""),
+  RTCIceServer(
+      urls: 'turn:huawei.nswebdevelopment.com:3478?transport=udp',
+      username: mixTurnServerUsernameHuawei,
+      credential: mixTurnServerCredentialHuawei),
+  RTCIceServer(
+      urls: 'turn:huawei.nswebdevelopment.com:3478?transport=tcp',
+      username: mixTurnServerUsernameHuawei,
+      credential: mixTurnServerCredentialHuawei),
+
+
 ];
 
 //HUAWEI
@@ -27,8 +44,8 @@ String url = "wss://huawei.nswebdevelopment.com:8189";
 bool withCredentials = false;
 String apiSecret = "";
 
-// String mixTurnServerUsername = 'test';
-// String mixTurnServerCredential = 'test123';
+String mixTurnServerUsernameHuawei = 'test';
+String mixTurnServerCredentialHuawei = 'test123';
 
 int maxPublishersDefault = 9;
 
