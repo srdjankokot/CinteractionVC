@@ -11,16 +11,16 @@ String mixTurnServerCredential = "vcnswd321";
 //
 List<RTCIceServer> iceServers = <RTCIceServer>[
 
-  RTCIceServer(urls: "stun:vc.cinteraction.com:3478", username: "", credential: ""),
-  RTCIceServer(
-      urls: "turn:vc.cinteraction.com:3478?transport=udp",
-      username: mixTurnServerUsername,
-      credential: mixTurnServerCredential),
-  RTCIceServer(
-      urls: "turn:vc.cinteraction.com:3478?transport=tcp",
-      username: mixTurnServerUsername,
-      credential: mixTurnServerCredential),
-
+  // RTCIceServer(urls: "stun:vc.cinteraction.com:3478", username: "", credential: ""),
+  // RTCIceServer(
+  //     urls: "turn:vc.cinteraction.com:3478?transport=udp",
+  //     username: mixTurnServerUsername,
+  //     credential: mixTurnServerCredential),
+  // RTCIceServer(
+  //     urls: "turn:vc.cinteraction.com:3478?transport=tcp",
+  //     username: mixTurnServerUsername,
+  //     credential: mixTurnServerCredential),
+  //
 
 
     RTCIceServer(
