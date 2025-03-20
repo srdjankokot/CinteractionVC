@@ -714,8 +714,9 @@ class ChatRoomPage extends StatelessWidget {
                                         onClickAction: () async {
                                           await context
                                               .read<ChatCubit>()
-                                              .makeCall(
-                                                  state.currentParticipant!.id);
+                                              .makeCall((state.listType == ListType.Chats
+                                                  ? state.currentChat?.chatParticipants?.first.id.toString()
+                                                  : state.currentParticipant?.id)!);
 
                                           // await context.read<ChatCubit>().rejectCall();
                                         },

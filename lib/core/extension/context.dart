@@ -90,6 +90,7 @@ extension Context on BuildContext {
         await handleLogout();
       } else {
         print('LogOut failed, ${response.statusCode}');
+        await handleLogout();
       }
     } catch (e) {
       if (e is DioException && e.response?.statusCode == 401) {

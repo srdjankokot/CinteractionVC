@@ -161,10 +161,10 @@
         <bt:Image id="Icon.Plus.80" DefaultValue="https://huawei.nswebdevelopment.com/web/addin/assets/plus-64.png"/>
       </bt:Images>
       <bt:Urls>
-        <bt:Url id="Commands.Url" DefaultValue="https://178.220.126.196:3003/commands.html" />
-        <bt:Url id="Taskpane.Url" DefaultValue="https://178.220.126.196:3003/taskpane.html" />
-        <bt:Url id="WebViewRuntime.Url" DefaultValue="https://178.220.126.196:3003/commands.html" />
-        <bt:Url id="JSRuntime.Url" DefaultValue="https://178.220.126.196:3003/launchevent.js" />
+        <bt:Url id="Commands.Url" DefaultValue="https://huawei.nswebdevelopment.com/web/addin/commands.html" />
+        <bt:Url id="Taskpane.Url" DefaultValue="https://huawei.nswebdevelopment.com/web/addin/taskpane.html" />
+        <bt:Url id="WebViewRuntime.Url" DefaultValue="https://huawei.nswebdevelopment.com/web/addin/commands.html" />
+        <bt:Url id="JSRuntime.Url" DefaultValue="https://huawei.nswebdevelopment.com/web/addin/launchevent.js" />
       </bt:Urls>
       <bt:ShortStrings>
         <bt:String id="GroupLabel" DefaultValue="Cinteraction Add-in"/>

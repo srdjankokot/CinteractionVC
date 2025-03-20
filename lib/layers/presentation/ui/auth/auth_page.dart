@@ -268,33 +268,33 @@ class AuthPage extends StatelessWidget {
                                   const SizedBox(height: 16),
                                   // const Spacer(),
 
-                                  Row(
-                                    children: [
-                                      const Expanded(child: Divider()),
-                                      Container(
-                                        margin: const EdgeInsets.only(
-                                            left: 5, right: 5),
-                                        child: const Text('Or login with'),
-                                      ),
-                                      const Expanded(child: Divider()),
-                                    ],
-                                  ),
+                                  // Row(
+                                  //   children: [
+                                  //     const Expanded(child: Divider()),
+                                  //     Container(
+                                  //       margin: const EdgeInsets.only(
+                                  //           left: 5, right: 5),
+                                  //       child: const Text('Or login with'),
+                                  //     ),
+                                  //     const Expanded(child: Divider()),
+                                  //   ],
+                                  // ),
+                                  //
+                                  // const SizedBox(height: 8),
 
-                                  const SizedBox(height: 8),
 
 
-
-                                  Row(
-                                    mainAxisAlignment: MainAxisAlignment.center,
-                                    children: [
-
-                                      buildSignInButton(
-                                       onPressed: () async {
-                                          await context
-                                             .read<AuthCubit>()
-                                             .signInWithGoogle();
-                                       }
-                                      ),
+                                  // Row(
+                                  //   mainAxisAlignment: MainAxisAlignment.center,
+                                  //   children: [
+                                  //
+                                  //     buildSignInButton(
+                                  //      onPressed: () async {
+                                  //         await context
+                                  //            .read<AuthCubit>()
+                                  //            .signInWithGoogle();
+                                  //      }
+                                  //     ),
 
                                       // SizedBox(
                                       //   width: 70,
@@ -344,8 +344,10 @@ class AuthPage extends StatelessWidget {
                                       //       ),
                                       //       child: imageSVGAsset('fb_logo')),
                                       // )
-                                    ],
-                                  ),
+
+
+                                    // ],
+                                  // ),
 
                                   const SizedBox(height: 8),
                                   LabeledTextButton(
