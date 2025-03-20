@@ -226,7 +226,6 @@ class ChatRepoImpl extends ChatRepo {
             final text = data['text'] as String;
 
             if (data['text'] == '!@checkList') {
-              print('Here it is');
               loadChats(1, 20);
             }
             final isFile =
@@ -646,6 +645,7 @@ class ChatRepoImpl extends ChatRepo {
           await _api.removeUserFromGroupChat(chatId: chatId, userId: userId);
       if (response.error == null && response.response != null) {
         print('Responsee: ${response.response}');
+
         _chatDetailsStream.add(response.response!);
         chatDetailsDto = response.response!;
       } else {
@@ -669,7 +669,7 @@ class ChatRepoImpl extends ChatRepo {
       name: name,
       chatId: chatId,
       senderId: senderId,
-      message: messageContent,
+      message: messageContent == '!@checkList' ? null : messageContent,
       participantIds: participantIds,
       uploadedFiles: uploadedFiles,
     );
@@ -682,6 +682,10 @@ class ChatRepoImpl extends ChatRepo {
               ? response.response!.files![0].path
               : messageContent,
           participants);
+
+      // if (messageContent == '!@checkList') {
+      //   return;
+      // }
       chatDetailsDto.messages.messages.add(MessageDto(
         chatId: response.response!.chatId,
         createdAt: DateTime.now().toIso8601String(),
