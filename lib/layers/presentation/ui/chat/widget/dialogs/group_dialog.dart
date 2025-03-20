@@ -114,6 +114,7 @@ class CreateGroupDialog extends StatelessWidget {
                   name: groupNameController.value.text,
                   participantIds: participantIds,
                   senderId: state.chatDetails!.authUser.id,
+                  messageContent: '!@checkList',
                 );
             // await Future.delayed(const Duration(seconds: 2));
             context.read<ChatCubit>().changeListType(ListType.Chats);
