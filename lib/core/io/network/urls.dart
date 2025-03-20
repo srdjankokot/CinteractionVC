@@ -22,9 +22,8 @@ class Urls {
 
   static String sendMessage = '$baseUrl/call/{call_id}/message';
 
-  static String baseIviUrl = 'https://server.institutonline.ai:55611';
-  static String IVIAccessToken =
-      'Bearer 15|Jsoy8PjvLXRw3Y9ggJyYRr4ylHamlWecHNKDSOVk';
+  static String baseIviUrl = 'https://server.institutonline.ai';
+  static String IVIAccessToken = 'Bearer 15|Jsoy8PjvLXRw3Y9ggJyYRr4ylHamlWecHNKDSOVk';
 
   static String engagement = '$baseIviUrl/engagement/rank';
   static String sendEngagement = '$baseUrl/api/meetings/update/attention/';
