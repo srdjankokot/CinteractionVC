@@ -1,7 +1,9 @@
+import 'dart:typed_data';
 import 'package:cinteraction_vc/assets/colors/Colors.dart';
 import 'package:cinteraction_vc/core/extension/context.dart';
 import 'package:cinteraction_vc/layers/domain/entities/chat_message.dart';
-import 'package:flutter/cupertino.dart';
+import 'package:cinteraction_vc/layers/presentation/ui/conference/widget/text_file.dart';
+import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
@@ -13,8 +15,15 @@ class ChatMessageWidget extends StatelessWidget {
 
   final ChatMessage message;
 
+  bool _isImage(PlatformFile file) {
+    final imageExtensions = ['jpg', 'jpeg', 'png', 'gif', 'webp'];
+    return imageExtensions.any((ext) => file.name.toLowerCase().endsWith(ext));
+  }
+
   @override
   Widget build(BuildContext context) {
+    bool hasFiles = message.files != null && message.files!.isNotEmpty;
+
     return Padding(
       padding: const EdgeInsets.all(8.0),
       child: Row(
@@ -22,13 +31,9 @@ class ChatMessageWidget extends StatelessWidget {
             ? MainAxisAlignment.end
             : MainAxisAlignment.start,
         children: [
-          Visibility(
-              visible:
-                  message.displayName != 'Me' && message.avatarUrl.isNotEmpty,
-              child: UserImage.medium(message.avatarUrl)),
-          const SizedBox(
-            width: 12,
-          ),
+          if (message.displayName != 'Me' && message.avatarUrl.isNotEmpty)
+            UserImage.medium(message.avatarUrl),
+          const SizedBox(width: 12),
           Expanded(
             child: Column(
               crossAxisAlignment: message.displayName == 'Me'
@@ -40,13 +45,12 @@ class ChatMessageWidget extends StatelessWidget {
                       ? MainAxisAlignment.end
                       : MainAxisAlignment.start,
                   children: [
-                    Visibility(
-                        visible: message.displayName != 'Me',
-                        child: Text(message.displayName,
-                            style: context.primaryTextTheme.displaySmall)),
-                    const SizedBox(
-                      width: 6,
-                    ),
+                    if (message.displayName != 'Me')
+                      Text(
+                        message.displayName,
+                        style: context.primaryTextTheme.displaySmall,
+                      ),
+                    const SizedBox(width: 6),
                     Text(
                       DateFormat('hh:mm a').format(message.time),
                       style: context.primaryTextTheme.bodySmall
@@ -54,7 +58,56 @@ class ChatMessageWidget extends StatelessWidget {
                     ),
                   ],
                 ),
-                LinkText(message.message)
+                if (hasFiles)
+                  MouseRegion(
+                    cursor: SystemMouseCursors.click,
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.end,
+                      children: message.files!.map((file) {
+                        if (_isImage(file) && file.bytes != null) {
+                          return GestureDetector(
+                            onTap: () => openLocalFile(context, file),
+                            child: Padding(
+                              padding: const EdgeInsets.only(top: 4.0),
+                              child: ClipRRect(
+                                borderRadius: BorderRadius.circular(8),
+                                child: Image.memory(
+                                  file.bytes!,
+                                  width: 200,
+                                  height: 200,
+                                  fit: BoxFit.cover,
+                                ),
+                              ),
+                            ),
+                          );
+                        } else {
+                          return GestureDetector(
+                            onTap: () => openLocalFile(context, file),
+                            child: Padding(
+                              padding: const EdgeInsets.only(top: 4.0),
+                              child: Row(
+                                mainAxisAlignment: message.displayName == 'Me'
+                                    ? MainAxisAlignment.end
+                                    : MainAxisAlignment.start,
+                                children: [
+                                  const Icon(Icons.insert_drive_file,
+                                      size: 24, color: Colors.blue),
+                                  const SizedBox(width: 8),
+                                  Text(
+                                    file.name,
+                                    style: context.primaryTextTheme.bodyMedium
+                                        ?.copyWith(color: Colors.blue),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          );
+                        }
+                      }).toList(),
+                    ),
+                  )
+                else
+                  LinkText(message.message),
               ],
             ),
           )

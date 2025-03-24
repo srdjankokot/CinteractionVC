@@ -396,21 +396,21 @@ class _ChatDetailsWidgetState extends State<ChatDetailsWidget> {
                                                                 null &&
                                                             message.files!
                                                                 .isNotEmpty)
-                                                          Column(
-                                                              crossAxisAlignment:
-                                                                  CrossAxisAlignment
-                                                                      .start,
-                                                              children: message
-                                                                  .files!
-                                                                  .map((file) {
-                                                                if (_isImage(file
-                                                                    .path)) {
-                                                                  return MouseRegion(
-                                                                    cursor:
-                                                                        SystemMouseCursors
-                                                                            .click,
-                                                                    child:
-                                                                        GestureDetector(
+                                                          MouseRegion(
+                                                            cursor:
+                                                                SystemMouseCursors
+                                                                    .click,
+                                                            child: Column(
+                                                                crossAxisAlignment:
+                                                                    CrossAxisAlignment
+                                                                        .start,
+                                                                children: message
+                                                                    .files!
+                                                                    .map(
+                                                                        (file) {
+                                                                  if (_isImage(file
+                                                                      .path)) {
+                                                                    return GestureDetector(
                                                                       onTap:
                                                                           () async {
                                                                         String updatedImagePath = file.path.replaceAll(
@@ -447,25 +447,27 @@ class _ChatDetailsWidgetState extends State<ChatDetailsWidget> {
                                                                                 ),
                                                                         ),
                                                                       ),
-                                                                    ),
-                                                                  );
-                                                                } else if (_isTextFile(
-                                                                    file.path)) {
-                                                                  return _buildFileButton(
-                                                                      context,
-                                                                      file.path,
-                                                                      Icons
-                                                                          .description,
-                                                                      'Open TextFile');
-                                                                } else {
-                                                                  return _buildFileButton(
-                                                                      context,
-                                                                      file.path,
-                                                                      Icons
-                                                                          .picture_as_pdf,
-                                                                      'Open PDF file');
-                                                                }
-                                                              }).toList()),
+                                                                    );
+                                                                  } else if (_isTextFile(
+                                                                      file.path)) {
+                                                                    return _buildFileButton(
+                                                                        context,
+                                                                        file
+                                                                            .path,
+                                                                        Icons
+                                                                            .description,
+                                                                        'Open TextFile');
+                                                                  } else {
+                                                                    return _buildFileButton(
+                                                                        context,
+                                                                        file
+                                                                            .path,
+                                                                        Icons
+                                                                            .picture_as_pdf,
+                                                                        'Open PDF file');
+                                                                  }
+                                                                }).toList()),
+                                                          ),
                                                         if (message.message !=
                                                                 null &&
                                                             message.message!

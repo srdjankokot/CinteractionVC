@@ -49,8 +49,7 @@ class ConferenceUseCases {
         sendMessage = ConferenceSendMessage(repo: repo),
         getMessageStream = ConferenceMessageStream(repo: repo),
         startRecording = ConferenceStartRecording(repo: repo),
-        stopRecording = ConferenceStopRecording(repo: repo)
-  ;
+        stopRecording = ConferenceStopRecording(repo: repo);
 
   final ConferenceRepo repo;
 

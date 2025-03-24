@@ -4,6 +4,7 @@ import 'dart:math';
 import 'package:cinteraction_vc/core/io/network/models/participant.dart';
 import 'package:cinteraction_vc/core/util/util.dart';
 import 'package:cinteraction_vc/layers/domain/usecases/conference/conference_usecases.dart';
+import 'package:file_picker/file_picker.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screen_recording/flutter_screen_recording.dart';
 import 'package:janus_client/janus_client.dart';
@@ -200,20 +201,23 @@ class ConferenceCubit extends Cubit<ConferenceState> with BlocLoggy {
     conferenceUseCases.changeSubStream(quality, remoteStream);
   }
 
-  Future<void> sendMessage(String msg) async {
-    conferenceUseCases.sendMessage(msg);
+  Future<void> sendMessage(String msg,
+      {List<PlatformFile>? uploadedFiles}) async {
+    await conferenceUseCases.sendMessage(msg, uploadedFiles);
   }
 
   Future<void> recordingMeet() async {
     if (state.recording == RecordingStatus.notRecording) {
-       // bool recording = await FlutterScreenRecording.startRecordScreenAndAudio("videoName");
-        emit(state.copyWith(recording: RecordingStatus.loading));
-       var recordingStarted = await conferenceUseCases.startRecording();
-       emit(state.copyWith(recording: recordingStarted ? RecordingStatus.recording: RecordingStatus.notRecording));
+      // bool recording = await FlutterScreenRecording.startRecordScreenAndAudio("videoName");
+      emit(state.copyWith(recording: RecordingStatus.loading));
+      var recordingStarted = await conferenceUseCases.startRecording();
+      emit(state.copyWith(
+          recording: recordingStarted
+              ? RecordingStatus.recording
+              : RecordingStatus.notRecording));
     } else {
       // FlutterScreenRecording.stopRecordScreen;
       conferenceUseCases.stopRecording();
-
 
       emit(state.copyWith(recording: RecordingStatus.notRecording));
     }
