@@ -1,3 +1,4 @@
+import 'dart:io';
 import 'dart:math';
 
 import 'package:cinteraction_vc/assets/colors/Colors.dart';
@@ -6,6 +7,7 @@ import 'package:cinteraction_vc/core/ui/widget/call_button_shape.dart';
 import 'package:cinteraction_vc/core/ui/widget/engagement_progress.dart';
 import 'package:cinteraction_vc/layers/presentation/ui/conference/widget/chat_message_widget.dart';
 import 'package:cinteraction_vc/layers/presentation/ui/conference/widget/participant_video_widget.dart';
+import 'package:file_picker/file_picker.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
@@ -46,13 +48,46 @@ class VideoRoomPage extends StatelessWidget {
     final ScrollController chatController = ScrollController();
     FocusNode messageFocusNode = FocusNode();
 
-    void sendMessage() {
-      if (messageFieldController.text.isNotEmpty) {
-        context
-            .read<ConferenceCubit>()
-            .sendMessage(messageFieldController.text);
-        messageFieldController.clear();
-        messageFocusNode.requestFocus();
+    Future<void> sendMessage({List<PlatformFile>? uploadedFiles}) async {
+      print('uploadedFiles: $uploadedFiles');
+
+      context.read<ConferenceCubit>().sendMessage(messageFieldController.text,
+          uploadedFiles: uploadedFiles);
+      messageFieldController.clear();
+      messageFocusNode.requestFocus();
+    }
+
+    Future<void> pickAndSendFile() async {
+      FilePickerResult? result = await FilePicker.platform.pickFiles(
+        withData: kIsWeb,
+      );
+
+      if (result != null) {
+        PlatformFile file = result.files.first;
+
+        Uint8List? fileBytes;
+
+        if (kIsWeb) {
+          fileBytes = file.bytes;
+        } else if (file.bytes != null) {
+          fileBytes = file.bytes;
+        } else if (file.path != null) {
+          File selectedFile = File(file.path!);
+          fileBytes = await selectedFile.readAsBytes();
+        }
+
+        if (fileBytes != null) {
+          PlatformFile fileWithBytes = PlatformFile(
+            name: file.name,
+            size: fileBytes.length,
+            bytes: fileBytes,
+          );
+          await sendMessage(uploadedFiles: [fileWithBytes]);
+        } else {
+          print('Error: Bytes not read.');
+        }
+      } else {
+        print('User canceled file selection');
       }
     }
 
@@ -86,18 +121,18 @@ class VideoRoomPage extends StatelessWidget {
 
           var subscribers = state.streamSubscribers?.toList();
 
-          var borderWidth = state.recording == RecordingStatus.recording? 3.0 : 0.0;
+          var borderWidth =
+              state.recording == RecordingStatus.recording ? 3.0 : 0.0;
 
           return Material(
             child: Center(
-              child:
-              Container(
+              child: Container(
                   width: double.maxFinite,
                   height: double.maxFinite,
                   // color: ColorConstants.kBlack3,
                   decoration: BoxDecoration(
                     color: ColorConstants.kBlack3, // Background color
-                    border:  Border.all(
+                    border: Border.all(
                       color: ColorConstants.kPrimaryColor, // Border color
                       width: borderWidth, // Border width
                     ), // Rounded corners
@@ -107,7 +142,8 @@ class VideoRoomPage extends StatelessWidget {
                       if (context.isWide) {
                         return Stack(
                           children: [
-                            getLayout(context, items, state.isGridLayout, borderWidth),
+                            getLayout(context, items, state.isGridLayout,
+                                borderWidth),
                             // Positioned(
                             //     top: 20,
                             //     left: 20,
@@ -273,36 +309,43 @@ class VideoRoomPage extends StatelessWidget {
                                     //   child: Text('1', style: context.primaryTextTheme.labelSmall?.copyWith(fontSize: 8, fontWeight: FontWeight.w700),)),,
                                   ]),
 
-                                    const SizedBox(width: 20),
-                                      // ElevatedButton(
-                                      //     onPressed: () async {
-                                      //       await context.read<ConferenceCubit>().recordingMeet();
-                                      //     },
-                                      //
-                                      //     child: AnimatedSwitcher(duration: const Duration(milliseconds: 300),
-                                      //     transitionBuilder: (child, animation) => ScaleTransition(scale: animation, child: child),
-                                      //     child:
-                                      //
-                                      //
-                                      //
-                                      //       ,
-                                      //     )
-                                      //
-                                      // )
+                                  const SizedBox(width: 20),
+                                  // ElevatedButton(
+                                  //     onPressed: () async {
+                                  //       await context.read<ConferenceCubit>().recordingMeet();
+                                  //     },
+                                  //
+                                  //     child: AnimatedSwitcher(duration: const Duration(milliseconds: 300),
+                                  //     transitionBuilder: (child, animation) => ScaleTransition(scale: animation, child: child),
+                                  //     child:
+                                  //
+                                  //
+                                  //
+                                  //       ,
+                                  //     )
+                                  //
+                                  // )
 
-                                      CallButtonShape(
-                                        // image: state.recording ? const Icon(Icons.stop, size: 30, color: Colors.red): const  Icon(Icons.fiber_manual_record, size: 30, color: Colors.red),
-                                        image:
-                                        state.recording == RecordingStatus.notRecording ?
-                                        const  Icon(Icons.fiber_manual_record, size: 30, color: Colors.red) :
-                                            state.recording == RecordingStatus.loading ?    const CircularProgressIndicator(
-                                              strokeWidth: 2,
-                                              color: Colors.white,
-                                            ) : const Icon(Icons.stop, size: 30, color: Colors.red),
-                                        onClickAction: () async {
-                                          await context.read<ConferenceCubit>().recordingMeet();
-                                        },
-                                      ),
+                                  CallButtonShape(
+                                    // image: state.recording ? const Icon(Icons.stop, size: 30, color: Colors.red): const  Icon(Icons.fiber_manual_record, size: 30, color: Colors.red),
+                                    image: state.recording ==
+                                            RecordingStatus.notRecording
+                                        ? const Icon(Icons.fiber_manual_record,
+                                            size: 30, color: Colors.red)
+                                        : state.recording ==
+                                                RecordingStatus.loading
+                                            ? const CircularProgressIndicator(
+                                                strokeWidth: 2,
+                                                color: Colors.white,
+                                              )
+                                            : const Icon(Icons.stop,
+                                                size: 30, color: Colors.red),
+                                    onClickAction: () async {
+                                      await context
+                                          .read<ConferenceCubit>()
+                                          .recordingMeet();
+                                    },
+                                  ),
 
                                   const SizedBox(width: 20),
                                   // CallButtonShape(
@@ -502,7 +545,14 @@ class VideoRoomPage extends StatelessWidget {
                                                         'icon_send') as Widget,
                                                   )),
                                             ),
-                                          )
+                                          ),
+                                          IconButton(
+                                            onPressed: () async {
+                                              await pickAndSendFile();
+                                            },
+                                            icon: imageSVGAsset('three_dots')
+                                                as Widget,
+                                          ),
                                         ],
                                       ),
                                     ],
@@ -558,8 +608,8 @@ class VideoRoomPage extends StatelessWidget {
                                     ],
                                   ),
                                   Expanded(
-                                    child: getLayout(
-                                        context, items, state.isGridLayout, borderWidth),
+                                    child: getLayout(context, items,
+                                        state.isGridLayout, borderWidth),
                                   ),
                                   Padding(
                                     padding: const EdgeInsets.only(
@@ -818,8 +868,8 @@ class VideoRoomPage extends StatelessWidget {
         listener: _onConferenceState);
   }
 
-  Widget getLayout(
-      BuildContext context, List<StreamRenderer> items, bool isGrid, double borderWidth) {
+  Widget getLayout(BuildContext context, List<StreamRenderer> items,
+      bool isGrid, double borderWidth) {
     StreamRenderer? screenshared;
 
     try {
@@ -849,7 +899,7 @@ class VideoRoomPage extends StatelessWidget {
       if (screenshared == null) {
         // desktop grid layout
         final double itemHeight = (size.height - borderWidth * 2) / row;
-        final double itemWidth = (size.width - borderWidth * 2)  / col ;
+        final double itemWidth = (size.width - borderWidth * 2) / col;
 
         return Wrap(
           runSpacing: 0,

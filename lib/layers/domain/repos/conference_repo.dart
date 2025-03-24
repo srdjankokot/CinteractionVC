@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:file_picker/file_picker.dart';
 import 'package:janus_client/janus_client.dart';
 import 'package:webrtc_interface/webrtc_interface.dart';
 
@@ -8,10 +9,8 @@ import '../../../core/util/util.dart';
 import '../entities/api_response.dart';
 import '../entities/chat_message.dart';
 
-
-abstract class ConferenceRepo{
+abstract class ConferenceRepo {
   const ConferenceRepo();
-
 
   Future<void> initialize({required int roomId, required String displayName});
 
@@ -28,7 +27,8 @@ abstract class ConferenceRepo{
 
   Future<void> mute({required String kind, required bool muted});
 
-  Future<void> changeSubstream({required String remoteStreamId, required int substream});
+  Future<void> changeSubstream(
+      {required String remoteStreamId, required int substream});
   Future<void> kick({required String id});
 
   Future<void> unPublish();
@@ -47,14 +47,16 @@ abstract class ConferenceRepo{
 
   Future<void> publishById({required String id});
 
-  Future<void> changeSubStream({required ConfigureStreamQuality quality, required StreamRenderer remoteStream});
+  Future<void> changeSubStream(
+      {required ConfigureStreamQuality quality,
+      required StreamRenderer remoteStream});
   Future<void> shareScreen(MediaStream? mediaStream);
 
   Future<ApiResponse<int>> startCall();
 
-  Future<ApiResponse<bool>> sendMessage(String msg);
+  Future<ApiResponse<bool>> sendMessage(String msg,
+      {List<PlatformFile>? uploadedFiles});
 
   Future<bool> startRecording();
   Future<void> stopRecording();
-
 }

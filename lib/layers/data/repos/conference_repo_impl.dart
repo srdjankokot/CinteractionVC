@@ -7,6 +7,7 @@ import 'package:cinteraction_vc/layers/domain/entities/api_response.dart';
 import 'package:cinteraction_vc/layers/domain/entities/chat_message.dart';
 import 'package:cinteraction_vc/layers/domain/repos/conference_repo.dart';
 import 'package:ffmpeg_kit_flutter/ffmpeg_kit.dart';
+import 'package:file_picker/file_picker.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_webrtc/flutter_webrtc.dart';
 import 'package:janus_client/janus_client.dart';
@@ -18,7 +19,6 @@ import 'package:webrtc_interface/webrtc_interface.dart';
 import '../../../core/app/injector.dart';
 import '../../../core/io/network/models/data_channel_command.dart';
 import '../../../core/util/conf.dart';
-
 
 import '../../domain/entities/user.dart';
 import '../../domain/source/api.dart';
@@ -46,7 +46,6 @@ class ConferenceRepoImpl extends ConferenceRepo {
   late StreamRenderer localVideoRenderer;
   late StreamRenderer localScreenSharingRenderer;
 
-
   int? myPvtId;
 
   bool joined = true;
@@ -64,7 +63,7 @@ class ConferenceRepoImpl extends ConferenceRepo {
   late JanusVideoRoom? roomDetails;
 
   final _conferenceStream =
-  StreamController<Map<dynamic, StreamRenderer>>.broadcast();
+      StreamController<Map<dynamic, StreamRenderer>>.broadcast();
   final _conferenceEndedStream = StreamController<String>.broadcast();
   final _conferenceChatStream = StreamController<List<ChatMessage>>.broadcast();
   final _participantsStream = StreamController<List<Participant>>.broadcast();
@@ -149,7 +148,7 @@ class ConferenceRepoImpl extends ConferenceRepo {
 
   _attachPlugin({bool pop = false}) async {
     JanusVideoRoomPlugin? videoPlugin =
-    await session?.attach<JanusVideoRoomPlugin>();
+        await session?.attach<JanusVideoRoomPlugin>();
 
     videoPlugin?.typedMessages?.listen((event) async {
       Object data = event.event.plugindata?.data;
@@ -209,7 +208,7 @@ class ConferenceRepoImpl extends ConferenceRepo {
         // }
         if (videoState.feedIdToMidSubscriptionMap[publisher['id']] != null &&
             videoState.feedIdToMidSubscriptionMap[publisher['id']]
-            ?[stream['mid']] ==
+                    ?[stream['mid']] ==
                 true) {
           print('PUBLISHER CHANGE: publishers streams : ${publisher['id']}');
           continue;
@@ -259,7 +258,7 @@ class ConferenceRepoImpl extends ConferenceRepo {
           if (dataMap.containsKey('display')) {
             var id = dataMap['id'];
             StreamRenderer? renderer =
-            videoState.streamsToBeRendered[id.toString()];
+                videoState.streamsToBeRendered[id.toString()];
             renderer?.publisherName = dataMap['display'];
             _refreshStreams();
             return;
@@ -303,7 +302,7 @@ class ConferenceRepoImpl extends ConferenceRepo {
           RTCSignalingState.RTCSignalingStateStable) return;
       // print('retrying to connect publisher');
       var offer =
-      await screenPlugin?.createOffer(audioRecv: false, videoRecv: false);
+          await screenPlugin?.createOffer(audioRecv: false, videoRecv: false);
       await screenPlugin?.configure(sessionDescription: offer);
     });
 
@@ -319,7 +318,7 @@ class ConferenceRepoImpl extends ConferenceRepo {
     //   return;
     // }
     StreamRenderer? renderer =
-    videoState.streamsToBeRendered[feedId.toString()];
+        videoState.streamsToBeRendered[feedId.toString()];
 
     // setState(() {
     if (renderer == null) {
@@ -357,7 +356,7 @@ class ConferenceRepoImpl extends ConferenceRepo {
     //     });
 
     localVideoRenderer.mediaStream =
-    await videoPlugin?.initializeMediaDevices(simulcastSendEncodings: [
+        await videoPlugin?.initializeMediaDevices(simulcastSendEncodings: [
       RTCRtpEncoding(
         rid: "h",
         minBitrate: 256000,
@@ -387,12 +386,11 @@ class ConferenceRepoImpl extends ConferenceRepo {
         scalabilityMode: 'L2T2',
         scaleResolutionDownBy: 4, // 180p
       ),
-    ],
-        mediaConstraints: {
-          'video': {'width': 1280, 'height': 720},
-          // 720p max for higher quality
-          'audio': true,
-        });
+    ], mediaConstraints: {
+      'video': {'width': 1280, 'height': 720},
+      // 720p max for higher quality
+      'audio': true,
+    });
     localVideoRenderer.videoRenderer.srcObject = localVideoRenderer.mediaStream;
     localVideoRenderer.publisherName = displayName;
     localVideoRenderer.publisherId = myId.toString();
@@ -430,7 +428,7 @@ class ConferenceRepoImpl extends ConferenceRepo {
           if (videoState.feedIdToMidSubscriptionMap[element['feed_id']] == null)
             videoState.feedIdToMidSubscriptionMap[element['feed_id']] = {};
           videoState.feedIdToMidSubscriptionMap[element['feed_id']]
-          [element['mid']] = true;
+              [element['mid']] = true;
         });
         if (payload.jsep != null) {
           await remotePlugin?.initDataChannel();
@@ -474,7 +472,6 @@ class ConferenceRepoImpl extends ConferenceRepo {
         });
       };
 
-
       remotePlugin?.remoteTrack?.listen((event) async {
         // print(event);
         print({
@@ -491,13 +488,13 @@ class ConferenceRepoImpl extends ConferenceRepo {
         _manageMuteUIEvents('$feedId', event.track!.kind!, !event.flowing!);
 
         String? displayName =
-        videoState.feedIdToDisplayStreamsMap[feedId]?['display'];
+            videoState.feedIdToDisplayStreamsMap[feedId]?['display'];
         if (feedId != null) {
           if (videoState.streamsToBeRendered.containsKey(feedId.toString()) &&
               event.flowing == true &&
               event.track?.kind == "audio") {
             var existingRenderer =
-            videoState.streamsToBeRendered[feedId.toString()];
+                videoState.streamsToBeRendered[feedId.toString()];
             existingRenderer?.mediaStream?.addTrack(event.track!);
             existingRenderer?.videoRenderer.srcObject =
                 existingRenderer.mediaStream;
@@ -513,15 +510,14 @@ class ConferenceRepoImpl extends ConferenceRepo {
             var localStream = StreamRenderer(feedId.toString(), 'local');
             await localStream.init();
             localStream.mediaStream =
-            await flutterWebRTC.createLocalMediaStream(feedId.toString());
+                await flutterWebRTC.createLocalMediaStream(feedId.toString());
             localStream.mediaStream?.addTrack(event.track!);
             localStream.videoRenderer.srcObject = localStream.mediaStream;
-            localStream.videoRenderer.onResize = () =>
-            {
-              // setState(() {})
-              // _conferenceStream.add(videoState.streamsToBeRendered)
-              _refreshStreams()
-            };
+            localStream.videoRenderer.onResize = () => {
+                  // setState(() {})
+                  // _conferenceStream.add(videoState.streamsToBeRendered)
+                  _refreshStreams()
+                };
             localStream.publisherName = displayName!;
             localStream.publisherId = feedId.toString();
             localStream.mid = event.mid;
@@ -544,10 +540,8 @@ class ConferenceRepoImpl extends ConferenceRepo {
         }
       });
       List<PublisherStream> streams = sources
-          .map((e) =>
-          e.map((e) =>
-              PublisherStream(
-                  feed: e['id'], mid: e['mid'], simulcast: e['simulcast'])))
+          .map((e) => e.map((e) => PublisherStream(
+              feed: e['id'], mid: e['mid'], simulcast: e['simulcast'])))
           .expand((element) => element)
           .toList();
 
@@ -573,7 +567,7 @@ class ConferenceRepoImpl extends ConferenceRepo {
         }
         if (videoState.feedIdToMidSubscriptionMap[stream['id']] != null &&
             videoState.feedIdToMidSubscriptionMap[stream['id']]
-            [stream['mid']] ==
+                    [stream['mid']] ==
                 true) {
           print("Already subscribed to stream, skipping:");
           continue;
@@ -590,7 +584,7 @@ class ConferenceRepoImpl extends ConferenceRepo {
         if (videoState.feedIdToMidSubscriptionMap[stream['id']] == null)
           videoState.feedIdToMidSubscriptionMap[stream['id']] = {};
         videoState.feedIdToMidSubscriptionMap[stream['id']][stream['mid']] =
-        true;
+            true;
       }
     }
     if ((added == null || added.length == 0) &&
@@ -600,13 +594,11 @@ class ConferenceRepoImpl extends ConferenceRepo {
     }
     await remotePlugin?.update(
         subscribe: added
-            ?.map((e) =>
-            SubscriberUpdateStream(
+            ?.map((e) => SubscriberUpdateStream(
                 feed: e['feed'], mid: e['mid'], crossrefid: null))
             .toList(),
         unsubscribe: removed
-            ?.map((e) =>
-            SubscriberUpdateStream(
+            ?.map((e) => SubscriberUpdateStream(
                 feed: e['feed'], mid: e['mid'], crossrefid: null))
             .toList());
   }
@@ -863,7 +855,7 @@ class ConferenceRepoImpl extends ConferenceRepo {
 
   _publishMyOwn() async {
     var offer =
-    await videoPlugin?.createOffer(audioRecv: false, videoRecv: false);
+        await videoPlugin?.createOffer(audioRecv: false, videoRecv: false);
     await videoPlugin?.configure(bitrate: 2000000, sessionDescription: offer);
 
     for (var audioTrack in localVideoRenderer.mediaStream!.getAudioTracks()) {
@@ -878,15 +870,15 @@ class ConferenceRepoImpl extends ConferenceRepo {
 
   _replaceAudioTrack() async {
     print('track is ended');
-    var stream = await flutterWebRTC.navigator.mediaDevices.getUserMedia(
-        {'audio': true});
+    var stream = await flutterWebRTC.navigator.mediaDevices
+        .getUserMedia({'audio': true});
     var audioTrack = stream.getAudioTracks()[0];
 
     // audioTrack.onEnded = () =>_replaceAudioTrack();
     _addOnEndedToTrack(audioTrack);
 
     List<RTCRtpSender>? senders =
-    await videoPlugin?.webRTCHandle?.peerConnection?.senders;
+        await videoPlugin?.webRTCHandle?.peerConnection?.senders;
     senders?.forEach((sender) async {
       if (sender.track?.kind == 'audio') {
         await sender.replaceTrack(audioTrack);
@@ -919,8 +911,9 @@ class ConferenceRepoImpl extends ConferenceRepo {
   }
 
   @override
-  Future<void> changeSubStream({required ConfigureStreamQuality quality,
-    required StreamRenderer remoteStream}) async {
+  Future<void> changeSubStream(
+      {required ConfigureStreamQuality quality,
+      required StreamRenderer remoteStream}) async {
     // var numberOfPublishers = videoState.streamsToBeRendered.length;
     // ConfigureStreamQuality.values[index];
     // var streamQuality = ConfigureStreamQuality.HIGH;
@@ -1069,9 +1062,9 @@ class ConferenceRepoImpl extends ConferenceRepo {
         break;
 
       case DataChannelCmd.engagement:
-      // print('engagement received ${command.data['engagement']}');
+        // print('engagement received ${command.data['engagement']}');
         videoState.streamsToBeRendered[command.id]?.engagement =
-        command.data['engagement'] as int;
+            command.data['engagement'] as int;
         _refreshStreams();
         break;
 
@@ -1144,9 +1137,9 @@ class ConferenceRepoImpl extends ConferenceRepo {
     var data = {'engagement': engagement};
 
     await videoPlugin?.sendData(jsonEncode(DataChannelCommand(
-        command: DataChannelCmd.engagement,
-        id: user!.id.toString(),
-        data: data)
+            command: DataChannelCmd.engagement,
+            id: user!.id.toString(),
+            data: data)
         .toJson()));
   }
 
@@ -1159,9 +1152,9 @@ class ConferenceRepoImpl extends ConferenceRepo {
     };
 
     await videoPlugin?.sendData(jsonEncode(DataChannelCommand(
-        command: DataChannelCmd.message,
-        id: user!.id.toString(),
-        data: data)
+            command: DataChannelCmd.message,
+            id: user!.id.toString(),
+            data: data)
         .toJson()));
   }
 
@@ -1190,33 +1183,33 @@ class ConferenceRepoImpl extends ConferenceRepo {
   }
 
   @override
-  Future<ApiResponse<bool>> sendMessage(String msg) async {
+  Future<ApiResponse<bool>> sendMessage(String msg,
+      {List<PlatformFile>? uploadedFiles}) async {
     messages.add(ChatMessage(
-        message: msg,
-        displayName: 'Me',
-        time: DateTime.now(),
-        avatarUrl: user!.imageUrl,
-        seen: true));
+      files: uploadedFiles,
+      message: msg,
+      displayName: 'Me',
+      time: DateTime.now(),
+      avatarUrl: user!.imageUrl,
+      seen: true,
+    ));
     _conferenceChatStream.add(messages);
     await _broadcastMessage(msg);
     return ApiResponse(response: true);
   }
 
-
   html.MediaStream? mergeStreamsAndRecord(
       flutterWebRTC.MediaStream? localStream, MediaStream? remoteStream) {
     if (kIsWeb) {
-      html.MediaStream local = localStream as html
-          .MediaStream; // Cast only if running on web
-      html.MediaStream remote = localStream as html
-          .MediaStream; // Cast only if running on web
+      html.MediaStream local =
+          localStream as html.MediaStream; // Cast only if running on web
+      html.MediaStream remote =
+          localStream as html.MediaStream; // Cast only if running on web
 
       final canvas = CanvasElement(width: 1280, height: 720);
       final ctx = canvas.context2D;
-      final video1 = VideoElement()
-        ..srcObject = local;
-      final video2 = VideoElement()
-        ..srcObject = remote;
+      final video1 = VideoElement()..srcObject = local;
+      final video2 = VideoElement()..srcObject = remote;
 
       void drawFrame() {
         ctx.drawImage(video1, 0, 0);
@@ -1232,11 +1225,9 @@ class ConferenceRepoImpl extends ConferenceRepo {
 
     return null;
 
-
     // final recorder = MediaRecorder(newStream);
     // recorder.start();
   }
-
 
   // flutterWebRTC.MediaRecorder? mediaRecorder;
   // List<dynamic> _recordedBlob = [];
@@ -1244,8 +1235,7 @@ class ConferenceRepoImpl extends ConferenceRepo {
 
   List<flutterWebRTC.MediaRecorder> recorderList = [];
 
-  Future<void> startRecordStream(flutterWebRTC.MediaStream stream) async
-  {
+  Future<void> startRecordStream(flutterWebRTC.MediaStream stream) async {
     flutterWebRTC.MediaRecorder? mediaRecorder = flutterWebRTC.MediaRecorder();
     try {
       // await Future.delayed(
@@ -1270,13 +1260,13 @@ class ConferenceRepoImpl extends ConferenceRepo {
     }
   }
 
-
   @override
   Future<bool> startRecording() async {
     try {
-      Map<dynamic, StreamRenderer> streams = await _conferenceStream.stream.first;
+      Map<dynamic, StreamRenderer> streams =
+          await _conferenceStream.stream.first;
 
-      streams.entries.forEach((stream){
+      streams.entries.forEach((stream) {
         startRecordStream(stream.value.mediaStream!);
       });
 
@@ -1328,7 +1318,6 @@ class ConferenceRepoImpl extends ConferenceRepo {
   //   }
   // }
 
-
   Future<List<Uint8List>> fetchVideoData(List<String> urls) async {
     return await Future.wait(urls.map((url) async {
       try {
@@ -1336,7 +1325,6 @@ class ConferenceRepoImpl extends ConferenceRepo {
         if (response.statusCode == 200) {
           print("Success to fetch video: $url");
           return response.bodyBytes;
-
         } else {
           print("Failed to fetch video: $url");
           throw Exception('Failed to load file');
@@ -1348,13 +1336,11 @@ class ConferenceRepoImpl extends ConferenceRepo {
     }));
   }
 
-
   Future<Uint8List> fetchDataFromUrl(String url) async {
-
     final response = await http.get(Uri.parse(url));
 
     if (response.statusCode == 200) {
-      return response.bodyBytes;  // Return the byte data of the file
+      return response.bodyBytes; // Return the byte data of the file
     } else {
       throw Exception('Failed to load file from URL');
     }
@@ -1367,11 +1353,6 @@ class ConferenceRepoImpl extends ConferenceRepo {
     js.context.callMethod('mergeVideos', [blobArray]);
   }
 
-
-
-
-
-
   void downloadRecording(String blob) async {
     print("Recording downloaded.");
 
@@ -1381,18 +1362,11 @@ class ConferenceRepoImpl extends ConferenceRepo {
     }
   }
 
-
-
-
   // void createBlob(Uint8List videoData) {
   //   final blob = html.Blob([videoData], 'video/mp4');
   //   final url = html.Url.createObjectUrlFromBlob(blob);
   //   print("Blob URL created: $url");
   // }
-
-
-
-
 
   // Future<void> mergeFiles(List<Uint8List> fileDataList) async {
   //   try {
@@ -1432,5 +1406,4 @@ class ConferenceRepoImpl extends ConferenceRepo {
   //   // await tempFile.writeAsBytes(data);
   //   return '${tempDirectory.path}/tempfile_${DateTime.now().millisecondsSinceEpoch}.mp4';
   // }
-
 }
