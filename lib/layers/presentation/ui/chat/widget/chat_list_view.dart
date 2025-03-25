@@ -215,11 +215,26 @@ class _ChatsListViewState extends State<ChatsListView> {
                                       ],
                                     ),
                                   ),
-                                  Text(
-                                    formatTime(chat.lastMessage?.createdAt
-                                        .toIso8601String()),
-                                    style: const TextStyle(
-                                        fontSize: 12, color: Colors.black45),
+                                  Column(
+                                    children: [
+                                      Text(
+                                        formatTime(chat.lastMessage?.createdAt
+                                            .toIso8601String()),
+                                        style: const TextStyle(
+                                            fontSize: 12,
+                                            color: Colors.black45),
+                                      ),
+                                      if (isSelected)
+                                        IconButton(
+                                          icon: Icon(
+                                            Icons.delete,
+                                            color: Color(0xFFFF6B6B),
+                                            size: 26,
+                                          ),
+                                          onPressed: () => _showRemoveDialog(
+                                              chat.id, context, _deleteChat),
+                                        ),
+                                    ],
                                   ),
                                 ],
                               ),
@@ -234,20 +249,6 @@ class _ChatsListViewState extends State<ChatsListView> {
                                       height: 10.0,
                                       color: Colors.green,
                                     ),
-                                  ),
-                                ),
-                              if (isSelected)
-                                Positioned(
-                                  right: 25,
-                                  top: 5,
-                                  child: IconButton(
-                                    icon: Icon(
-                                      Icons.delete_forever,
-                                      color: Color(0xFFFF6B6B),
-                                      size: 26,
-                                    ),
-                                    onPressed: () => _showRemoveDialog(
-                                        chat.id, context, _deleteChat),
                                   ),
                                 ),
                             ],

@@ -195,52 +195,37 @@ class _HomePageState extends State<HomePage> {
                     ),
                     const Spacer(),
                     if (user != null)
-                      PopupMenuButton<String>(
-                        tooltip: '',
-                        child: Row(
-                          children: [
-                            // CallButtonShape(
-                            //     image: imageSVGAsset('menu_notifications') as Widget,
-                            //     bgColor: ColorConstants.kGrey100,
-                            //     onClickAction: () => {}),
-                            const SizedBox(
-                              width: 10,
+                      Row(
+                        children: [
+                          const SizedBox(width: 15),
+                          UserImage.medium(user.imageUrl),
+                          const SizedBox(width: 15),
+                          Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                user.name,
+                                textAlign: TextAlign.center,
+                                style: context.textTheme.titleSmall,
+                              ),
+                              Text(
+                                'Participant',
+                                textAlign: TextAlign.center,
+                                style: context.textTheme.labelSmall,
+                              ),
+                            ],
+                          ),
+                          const SizedBox(width: 15),
+                          Tooltip(
+                            message: 'LogOut',
+                            child: IconButton(
+                              icon: const Icon(Icons.logout),
+                              onPressed: () => handleClick(context, 'LogOut'),
                             ),
-                            UserImage.medium(user.imageUrl),
-                            const SizedBox(
-                              width: 10,
-                            ),
-
-                            Column(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  user.name,
-                                  textAlign: TextAlign.center,
-                                  style: context.textTheme.titleSmall,
-                                ),
-                                Text(
-                                  'Participant',
-                                  textAlign: TextAlign.center,
-                                  style: context.textTheme.labelSmall,
-                                ),
-                              ],
-                            ),
-                          ],
-                        ),
-                        onSelected: (item) {
-                          handleClick(context, item);
-                        },
-                        itemBuilder: (BuildContext context) {
-                          return {'LogOut'}.map((String choice) {
-                            return PopupMenuItem<String>(
-                              value: choice,
-                              child: Text(choice),
-                            );
-                          }).toList();
-                        },
-                      )
+                          )
+                        ],
+                      ),
                   ],
                 ),
               ),
