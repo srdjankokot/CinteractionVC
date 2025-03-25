@@ -32,7 +32,7 @@ class EditGroupDialog extends StatelessWidget {
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                UserImage.medium(
+                const UserImage.medium(
                     "https://ui-avatars.com/api/?name=G+R&color=ffffff&background=f34320"),
                 const SizedBox(height: 16.0),
                 Text(
@@ -55,7 +55,7 @@ class EditGroupDialog extends StatelessWidget {
                   ),
                 ),
                 const SizedBox(height: 40.0),
-                Container(
+                SizedBox(
                   height: 300,
                   width: 500,
                   child: ListView.builder(
@@ -117,20 +117,23 @@ class EditGroupDialog extends StatelessWidget {
                       ),
                     );
                   },
-                  child: const Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Icon(Icons.add, color: Colors.blue),
-                      SizedBox(width: 8.0),
-                      Text(
-                        "Add participants",
-                        style: TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.blue,
+                  child: const MouseRegion(
+                    cursor: SystemMouseCursors.click,
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Icon(Icons.add, color: Colors.blue),
+                        SizedBox(width: 8.0),
+                        Text(
+                          "Add participants",
+                          style: TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.blue,
+                          ),
                         ),
-                      ),
-                    ],
+                      ],
+                    ),
                   ),
                 ),
               ],
@@ -139,13 +142,13 @@ class EditGroupDialog extends StatelessWidget {
           Positioned(
             top: 0,
             right: 0,
-            child: GestureDetector(
-              onTap: () => Navigator.of(context).pop(),
-              child: const Icon(
+            child: IconButton(
+              icon: const Icon(
                 Icons.close,
                 color: Colors.grey,
                 size: 24,
               ),
+              onPressed: () => Navigator.of(context).pop(),
             ),
           ),
         ],

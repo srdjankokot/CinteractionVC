@@ -648,16 +648,22 @@ class ChatRoomPage extends StatelessWidget {
                                                     await displayEditGroupPopup(
                                                         context, state);
                                                   },
-                                                  child: Row(children: [
-                                                    Text((state
-                                                                .chatDetails!
-                                                                .chatParticipants
-                                                                .length +
-                                                            1)
-                                                        .toString()),
-                                                    const SizedBox(width: 3.0),
-                                                    const Text('participants'),
-                                                  ]),
+                                                  child: MouseRegion(
+                                                    cursor: SystemMouseCursors
+                                                        .click,
+                                                    child: Row(children: [
+                                                      Text((state
+                                                                  .chatDetails!
+                                                                  .chatParticipants
+                                                                  .length +
+                                                              1)
+                                                          .toString()),
+                                                      const SizedBox(
+                                                          width: 3.0),
+                                                      const Text(
+                                                          'participants'),
+                                                    ]),
+                                                  ),
                                                 ),
                                               ],
                                             )
