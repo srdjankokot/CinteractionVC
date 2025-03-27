@@ -5,6 +5,9 @@ import 'package:cinteraction_vc/assets/colors/Colors.dart';
 import 'package:cinteraction_vc/core/extension/context.dart';
 import 'package:cinteraction_vc/core/ui/widget/call_button_shape.dart';
 import 'package:cinteraction_vc/core/ui/widget/engagement_progress.dart';
+import 'package:cinteraction_vc/layers/presentation/cubit/chat/chat_cubit.dart';
+import 'package:cinteraction_vc/layers/presentation/cubit/chat/chat_state.dart';
+import 'package:cinteraction_vc/layers/presentation/ui/chat/widget/chat_details_widget.dart';
 import 'package:cinteraction_vc/layers/presentation/ui/conference/widget/chat_message_widget.dart';
 import 'package:cinteraction_vc/layers/presentation/ui/conference/widget/participant_video_widget.dart';
 import 'package:file_picker/file_picker.dart';
@@ -488,38 +491,47 @@ class VideoRoomPage extends StatelessWidget {
                                         ],
                                       ),
                                       Expanded(
-                                        child: Container(
-                                          child: state.messages == null
-                                              ? const Center(
-                                                  child: Text('No Messages'))
-                                              : ListView.builder(
-                                                  controller: chatController,
-                                                  itemCount:
-                                                      state.messages?.length,
-                                                  itemBuilder:
-                                                      (BuildContext context,
-                                                          int index) {
-                                                    return VisibilityDetector(
-                                                        key: Key(
-                                                            index.toString()),
-                                                        onVisibilityChanged:
-                                                            (VisibilityInfo
-                                                                info) {
-                                                          // print('${state.messages![int.parse('${(info.key as ValueKey).value}')]} (message seen)');
-                                                          context
-                                                              .read<
-                                                                  ConferenceCubit>()
-                                                              .chatMessageSeen(
-                                                                  index);
-                                                        },
-                                                        child: ChatMessageWidget(
-                                                            message:
-                                                                state.messages![
-                                                                    index]));
-                                                  },
-                                                ),
-                                        ),
-                                      ),
+                                          child: BlocConsumer<ChatCubit,
+                                              ChatState>(
+                                        builder: (context, state) {
+                                          return ChatDetailsWidget(state);
+                                        },
+                                        listener: (BuildContext context,
+                                            ChatState state) {},
+                                      )
+
+                                          // Container(
+                                          //   child: state.messages == null
+                                          //       ? const Center(
+                                          //           child: Text('No Messages'))
+                                          //       : ListView.builder(
+                                          //           controller: chatController,
+                                          //           itemCount:
+                                          //               state.messages?.length,
+                                          //           itemBuilder:
+                                          //               (BuildContext context,
+                                          //                   int index) {
+                                          //             return VisibilityDetector(
+                                          //                 key: Key(
+                                          //                     index.toString()),
+                                          //                 onVisibilityChanged:
+                                          //                     (VisibilityInfo
+                                          //                         info) {
+                                          //                   // print('${state.messages![int.parse('${(info.key as ValueKey).value}')]} (message seen)');
+                                          //                   context
+                                          //                       .read<
+                                          //                           ConferenceCubit>()
+                                          //                       .chatMessageSeen(
+                                          //                           index);
+                                          //                 },
+                                          //                 child: ChatMessageWidget(
+                                          //                     message:
+                                          //                         state.messages![
+                                          //                             index]));
+                                          //           },
+                                          //         ),
+                                          // ),
+                                          ),
                                       const SizedBox(
                                         height: 5,
                                       ),
@@ -746,115 +758,124 @@ class VideoRoomPage extends StatelessWidget {
                                 ],
                               ),
                               AnimatedPositioned(
-                                bottom: state.showingChat
-                                    ? 0
-                                    : -MediaQuery.of(context).size.height * 0.8,
-                                right: 0,
-                                left: 0,
-                                duration: const Duration(milliseconds: 250),
-                                child: Container(
-                                  width: double.maxFinite,
-                                  height:
-                                      MediaQuery.of(context).size.height * 0.8,
-                                  color: Colors.white,
-                                  child: Padding(
-                                    padding: EdgeInsets.only(
-                                        bottom: MediaQuery.of(context)
-                                                .viewInsets
-                                                .bottom +
-                                            23,
-                                        top: 23,
-                                        right: 23,
-                                        left: 23),
-                                    child: Column(
-                                      // crossAxisAlignment: CrossAxisAlignment.start,
-                                      children: [
-                                        Row(
-                                          children: [
-                                            Expanded(
-                                              child: Text(
-                                                'Chat messages',
-                                                style: context
-                                                    .titleTheme.titleMedium,
-                                              ),
-                                            ),
-                                            IconButton(
-                                              icon: const Icon(Icons.close),
-                                              onPressed: () {
-                                                context
-                                                    .read<ConferenceCubit>()
-                                                    .toggleChatWindow();
-                                              },
-                                            )
-                                          ],
-                                        ),
-                                        Expanded(
-                                          child: Container(
-                                            child: state.messages == null
-                                                ? const Center(
-                                                    child: Text('No Messages'))
-                                                : ListView.builder(
-                                                    controller: chatController,
-                                                    itemCount:
-                                                        state.messages?.length,
-                                                    itemBuilder:
-                                                        (BuildContext context,
-                                                            int index) {
-                                                      return VisibilityDetector(
-                                                          key: Key(
-                                                              index.toString()),
-                                                          onVisibilityChanged:
-                                                              (VisibilityInfo
-                                                                  info) {
-                                                            // print('${state.messages![int.parse('${(info.key as ValueKey).value}')]} (message seen)');
-                                                            context
-                                                                .read<
-                                                                    ConferenceCubit>()
-                                                                .chatMessageSeen(
-                                                                    index);
-                                                          },
-                                                          child: ChatMessageWidget(
-                                                              message: state
-                                                                      .messages![
-                                                                  index]));
-                                                    },
-                                                  ),
-                                          ),
-                                        ),
-                                        const SizedBox(
-                                          height: 5,
-                                        ),
-                                        Row(
-                                          children: [
-                                            Expanded(
-                                              child: TextField(
-                                                textInputAction:
-                                                    TextInputAction.go,
-                                                focusNode: messageFocusNode,
-                                                onSubmitted: (value) {
-                                                  sendMessage();
-                                                },
-                                                controller:
-                                                    messageFieldController,
-                                                decoration: InputDecoration(
-                                                    hintText: "Send a message",
-                                                    suffixIcon: IconButton(
-                                                      onPressed: () {
-                                                        sendMessage();
-                                                      },
-                                                      icon: imageSVGAsset(
-                                                              'icon_send')
-                                                          as Widget,
-                                                    )),
-                                              ),
-                                            )
-                                          ],
-                                        ),
-                                      ],
-                                    ),
+                                  bottom: state.showingChat
+                                      ? 0
+                                      : -MediaQuery.of(context).size.height *
+                                          0.8,
+                                  right: 0,
+                                  left: 0,
+                                  duration: const Duration(milliseconds: 250),
+                                  child: BlocConsumer<ChatCubit, ChatState>(
+                                    builder: (context, state) {
+                                      return ChatDetailsWidget(state);
+                                    },
+                                    listener: (BuildContext context,
+                                        ChatState state) {},
+                                  )
+
+                                  // Container(
+                                  //   width: double.maxFinite,
+                                  //   height:
+                                  //       MediaQuery.of(context).size.height * 0.8,
+                                  //   color: Colors.white,
+                                  //   child: Padding(
+                                  //     padding: EdgeInsets.only(
+                                  //         bottom: MediaQuery.of(context)
+                                  //                 .viewInsets
+                                  //                 .bottom +
+                                  //             23,
+                                  //         top: 23,
+                                  //         right: 23,
+                                  //         left: 23),
+                                  //     child: Column(
+                                  //       // crossAxisAlignment: CrossAxisAlignment.start,
+                                  //       children: [
+                                  //         Row(
+                                  //           children: [
+                                  //             Expanded(
+                                  //               child: Text(
+                                  //                 'Chat messages',
+                                  //                 style: context
+                                  //                     .titleTheme.titleMedium,
+                                  //               ),
+                                  //             ),
+                                  //             IconButton(
+                                  //               icon: const Icon(Icons.close),
+                                  //               onPressed: () {
+                                  //                 context
+                                  //                     .read<ConferenceCubit>()
+                                  //                     .toggleChatWindow();
+                                  //               },
+                                  //             )
+                                  //           ],
+                                  //         ),
+                                  //         Expanded(
+                                  //           child: Container(
+                                  //             child: state.messages == null
+                                  //                 ? const Center(
+                                  //                     child: Text('No Messages'))
+                                  //                 : ListView.builder(
+                                  //                     controller: chatController,
+                                  //                     itemCount:
+                                  //                         state.messages?.length,
+                                  //                     itemBuilder:
+                                  //                         (BuildContext context,
+                                  //                             int index) {
+                                  //                       return VisibilityDetector(
+                                  //                           key: Key(
+                                  //                               index.toString()),
+                                  //                           onVisibilityChanged:
+                                  //                               (VisibilityInfo
+                                  //                                   info) {
+                                  //                             // print('${state.messages![int.parse('${(info.key as ValueKey).value}')]} (message seen)');
+                                  //                             context
+                                  //                                 .read<
+                                  //                                     ConferenceCubit>()
+                                  //                                 .chatMessageSeen(
+                                  //                                     index);
+                                  //                           },
+                                  //                           child: ChatMessageWidget(
+                                  //                               message: state
+                                  //                                       .messages![
+                                  //                                   index]));
+                                  //                     },
+                                  //                   ),
+                                  //           ),
+                                  //         ),
+                                  //         const SizedBox(
+                                  //           height: 5,
+                                  //         ),
+                                  //         Row(
+                                  //           children: [
+                                  //             Expanded(
+                                  //               child: TextField(
+                                  //                 textInputAction:
+                                  //                     TextInputAction.go,
+                                  //                 focusNode: messageFocusNode,
+                                  //                 onSubmitted: (value) {
+                                  //                   sendMessage();
+                                  //                 },
+                                  //                 controller:
+                                  //                     messageFieldController,
+                                  //                 decoration: InputDecoration(
+                                  //                     hintText: "Send a message",
+                                  //                     suffixIcon: IconButton(
+                                  //                       onPressed: () {
+                                  //                         sendMessage();
+                                  //                       },
+                                  //                       icon: imageSVGAsset(
+                                  //                               'icon_send')
+                                  //                           as Widget,
+                                  //                     )),
+                                  //               ),
+                                  //             )
+                                  //           ],
+                                  //         ),
+                                  //       ],
+                                  //     ),
+                                  //   ),
+                                  // ),
                                   ),
-                                ),
-                              ),
                             ],
                           ),
                         );

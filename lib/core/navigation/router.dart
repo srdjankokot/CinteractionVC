@@ -3,6 +3,7 @@ import 'dart:math';
 import 'package:cinteraction_vc/core/app/injector.dart';
 import 'package:cinteraction_vc/core/extension/context_user.dart';
 import 'package:cinteraction_vc/core/navigation/route.dart';
+import 'package:cinteraction_vc/layers/domain/usecases/call/call_use_cases.dart';
 import 'package:cinteraction_vc/layers/domain/usecases/chat/chat_usecases.dart';
 import 'package:cinteraction_vc/layers/domain/usecases/conference/conference_usecases.dart';
 import 'package:cinteraction_vc/layers/presentation/cubit/chat/chat_cubit.dart';
@@ -134,13 +135,31 @@ final GoRouter router = GoRouter(
         // final display =  state.pathParameters['displayName'] ?? 'displayName';
 
         // final roomId = state.pathParameters['roomId'];
-        return BlocProvider(
-          create: (context) => ConferenceCubit(
+        // return BlocProvider(
+        //   create: (context) => ConferenceCubit(
+        //       conferenceUseCases: getIt.get<ConferenceUseCases>(),
+        //       roomId: int.parse(roomId.toString()),
+        //       displayName: display.toString()),
+        //   child: const VideoRoomPage(),
+        // );
+
+        return MultiBlocProvider(providers: [
+
+          BlocProvider<ConferenceCubit>(create: (context) => ConferenceCubit(
               conferenceUseCases: getIt.get<ConferenceUseCases>(),
               roomId: int.parse(roomId.toString()),
-              displayName: display.toString()),
-          child: const VideoRoomPage(),
-        );
+              displayName: display.toString())),
+
+          BlocProvider<ChatCubit>(
+            create: (context) => ChatCubit(
+              callUseCases: getIt.get<CallUseCases>(),
+              chatUseCases: getIt.get<ChatUseCases>()
+            ),
+          ),
+
+        ], child:  const VideoRoomPage());
+
+
       },
       redirect: (context, state) {
         var user = context.getCurrentUser;
