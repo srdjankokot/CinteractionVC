@@ -11,7 +11,8 @@ class Participant {
     required this.display,
     this.publisher = false,
     this.talking = false,
-  });
+    List<String>? deviceId,
+  }) : deviceId = deviceId ?? [];
 
   @JsonKey(name: 'id')
   int id;
@@ -25,12 +26,18 @@ class Participant {
   @JsonKey(name: 'talking')
   bool talking;
 
+  @JsonKey(includeFromJson: false, includeToJson: false)
+  List<String> deviceId;
+
   List<ChatMessage> messages = [];
 
   bool haveUnreadMessages = false;
 
+  bool get isOnline => deviceId.isNotEmpty;
+
   @override
   factory Participant.fromJson(Map<String, dynamic> json) =>
       _$ParticipantFromJson(json);
+
   Map<String, dynamic> toJson() => _$ParticipantToJson(this);
 }

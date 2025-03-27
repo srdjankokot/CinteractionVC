@@ -18,6 +18,7 @@ import '../../domain/entities/chat_message.dart';
 import '../../domain/entities/user.dart';
 import '../../domain/source/api.dart';
 import '../source/local/local_storage.dart';
+import 'package:uuid/uuid.dart';
 
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:path/path.dart' as Path;
@@ -150,6 +151,11 @@ class ChatRepoImpl extends ChatRepo {
     // }
   }
 
+  String generateUniqueString(int userId) {
+    var uuid = const Uuid();
+    return '$userId-${uuid.v4()}';
+  }
+
   _attachPlugin() async {
     textRoom = await _session.attach<JanusTextRoomPlugin>();
   }
@@ -160,7 +166,7 @@ class ChatRepoImpl extends ChatRepo {
       if (RTCDataChannelState.RTCDataChannelOpen == event) {
         await textRoom.joinRoom(
           room,
-          user!.id,
+          generateUniqueString(int.parse(user!.id)),
           display: displayName,
           pin: "",
         );
@@ -196,16 +202,14 @@ class ChatRepoImpl extends ChatRepo {
   void _matchParticipantWithChat() {
     chats = chats.map((chat) => chat.copyWith(isOnline: false)).toList();
 
-    for (var subscriber in subscribers) {
-      for (var i = 0; i < chats.length; i++) {
-        bool isParticipantOnline = chats[i]
-                .chatParticipants
-                ?.any((data) => data.id == subscriber.id) ??
-            false;
+    for (var i = 0; i < chats.length; i++) {
+      bool isChatOnline = chats[i].chatParticipants?.any((participant) =>
+              subscribers.any((subscriber) =>
+                  subscriber.id == participant.id && subscriber.isOnline)) ??
+          false;
 
-        if (isParticipantOnline) {
-          chats[i] = chats[i].copyWith(isOnline: true);
-        }
+      if (isChatOnline) {
+        chats[i] = chats[i].copyWith(isOnline: true);
       }
     }
 
@@ -291,14 +295,33 @@ class ChatRepoImpl extends ChatRepo {
         }
         if (data['textroom'] == 'leave') {
           print('from: ${data['username']} Left The Chat!');
-          subscribers = subscribers
-              .where((item) => item.id.toString() != data['username'])
-              .toList();
-          _participantsStream.add(subscribers);
 
+          String getUserId = data['username'].split('-')[0];
+
+          var existingParticipants = subscribers
+              .where((element) => element.id.toString() == getUserId)
+              .toList();
+
+          if (existingParticipants.isNotEmpty) {
+            print("Participants found, removing deviceId...");
+
+            for (var participant in existingParticipants) {
+              participant.deviceId.remove(data['username']);
+
+              if (participant.deviceId.isEmpty) {
+                subscribers.remove(participant);
+                print("Participant removed from subscribers.");
+              }
+            }
+          }
+
+          print('existingParticipiantAfterRemove $existingParticipants');
+
+          _participantsStream.add(subscribers);
           _matchParticipantWithUser();
           _matchParticipantWithChat();
         }
+
         if (data['textroom'] == 'join') {
           print('from: ${data['username']} Joined The Chat!');
 
@@ -306,32 +329,48 @@ class ChatRepoImpl extends ChatRepo {
             return;
           }
 
-          if (subscribers
-              .where((element) => element.id.toString() == data['username'])
-              .toList()
-              .isEmpty) {
-            print("there is no participant with this display name");
-            var participant = Participant(
-                display: data['display'], id: int.parse(data['username']));
+          String getUserId = data['username'].split('-')[0];
 
+          var existingParticipants = subscribers
+              .where((element) => element.id.toString() == getUserId)
+              .toList();
+
+          if (existingParticipants.isEmpty) {
+            print("There is no participant with this display name");
+            var participant = Participant(
+              display: data['display'],
+              id: int.parse(getUserId),
+              deviceId: [data['username']],
+            );
             subscribers.add(participant);
+
+            print('prtList: ${participant.deviceId}');
+          } else {
+            print("Participant found, updating deviceId list");
+
+            for (var participant in existingParticipants) {
+              if (!participant.deviceId.contains(data['username'])) {
+                participant.deviceId.add(data['username']);
+              }
+              print('listOfAllPart: ${participant.deviceId}');
+            }
           }
+          print('existingParticipiants: $existingParticipants');
 
           _participantsStream.add(subscribers);
           _matchParticipantWithUser();
           _matchParticipantWithChat();
-          // if (currentParticipant == null) setCurrentParticipant(subscribers.first);
         }
+
         if (data['participants'] != null) {
           for (var element in (data['participants'] as List<dynamic>)) {
             // setState(() {
             //   userNameDisplayMap.putIfAbsent(element['username'], () => element['display']);
             // });
-
+            String getUserId = element['username'].split('-')[0];
             // var participant = Participant.fromJson(element as Map<String, dynamic>);
             var participant = Participant(
-                display: element['display'],
-                id: int.parse(element['username']));
+                display: element['display'], id: int.parse(getUserId));
             // if(!participant.publisher){
             subscribers.add(participant);
             // }
