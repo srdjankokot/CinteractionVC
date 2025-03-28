@@ -190,7 +190,7 @@ class ChatRepoImpl extends ChatRepo {
 
     for (var subscriber in subscribers) {
       for (var i = 0; i < users.length; i++) {
-        if (int.parse(users[i].id) == subscriber.id) {
+        if (int.parse(users[i].id) == subscriber.id && subscriber.isOnline) {
           users[i] = users[i].copyWith(online: true);
         }
       }
@@ -202,14 +202,17 @@ class ChatRepoImpl extends ChatRepo {
   void _matchParticipantWithChat() {
     chats = chats.map((chat) => chat.copyWith(isOnline: false)).toList();
 
-    for (var i = 0; i < chats.length; i++) {
-      bool isChatOnline = chats[i].chatParticipants?.any((participant) =>
-              subscribers.any((subscriber) =>
-                  subscriber.id == participant.id && subscriber.isOnline)) ??
-          false;
+    for (var subscriber in subscribers) {
+      for (var i = 0; i < chats.length; i++) {
+        bool isParticipantOnline = chats[i].chatParticipants?.any(
+                (data) => data.id == subscriber.id && subscriber.isOnline) ??
+            false;
 
-      if (isChatOnline) {
-        chats[i] = chats[i].copyWith(isOnline: true);
+        if (isParticipantOnline) {
+          chats[i] = chats[i].copyWith(isOnline: true);
+        }
+
+        // print(' ListSub ${subscribers[i].deviceId}');
       }
     }
 
@@ -219,12 +222,19 @@ class ChatRepoImpl extends ChatRepo {
   _setListener() {
     textRoom.data?.listen((event) {
       dynamic data = parse(event.text);
+      print('testData: $data');
       if (data != null) {
         if (data['textroom'] == 'message') {
           // var initUserChat = currentParticipant!.id
+
+          var participiantsPrint = data['participants'];
+          print('prtListInit: $participiantsPrint');
+
           var initChat = chatDetailsDto.chatParticipants
               .firstWhere((item) => '${item.id}' == data['from']);
           var senderId = int.parse(data['from']);
+
+          print('senderId: $senderId');
 
           if (initChat != null) {
             final text = data['text'] as String;
@@ -342,9 +352,8 @@ class ChatRepoImpl extends ChatRepo {
               id: int.parse(getUserId),
               deviceId: [data['username']],
             );
+            print('CurrentUserId: ${participant.deviceId}');
             subscribers.add(participant);
-
-            print('prtList: ${participant.deviceId}');
           } else {
             print("Participant found, updating deviceId list");
 
@@ -352,7 +361,6 @@ class ChatRepoImpl extends ChatRepo {
               if (!participant.deviceId.contains(data['username'])) {
                 participant.deviceId.add(data['username']);
               }
-              print('listOfAllPart: ${participant.deviceId}');
             }
           }
           print('existingParticipiants: $existingParticipants');
@@ -364,20 +372,29 @@ class ChatRepoImpl extends ChatRepo {
 
         if (data['participants'] != null) {
           for (var element in (data['participants'] as List<dynamic>)) {
-            // setState(() {
-            //   userNameDisplayMap.putIfAbsent(element['username'], () => element['display']);
-            // });
             String getUserId = element['username'].split('-')[0];
-            // var participant = Participant.fromJson(element as Map<String, dynamic>);
-            var participant = Participant(
-                display: element['display'], id: int.parse(getUserId));
-            // if(!participant.publisher){
-            subscribers.add(participant);
-            // }
-            _participantsStream.add(subscribers);
-            _matchParticipantWithUser();
-            _matchParticipantWithChat();
+
+            var existingParticipant = subscribers.firstWhere(
+              (participant) => participant.id.toString() == getUserId,
+              orElse: () {
+                var newParticipant = Participant(
+                  display: element['display'],
+                  id: int.parse(getUserId),
+                  deviceId: [element['username']],
+                );
+                subscribers.add(newParticipant);
+                return newParticipant;
+              },
+            );
+
+            if (!existingParticipant.deviceId.contains(element['username'])) {
+              existingParticipant.deviceId.add(element['username']);
+            }
           }
+
+          _participantsStream.add(subscribers);
+          _matchParticipantWithUser();
+          _matchParticipantWithChat();
         }
       }
     });
