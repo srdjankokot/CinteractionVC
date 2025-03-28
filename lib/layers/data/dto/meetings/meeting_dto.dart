@@ -4,7 +4,9 @@ import '../../../domain/entities/meetings/organizer.dart';
 
 class MeetingDto extends Meeting {
   MeetingDto(
-      {required super.callId,
+      {
+        required super.callId,
+        required super.chatId,
       required super.organizerId,
       required super.organizer,
       super.averageEngagement,
@@ -18,6 +20,7 @@ class MeetingDto extends Meeting {
   @override
   factory MeetingDto.fromJson(Map<String, dynamic> json) => MeetingDto(
         callId: json['meeting_id'] as int,
+        chatId: json['chat_id'] as int,
         organizerId: json['organizer']['id'] as int,
         organizer: json['organizer']['name'] as String,
         averageEngagement: (json['average_engagement'] as num?)?.toDouble(),
