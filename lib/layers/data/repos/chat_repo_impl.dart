@@ -72,8 +72,8 @@ class ChatRepoImpl extends ChatRepo {
   List<ChatDto> chats = [];
 
   @override
-  Future<void> initialize({required int roomId, required bool isInCall}) async {
-    room = roomId;
+  Future<void> initialize({required int chatGroupId, required bool isInCall}) async {
+    room = chatGroupId;
     _session = await getIt.getAsync<JanusSession>();
     await _attachPlugin();
     if (!isInCall) {

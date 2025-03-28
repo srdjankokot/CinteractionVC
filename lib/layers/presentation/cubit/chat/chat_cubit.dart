@@ -38,7 +38,7 @@ class ChatCubit extends Cubit<ChatState> with BlocLoggy {
 
   void load(bool isInCall, int roomId) async {
     if (!isLoaded) {
-      await chatUseCases.chatInitialize(isInCall: isInCall, roomId: roomId);
+      await chatUseCases.chatInitialize(isInCall: isInCall, chatGroupId: roomId);
       if(!isInCall) {
         await callUseCases.initialize();
       }
