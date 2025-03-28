@@ -43,10 +43,9 @@ class VideoRoomPage extends StatelessWidget {
       // AppRoute.home.pushReplacement(context);
     }
 
-    if(state.isCallStarted && state.meetId != null)
+    if(state.isCallStarted && state.chatId != null)
       {
-        print("initialize chat repo with meetId: ${state.meetId}");
-        context.read<ChatCubit>().load( true, 583);
+        context.read<ChatCubit>().load( true, state.chatId ?? 0);
       }
   }
 
