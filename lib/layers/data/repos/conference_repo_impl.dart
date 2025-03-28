@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:convert';
+import 'dart:math';
 
 import 'package:cinteraction_vc/core/io/network/models/participant.dart';
 import 'package:cinteraction_vc/core/util/util.dart';
@@ -72,7 +73,8 @@ class ConferenceRepoImpl extends ConferenceRepo {
 
   User? user = getIt.get<LocalStorage>().loadLoggedUser();
 
-  late String myId = user?.id ?? "";
+  // late String myId = user?.id ?? "";
+  late String myId = '${Random().nextInt(10000)}';
   late String displayName = user?.name ?? 'User $myId';
 
   get screenShareId => int.parse(myId) * 774352;
@@ -1089,7 +1091,7 @@ class ConferenceRepoImpl extends ConferenceRepo {
   }
 
   _getEngagement() async {
-    // return;
+    return;
 
     if (engagementIsRunning || (localVideoRenderer.isVideoMuted ?? false))
       return;
