@@ -6,6 +6,7 @@ import 'package:webrtc_interface/webrtc_interface.dart';
 
 import '../../../core/io/network/models/participant.dart';
 import '../../../core/util/util.dart';
+import '../../data/dto/meetings/meeting_dto.dart';
 import '../entities/api_response.dart';
 import '../entities/chat_message.dart';
 
@@ -52,7 +53,7 @@ abstract class ConferenceRepo {
       required StreamRenderer remoteStream});
   Future<void> shareScreen(MediaStream? mediaStream);
 
-  Future<ApiResponse<int>> startCall();
+  Future<ApiResponse<MeetingDto>> startCall();
 
   Future<ApiResponse<bool>> sendMessage(String msg,
       {List<PlatformFile>? uploadedFiles});

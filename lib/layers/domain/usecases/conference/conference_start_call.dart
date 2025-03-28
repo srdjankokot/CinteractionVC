@@ -1,3 +1,4 @@
+import '../../../data/dto/meetings/meeting_dto.dart';
 import '../../entities/api_response.dart';
 import '../../repos/conference_repo.dart';
 
@@ -7,7 +8,7 @@ class ConferenceStartCall {
 
   final ConferenceRepo repo;
 
-  Future<ApiResponse<int>> call() {
+  Future<ApiResponse<MeetingDto>> call() {
      return repo.startCall();
   }
 }

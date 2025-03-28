@@ -115,7 +115,7 @@ class ApiImpl extends Api {
   }
 
   @override
-  Future<ApiResponse<int>> startCall(
+  Future<ApiResponse<MeetingDto>> startCall(
       {required streamId, required userId}) async {
     Dio dio = await getIt.getAsync<Dio>();
     print('UserId: $userId');
@@ -130,9 +130,10 @@ class ApiImpl extends Api {
       print(formData);
       Response response = await dio.post(Urls.startCall, data: formData);
       var callId = response.data['meeting_id'] as int;
+      var chatId = response.data['chat_id'] as int;
       print('callId $callId');
 
-      return ApiResponse(response: callId);
+      return ApiResponse(response: response.data);
       // return login;
     } on DioException catch (e) {
       return ApiResponse(error: ApiErrorDto.fromDioException(e));

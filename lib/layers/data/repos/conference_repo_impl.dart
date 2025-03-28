@@ -23,6 +23,7 @@ import '../../../core/util/conf.dart';
 import '../../domain/entities/user.dart';
 import '../../domain/source/api.dart';
 
+import '../dto/meetings/meeting_dto.dart';
 import '../source/local/local_storage.dart';
 
 import 'package:webrtc_interface/webrtc_interface.dart' as webrtcInterface;
@@ -102,9 +103,9 @@ class ConferenceRepoImpl extends ConferenceRepo {
   }
 
   @override
-  Future<ApiResponse<int>> startCall() async {
+  Future<ApiResponse<MeetingDto>> startCall() async {
     var res = await _api.startCall(streamId: room.toString(), userId: user?.id);
-    callId = res.response;
+    callId = res.response?.callId;
     return res;
   }
 

@@ -57,7 +57,7 @@ class ConferenceCubit extends Cubit<ConferenceState> with BlocLoggy {
       emit(ConferenceState.error(error: startCall.error!.errorMessage));
       return;
     } else {
-      emit(state.copyWith(isCallStarted: true, meetId: startCall.response));
+      emit(state.copyWith(isCallStarted: true, chatId: startCall.response?.chatId));
     }
   }
 

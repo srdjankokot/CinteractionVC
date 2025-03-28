@@ -29,7 +29,7 @@ abstract class Api {
   Future<ApiResponse<bool>> sendEngagement(
       {required engagement, required userId, required callId});
 
-  Future<ApiResponse<int>> startCall({required streamId, required userId});
+  Future<ApiResponse<MeetingDto>> startCall({required streamId, required userId});
   Future<bool> endCall({required callId, required userId});
 
   Future<ApiResponse<MeetingResponse?>> getMeetings(int page);
