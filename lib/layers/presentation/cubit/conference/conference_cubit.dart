@@ -51,13 +51,13 @@ class ConferenceCubit extends Cubit<ConferenceState> with BlocLoggy {
         .getAvgEngagementStream()
         .listen(_onEngagementChanged);
 
-    var startCall = await conferenceUseCases.startCall();
+    var meet = await conferenceUseCases.startCall();
 
-    if (startCall.error != null) {
-      emit(ConferenceState.error(error: startCall.error!.errorMessage));
+    if (meet == null) {
+      emit(const ConferenceState.error(error: "Something went wrong"));
       return;
     } else {
-      emit(state.copyWith(isCallStarted: true, meetId: startCall.response));
+      emit(state.copyWith(isCallStarted: true, chatId: meet.chatId));
     }
   }
 

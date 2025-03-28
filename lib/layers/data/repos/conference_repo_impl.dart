@@ -3,6 +3,7 @@ import 'dart:convert';
 
 import 'package:cinteraction_vc/core/io/network/models/participant.dart';
 import 'package:cinteraction_vc/core/util/util.dart';
+import 'package:cinteraction_vc/layers/data/dto/meetings/meeting_dto.dart';
 import 'package:cinteraction_vc/layers/domain/entities/api_response.dart';
 import 'package:cinteraction_vc/layers/domain/entities/chat_message.dart';
 import 'package:cinteraction_vc/layers/domain/repos/conference_repo.dart';
@@ -101,12 +102,7 @@ class ConferenceRepoImpl extends ConferenceRepo {
     await _joinRoom();
   }
 
-  @override
-  Future<ApiResponse<int>> startCall() async {
-    var res = await _api.startCall(streamId: room.toString(), userId: user?.id);
-    callId = res.response;
-    return res;
-  }
+
 
   @override
   Stream<Map<dynamic, StreamRenderer>> getStreamRendererStream() {
@@ -1361,6 +1357,15 @@ class ConferenceRepoImpl extends ConferenceRepo {
       throw Exception('Could not launch $blob');
     }
   }
+
+  @override
+  Future<MeetingDto?> startCall() async{
+    var res = await _api.startCall(streamId: room.toString(), userId: user?.id);
+    callId = res.response?.callId;
+    return res.response;
+  }
+
+
 
   // void createBlob(Uint8List videoData) {
   //   final blob = html.Blob([videoData], 'video/mp4');
