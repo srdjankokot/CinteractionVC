@@ -24,15 +24,15 @@ List<RTCIceServer> iceServers = <RTCIceServer>[
 
 
     RTCIceServer(
-      urls: 'stun:huawei.nswebdevelopment.com:3478',
+      urls: 'stun:cinteraction.nswebdevelopment.com:3478',
       username: "",
       credential: ""),
   RTCIceServer(
-      urls: 'turn:huawei.nswebdevelopment.com:3478?transport=udp',
+      urls: 'turn:cinteraction.nswebdevelopment.com:3478?transport=udp',
       username: mixTurnServerUsernameHuawei,
       credential: mixTurnServerCredentialHuawei),
   RTCIceServer(
-      urls: 'turn:huawei.nswebdevelopment.com:3478?transport=tcp',
+      urls: 'turn:cinteraction.nswebdevelopment.com:3478?transport=tcp',
       username: mixTurnServerUsernameHuawei,
       credential: mixTurnServerCredentialHuawei),
 
