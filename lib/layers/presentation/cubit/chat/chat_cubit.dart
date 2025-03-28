@@ -24,26 +24,43 @@ class ChatCubit extends Cubit<ChatState> with BlocLoggy {
   final ChatUseCases chatUseCases;
   final CallUseCases callUseCases;
 
-  ChatCubit({required this.chatUseCases, required this.callUseCases})
+  final bool isInCallChat;
+  bool isLoaded = false;
+
+  ChatCubit(
+      {required this.chatUseCases,
+      required this.callUseCases,
+      required this.isInCallChat})
       : super(const ChatState.initial()) {
     print("Chat Cubit is created");
-    _load();
+    if (!isInCallChat) load(isInCallChat, 1234);
   }
 
-  void _load() async {
-    await chatUseCases.chatInitialize();
-    await callUseCases.initialize();
+  void load(bool isInCall, int roomId) async {
+    if (!isLoaded) {
+      await chatUseCases.chatInitialize(isInCall: isInCall, roomId: roomId);
+      if(!isInCall) {
+        await callUseCases.initialize();
+      }
 
-    chatUseCases.getParticipantsStream().listen(_onParticipants);
-    chatUseCases.getUsersStream().listen(_onUsers);
-    chatUseCases.getChatsStream().listen(_onChats);
-    chatUseCases.getMessageStream().listen(_onMessages);
-    chatUseCases.getChatDetailsStream().listen(_onChatDetails);
-    chatUseCases.getPaginationStream().listen(_onPagination);
-    chatUseCases.getUsersPaginationStream().listen(_onUsersPagination);
-    callUseCases.videoCallStream().listen(_onVideoCall);
-    callUseCases.getLocalStream().listen(_onLocalStream);
-    callUseCases.getRemoteStream().listen(_onRemoteStream);
+
+      chatUseCases.getParticipantsStream().listen(_onParticipants);
+      chatUseCases.getUsersStream().listen(_onUsers);
+      chatUseCases.getChatsStream().listen(_onChats);
+      chatUseCases.getMessageStream().listen(_onMessages);
+      chatUseCases.getChatDetailsStream().listen(_onChatDetails);
+      chatUseCases.getPaginationStream().listen(_onPagination);
+      chatUseCases.getUsersPaginationStream().listen(_onUsersPagination);
+
+      if(!isInCall) {
+        callUseCases.videoCallStream().listen(_onVideoCall);
+        callUseCases.getLocalStream().listen(_onLocalStream);
+        callUseCases.getRemoteStream().listen(_onRemoteStream);
+      }
+
+      isLoaded = true;
+      print("inCall chat loaded: $isInCall");
+    }
   }
 
   @override

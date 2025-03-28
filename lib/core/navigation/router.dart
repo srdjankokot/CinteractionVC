@@ -153,7 +153,8 @@ final GoRouter router = GoRouter(
           BlocProvider<ChatCubit>(
             create: (context) => ChatCubit(
               callUseCases: getIt.get<CallUseCases>(),
-              chatUseCases: getIt.get<ChatUseCases>()
+              chatUseCases: getIt.get<ChatUseCases>(),
+              isInCallChat: true
             ),
           ),
 

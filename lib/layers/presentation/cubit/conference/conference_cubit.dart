@@ -5,6 +5,7 @@ import 'package:cinteraction_vc/core/io/network/models/participant.dart';
 import 'package:cinteraction_vc/core/util/util.dart';
 import 'package:cinteraction_vc/layers/domain/usecases/conference/conference_usecases.dart';
 import 'package:file_picker/file_picker.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screen_recording/flutter_screen_recording.dart';
 import 'package:janus_client/janus_client.dart';
@@ -55,6 +56,8 @@ class ConferenceCubit extends Cubit<ConferenceState> with BlocLoggy {
     if (startCall.error != null) {
       emit(ConferenceState.error(error: startCall.error!.errorMessage));
       return;
+    } else {
+      emit(state.copyWith(isCallStarted: true, meetId: startCall.response));
     }
   }
 

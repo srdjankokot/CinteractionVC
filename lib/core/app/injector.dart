@@ -170,8 +170,8 @@ Future<void> initializeGetIt() async {
       () => MeetingCubit(meetingUseCases: getIt()));
   getIt.registerFactory<DashboardCubit>(
       () => DashboardCubit(dashboardUseCases: getIt()));
-  getIt.registerLazySingleton<ChatCubit>(
-      () => ChatCubit(chatUseCases: getIt(), callUseCases: getIt()));
+
+  getIt.registerLazySingleton<ChatCubit>(() => ChatCubit(chatUseCases: getIt(), callUseCases: getIt(), isInCallChat: false));
 
   getIt
       .registerFactory<JanusTransport>(() => WebSocketJanusTransport(url: url));
