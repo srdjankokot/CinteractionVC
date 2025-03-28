@@ -46,7 +46,7 @@ class VideoRoomPage extends StatelessWidget {
     if(state.isCallStarted && state.meetId != null)
       {
         print("initialize chat repo with meetId: ${state.meetId}");
-        context.read<ChatCubit>().load( true, state.meetId ?? 0);
+        context.read<ChatCubit>().load( true, 583);
       }
   }
 
@@ -57,48 +57,6 @@ class VideoRoomPage extends StatelessWidget {
     final ScrollController chatController = ScrollController();
     FocusNode messageFocusNode = FocusNode();
 
-    Future<void> sendMessage({List<PlatformFile>? uploadedFiles}) async {
-      print('uploadedFiles: $uploadedFiles');
-
-      context.read<ConferenceCubit>().sendMessage(messageFieldController.text,
-          uploadedFiles: uploadedFiles);
-      messageFieldController.clear();
-      messageFocusNode.requestFocus();
-    }
-
-    Future<void> pickAndSendFile() async {
-      FilePickerResult? result = await FilePicker.platform.pickFiles(
-        withData: kIsWeb,
-      );
-
-      if (result != null) {
-        PlatformFile file = result.files.first;
-
-        Uint8List? fileBytes;
-
-        if (kIsWeb) {
-          fileBytes = file.bytes;
-        } else if (file.bytes != null) {
-          fileBytes = file.bytes;
-        } else if (file.path != null) {
-          File selectedFile = File(file.path!);
-          fileBytes = await selectedFile.readAsBytes();
-        }
-
-        if (fileBytes != null) {
-          PlatformFile fileWithBytes = PlatformFile(
-            name: file.name,
-            size: fileBytes.length,
-            bytes: fileBytes,
-          );
-          await sendMessage(uploadedFiles: [fileWithBytes]);
-        } else {
-          print('Error: Bytes not read.');
-        }
-      } else {
-        print('User canceled file selection');
-      }
-    }
 
     return BlocConsumer<ConferenceCubit, ConferenceState>(
         builder: (context, state) {
@@ -505,74 +463,7 @@ class VideoRoomPage extends StatelessWidget {
                                         listener: (BuildContext context,
                                             ChatState state) {},
                                       )
-
-                                          // Container(
-                                          //   child: state.messages == null
-                                          //       ? const Center(
-                                          //           child: Text('No Messages'))
-                                          //       : ListView.builder(
-                                          //           controller: chatController,
-                                          //           itemCount:
-                                          //               state.messages?.length,
-                                          //           itemBuilder:
-                                          //               (BuildContext context,
-                                          //                   int index) {
-                                          //             return VisibilityDetector(
-                                          //                 key: Key(
-                                          //                     index.toString()),
-                                          //                 onVisibilityChanged:
-                                          //                     (VisibilityInfo
-                                          //                         info) {
-                                          //                   // print('${state.messages![int.parse('${(info.key as ValueKey).value}')]} (message seen)');
-                                          //                   context
-                                          //                       .read<
-                                          //                           ConferenceCubit>()
-                                          //                       .chatMessageSeen(
-                                          //                           index);
-                                          //                 },
-                                          //                 child: ChatMessageWidget(
-                                          //                     message:
-                                          //                         state.messages![
-                                          //                             index]));
-                                          //           },
-                                          //         ),
-                                          // ),
                                           ),
-                                      const SizedBox(
-                                        height: 5,
-                                      ),
-                                      Row(
-                                        children: [
-                                          Expanded(
-                                            child: TextField(
-                                              textInputAction:
-                                                  TextInputAction.go,
-                                              focusNode: messageFocusNode,
-                                              onSubmitted: (value) {
-                                                sendMessage();
-                                              },
-                                              controller:
-                                                  messageFieldController,
-                                              decoration: InputDecoration(
-                                                  hintText: "Send a message",
-                                                  suffixIcon: IconButton(
-                                                    onPressed: () {
-                                                      sendMessage();
-                                                    },
-                                                    icon: imageSVGAsset(
-                                                        'icon_send') as Widget,
-                                                  )),
-                                            ),
-                                          ),
-                                          IconButton(
-                                            onPressed: () async {
-                                              await pickAndSendFile();
-                                            },
-                                            icon: imageSVGAsset('three_dots')
-                                                as Widget,
-                                          ),
-                                        ],
-                                      ),
                                     ],
                                   ),
                                 ),

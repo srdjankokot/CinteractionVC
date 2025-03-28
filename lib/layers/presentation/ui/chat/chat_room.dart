@@ -39,21 +39,7 @@ class ChatRoomPage extends StatelessWidget {
   Widget build(BuildContext context) {
     final user = context.getCurrentUser;
 
-    final ScrollController chatController = ScrollController();
-    TextEditingController messageFieldController = TextEditingController();
-
-    FocusNode messageFocusNode = FocusNode();
-
     AudioPlayer audioPlayer = AudioPlayer();
-
-    late DropzoneViewController controller;
-
-    Future<void> onFileDropped(dynamic event) async {
-      final name = await controller.getFilename(event);
-      final bytes = await controller.getFileData(event);
-
-      await context.read<ChatCubit>().sendFile(name.toString(), bytes);
-    }
 
     void playIncomingCallSound() async {
       try {
@@ -66,51 +52,6 @@ class ChatRoomPage extends StatelessWidget {
 
     void stopIncomingCallSound() async {
       await audioPlayer.stop();
-    }
-
-    Future<void> sendMessage({List<PlatformFile>? uploadedFiles}) async {
-      await context.read<ChatCubit>().sendChatMessage(
-            messageContent: messageFieldController.text,
-            uploadedFiles: uploadedFiles,
-          );
-
-      messageFieldController.text = '';
-      messageFocusNode.requestFocus();
-    }
-
-    Future<void> pickAndSendFile() async {
-      FilePickerResult? result = await FilePicker.platform.pickFiles(
-        withData: kIsWeb,
-      );
-
-      if (result != null) {
-        PlatformFile file = result.files.first;
-
-        Uint8List? fileBytes;
-
-        if (kIsWeb) {
-          fileBytes = file.bytes;
-        } else if (file.bytes != null) {
-          fileBytes = file.bytes;
-        } else if (file.path != null) {
-          File selectedFile = File(file.path!);
-          fileBytes = await selectedFile.readAsBytes();
-        }
-
-        if (fileBytes != null) {
-          PlatformFile fileWithBytes = PlatformFile(
-            name: file.name,
-            size: fileBytes.length,
-            bytes: fileBytes,
-          );
-          print('sendedFiles:  $fileWithBytes');
-          await sendMessage(uploadedFiles: [fileWithBytes]);
-        } else {
-          print('Error: Bytes not read.');
-        }
-      } else {
-        print('User canceled file selection');
-      }
     }
 
     AlertDialog? callDialog;
@@ -796,67 +737,8 @@ class ChatRoomPage extends StatelessWidget {
                               ),
                             ),
                             const Divider(),
-                            Expanded(
-                              child: Stack(
-                                children: [
-                                  DropzoneView(
-                                    onCreated: (ctrl) => controller = ctrl,
-                                    onDropFile: onFileDropped,
-                                    onHover: () => print('eeeeeeeeeeeee'),
-                                  ),
-                                  ChatDropzone(
-                                    sendFile: sendMessage,
-                                    child: Container(
-                                      child: !state.isLoading
-                                          ? ChatDetailsWidget(state)
-                                          : const Center(
-                                              child:
-                                                  CircularProgressIndicator()),
-                                    ),
-                                  )
-                                ],
-                              ),
-                            ),
-                            const SizedBox(
-                              height: 5,
-                            ),
-                            Row(
-                              children: [
-                                Expanded(
-                                  child: TextField(
-                                    textInputAction: TextInputAction.done,
-                                    focusNode: messageFocusNode,
-                                    controller: messageFieldController,
-                                    keyboardType: TextInputType.multiline,
-                                    minLines: 1,
-                                    maxLines: 8,
-                                    onEditingComplete: () {
-                                      if (messageFieldController.text
-                                          .trim()
-                                          .isNotEmpty) {
-                                        sendMessage();
-                                      }
-                                    },
-                                    decoration: InputDecoration(
-                                      hintText: "Send a message",
-                                      suffixIcon: IconButton(
-                                        onPressed: () async {
-                                          sendMessage();
-                                        },
-                                        icon: imageSVGAsset('icon_send')
-                                            as Widget,
-                                      ),
-                                    ),
-                                  ),
-                                ),
-                                IconButton(
-                                  onPressed: () async {
-                                    await pickAndSendFile();
-                                  },
-                                  icon: imageSVGAsset('three_dots') as Widget,
-                                ),
-                              ],
-                            )
+                            Expanded(child: ChatDetailsWidget(state)),
+
                           ],
                         );
                       }
