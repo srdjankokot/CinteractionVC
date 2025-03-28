@@ -16,7 +16,7 @@ import '../entities/chat_message.dart';
 abstract class ChatRepo {
   const ChatRepo();
 
-  Future<void> initialize();
+  Future<void> initialize({required int roomId, required bool isInCall});
   Future<void> sendMessage(String msg, List<String> participantIds);
   Stream<List<Participant>> getParticipantsStream();
   Stream<List<UserDto>> getUsersStream();

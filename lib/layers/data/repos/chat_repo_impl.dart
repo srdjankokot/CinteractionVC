@@ -25,6 +25,7 @@ import 'package:path/path.dart' as Path;
 class ChatRepoImpl extends ChatRepo {
   ChatRepoImpl({required Api api}) : _api = api;
   User? user = getIt.get<LocalStorage>().loadLoggedUser();
+
   // User? user;
 
   final Api _api;
@@ -71,11 +72,14 @@ class ChatRepoImpl extends ChatRepo {
   List<ChatDto> chats = [];
 
   @override
-  Future<void> initialize() async {
+  Future<void> initialize({required int roomId, required bool isInCall}) async {
+    room = roomId;
     _session = await getIt.getAsync<JanusSession>();
     await _attachPlugin();
-    loadUsers(1, 20);
-    loadChats(1, 20);
+    if (!isInCall) {
+      loadUsers(1, 20);
+      loadChats(1, 20);
+    }
     _setup();
   }
 
@@ -129,6 +133,7 @@ class ChatRepoImpl extends ChatRepo {
     // if (event.plugindata?.data['exists'] == true) {
     if (exist!) {
       print('try to join publisher');
+      await _joinRoom();
     } else {
       print('need to create the room');
       await _createRoom(id);
@@ -140,14 +145,29 @@ class ChatRepoImpl extends ChatRepo {
     //   'publishers': maxPublishersDefault
     // };
     // var created = await textRoom.createRoom(roomId: room.toString(), adminKey: "supersecret", history: 10, isPrivate: false, description: "TestRoom", permanent: false, pin: "pin", secret: "secret", post: "https://7a2f-188-2-51-157.ngrok-free.app/api/message");
-    var created =
-        await textRoom.createRoom(roomId: roomId.toString(), permanent: true);
-    // JanusEvent event = JanusEvent.fromJson(created);
-    // if (event.plugindata?.data['videoroom'] == 'created') {
-    //   // await _joinPublisher();
-    // } else {
-    //   print('error creating room');
-    // }
+    // var created = await textRoom.createRoom(roomId: roomId);
+    var payload = {
+      "request": "create",
+      "room": roomId
+    };
+
+    var created = await textRoom.send(data: payload);
+    JanusEvent event = JanusEvent.fromJson(created);
+    if (event.plugindata?.data['textroom'] == 'created') {
+      await _joinRoom();
+    } else {
+      print('error creating room');
+    }
+  }
+
+  _joinRoom() async
+  {
+    await textRoom.joinRoom(
+      room,
+      user!.id,
+      display: displayName,
+      pin: "",
+    );
   }
 
   _attachPlugin() async {
@@ -158,12 +178,8 @@ class ChatRepoImpl extends ChatRepo {
     await textRoom.setup();
     textRoom.onData?.listen((event) async {
       if (RTCDataChannelState.RTCDataChannelOpen == event) {
-        await textRoom.joinRoom(
-          room,
-          user!.id,
-          display: displayName,
-          pin: "",
-        );
+
+        _checkRoom(room);
       }
     });
     _setListener();

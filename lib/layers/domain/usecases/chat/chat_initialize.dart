@@ -6,7 +6,7 @@ class ChatInitialize {
 
   final ChatRepo repo;
 
-  call(){
-    repo.initialize();
+  call({required int roomId, required bool isInCall}){
+    repo.initialize(isInCall: isInCall, roomId: roomId);
   }
 }
