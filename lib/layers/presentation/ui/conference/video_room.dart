@@ -81,8 +81,7 @@ class VideoRoomPage extends StatelessWidget {
 
           List<StreamRenderer> items = [];
           for (var i = 0; i < state.numberOfStreamsCopy; i++) {
-            items.addAll(
-                state.streamRenderers!.entries.map((e) => e.value).toList());
+            items.addAll(state.streamRenderers!.entries.map((e) => e.value).toList());
           }
 
           var subscribers = state.streamSubscribers?.toList();

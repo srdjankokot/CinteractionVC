@@ -69,6 +69,7 @@ class ConferenceRepoImpl extends ConferenceRepo {
   final _conferenceChatStream = StreamController<List<ChatMessage>>.broadcast();
   final _participantsStream = StreamController<List<Participant>>.broadcast();
   final _avgEngagementStream = StreamController<int>.broadcast();
+  final _talkingIdStream = StreamController<int>.broadcast();
 
   User? user = getIt.get<LocalStorage>().loadLoggedUser();
 
@@ -273,6 +274,24 @@ class ConferenceRepoImpl extends ConferenceRepo {
               _manageMuteUIEvents(id, kind, muted);
             }
           }
+
+          if(data.containsKey("videoroom"))
+            {
+              var videoroom = dataMap['videoroom'];
+              if(data.containsKey("id"))
+                {
+                  var id = dataMap['id'];
+                  if(videoroom == "talking")
+                  {
+                    _manageTalkingEvents(id, true);
+                  }
+                  if(videoroom == "stopped-talking")
+                  {
+                    _manageTalkingEvents(id, false);
+                  }
+                }
+
+            }
         }
       }
     });
@@ -305,6 +324,18 @@ class ConferenceRepoImpl extends ConferenceRepo {
     videoPlugin?.peerConnection?.onConnectionState = (state) {
       // print('peerConnection state: ${state.name}');
     };
+  }
+
+  _manageTalkingEvents(int feedId, bool talking) async
+  {
+    var id = user?.id == feedId.toString() ? "local" : feedId.toString();
+    StreamRenderer? renderer = videoState.streamsToBeRendered[id];
+    if (renderer == null) {
+      return;
+    }
+    renderer.isTalking = talking;
+    _refreshStreams();
+
   }
 
   _manageMuteUIEvents(String mid, String kind, bool muted) async {
@@ -961,6 +992,15 @@ class ConferenceRepoImpl extends ConferenceRepo {
     print('room is exist: ${event.plugindata}');
     if (event.plugindata?.data['exists'] == true) {
       print('try to join publisher');
+
+      // var payload = {
+      //   "request": "edit",
+      //   "room": room,
+      //   "audiolevel_event" : true,
+      //   "secret" : ""
+      // };
+      //
+      // await videoPlugin?.send(data: payload);
       await _joinPublisher();
     } else {
       print('need to create the room');
@@ -969,7 +1009,13 @@ class ConferenceRepoImpl extends ConferenceRepo {
   }
 
   _createRoom(int roomId) async {
-    Map<String, dynamic>? extras = {'publishers': maxPublishersDefault};
+    Map<String, dynamic>? extras = {
+      'publishers': maxPublishersDefault,
+      'audiolevel_event': true,
+      'audio_active_packets': 25,
+      'audio_level_average': 35,
+      'audio_level_threshold': 10
+    };
     var created = await videoPlugin?.createRoom(room, extras: extras);
     JanusEvent event = JanusEvent.fromJson(created);
     if (event.plugindata?.data['videoroom'] == 'created') {
