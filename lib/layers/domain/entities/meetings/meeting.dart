@@ -2,9 +2,8 @@ import 'package:json_annotation/json_annotation.dart';
 
 class Meeting {
   Meeting(
-      {
-        required this.callId,
-        required this.chatId,
+      {required this.callId,
+      this.chatId,
       required this.organizerId,
       required this.organizer,
       this.averageEngagement,
@@ -19,7 +18,7 @@ class Meeting {
   int callId;
 
   @JsonKey(name: 'chat_id')
-  int chatId;
+  int? chatId;
 
   @JsonKey(name: 'organizer_id')
   int organizerId;
