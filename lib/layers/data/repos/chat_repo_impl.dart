@@ -690,6 +690,8 @@ class ChatRepoImpl extends ChatRepo {
       uploadedFiles: uploadedFiles,
     );
 
+
+    sendMessage("slanje poruka preko janusa", []);
     if (response.error == null && response.response != null) {
       List<String> participants =
           participantIds.map((int value) => value.toString()).toList();

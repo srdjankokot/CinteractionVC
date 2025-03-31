@@ -311,8 +311,9 @@ class ChatCubit extends Cubit<ChatState> with BlocLoggy {
   Future<void> sendChatMessage(
       {required String messageContent,
       List<PlatformFile>? uploadedFiles}) async {
-    var participiansList =
-        state.chatDetails!.chatParticipants.map((data) => data.id).toList();
+    // var participiansList = state.chatDetails!.chatParticipants.map((data) => data.id).toList();
+    var participiansList = state.participants!.map((data) => data.id).toList();
+
 
     chatUseCases.sendMessageToChatStream(
         chatId: state.chatDetails?.chatId,
