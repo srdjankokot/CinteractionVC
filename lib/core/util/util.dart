@@ -13,6 +13,7 @@ class StreamRenderer {
   // List<bool> selectedQuality = [false, false, true];
   bool? isVideoMuted;
   ConfigureStreamQuality subStreamQuality = ConfigureStreamQuality.HIGH;
+  bool? isTalking;
 
   Future<void> dispose() async {
     if(!isRendererDisposed(videoRenderer))
@@ -33,6 +34,7 @@ class StreamRenderer {
     mediaStream = await createLocalMediaStream('mediaStream_$id');
     isAudioMuted = false;
     isVideoMuted = false;
+    isTalking = false;
     videoRenderer = RTCVideoRenderer();
     await videoRenderer.initialize();
     videoRenderer.srcObject = mediaStream;

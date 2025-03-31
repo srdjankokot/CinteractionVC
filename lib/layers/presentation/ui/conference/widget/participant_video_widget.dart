@@ -18,8 +18,7 @@ class ParticipantVideoWidget extends StatelessWidget {
       required this.remoteStream,
       required this.height,
       required this.width,
-        this.showEngagement = true
-      });
+      this.showEngagement = true});
 
   final StreamRenderer remoteStream;
   final double height;
@@ -36,33 +35,51 @@ class ParticipantVideoWidget extends StatelessWidget {
         width: width,
         child: Stack(
           children: [
-            Visibility(
-              visible: remoteStream.isVideoMuted == false,
-              replacement: Center(
-                  child: CircleAvatar(
-                backgroundColor:
-                    ([...ColorConstants.kStateColors]..shuffle()).first,
-                radius: [width, height].reduce(min) / 4,
-                child: Text(remoteStream.publisherName.getInitials(),
-                    style: context.primaryTextTheme.titleLarge?.copyWith(
-                        fontSize: [width, height].reduce(min) / 8,
-                        fontWeight: FontWeight.bold)),
-              )
+            Stack(
+              children: [
+                Visibility(
+                  visible: remoteStream.isVideoMuted == false,
+                  replacement: Center(
+                      child: CircleAvatar(
+                        backgroundColor:
+                        ([...ColorConstants.kStateColors]..shuffle()).first,
+                        radius: [width, height].reduce(min) / 4,
+                        child: Text(remoteStream.publisherName.getInitials(),
+                            style: context.primaryTextTheme.titleLarge?.copyWith(
+                                fontSize: [width, height].reduce(min) / 8,
+                                fontWeight: FontWeight.bold)),
+                      )
 
-                  // Text("Video Paused By ${remoteStream.publisherName!}",
-                  //     style: const TextStyle(color: Colors.white)),
+                    // Text("Video Paused By ${remoteStream.publisherName!}",
+                    //     style: const TextStyle(color: Colors.white)),
                   ),
-              child: RTCVideoView(
-                remoteStream.videoRenderer,
-                placeholderBuilder: (context) {
-                  return Text('data');
-                },
-                filterQuality: FilterQuality.none,
-                objectFit: screenShare
-                    ? RTCVideoViewObjectFit.RTCVideoViewObjectFitContain
-                    : RTCVideoViewObjectFit.RTCVideoViewObjectFitCover,
-                mirror: !screenShare,
-              ),
+                  child: RTCVideoView(
+                    remoteStream.videoRenderer,
+                    placeholderBuilder: (context) {
+                      return Text('data');
+                    },
+                    filterQuality: FilterQuality.none,
+                    objectFit: screenShare
+                        ? RTCVideoViewObjectFit.RTCVideoViewObjectFitContain
+                        : RTCVideoViewObjectFit.RTCVideoViewObjectFitCover,
+                    mirror: !screenShare,
+                  ),
+                ),
+
+                // Border overlay (doesn't affect video size)
+                Positioned.fill(
+                  child: AnimatedContainer(
+                    duration: const Duration(milliseconds: 100),
+                    decoration: BoxDecoration(
+                      border: Border.all(
+                        color: remoteStream.isTalking == true? Colors.red : Colors.transparent,
+                        width: 4,
+                      ),
+                    ),
+                  ),
+                ),
+
+              ],
             ),
             // Text('${remoteStream.videoRenderer.videoWidth}:${remoteStream.videoRenderer.videoHeight}'),
             Positioned(
@@ -77,6 +94,8 @@ class ParticipantVideoWidget extends StatelessWidget {
                     ),
                   ],
                 )),
+
+
 
             Visibility(
                 visible: remoteStream.isAudioMuted == true,
