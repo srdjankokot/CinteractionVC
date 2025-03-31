@@ -3,8 +3,10 @@ import 'dart:io';
 import 'dart:math';
 import 'dart:typed_data';
 
+import 'package:cinteraction_vc/core/app/injector.dart';
 import 'package:cinteraction_vc/layers/data/dto/chat/chat_detail_dto.dart';
 import 'package:cinteraction_vc/layers/data/dto/chat/chat_dto.dart';
+import 'package:cinteraction_vc/layers/data/repos/chat_repo_impl.dart';
 import 'package:cinteraction_vc/layers/presentation/cubit/chat/chat_state.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
@@ -38,16 +40,14 @@ class ChatCubit extends Cubit<ChatState> with BlocLoggy {
 
   void load(bool isInCall, int roomId) async {
     if (!isLoaded) {
-      await chatUseCases.chatInitialize(isInCall: isInCall, chatGroupId: roomId);
-      if(!isInCall) {
+      await chatUseCases.chatInitialize(
+          isInCall: isInCall, chatGroupId: roomId);
+      if (!isInCall) {
         await callUseCases.initialize();
+      } else {
+        setCurrentChat(ChatDto(id: roomId, name: "name"));
+        getChatDetails(roomId, 1);
       }
-      else
-        {
-          setCurrentChat(ChatDto(id: roomId, name: "name"));
-          getChatDetails(roomId, 1);
-        }
-
 
       chatUseCases.getParticipantsStream().listen(_onParticipants);
       chatUseCases.getUsersStream().listen(_onUsers);
@@ -57,7 +57,7 @@ class ChatCubit extends Cubit<ChatState> with BlocLoggy {
       chatUseCases.getPaginationStream().listen(_onPagination);
       chatUseCases.getUsersPaginationStream().listen(_onUsersPagination);
 
-      if(!isInCall) {
+      if (!isInCall) {
         callUseCases.videoCallStream().listen(_onVideoCall);
         callUseCases.getLocalStream().listen(_onLocalStream);
         callUseCases.getRemoteStream().listen(_onRemoteStream);
@@ -311,9 +311,9 @@ class ChatCubit extends Cubit<ChatState> with BlocLoggy {
   Future<void> sendChatMessage(
       {required String messageContent,
       List<PlatformFile>? uploadedFiles}) async {
-    // var participiansList = state.chatDetails!.chatParticipants.map((data) => data.id).toList();
-    var participiansList = state.participants!.map((data) => data.id).toList();
-
+    var participiansList = !isInCallChat
+        ? state.chatDetails!.chatParticipants.map((data) => data.id).toList()
+        : state.participants!.map((data) => data.id).toList();
 
     chatUseCases.sendMessageToChatStream(
         chatId: state.chatDetails?.chatId,
