@@ -18,6 +18,7 @@ import '../../domain/entities/chat_message.dart';
 import '../../domain/entities/user.dart';
 import '../../domain/source/api.dart';
 import '../source/local/local_storage.dart';
+import 'package:uuid/uuid.dart';
 
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:path/path.dart' as Path;
@@ -72,7 +73,8 @@ class ChatRepoImpl extends ChatRepo {
   List<ChatDto> chats = [];
 
   @override
-  Future<void> initialize({required int chatGroupId, required bool isInCall}) async {
+  Future<void> initialize(
+      {required int chatGroupId, required bool isInCall}) async {
     room = chatGroupId;
     _session = await getIt.getAsync<JanusSession>();
     await _attachPlugin();
@@ -146,10 +148,7 @@ class ChatRepoImpl extends ChatRepo {
     // };
     // var created = await textRoom.createRoom(roomId: room.toString(), adminKey: "supersecret", history: 10, isPrivate: false, description: "TestRoom", permanent: false, pin: "pin", secret: "secret", post: "https://7a2f-188-2-51-157.ngrok-free.app/api/message");
     // var created = await textRoom.createRoom(roomId: roomId);
-    var payload = {
-      "request": "create",
-      "room": roomId
-    };
+    var payload = {"request": "create", "room": roomId};
 
     var created = await textRoom.send(data: payload);
     JanusEvent event = JanusEvent.fromJson(created);
@@ -160,14 +159,18 @@ class ChatRepoImpl extends ChatRepo {
     }
   }
 
-  _joinRoom() async
-  {
+  _joinRoom() async {
     await textRoom.joinRoom(
       room,
       user!.id,
       display: displayName,
       pin: "",
     );
+  }
+
+  String generateUniqueString(int userId) {
+    var uuid = const Uuid();
+    return '$userId-${uuid.v4()}';
   }
 
   _attachPlugin() async {
@@ -178,7 +181,6 @@ class ChatRepoImpl extends ChatRepo {
     await textRoom.setup();
     textRoom.onData?.listen((event) async {
       if (RTCDataChannelState.RTCDataChannelOpen == event) {
-
         _checkRoom(room);
       }
     });
@@ -200,7 +202,7 @@ class ChatRepoImpl extends ChatRepo {
 
     for (var subscriber in subscribers) {
       for (var i = 0; i < users.length; i++) {
-        if (int.parse(users[i].id) == subscriber.id) {
+        if (int.parse(users[i].id) == subscriber.id && subscriber.isOnline) {
           users[i] = users[i].copyWith(online: true);
         }
       }
@@ -214,14 +216,15 @@ class ChatRepoImpl extends ChatRepo {
 
     for (var subscriber in subscribers) {
       for (var i = 0; i < chats.length; i++) {
-        bool isParticipantOnline = chats[i]
-                .chatParticipants
-                ?.any((data) => data.id == subscriber.id) ??
+        bool isParticipantOnline = chats[i].chatParticipants?.any(
+                (data) => data.id == subscriber.id && subscriber.isOnline) ??
             false;
 
         if (isParticipantOnline) {
           chats[i] = chats[i].copyWith(isOnline: true);
         }
+
+        // print(' ListSub ${subscribers[i].deviceId}');
       }
     }
 
@@ -231,12 +234,12 @@ class ChatRepoImpl extends ChatRepo {
   _setListener() {
     textRoom.data?.listen((event) {
       dynamic data = parse(event.text);
+      print('testData: $data');
       if (data != null) {
         if (data['textroom'] == 'message') {
-          // var initUserChat = currentParticipant!.id
           var initChat = chatDetailsDto.chatParticipants
-              .firstWhere((item) => '${item.id}' == data['from']);
-          var senderId = int.parse(data['from']);
+              .firstWhere((item) => '${item.id}' == data['from'].split('-')[0]);
+          var senderId = int.parse(data['from'].split('-')[0]);
 
           if (initChat != null) {
             final text = data['text'] as String;
@@ -284,8 +287,8 @@ class ChatRepoImpl extends ChatRepo {
           }
           _chatDetailsStream.add(chatDetailsDto);
 
-          var participant = subscribers
-              .firstWhere((item) => item.id.toString() == data['from']);
+          var participant = subscribers.firstWhere(
+              (item) => item.id.toString() == data['from'].split('-')[0]);
 
           participant.haveUnreadMessages = _haveUnread(participant);
 
@@ -303,18 +306,36 @@ class ChatRepoImpl extends ChatRepo {
           _matchParticipantWithUser();
           _matchParticipantWithChat();
           // _matchParticipiantWithChat();
-          print(data);
         }
         if (data['textroom'] == 'leave') {
           print('from: ${data['username']} Left The Chat!');
-          subscribers = subscribers
-              .where((item) => item.id.toString() != data['username'])
-              .toList();
-          _participantsStream.add(subscribers);
 
+          String getUserId = data['username'].split('-')[0];
+
+          var existingParticipants = subscribers
+              .where((element) => element.id.toString() == getUserId)
+              .toList();
+
+          if (existingParticipants.isNotEmpty) {
+            print("Participants found, removing deviceId...");
+
+            for (var participant in existingParticipants) {
+              participant.deviceId.remove(data['username']);
+
+              if (participant.deviceId.isEmpty) {
+                subscribers.remove(participant);
+                print("Participant removed from subscribers.");
+              }
+            }
+          }
+
+          print('existingParticipiantAfterRemove $existingParticipants');
+
+          _participantsStream.add(subscribers);
           _matchParticipantWithUser();
           _matchParticipantWithChat();
         }
+
         if (data['textroom'] == 'join') {
           print('from: ${data['username']} Joined The Chat!');
 
@@ -322,39 +343,58 @@ class ChatRepoImpl extends ChatRepo {
             return;
           }
 
-          if (subscribers
-              .where((element) => element.id.toString() == data['username'])
-              .toList()
-              .isEmpty) {
-            print("there is no participant with this display name");
-            var participant = Participant(
-                display: data['display'], id: int.parse(data['username']));
+          String getUserId = data['username'].split('-')[0];
 
+          var existingParticipants = subscribers
+              .where((element) => element.id.toString() == getUserId)
+              .toList();
+
+          if (existingParticipants.isEmpty) {
+            print("There is no participant with this display name");
+            var participant = Participant(
+              display: data['display'],
+              id: int.parse(getUserId),
+              deviceId: [data['username']],
+            );
             subscribers.add(participant);
+          } else {
+            for (var participant in existingParticipants) {
+              if (!participant.deviceId.contains(data['username'])) {
+                participant.deviceId.add(data['username']);
+              }
+            }
           }
 
           _participantsStream.add(subscribers);
           _matchParticipantWithUser();
           _matchParticipantWithChat();
-          // if (currentParticipant == null) setCurrentParticipant(subscribers.first);
         }
+
         if (data['participants'] != null) {
           for (var element in (data['participants'] as List<dynamic>)) {
-            // setState(() {
-            //   userNameDisplayMap.putIfAbsent(element['username'], () => element['display']);
-            // });
+            String getUserId = element['username'].split('-')[0];
 
-            // var participant = Participant.fromJson(element as Map<String, dynamic>);
-            var participant = Participant(
-                display: element['display'],
-                id: int.parse(element['username']));
-            // if(!participant.publisher){
-            subscribers.add(participant);
-            // }
-            _participantsStream.add(subscribers);
-            _matchParticipantWithUser();
-            _matchParticipantWithChat();
+            var existingParticipant = subscribers.firstWhere(
+              (participant) => participant.id.toString() == getUserId,
+              orElse: () {
+                var newParticipant = Participant(
+                  display: element['display'],
+                  id: int.parse(getUserId),
+                  deviceId: [element['username']],
+                );
+                subscribers.add(newParticipant);
+                return newParticipant;
+              },
+            );
+
+            if (!existingParticipant.deviceId.contains(element['username'])) {
+              existingParticipant.deviceId.add(element['username']);
+            }
           }
+
+          _participantsStream.add(subscribers);
+          _matchParticipantWithUser();
+          _matchParticipantWithChat();
         }
       }
     });
@@ -674,7 +714,12 @@ class ChatRepoImpl extends ChatRepo {
 
   @override
   Future<void> sendMessage(String? msg, List<String> participantIds) async {
-    await textRoom.sendMessage(room, msg!, tos: participantIds);
+    final matchingDeviceIds =
+        subscribers.expand((subscriber) => subscriber.deviceId).where((device) {
+      final firstPart = device.split('-').first;
+      return participantIds.contains(firstPart);
+    }).toList();
+    await textRoom.sendMessage(room, msg!, tos: matchingDeviceIds);
   }
 
   @override
@@ -689,7 +734,6 @@ class ChatRepoImpl extends ChatRepo {
       participantIds: participantIds,
       uploadedFiles: uploadedFiles,
     );
-
 
     sendMessage("slanje poruka preko janusa", []);
     if (response.error == null && response.response != null) {
