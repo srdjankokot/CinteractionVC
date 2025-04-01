@@ -162,7 +162,7 @@ class ChatRepoImpl extends ChatRepo {
   _joinRoom() async {
     await textRoom.joinRoom(
       room,
-      user!.id,
+      generateUniqueString(int.parse(user!.id)),
       display: displayName,
       pin: "",
     );
