@@ -225,16 +225,9 @@ class ChatRepoImpl extends ChatRepo {
       print('testData: $data');
       if (data != null) {
         if (data['textroom'] == 'message') {
-          // var initUserChat = currentParticipant!.id
-
-          var participiantsPrint = data['participants'];
-          print('prtListInit: $participiantsPrint');
-
           var initChat = chatDetailsDto.chatParticipants
-              .firstWhere((item) => '${item.id}' == data['from']);
-          var senderId = int.parse(data['from']);
-
-          print('senderId: $senderId');
+              .firstWhere((item) => '${item.id}' == data['from'].split('-')[0]);
+          var senderId = int.parse(data['from'].split('-')[0]);
 
           if (initChat != null) {
             final text = data['text'] as String;
@@ -282,8 +275,8 @@ class ChatRepoImpl extends ChatRepo {
           }
           _chatDetailsStream.add(chatDetailsDto);
 
-          var participant = subscribers
-              .firstWhere((item) => item.id.toString() == data['from']);
+          var participant = subscribers.firstWhere(
+              (item) => item.id.toString() == data['from'].split('-')[0]);
 
           participant.haveUnreadMessages = _haveUnread(participant);
 
@@ -301,7 +294,6 @@ class ChatRepoImpl extends ChatRepo {
           _matchParticipantWithUser();
           _matchParticipantWithChat();
           // _matchParticipiantWithChat();
-          print(data);
         }
         if (data['textroom'] == 'leave') {
           print('from: ${data['username']} Left The Chat!');
@@ -352,18 +344,14 @@ class ChatRepoImpl extends ChatRepo {
               id: int.parse(getUserId),
               deviceId: [data['username']],
             );
-            print('CurrentUserId: ${participant.deviceId}');
             subscribers.add(participant);
           } else {
-            print("Participant found, updating deviceId list");
-
             for (var participant in existingParticipants) {
               if (!participant.deviceId.contains(data['username'])) {
                 participant.deviceId.add(data['username']);
               }
             }
           }
-          print('existingParticipiants: $existingParticipants');
 
           _participantsStream.add(subscribers);
           _matchParticipantWithUser();
@@ -714,7 +702,12 @@ class ChatRepoImpl extends ChatRepo {
 
   @override
   Future<void> sendMessage(String? msg, List<String> participantIds) async {
-    await textRoom.sendMessage(room, msg!, tos: participantIds);
+    final matchingDeviceIds =
+        subscribers.expand((subscriber) => subscriber.deviceId).where((device) {
+      final firstPart = device.split('-').first;
+      return participantIds.contains(firstPart);
+    }).toList();
+    await textRoom.sendMessage(room, msg!, tos: matchingDeviceIds);
   }
 
   @override
