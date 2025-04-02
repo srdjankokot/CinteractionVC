@@ -45,7 +45,7 @@ class ChatCubit extends Cubit<ChatState> with BlocLoggy {
       if (!isInCall) {
         await callUseCases.initialize();
       } else {
-        setCurrentChat(ChatDto(id: roomId, name: "name"));
+        setCurrentChat(ChatDto(id: roomId, name: "name", chatGroup: true));
         getChatDetails(roomId, 1);
       }
 

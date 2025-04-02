@@ -13,6 +13,7 @@ class ChatDto {
   final String? prevPageUrl;
   final DateTime? createdAt;
   bool isOnline;
+  final bool chatGroup;
 
   ChatDto({
     required this.id,
@@ -26,6 +27,7 @@ class ChatDto {
     this.prevPageUrl,
     this.createdAt,
     this.isOnline = false,
+    required this.chatGroup,
   });
 
   ChatDto copyWith({
@@ -40,6 +42,7 @@ class ChatDto {
     String? prevPageUrl,
     DateTime? createdAt,
     bool? isOnline,
+    bool? chatGroup,
   }) {
     return ChatDto(
       id: id ?? this.id,
@@ -53,6 +56,7 @@ class ChatDto {
       prevPageUrl: prevPageUrl ?? this.prevPageUrl,
       createdAt: createdAt ?? this.createdAt,
       isOnline: isOnline ?? this.isOnline,
+      chatGroup: chatGroup ?? this.chatGroup,
     );
   }
 
@@ -78,6 +82,7 @@ class ChatDto {
       lastPage: json['meta']?['last_page'] as int? ?? 1,
       nextPageUrl: json['links']?['next'] as String?,
       prevPageUrl: json['links']?['prev'] as String?,
+      chatGroup: json['chat_group'] as bool? ?? false,
     );
   }
 
@@ -96,11 +101,12 @@ class ChatDto {
           'next': nextPageUrl,
           'prev': prevPageUrl,
         },
+        'chat_group': chatGroup,
       };
 
   @override
   String toString() {
-    return 'ChatDto(id: $id, name: $name, userImage: $userImage, lastMessage: $lastMessage, chatParticipants: $chatParticipants, createdAt: $createdAt, currentPage: $currentPage, lastPage: $lastPage, nextPageUrl: $nextPageUrl, prevPageUrl: $prevPageUrl, isOnline: $isOnline)';
+    return 'ChatDto(id: $id, name: $name, userImage: $userImage, lastMessage: $lastMessage, chatParticipants: $chatParticipants, createdAt: $createdAt, currentPage: $currentPage, lastPage: $lastPage, nextPageUrl: $nextPageUrl, prevPageUrl: $prevPageUrl, isOnline: $isOnline, chatGroup: $chatGroup)';
   }
 }
 

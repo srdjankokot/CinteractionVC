@@ -238,8 +238,7 @@ class _ChatsListViewState extends State<ChatsListView> {
                                   ),
                                 ],
                               ),
-                              if (chat.isOnline &&
-                                  chat.chatParticipants!.length < 2)
+                              if (chat.isOnline && !chat.chatGroup)
                                 Positioned(
                                   left: 35,
                                   top: 35,
