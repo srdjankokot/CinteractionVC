@@ -237,11 +237,17 @@ class ChatRepoImpl extends ChatRepo {
       print('testData: $data');
       if (data != null) {
         if (data['textroom'] == 'message') {
-          var initChat = chatDetailsDto.chatParticipants
-              .firstWhere((item) => '${item.id}' == data['from'].split('-')[0]);
           var senderId = int.parse(data['from'].split('-')[0]);
 
-          if (initChat != null) {
+          // List<ChatParticipantDto> chatParticipants =
+          //     chatDetailsDto.chatParticipants;
+          // ChatParticipantDto? initChat;
+          // if (chatParticipants.isNotEmpty) {
+          //   initChat = chatParticipants.firstWhere(
+          //       (item) => '${item.id}' == data['from'].split('-')[0]);
+          // }
+
+          if (myId != senderId.toString()) {
             final text = data['text'] as String;
 
             if (data['text'] == '!@checkList') {

@@ -222,7 +222,7 @@ class ConferenceRepoImpl extends ConferenceRepo {
 
   _eventMessagesHandler() async {
     videoPlugin?.messages?.listen((payload) async {
-      // print('eventMessagesHandlerTest: $payload');
+      print('eventMessagesHandlerTest: $payload');
 
       JanusEvent event = JanusEvent.fromJson(payload.event);
       List<dynamic>? publishers = event.plugindata?.data['publishers'];
