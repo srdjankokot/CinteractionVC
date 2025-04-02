@@ -3,6 +3,7 @@ import 'dart:math';
 import 'package:cinteraction_vc/core/extension/context.dart';
 import 'package:cinteraction_vc/core/extension/string.dart';
 import 'package:flutter/cupertino.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_webrtc/flutter_webrtc.dart';
 import 'package:flutter/material.dart';
 import 'package:webrtc_interface/webrtc_interface.dart';
@@ -11,6 +12,7 @@ import '../../../../../assets/colors/Colors.dart';
 import '../../../../../core/ui/images/image.dart';
 import '../../../../../core/ui/widget/engagement_progress.dart';
 import '../../../../../core/util/util.dart';
+import '../../../cubit/conference/conference_cubit.dart';
 
 class ParticipantVideoWidget extends StatelessWidget {
   const ParticipantVideoWidget(
@@ -82,19 +84,48 @@ class ParticipantVideoWidget extends StatelessWidget {
               ],
             ),
             // Text('${remoteStream.videoRenderer.videoWidth}:${remoteStream.videoRenderer.videoHeight}'),
+            // Positioned(
+            //     top: 20,
+            //     right: 24,
+            //     child: Row(
+            //       children: [
+            //         Visibility(
+            //           visible: width > 200,
+            //           child: EngagementProgress(
+            //               engagement: remoteStream.engagement ?? 0),
+            //         ),
+            //       ],
+            //     )),
+
+
             Positioned(
-                top: 20,
-                right: 24,
+                right: 0,
                 child: Row(
                   children: [
-                    Visibility(
-                      visible: width > 200,
-                      child: EngagementProgress(
-                          engagement: remoteStream.engagement ?? 0),
+                    EngagementProgress(
+                        engagement: remoteStream.engagement ?? 0),
+                    PopupMenuButton<String>(
+                      onSelected: (e) async {
+                        switch (e) {
+                          case 'Kick':
+                            context.read<ConferenceCubit>().kick(remoteStream.id);
+                            break;
+                          case 'UnPublish':
+                            context.read<ConferenceCubit>().unPublishById(remoteStream.id);
+                            break;
+                        }
+                      },
+                      itemBuilder: (BuildContext context) {
+                        return {'Kick', 'UnPublish'}.map((String choice) {
+                          return PopupMenuItem<String>(
+                            value: choice,
+                            child: Text(choice),
+                          );
+                        }).toList();
+                      },
                     ),
                   ],
                 )),
-
 
 
             Visibility(
@@ -113,6 +144,7 @@ class ParticipantVideoWidget extends StatelessWidget {
                       child: EngagementProgress(
                           engagement: remoteStream.engagement ?? 0)),
                 )),
+
           ],
         ),
       );
@@ -169,6 +201,16 @@ class ParticipantVideoWidget extends StatelessWidget {
                     EngagementProgress(
                         engagement: remoteStream.engagement ?? 0),
                     PopupMenuButton<String>(
+                      onSelected: (e) async {
+                        switch (e) {
+                          case 'Kick':
+                            context.read<ConferenceCubit>().kick(remoteStream.id);
+                            break;
+                          case 'UnPublish':
+                            context.read<ConferenceCubit>().unPublishById(remoteStream.id);
+                            break;
+                        }
+                      },
                       itemBuilder: (BuildContext context) {
                         return {'Kick', 'UnPublish'}.map((String choice) {
                           return PopupMenuItem<String>(
