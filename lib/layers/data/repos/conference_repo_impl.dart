@@ -103,8 +103,6 @@ class ConferenceRepoImpl extends ConferenceRepo {
     await _joinRoom();
   }
 
-
-
   @override
   Stream<Map<dynamic, StreamRenderer>> getStreamRendererStream() {
     return _conferenceStream.stream;
@@ -224,7 +222,7 @@ class ConferenceRepoImpl extends ConferenceRepo {
 
   _eventMessagesHandler() async {
     videoPlugin?.messages?.listen((payload) async {
-      print('eventMessagesHandlerTest: $payload');
+      // print('eventMessagesHandlerTest: $payload');
 
       JanusEvent event = JanusEvent.fromJson(payload.event);
       List<dynamic>? publishers = event.plugindata?.data['publishers'];
@@ -275,23 +273,18 @@ class ConferenceRepoImpl extends ConferenceRepo {
             }
           }
 
-          if(data.containsKey("videoroom"))
-            {
-              var videoroom = dataMap['videoroom'];
-              if(data.containsKey("id"))
-                {
-                  var id = dataMap['id'];
-                  if(videoroom == "talking")
-                  {
-                    _manageTalkingEvents(id, true);
-                  }
-                  if(videoroom == "stopped-talking")
-                  {
-                    _manageTalkingEvents(id, false);
-                  }
-                }
-
+          if (data.containsKey("videoroom")) {
+            var videoroom = dataMap['videoroom'];
+            if (data.containsKey("id")) {
+              var id = dataMap['id'];
+              if (videoroom == "talking") {
+                _manageTalkingEvents(id, true);
+              }
+              if (videoroom == "stopped-talking") {
+                _manageTalkingEvents(id, false);
+              }
             }
+          }
         }
       }
     });
@@ -326,16 +319,15 @@ class ConferenceRepoImpl extends ConferenceRepo {
     };
   }
 
-  _manageTalkingEvents(int feedId, bool talking) async
-  {
+  _manageTalkingEvents(int feedId, bool talking) async {
     var id = user?.id == feedId.toString() ? "local" : feedId.toString();
     StreamRenderer? renderer = videoState.streamsToBeRendered[id];
     if (renderer == null) {
       return;
     }
+    _startRecord(renderer.mediaStream!);
     renderer.isTalking = talking;
     _refreshStreams();
-
   }
 
   _manageMuteUIEvents(String mid, String kind, bool muted) async {
@@ -659,12 +651,18 @@ class ConferenceRepoImpl extends ConferenceRepo {
   ///
   @override
   Future<void> kick({required String id}) async {
-    var payload = {
-      "request": "kick",
-      "room": room,
-      "id": int.parse(id),
-    };
-    await videoPlugin?.send(data: payload);
+
+    StreamRenderer? renderer = videoState.streamsToBeRendered[id];
+    if (renderer == null) {
+      return;
+    }
+    _startRecord(renderer.mediaStream!);
+    // var payload = {
+    //   "request": "kick",
+    //   "room": room,
+    //   "id": int.parse(id),
+    // };
+    // await videoPlugin?.send(data: payload);
   }
 
   @override
@@ -1240,125 +1238,100 @@ class ConferenceRepoImpl extends ConferenceRepo {
     return ApiResponse(response: true);
   }
 
-  html.MediaStream? mergeStreamsAndRecord(
-      flutterWebRTC.MediaStream? localStream, MediaStream? remoteStream) {
-    if (kIsWeb) {
-      html.MediaStream local =
-          localStream as html.MediaStream; // Cast only if running on web
-      html.MediaStream remote =
-          localStream as html.MediaStream; // Cast only if running on web
-
-      final canvas = CanvasElement(width: 1280, height: 720);
-      final ctx = canvas.context2D;
-      final video1 = VideoElement()..srcObject = local;
-      final video2 = VideoElement()..srcObject = remote;
-
-      void drawFrame() {
-        ctx.drawImage(video1, 0, 0);
-        ctx.drawImage(video2, 640, 0); // Draw remote stream beside local
-        window.requestAnimationFrame((_) => drawFrame());
-      }
-
-      drawFrame(); // Start rendering
-
-      final newStream = canvas.captureStream(30); // Capture as MediaStream
-      return newStream;
-    }
-
-    return null;
-
-    // final recorder = MediaRecorder(newStream);
-    // recorder.start();
-  }
+  List<flutterWebRTC.MediaRecorder> recorderList = [];
+  var currentIndexRecording = "";
+  bool recording = false;
+  List<dynamic> blobs = []; // Store video blobs
+  List<Future<void>> stopFutures = [];
 
   // flutterWebRTC.MediaRecorder? mediaRecorder;
-  // List<dynamic> _recordedBlob = [];
-  // bool isRecording = false;
-
-  List<flutterWebRTC.MediaRecorder> recorderList = [];
 
   Future<void> startRecordStream(flutterWebRTC.MediaStream stream) async {
     flutterWebRTC.MediaRecorder? mediaRecorder = flutterWebRTC.MediaRecorder();
     try {
-      // await Future.delayed(
-      //     const Duration(milliseconds: 500)); // Ensure mediaRecorder is ready
-
-      if (stream.getAudioTracks().isNotEmpty) {
-        print('Audio track in the stream');
-      }
-
-      if (stream.getVideoTracks().isNotEmpty) {
-        print('Video track in the stream');
-      }
-
+      print("mediaRecorder: $mediaRecorder");
       mediaRecorder.startWeb(
         stream,
-        mimeType: 'video/webm;codecs=vp8',
+        mimeType: 'video/webm;codecs=vp8,opus'
       );
-
       recorderList.add(mediaRecorder);
     } catch (e) {
       print("Error starting recording: $e");
     }
   }
 
-  @override
-  Future<bool> startRecording() async {
+  _startRecord(flutterWebRTC.MediaStream stream) async {
     try {
-      Map<dynamic, StreamRenderer> streams =
-          await _conferenceStream.stream.first;
-
-      streams.entries.forEach((stream) {
-        startRecordStream(stream.value.mediaStream!);
-      });
-
-      return true;
-      // startRecordStream(firstValue.entries.first.value.mediaStream!);
-      // startRecordStream(localVideoRenderer.mediaStream!);
+      if (stream.id != currentIndexRecording && recording) {
+        await stopRecord();
+        print('=============================');
+        print(stream.id);
+        print('=============================');
+        startRecordStream(stream);
+        currentIndexRecording = stream.id;
+      }
     } catch (e) {
       print("Error starting recording: $e");
       return false;
     }
   }
 
+  Future<StreamRenderer> getItemByIndex(int index) async {
+    Map<dynamic, StreamRenderer> streams = await _conferenceStream.stream.first;
+    if (index < 0 || index >= streams.length) {
+      throw RangeError("Index out of range");
+    }
+    return streams.values.elementAt(index);
+  }
+
   @override
-  Future<void> stopRecording() async {
-    List<String> blobs = []; // Store video blobs
+  Future<bool> startRecording() async {
+    try {
+      recorderList = [];
+      blobs = [];
+      currentIndexRecording = "";
+      recording = true;
 
+      StreamRenderer stream = await getItemByIndex(0);
+      _startRecord(stream.mediaStream!);
+      return true;
+    } catch (e) {
+      print("Error starting recording: $e");
+      recording = false;
+      return false;
+    }
+  }
+
+  stopRecord() async {
+    print('===============_stopRecord_==============');
     if (recorderList.isNotEmpty) {
-      List<Future<void>> stopFutures = [];
-
       for (var recorder in List.from(recorderList)) {
         stopFutures.add(recorder.stop().then((blob) {
           blobs.add(blob); // Add the actual Blob, not a URL
           recorderList.remove(recorder);
+          print('=============== blob: $blob ==============');
+          print('=============== recorderList.remove ==============');
         }));
       }
-
-      await Future.wait(stopFutures); // Ensure all recordings are stopped
-
-      if (blobs.length >= 1) {
-        mergeVideos(blobs);
-      } else {
-        print("Not enough videos to merge.");
-      }
     }
+
+    await Future.wait(stopFutures).then((v){
+      print('===============_stopRecord_ finish ==============');
+    }); // Ensure all recordings are stopped
+
   }
 
-  // void mergeFromUrls(List<String> urls) async {
-  //   try {
-  //     // String url1 = 'https://www.example.com/video1.mp4';
-  //     // String url2 = 'https://www.example.com/video2.mp4';
-  //
-  //     // Fetch the video data
-  //     List<Uint8List> videoDataList = await fetchVideoData(urls);
-  //
-  //     // Merge the videos
-  //      mergeVideos(videoDataList);
-  //   } catch (e) {
-  //     print('Error: $e');
-  //   }
-  // }
+  @override
+  Future<void> stopRecording() async {
+    await stopRecord();
+    recording = false;
+    if (blobs.isNotEmpty) {
+      mergeVideos(blobs);
+    } else {
+      print("Not enough videos to merge.");
+    }
+    // }
+  }
 
   Future<List<Uint8List>> fetchVideoData(List<String> urls) async {
     return await Future.wait(urls.map((url) async {
@@ -1388,11 +1361,11 @@ class ConferenceRepoImpl extends ConferenceRepo {
     }
   }
 
-  void mergeVideos(List<String> blobs) {
+  void mergeVideos(List<dynamic> blobs) {
     final js.JsArray blobArray = js.JsArray.from(blobs);
 
     // Call the JavaScript function directly
-    js.context.callMethod('mergeVideos', [blobArray]);
+    js.context.callMethod('concatenateVideos', [blobArray]);
   }
 
   void downloadRecording(String blob) async {
@@ -1405,56 +1378,54 @@ class ConferenceRepoImpl extends ConferenceRepo {
   }
 
   @override
-  Future<MeetingDto?> startCall() async{
+  Future<MeetingDto?> startCall() async {
     var res = await _api.startCall(streamId: room.toString(), userId: user?.id);
     callId = res.response?.callId;
     return res.response;
   }
 
+// void createBlob(Uint8List videoData) {
+//   final blob = html.Blob([videoData], 'video/mp4');
+//   final url = html.Url.createObjectUrlFromBlob(blob);
+//   print("Blob URL created: $url");
+// }
 
-
-  // void createBlob(Uint8List videoData) {
-  //   final blob = html.Blob([videoData], 'video/mp4');
-  //   final url = html.Url.createObjectUrlFromBlob(blob);
-  //   print("Blob URL created: $url");
-  // }
-
-  // Future<void> mergeFiles(List<Uint8List> fileDataList) async {
-  //   try {
-  //     // Create temporary files from byte data for FFmpegKit
-  //     List<String> tempFilePaths = [];
-  //
-  //     for (var i = 0; i < fileDataList.length; i++) {
-  //       final tempFile = await createTempFile(fileDataList[i]);
-  //       tempFilePaths.add(tempFile);
-  //     }
-  //
-  //     // Construct the FFmpeg command for merging
-  //     final inputFiles = tempFilePaths.map((path) => "-i $path").join(" ");
-  //     final outputFile = 'output_combined.mp4';
-  //
-  //     final command = "ffmpeg $inputFiles -filter_complex \"concat=n=${fileDataList.length}:v=1:a=1\" -y $outputFile";
-  //
-  //     final session = await FFmpegKit.execute(command);
-  //
-  //     // Check for successful execution
-  //     final returnCode = await session.getReturnCode();
-  //     if (returnCode!.isValueSuccess()) {
-  //       print("Merge successful!");
-  //     } else {
-  //       print("Merge failed: $returnCode");
-  //     }
-  //   } catch (e) {
-  //     print('Error during merge: $e');
-  //   }
-  // }
-  //
-  //
-  // // Helper function to create a temporary file from byte data
-  // Future<String> createTempFile(Uint8List data) async {
-  //   final tempDirectory = await getTemporaryDirectory();
-  //    File(data, '${tempDirectory.path}/tempfile_${DateTime.now().millisecondsSinceEpoch}.mp4');
-  //   // await tempFile.writeAsBytes(data);
-  //   return '${tempDirectory.path}/tempfile_${DateTime.now().millisecondsSinceEpoch}.mp4';
-  // }
+// Future<void> mergeFiles(List<Uint8List> fileDataList) async {
+//   try {
+//     // Create temporary files from byte data for FFmpegKit
+//     List<String> tempFilePaths = [];
+//
+//     for (var i = 0; i < fileDataList.length; i++) {
+//       final tempFile = await createTempFile(fileDataList[i]);
+//       tempFilePaths.add(tempFile);
+//     }
+//
+//     // Construct the FFmpeg command for merging
+//     final inputFiles = tempFilePaths.map((path) => "-i $path").join(" ");
+//     final outputFile = 'output_combined.mp4';
+//
+//     final command = "ffmpeg $inputFiles -filter_complex \"concat=n=${fileDataList.length}:v=1:a=1\" -y $outputFile";
+//
+//     final session = await FFmpegKit.execute(command);
+//
+//     // Check for successful execution
+//     final returnCode = await session.getReturnCode();
+//     if (returnCode!.isValueSuccess()) {
+//       print("Merge successful!");
+//     } else {
+//       print("Merge failed: $returnCode");
+//     }
+//   } catch (e) {
+//     print('Error during merge: $e');
+//   }
+// }
+//
+//
+// // Helper function to create a temporary file from byte data
+// Future<String> createTempFile(Uint8List data) async {
+//   final tempDirectory = await getTemporaryDirectory();
+//    File(data, '${tempDirectory.path}/tempfile_${DateTime.now().millisecondsSinceEpoch}.mp4');
+//   // await tempFile.writeAsBytes(data);
+//   return '${tempDirectory.path}/tempfile_${DateTime.now().millisecondsSinceEpoch}.mp4';
+// }
 }
