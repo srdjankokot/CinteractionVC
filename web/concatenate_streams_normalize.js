@@ -42,6 +42,7 @@ async function concatenateVideos(blobUrls) {
     let inputFile = `input${i}.webm`;
     let outputFile = `normalized${i}.webm`;
 
+try {
     await ffmpeg.run(
       "-i", inputFile,
       "-r", "24",
@@ -55,6 +56,11 @@ async function concatenateVideos(blobUrls) {
       name: outputFile,
       blob: new Blob([data.buffer], { type: "video/webm" }),
     });
+} catch (error) {
+    // Code to handle the error
+    console.error('An error occurred:', error.message);
+}
+
   }
 
   for (let video of normalizedVideos) {
