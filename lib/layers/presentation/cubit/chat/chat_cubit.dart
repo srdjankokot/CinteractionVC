@@ -148,12 +148,17 @@ class ChatCubit extends Cubit<ChatState> with BlocLoggy {
       } else {
         updatedChats.add(chat);
       }
-    }
+      if (state.currentChat?.id == chat.id) {
+        emit(state.copyWith(
+          currentChat: state.currentChat!.copyWith(isOnline: chat.isOnline),
+        ));
+      }
 
-    emit(state.copyWith(
-      isLoading: false,
-      chats: updatedChats,
-    ));
+      emit(state.copyWith(
+        isLoading: false,
+        chats: updatedChats,
+      ));
+    }
   }
 
   void _onChatDetails(ChatDetailsDto chatDetails) {
