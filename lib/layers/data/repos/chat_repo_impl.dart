@@ -72,10 +72,15 @@ class ChatRepoImpl extends ChatRepo {
 
   List<ChatDto> chats = [];
 
+  late bool isInCallChat;
+
   @override
   Future<void> initialize(
       {required int chatGroupId, required bool isInCall}) async {
+    chatDetailsDto = ChatDetailsDto(chatId: 0, chatName: "chatName", authUser: ChatParticipantDto(id: 0, image: 'image', name: 'name', email: 'email'), chatParticipants: [], messages: ChatPaginationDto(messages: []));
+    
     room = chatGroupId;
+    isInCallChat = isInCall;
     _session = await getIt.getAsync<JanusSession>();
     await _attachPlugin();
     if (!isInCall) {
@@ -223,13 +228,13 @@ class ChatRepoImpl extends ChatRepo {
         if (isParticipantOnline) {
           chats[i] = chats[i].copyWith(isOnline: true);
         }
-
         // print(' ListSub ${subscribers[i].deviceId}');
       }
     }
 
     _chatStream.add(chats);
   }
+
 
   _setListener() {
     textRoom.data?.listen((event) {
@@ -239,15 +244,15 @@ class ChatRepoImpl extends ChatRepo {
         if (data['textroom'] == 'message') {
           var senderId = int.parse(data['from'].split('-')[0]);
 
-          // List<ChatParticipantDto> chatParticipants =
-          //     chatDetailsDto.chatParticipants;
-          // ChatParticipantDto? initChat;
-          // if (chatParticipants.isNotEmpty) {
-          //   initChat = chatParticipants.firstWhere(
-          //       (item) => '${item.id}' == data['from'].split('-')[0]);
-          // }
+          List<ChatParticipantDto> chatParticipants =
+              chatDetailsDto.chatParticipants;
+          ChatParticipantDto? initChat;
+          if (chatParticipants.isNotEmpty) {
+            initChat = chatParticipants.firstWhere(
+                (item) => '${item.id}' == data['from'].split('-')[0]);
+          }
 
-          if (myId != senderId.toString()) {
+          if (initChat != null) {
             final text = data['text'] as String;
 
             if (data['text'] == '!@checkList') {
@@ -343,6 +348,11 @@ class ChatRepoImpl extends ChatRepo {
         }
 
         if (data['textroom'] == 'join') {
+          if(isInCallChat)
+            {
+              getChatDetails(chatDetailsDto.chatId!, 1);
+            }
+
           print('from: ${data['username']} Joined The Chat!');
 
           if (data['username'] == displayName) {
@@ -569,6 +579,7 @@ class ChatRepoImpl extends ChatRepo {
     try {
       var response = await _api.getChatById(id: id, page: page);
       if (response.error == null && response.response != null) {
+        print(response);
         _chatDetailsStream.add(response.response!);
         chatDetailsDto = response.response!;
       } else {
