@@ -19,7 +19,6 @@ import 'package:cinteraction_vc/layers/presentation/cubit/chat/chat_cubit.dart';
 import 'package:cinteraction_vc/main.dart';
 import 'package:dio/dio.dart';
 import 'package:get_it/get_it.dart';
-import 'package:janus_client/janus_client.dart';
 import 'package:logging/logging.dart';
 
 import '../../layers/data/repos/auth_repo_impl.dart';
@@ -45,6 +44,7 @@ import '../../layers/presentation/ui/roles/provider/roles_provider.dart';
 import '../../layers/presentation/ui/roles/repository/roles_repository.dart';
 import '../../layers/presentation/ui/users/provider/users_provider.dart';
 import '../../layers/presentation/ui/users/repository/users_repository.dart';
+import '../janus/janus_client.dart';
 import '../util/conf.dart';
 
 GetIt getIt = GetIt.instance;

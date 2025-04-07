@@ -10,9 +10,9 @@ import 'package:cinteraction_vc/layers/data/repos/chat_repo_impl.dart';
 import 'package:cinteraction_vc/layers/presentation/cubit/chat/chat_state.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
-import 'package:janus_client/janus_client.dart';
 
 import '../../../../core/io/network/models/participant.dart';
+import '../../../../core/janus/janus_client.dart';
 import '../../../../core/logger/loggy_types.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 

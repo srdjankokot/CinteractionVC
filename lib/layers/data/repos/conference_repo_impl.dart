@@ -11,7 +11,6 @@ import 'package:ffmpeg_kit_flutter/ffmpeg_kit.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_webrtc/flutter_webrtc.dart';
-import 'package:janus_client/janus_client.dart';
 import 'package:logging/logging.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:universal_html/html.dart';
@@ -19,6 +18,7 @@ import 'package:webrtc_interface/webrtc_interface.dart';
 
 import '../../../core/app/injector.dart';
 import '../../../core/io/network/models/data_channel_command.dart';
+import '../../../core/janus/janus_client.dart';
 import '../../../core/util/conf.dart';
 
 import '../../domain/entities/user.dart';

@@ -5,9 +5,9 @@ import 'dart:math';
 import 'package:cinteraction_vc/core/util/util.dart';
 import 'package:cinteraction_vc/layers/domain/repos/call_repo.dart';
 import 'package:flutter/foundation.dart';
-import 'package:janus_client/janus_client.dart';
 
 import '../../../core/app/injector.dart';
+import '../../../core/janus/janus_client.dart';
 import '../../domain/entities/user.dart';
 import '../../domain/source/api.dart';
 import '../source/local/local_storage.dart';
