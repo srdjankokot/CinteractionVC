@@ -1,10 +1,10 @@
 import 'dart:async';
 
 import 'package:file_picker/file_picker.dart';
-import 'package:janus_client/janus_client.dart';
 import 'package:webrtc_interface/webrtc_interface.dart';
 
 import '../../../core/io/network/models/participant.dart';
+import '../../../core/janus/janus_client.dart';
 import '../../../core/util/util.dart';
 import '../../data/dto/meetings/meeting_dto.dart';
 import '../entities/api_response.dart';

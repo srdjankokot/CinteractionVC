@@ -8,9 +8,9 @@ import 'package:file_picker/file_picker.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screen_recording/flutter_screen_recording.dart';
-import 'package:janus_client/janus_client.dart';
 import 'package:webrtc_interface/webrtc_interface.dart';
 
+import '../../../../core/janus/janus_client.dart';
 import '../../../../core/logger/loggy_types.dart';
 import '../../../domain/entities/chat_message.dart';
 import 'conference_state.dart';

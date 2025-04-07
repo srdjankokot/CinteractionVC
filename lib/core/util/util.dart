@@ -1,5 +1,6 @@
 import 'package:flutter_webrtc/flutter_webrtc.dart';
-import 'package:janus_client/janus_client.dart';
+
+import '../janus/janus_client.dart';
 
 class StreamRenderer {
   RTCVideoRenderer videoRenderer = RTCVideoRenderer();
@@ -18,7 +19,7 @@ class StreamRenderer {
   Future<void> dispose() async {
     if(!isRendererDisposed(videoRenderer))
       {
-        await stopAllTracksAndDispose(mediaStream);
+        await stopAllTracks(mediaStream);
         videoRenderer.srcObject = null;
         await videoRenderer.dispose();
       }

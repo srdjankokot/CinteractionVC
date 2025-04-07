@@ -262,8 +262,8 @@ class _ChatDetailsWidgetState extends State<ChatDetailsWidget> {
                       direction: Axis.horizontal,
                       children: [
                         Container(
-                          child: !state.isLoading
-                              ? Expanded(
+                          child:
+                          Expanded(
                                   child: sortedMessages.isEmpty
                                       ? const Center(
                                           child: Text(
@@ -629,8 +629,6 @@ class _ChatDetailsWidgetState extends State<ChatDetailsWidget> {
                                           },
                                         ),
                                 )
-                              : const Center(
-                                  child: CircularProgressIndicator()),
                         ),
                       ],
                     ),
