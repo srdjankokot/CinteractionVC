@@ -1,5 +1,6 @@
 // ignore_for_file: prefer_const_constructors
 
+import 'package:audioplayers/audioplayers.dart';
 import 'package:cinteraction_vc/core/extension/context.dart';
 import 'package:cinteraction_vc/layers/data/dto/chat/chat_dto.dart';
 import 'package:flutter/material.dart';
@@ -25,6 +26,7 @@ class _ChatsListViewState extends State<ChatsListView> {
   int currentPage = 1;
   final int paginate = 20;
   bool isLoading = false;
+  AudioPlayer audioPlayer = AudioPlayer();
 
   @override
   void initState() {
@@ -75,6 +77,15 @@ class _ChatsListViewState extends State<ChatsListView> {
             _scrollController.position.maxScrollExtent - 100 &&
         !isLoading) {
       _loadMoreChats();
+    }
+  }
+
+  void playIncomingCallSound() async {
+    try {
+      await audioPlayer.setSource(AssetSource('notification_message.wav'));
+      audioPlayer.resume();
+    } catch (e) {
+      print('Error playing sound: $e');
     }
   }
 
@@ -130,8 +141,12 @@ class _ChatsListViewState extends State<ChatsListView> {
             builder: (context, state) {
               List<ChatDto> sortedChats = List.from(state.chats ?? [])
                 ..sort((a, b) {
+                  if (a.haveUnread && !b.haveUnread) return -1;
+                  if (!a.haveUnread && b.haveUnread) return 1;
+
                   DateTime? aTime = a.lastMessage?.createdAt ?? a.createdAt;
                   DateTime? bTime = b.lastMessage?.createdAt ?? b.createdAt;
+
                   return (bTime ?? DateTime(0)).compareTo(aTime ?? DateTime(0));
                 });
 
@@ -146,6 +161,10 @@ class _ChatsListViewState extends State<ChatsListView> {
                     var chat = sortedChats[index];
                     bool isSelected = chat.id == selectedChat;
 
+                    if (chat.haveUnread) {
+                      playIncomingCallSound();
+                    }
+
                     return MouseRegion(
                       cursor: SystemMouseCursors.click,
                       child: GestureDetector(
@@ -153,6 +172,7 @@ class _ChatsListViewState extends State<ChatsListView> {
                           setState(() {
                             selectedChat = chat.id;
                           });
+                          await context.read<ChatCubit>().chatSeen(chat.id);
                           await context
                               .read<ChatCubit>()
                               .getChatDetails(chat.id, 1);
@@ -205,9 +225,14 @@ class _ChatsListViewState extends State<ChatsListView> {
                                                           .filePath!.isNotEmpty
                                                   ? "File"
                                                   : "No messages"),
-                                          style: const TextStyle(
+                                          style: TextStyle(
                                             fontSize: 14,
-                                            color: Colors.black54,
+                                            color: chat.haveUnread == true
+                                                ? Colors.black87
+                                                : Colors.black54,
+                                            fontWeight: chat.haveUnread == true
+                                                ? FontWeight.bold
+                                                : FontWeight.normal,
                                           ),
                                           maxLines: 1,
                                           overflow: TextOverflow.ellipsis,
@@ -218,7 +243,7 @@ class _ChatsListViewState extends State<ChatsListView> {
                                   Column(
                                     children: [
                                       Text(
-                                        formatTime(chat.lastMessage?.createdAt
+                                        formatTime(chat.lastMessage?.createdAt!
                                             .toIso8601String()),
                                         style: const TextStyle(
                                             fontSize: 12,
@@ -233,6 +258,12 @@ class _ChatsListViewState extends State<ChatsListView> {
                                           ),
                                           onPressed: () => _showRemoveDialog(
                                               chat.id, context, _deleteChat),
+                                        ),
+                                      if (chat.haveUnread)
+                                        Icon(
+                                          Icons.mark_chat_unread,
+                                          color: Colors.redAccent,
+                                          size: 18,
                                         ),
                                     ],
                                   ),

@@ -17,6 +17,7 @@ import '../../../core/util/util.dart';
 import '../../domain/entities/chat_message.dart';
 import '../../domain/entities/user.dart';
 import '../../domain/source/api.dart';
+import '../dto/chat/last_message_dto.dart';
 import '../source/local/local_storage.dart';
 import 'package:uuid/uuid.dart';
 
@@ -77,8 +78,14 @@ class ChatRepoImpl extends ChatRepo {
   @override
   Future<void> initialize(
       {required int chatGroupId, required bool isInCall}) async {
-    chatDetailsDto = ChatDetailsDto(chatId: 0, chatName: "chatName", authUser: ChatParticipantDto(id: 0, image: 'image', name: 'name', email: 'email'), chatParticipants: [], messages: ChatPaginationDto(messages: []));
-    
+    chatDetailsDto = ChatDetailsDto(
+        chatId: 0,
+        chatName: "chatName",
+        authUser: ChatParticipantDto(
+            id: 0, image: 'image', name: 'name', email: 'email'),
+        chatParticipants: [],
+        messages: ChatPaginationDto(messages: []));
+
     room = chatGroupId;
     isInCallChat = isInCall;
     _session = await getIt.getAsync<JanusSession>();
@@ -235,7 +242,6 @@ class ChatRepoImpl extends ChatRepo {
     _chatStream.add(chats);
   }
 
-
   _setListener() {
     textRoom.data?.listen((event) {
       dynamic data = parse(event.text);
@@ -248,12 +254,41 @@ class ChatRepoImpl extends ChatRepo {
               chatDetailsDto.chatParticipants;
           ChatParticipantDto? initChat;
           if (chatParticipants.isNotEmpty) {
-            initChat = chatParticipants.firstWhere(
-                (item) => '${item.id}' == data['from'].split('-')[0]);
+            try {
+              initChat = chatParticipants.firstWhere(
+                (item) => '${item.id}' == data['from'].split('-')[0],
+              );
+            } catch (e) {
+              for (var sub in subscribers) {
+                for (var i = 0; i < chats.length; i++) {
+                  if (chats[i].chatParticipants!.any((datas) =>
+                      datas.name == sub.display && !chats[i].chatGroup)) {
+                    if (chats[i].id != currentChat!.id) {
+                      chats[i] = chats[i].copyWith(
+                        haveUnread: true,
+                        lastMessage: LastMessageDto(
+                          message: data['text'],
+                          createdAt: DateTime.tryParse(data['date']),
+                          chatId: chats[i].id,
+                        ),
+                      );
+
+                      print('Chattt: ${chats[i].haveUnread}');
+                    }
+                  }
+                }
+              }
+            }
           }
 
           if (initChat != null) {
             final text = data['text'] as String;
+
+            // var participant = subscribers.firstWhere(
+            //     (item) => item.id.toString() == data['from'].split('-')[0]);
+
+            // participant.haveUnreadMessages = _haveUnread(participant);
+            // _messagesStream.add(getUserMessages()!);
 
             if (data['text'] == '!@checkList') {
               loadChats(1, 20);
@@ -298,11 +333,6 @@ class ChatRepoImpl extends ChatRepo {
           }
           _chatDetailsStream.add(chatDetailsDto);
 
-          var participant = subscribers.firstWhere(
-              (item) => item.id.toString() == data['from'].split('-')[0]);
-
-          participant.haveUnreadMessages = _haveUnread(participant);
-
           // participant.messages.add(data['text']);
           // participant.messages.add(MessageDto(
           //     chatId: ,
@@ -312,7 +342,6 @@ class ChatRepoImpl extends ChatRepo {
           //     seen: false));
           // messages.add(data['text']);
 
-          _messagesStream.add(getUserMessages()!);
           _participantsStream.add(subscribers);
           _matchParticipantWithUser();
           _matchParticipantWithChat();
@@ -348,10 +377,9 @@ class ChatRepoImpl extends ChatRepo {
         }
 
         if (data['textroom'] == 'join') {
-          if(isInCallChat)
-            {
-              getChatDetails(chatDetailsDto.chatId!, 1);
-            }
+          if (isInCallChat) {
+            getChatDetails(chatDetailsDto.chatId!, 1);
+          }
 
           print('from: ${data['username']} Joined The Chat!');
 
@@ -427,14 +455,24 @@ class ChatRepoImpl extends ChatRepo {
     }
   }
 
-  List<ChatMessage>? getUserMessages() {
+  getUserMessages() {
     for (var sub in subscribers) {
-      if (sub.display == currentParticipant?.name) {
-        return sub.messages;
+      for (var i = 0; i < chats.length; i++) {
+        if (chats[i]
+            .chatParticipants!
+            .any((data) => data.name == sub.display)) {
+          // print('subMessages: ${sub.messages}');
+          // print('dataName: ${chatDetailsDto.messages.messages}');
+          // getChatDetails(chats[i].id, 1);
+          print('chat[i]id: ${chats[i].id}');
+          print('currentChat!.id ${currentChat!.id}');
+          if (chats[i].id != currentChat!.id) {
+            chats[i] = chats[i].copyWith(haveUnread: true);
+          }
+          print('Chattt: ${chats[i].haveUnread}');
+        }
       }
     }
-
-    return List.empty();
   }
 
   // @override
@@ -474,7 +512,7 @@ class ChatRepoImpl extends ChatRepo {
   @override
   Future<void> setCurrentParticipant(UserDto user) async {
     currentParticipant = user;
-    messages = getUserMessages()!;
+    // messages = getUserMessages()!;
     _messagesStream.add(messages);
     print("Changed current participant");
   }
@@ -570,7 +608,7 @@ class ChatRepoImpl extends ChatRepo {
   @override
   Future<void> setCurrentChat(ChatDto chat) async {
     currentChat = chat;
-    messages = getUserMessages()!;
+    // messages = getUserMessages()!;
     _messagesStream.add(messages);
   }
 

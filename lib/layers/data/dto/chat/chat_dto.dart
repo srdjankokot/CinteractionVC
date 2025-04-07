@@ -13,6 +13,7 @@ class ChatDto {
   final String? prevPageUrl;
   final DateTime? createdAt;
   bool isOnline;
+  bool haveUnread;
   final bool chatGroup;
 
   ChatDto({
@@ -27,6 +28,7 @@ class ChatDto {
     this.prevPageUrl,
     this.createdAt,
     this.isOnline = false,
+    this.haveUnread = false,
     required this.chatGroup,
   });
 
@@ -42,6 +44,7 @@ class ChatDto {
     String? prevPageUrl,
     DateTime? createdAt,
     bool? isOnline,
+    bool? haveUnread,
     bool? chatGroup,
   }) {
     return ChatDto(
@@ -56,6 +59,7 @@ class ChatDto {
       prevPageUrl: prevPageUrl ?? this.prevPageUrl,
       createdAt: createdAt ?? this.createdAt,
       isOnline: isOnline ?? this.isOnline,
+      haveUnread: haveUnread ?? this.haveUnread,
       chatGroup: chatGroup ?? this.chatGroup,
     );
   }
@@ -106,7 +110,7 @@ class ChatDto {
 
   @override
   String toString() {
-    return 'ChatDto(id: $id, name: $name, userImage: $userImage, lastMessage: $lastMessage, chatParticipants: $chatParticipants, createdAt: $createdAt, currentPage: $currentPage, lastPage: $lastPage, nextPageUrl: $nextPageUrl, prevPageUrl: $prevPageUrl, isOnline: $isOnline, chatGroup: $chatGroup)';
+    return 'ChatDto(id: $id, name: $name, userImage: $userImage, lastMessage: $lastMessage, chatParticipants: $chatParticipants, createdAt: $createdAt, currentPage: $currentPage, lastPage: $lastPage, nextPageUrl: $nextPageUrl, prevPageUrl: $prevPageUrl, isOnline: $isOnline, chatGroup: $chatGroup, haveUnread: $haveUnread)';
   }
 }
 

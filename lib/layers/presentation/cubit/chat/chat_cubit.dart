@@ -144,6 +144,7 @@ class ChatCubit extends Cubit<ChatState> with BlocLoggy {
         updatedChats[existingIndex] = updatedChats[existingIndex].copyWith(
           lastMessage: chat.lastMessage,
           isOnline: chat.isOnline,
+          haveUnread: chat.haveUnread,
         );
       } else {
         updatedChats.add(chat);
@@ -257,6 +258,16 @@ class ChatCubit extends Cubit<ChatState> with BlocLoggy {
           chatDetails: chatDetails, isInitialLoading: isNewChat));
     } catch (e) {
       print("Error fetching chat details: $e");
+    }
+  }
+
+  Future<void> chatSeen(int chatId) async {
+    final updatedChats = List<ChatDto>.from(state.chats ?? []);
+
+    final index = updatedChats.indexWhere((chat) => chat.id == chatId);
+    if (index != -1) {
+      updatedChats[index] = updatedChats[index].copyWith(haveUnread: false);
+      emit(state.copyWith(chats: updatedChats));
     }
   }
 
