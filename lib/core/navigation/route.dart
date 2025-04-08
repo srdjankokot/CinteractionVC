@@ -14,7 +14,8 @@ enum AppRoute {
   forgotPassword('/auth/forgot_password'),
   forgotPasswordSuccess('/auth/forgot_password/success'),
   enterNewPassword('/reset-app'),
-  chat('/chat');
+  chat('/chat'),
+  echo('/echo');
 
   const AppRoute(this.path);
 

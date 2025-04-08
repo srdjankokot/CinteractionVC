@@ -100,6 +100,9 @@ class JanusPlugin {
       } else {
         _webRtcConfiguration?.putIfAbsent('sdpSemantics', () => 'plan-b');
       }
+
+      // _webRtcConfiguration?.putIfAbsent('iceTransportPolicy', () => 'relay');
+
       _context._logger.fine('peer connection configuration');
       _context._logger.fine(_webRtcConfiguration);
       await initializeWebRTCStack();

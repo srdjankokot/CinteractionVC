@@ -102,8 +102,8 @@ class ParticipantVideoWidget extends StatelessWidget {
                 right: 0,
                 child: Row(
                   children: [
-                    EngagementProgress(
-                        engagement: remoteStream.engagement ?? 0),
+                    // EngagementProgress(
+                    //     engagement: remoteStream.engagement ?? 0),
                     PopupMenuButton<String>(
                       onSelected: (e) async {
                         switch (e) {
@@ -127,6 +127,10 @@ class ParticipantVideoWidget extends StatelessWidget {
                   ],
                 )),
 
+            Positioned(
+                left: 10,
+                top: 10,
+                child: Text('${remoteStream.publisherName}', style: context.textTheme.displayLarge?.copyWith(color: Colors.white),)),
 
             Visibility(
                 visible: remoteStream.isAudioMuted == true,

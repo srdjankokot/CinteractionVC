@@ -23,6 +23,7 @@ import '../../layers/presentation/ui/auth/forgot_pass_page.dart';
 import '../../layers/presentation/ui/auth/reset_pass_send_email.dart';
 import '../../layers/presentation/ui/auth/splash_page.dart';
 import '../../layers/presentation/ui/conference/video_room.dart';
+import '../../layers/presentation/ui/echotest/EchoTestWidget.dart';
 import '../../layers/presentation/ui/landing/ui/page/home_page.dart';
 import '../util/menu_items.dart';
 
@@ -196,6 +197,12 @@ final GoRouter router = GoRouter(
       path: AppRoute.roles.path,
       builder: (context, state) {
         return roles.builder(context);
+      },),
+
+    GoRoute(
+      path: AppRoute.echo.path,
+      builder: (context, state) {
+        return const EchoTestWidget();
       },
     ),
 

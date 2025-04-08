@@ -1122,7 +1122,7 @@ class ConferenceRepoImpl extends ConferenceRepo {
   }
 
   _getEngagement() async {
-    // return;
+    return;
 
     if (engagementIsRunning || (localVideoRenderer.isVideoMuted ?? false))
       return;

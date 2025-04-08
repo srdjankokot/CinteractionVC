@@ -408,15 +408,15 @@ class VideoRoomPage extends StatelessWidget {
                                 ],
                               ),
                             ),
-                            Positioned(
-                              bottom: 20,
-                              right: 24,
-                              child: EngagementProgress(
-                                engagement: state.avgEngagement ?? 0,
-                                width: 266,
-                                height: 28,
-                              ),
-                            ),
+                            // Positioned(
+                            //   bottom: 20,
+                            //   right: 24,
+                            //   child: EngagementProgress(
+                            //     engagement: state.avgEngagement ?? 0,
+                            //     width: 266,
+                            //     height: 28,
+                            //   ),
+                            // ),
 
                             AnimatedPositioned(
                               top: 0,
@@ -864,7 +864,7 @@ class VideoRoomPage extends StatelessWidget {
                       child: ParticipantVideoWidget(
                           remoteStream: items[index],
                           height: itemHeight,
-                          width: itemWidth),
+                          width: itemWidth, ),
                     );
                   },
                 ),
