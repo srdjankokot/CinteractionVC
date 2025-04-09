@@ -80,15 +80,6 @@ class _ChatsListViewState extends State<ChatsListView> {
     }
   }
 
-  void playIncomingCallSound() async {
-    try {
-      await audioPlayer.setSource(AssetSource('notification_message.wav'));
-      audioPlayer.resume();
-    } catch (e) {
-      print('Error playing sound: $e');
-    }
-  }
-
   Future<void> _loadMoreChats() async {
     if (isLoading || widget.state.pagination?.nextPageUrl == null) {
       // debugPrint("No more pages");
@@ -160,10 +151,6 @@ class _ChatsListViewState extends State<ChatsListView> {
                   if (index < sortedChats.length) {
                     var chat = sortedChats[index];
                     bool isSelected = chat.id == selectedChat;
-
-                    if (chat.haveUnread) {
-                      playIncomingCallSound();
-                    }
 
                     return MouseRegion(
                       cursor: SystemMouseCursors.click,

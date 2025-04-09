@@ -1,8 +1,10 @@
 import 'dart:async';
+import 'dart:convert';
 import 'dart:io';
 import 'dart:math';
 // import 'dart:html' as html;
 
+import 'package:audioplayers/audioplayers.dart';
 import 'package:cinteraction_vc/layers/data/dto/chat/chat_detail_dto.dart';
 import 'package:cinteraction_vc/layers/data/dto/chat/chat_dto.dart';
 import 'package:cinteraction_vc/layers/data/dto/user_dto.dart';
@@ -42,6 +44,8 @@ class ChatRepoImpl extends ChatRepo {
   // late JanusClient client;
   late JanusSession _session;
   late JanusTextRoomPlugin textRoom;
+
+  AudioPlayer audioPlayer = AudioPlayer();
 
   // late WebSocketJanusTransport ws;
 
@@ -132,6 +136,15 @@ class ChatRepoImpl extends ChatRepo {
   @override
   Stream<List<ChatMessage>> getMessageStream() {
     return _messagesStream.stream;
+  }
+
+  void unreadMessageSound() async {
+    try {
+      await audioPlayer.setSource(AssetSource('notification_message.mp3'));
+      audioPlayer.resume();
+    } catch (e) {
+      print('Error playing sound: $e');
+    }
   }
 
   _editRoom() async {
@@ -245,71 +258,70 @@ class ChatRepoImpl extends ChatRepo {
   _setListener() {
     textRoom.data?.listen((event) {
       dynamic data = parse(event.text);
-      print('testData: $data');
       if (data != null) {
         if (data['textroom'] == 'message') {
           var senderId = int.parse(data['from'].split('-')[0]);
+          final receviedMessage = data['text'] as String;
+          final parsed = jsonDecode(receviedMessage);
+          int? chatIdParsed = parsed['chatId'];
+          String messageParsed = parsed['message'];
+          if (messageParsed == '!@checkList') {
+            loadChats(1, 20);
+          }
 
           List<ChatParticipantDto> chatParticipants =
               chatDetailsDto.chatParticipants;
-          ChatParticipantDto? initChat;
+          ChatParticipantDto? matchedChat;
+
           if (chatParticipants.isNotEmpty) {
             try {
-              initChat = chatParticipants.firstWhere(
+              matchedChat = chatParticipants.firstWhere(
                 (item) => '${item.id}' == data['from'].split('-')[0],
               );
+              //Added for unread messages//
             } catch (e) {
               for (var sub in subscribers) {
                 for (var i = 0; i < chats.length; i++) {
-                  if (chats[i].chatParticipants!.any((datas) =>
-                      datas.name == sub.display && !chats[i].chatGroup)) {
-                    if (chats[i].id != currentChat!.id) {
+                  if (chats[i]
+                      .chatParticipants!
+                      .any((datas) => datas.name == sub.display)) {
+                    if (chats[i].id == chatIdParsed) {
                       chats[i] = chats[i].copyWith(
                         haveUnread: true,
                         lastMessage: LastMessageDto(
-                          message: data['text'],
+                          message: messageParsed,
                           createdAt: DateTime.tryParse(data['date']),
                           chatId: chats[i].id,
                         ),
                       );
-
-                      print('Chattt: ${chats[i].haveUnread}');
                     }
+                    unreadMessageSound();
                   }
                 }
               }
             }
           }
 
-          if (initChat != null) {
-            final text = data['text'] as String;
-
-            // var participant = subscribers.firstWhere(
-            //     (item) => item.id.toString() == data['from'].split('-')[0]);
-
-            // participant.haveUnreadMessages = _haveUnread(participant);
-            // _messagesStream.add(getUserMessages()!);
-
-            if (data['text'] == '!@checkList') {
-              loadChats(1, 20);
-            }
-            final isFile =
-                text.startsWith('http') || text.contains('/storage/');
+          if (matchedChat != null && chatIdParsed == chatDetailsDto.chatId) {
+            final isFile = messageParsed.startsWith('http') ||
+                messageParsed.contains('/storage/');
 
             final newMessage = MessageDto(
               chatId: chatDetailsDto.chatId!,
               senderId: senderId,
               createdAt: data['date'],
               updatedAt: data['date'],
-              message: isFile || data['text'] == '!@checkList' ? null : text,
+              message: isFile || messageParsed == '!@checkList'
+                  ? null
+                  : messageParsed,
               files: isFile
                   ? [
                       FileDto(
                           id: int.parse(RegExp(r'/storage/(\d+)/')
-                                  .firstMatch(text)
+                                  .firstMatch(messageParsed)
                                   ?.group(1) ??
                               '0'),
-                          path: text)
+                          path: messageParsed)
                     ]
                   : null,
             );
@@ -330,17 +342,8 @@ class ChatRepoImpl extends ChatRepo {
               chatParticipants: chatDetailsDto.chatParticipants,
               messages: updatedMessages,
             );
+            _chatDetailsStream.add(chatDetailsDto);
           }
-          _chatDetailsStream.add(chatDetailsDto);
-
-          // participant.messages.add(data['text']);
-          // participant.messages.add(MessageDto(
-          //     chatId: ,
-          //     displayName: participant.display,
-          //     time: DateTime.parse(data['date']),
-          //     avatarUrl: data['avatarUrl'] ?? "",
-          //     seen: false));
-          // messages.add(data['text']);
 
           _participantsStream.add(subscribers);
           _matchParticipantWithUser();
@@ -768,13 +771,22 @@ class ChatRepoImpl extends ChatRepo {
   }
 
   @override
-  Future<void> sendMessage(String? msg, List<String> participantIds) async {
+  Future<void> sendMessage(String? msg, List<String> participantIds,
+      {int? chatId}) async {
     final matchingDeviceIds =
         subscribers.expand((subscriber) => subscriber.deviceId).where((device) {
       final firstPart = device.split('-').first;
       return participantIds.contains(firstPart);
     }).toList();
-    await textRoom.sendMessage(room, msg!, tos: matchingDeviceIds);
+    final messagePayload = jsonEncode({
+      "chatId": chatId,
+      "message": msg,
+    });
+    await textRoom.sendMessage(
+      room,
+      messagePayload,
+      tos: matchingDeviceIds,
+    );
   }
 
   @override
@@ -790,7 +802,6 @@ class ChatRepoImpl extends ChatRepo {
       uploadedFiles: uploadedFiles,
     );
 
-    sendMessage("slanje poruka preko janusa", []);
     if (response.error == null && response.response != null) {
       List<String> participants =
           participantIds.map((int value) => value.toString()).toList();
@@ -798,7 +809,8 @@ class ChatRepoImpl extends ChatRepo {
           response.response?.files?.isNotEmpty == true
               ? response.response!.files![0].path
               : messageContent,
-          participants);
+          participants,
+          chatId: chatId);
 
       // if (messageContent == '!@checkList') {
       //   return;
