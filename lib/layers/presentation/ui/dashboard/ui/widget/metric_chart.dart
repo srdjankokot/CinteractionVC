@@ -1,6 +1,7 @@
 import 'dart:math';
 
 import 'package:cinteraction_vc/core/extension/context.dart';
+import 'package:cinteraction_vc/layers/presentation/ui/dashboard/ui/widget/empty_state_data.dart';
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/animation.dart';
 import 'package:flutter/cupertino.dart';
@@ -9,19 +10,21 @@ import 'package:flutter/material.dart';
 import '../../../../../../assets/colors/Colors.dart';
 import '../../../../../../core/ui/images/image.dart';
 
-
 class MetricGraph extends StatelessWidget {
   final String title;
   final List<double> values;
   final int mainValue;
 
-  const MetricGraph({super.key, required this.title, required this.values, required this.mainValue});
+  const MetricGraph(
+      {super.key,
+      required this.title,
+      required this.values,
+      required this.mainValue});
 
   @override
   Widget build(BuildContext context) {
-
-    if(values.isEmpty) {
-      return const Text('no data');
+    if (values.isEmpty) {
+      return const EmptyStateWidget();
     }
 
     var statusColor = values.first < values.last
