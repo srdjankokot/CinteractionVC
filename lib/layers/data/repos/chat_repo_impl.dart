@@ -9,6 +9,7 @@ import 'package:cinteraction_vc/layers/data/dto/chat/chat_detail_dto.dart';
 import 'package:cinteraction_vc/layers/data/dto/chat/chat_dto.dart';
 import 'package:cinteraction_vc/layers/data/dto/user_dto.dart';
 import 'package:cinteraction_vc/layers/domain/repos/chat_repo.dart';
+import 'package:cinteraction_vc/layers/presentation/cubit/chat/chat_state.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/foundation.dart';
 import 'package:webrtc_interface/webrtc_interface.dart';
@@ -63,7 +64,7 @@ class ChatRepoImpl extends ChatRepo {
 
   final _usersPaginationStream = StreamController<UserListResponse>.broadcast();
 
-  final _messagesStream = StreamController<List<ChatMessage>>.broadcast();
+  final _messagesStream = StreamController<List<MessageDto>>.broadcast();
 
   List<Participant> subscribers = [];
   List<UserDto> users = [];
@@ -71,7 +72,7 @@ class ChatRepoImpl extends ChatRepo {
   late ChatDetailsDto chatDetailsDto;
 
   UserDto? currentParticipant;
-  List<ChatMessage> messages = [];
+  List<MessageDto> messages = [];
 
   ChatDto? currentChat;
 
@@ -89,7 +90,6 @@ class ChatRepoImpl extends ChatRepo {
             id: 0, image: 'image', name: 'name', email: 'email'),
         chatParticipants: [],
         messages: ChatPaginationDto(messages: []));
-
     room = chatGroupId;
     isInCallChat = isInCall;
     _session = await getIt.getAsync<JanusSession>();
@@ -134,7 +134,7 @@ class ChatRepoImpl extends ChatRepo {
   }
 
   @override
-  Stream<List<ChatMessage>> getMessageStream() {
+  Stream<List<MessageDto>> getMessageStream() {
     return _messagesStream.stream;
   }
 
@@ -212,13 +212,12 @@ class ChatRepoImpl extends ChatRepo {
     _setListener();
   }
 
-  bool _haveUnread(Participant participant) {
-    for (var message in participant.messages) {
-      if (message.seen == false) {
+  bool _haveUnread(List<MessageDto> messages) {
+    for (var message in messages) {
+      if (!message.seen) {
         return true;
       }
     }
-
     return false;
   }
 
@@ -260,11 +259,22 @@ class ChatRepoImpl extends ChatRepo {
       dynamic data = parse(event.text);
       if (data != null) {
         if (data['textroom'] == 'message') {
+          if (isInCallChat) {
+            messages = chatDetailsDto.messages.messages;
+          }
           var senderId = int.parse(data['from'].split('-')[0]);
           final receviedMessage = data['text'] as String;
           final parsed = jsonDecode(receviedMessage);
           int? chatIdParsed = parsed['chatId'];
+          int? msgIdParsed = parsed['msgId'];
+          print('recevidedMsgId: $msgIdParsed');
           String messageParsed = parsed['message'];
+          // if (isInCallChat) {
+          //   {
+          //     getChatMessages(chatIdParsed!);
+          //     _chatDetailsStream.add(chatDetailsDto);
+          //   }
+          // }
           if (messageParsed == '!@checkList') {
             loadChats(1, 20);
           }
@@ -278,7 +288,8 @@ class ChatRepoImpl extends ChatRepo {
               matchedChat = chatParticipants.firstWhere(
                 (item) => '${item.id}' == data['from'].split('-')[0],
               );
-              //Added for unread messages//
+
+              //Added for unread chats//
             } catch (e) {
               for (var sub in subscribers) {
                 for (var i = 0; i < chats.length; i++) {
@@ -289,13 +300,17 @@ class ChatRepoImpl extends ChatRepo {
                       chats[i] = chats[i].copyWith(
                         haveUnread: true,
                         lastMessage: LastMessageDto(
+                          id: msgIdParsed,
                           message: messageParsed,
                           createdAt: DateTime.tryParse(data['date']),
                           chatId: chats[i].id,
                         ),
                       );
                     }
-                    unreadMessageSound();
+                    getChatMessages(chatIdParsed!);
+                    if (!isInCallChat) {
+                      unreadMessageSound();
+                    }
                   }
                 }
               }
@@ -307,6 +322,7 @@ class ChatRepoImpl extends ChatRepo {
                 messageParsed.contains('/storage/');
 
             final newMessage = MessageDto(
+              id: msgIdParsed,
               chatId: chatDetailsDto.chatId!,
               senderId: senderId,
               createdAt: data['date'],
@@ -345,6 +361,7 @@ class ChatRepoImpl extends ChatRepo {
             _chatDetailsStream.add(chatDetailsDto);
           }
 
+          getChatMessages(chatIdParsed!);
           _participantsStream.add(subscribers);
           _matchParticipantWithUser();
           _matchParticipantWithChat();
@@ -371,18 +388,16 @@ class ChatRepoImpl extends ChatRepo {
               }
             }
           }
-
-          print('existingParticipiantAfterRemove $existingParticipants');
-
+          getChatMessages(chatDetailsDto.chatId!);
           _participantsStream.add(subscribers);
           _matchParticipantWithUser();
           _matchParticipantWithChat();
         }
 
         if (data['textroom'] == 'join') {
-          if (isInCallChat) {
-            getChatDetails(chatDetailsDto.chatId!, 1);
-          }
+          // if (isInCallChat) {
+          //   getChatDetails(chatDetailsDto.chatId!, 1);
+          // }
 
           print('from: ${data['username']} Joined The Chat!');
 
@@ -411,7 +426,7 @@ class ChatRepoImpl extends ChatRepo {
               }
             }
           }
-
+          getChatMessages(chatDetailsDto.chatId!);
           _participantsStream.add(subscribers);
           _matchParticipantWithUser();
           _matchParticipantWithChat();
@@ -458,24 +473,11 @@ class ChatRepoImpl extends ChatRepo {
     }
   }
 
-  getUserMessages() {
-    for (var sub in subscribers) {
-      for (var i = 0; i < chats.length; i++) {
-        if (chats[i]
-            .chatParticipants!
-            .any((data) => data.name == sub.display)) {
-          // print('subMessages: ${sub.messages}');
-          // print('dataName: ${chatDetailsDto.messages.messages}');
-          // getChatDetails(chats[i].id, 1);
-          print('chat[i]id: ${chats[i].id}');
-          print('currentChat!.id ${currentChat!.id}');
-          if (chats[i].id != currentChat!.id) {
-            chats[i] = chats[i].copyWith(haveUnread: true);
-          }
-          print('Chattt: ${chats[i].haveUnread}');
-        }
-      }
-    }
+  List<MessageDto> getChatMessages(int chatId) {
+    messages = chatDetailsDto.messages.messages;
+    _messagesStream.add(messages);
+
+    return messages;
   }
 
   // @override
@@ -516,22 +518,25 @@ class ChatRepoImpl extends ChatRepo {
   Future<void> setCurrentParticipant(UserDto user) async {
     currentParticipant = user;
     // messages = getUserMessages()!;
-    _messagesStream.add(messages);
-    print("Changed current participant");
+    // _messagesStream.add(messages);
   }
 
   @override
-  Future<void> messageSeen(int index) async {
-    var participant = subscribers
-        .firstWhere((item) => item.display == currentParticipant?.name);
+  Future<void> messageSeen(int msgId) async {
+    messages = chatDetailsDto.messages.messages;
+    final updatedMessages = List<MessageDto>.from(messages);
+    for (var i = 0; i < updatedMessages.length; i++) {
+      if (updatedMessages[i].id == msgId) {
+        updatedMessages[i] = updatedMessages[i].copyWith(seen: true);
+        break;
+      }
+    }
 
-    messages = participant.messages;
-    messages[index].seen = true;
-    participant.haveUnreadMessages = _haveUnread(participant);
+    chatDetailsDto = chatDetailsDto.copyWith(
+      messages: chatDetailsDto.messages.copyWith(messages: updatedMessages),
+    );
 
-    // _messagesStream.add(messages);
-    _participantsStream.add(subscribers);
-    _matchParticipantWithUser();
+    _chatDetailsStream.add(chatDetailsDto);
   }
 
   // void _updateChatWithDownloadedImage(int fileId, Uint8List imageBytes) {
@@ -612,7 +617,7 @@ class ChatRepoImpl extends ChatRepo {
   Future<void> setCurrentChat(ChatDto chat) async {
     currentChat = chat;
     // messages = getUserMessages()!;
-    _messagesStream.add(messages);
+    // _messagesStream.add(messages);
   }
 
   @override
@@ -620,7 +625,6 @@ class ChatRepoImpl extends ChatRepo {
     try {
       var response = await _api.getChatById(id: id, page: page);
       if (response.error == null && response.response != null) {
-        print(response);
         _chatDetailsStream.add(response.response!);
         chatDetailsDto = response.response!;
       } else {
@@ -648,7 +652,6 @@ class ChatRepoImpl extends ChatRepo {
 
   @override
   Future<void> deleteMessage(int id) async {
-    print('ID: $id');
     try {
       var response = await _api.deleteMessageById(id: id);
       if (response.error == null && response.response != null) {
@@ -662,6 +665,7 @@ class ChatRepoImpl extends ChatRepo {
     }
   }
 
+  @override
   Future<void> openDownloadedMedia(int id, String fileName) async {
     try {
       var response = await _api.downloadMedia(id: id);
@@ -710,10 +714,10 @@ class ChatRepoImpl extends ChatRepo {
           _chatDetailsStream.add(updatedChatDetails);
         }
       } else {
-        print("❌ Greška pri preuzimanju: ${response.error}");
+        print("Error while download: ${response.error}");
       }
     } catch (e) {
-      print("🚨 Exception in openDownloadedMedia: $e");
+      print("Exception in openDownloadedMedia: $e");
     }
   }
 
@@ -724,6 +728,13 @@ class ChatRepoImpl extends ChatRepo {
       if (response.error == null && response.response != null) {
         _chatDetailsStream.add(response.response!);
         chatDetailsDto = response.response!;
+        // sendMessage(
+        //     message,
+        //     chatDetailsDto.chatParticipants
+        //         .map((data) => data.id.toString())
+        //         .toList(),
+        //     chatId: chatDetailsDto.chatId,
+        //     msgId: id);
       } else {
         print("Error: ${response.error}");
       }
@@ -741,7 +752,7 @@ class ChatRepoImpl extends ChatRepo {
       if (response.error == null && response.response != null) {
         _chatDetailsStream.add(response.response!);
         chatDetailsDto = response.response!;
-        print('test: ${participantIds.map((id) => id.toString()).toList()}');
+        // print('test: ${participantIds.map((id) => id.toString()).toList()}');
         sendMessage(
             '!@checkList', participantIds.map((id) => id.toString()).toList());
       } else {
@@ -758,8 +769,6 @@ class ChatRepoImpl extends ChatRepo {
       var response =
           await _api.removeUserFromGroupChat(chatId: chatId, userId: userId);
       if (response.error == null && response.response != null) {
-        print('Responsee: ${response.response}');
-
         _chatDetailsStream.add(response.response!);
         chatDetailsDto = response.response!;
       } else {
@@ -772,7 +781,7 @@ class ChatRepoImpl extends ChatRepo {
 
   @override
   Future<void> sendMessage(String? msg, List<String> participantIds,
-      {int? chatId}) async {
+      {int? chatId, int? msgId}) async {
     final matchingDeviceIds =
         subscribers.expand((subscriber) => subscriber.deviceId).where((device) {
       final firstPart = device.split('-').first;
@@ -781,6 +790,7 @@ class ChatRepoImpl extends ChatRepo {
     final messagePayload = jsonEncode({
       "chatId": chatId,
       "message": msg,
+      "msgId": msgId,
     });
     await textRoom.sendMessage(
       room,
@@ -810,7 +820,8 @@ class ChatRepoImpl extends ChatRepo {
               ? response.response!.files![0].path
               : messageContent,
           participants,
-          chatId: chatId);
+          chatId: chatId,
+          msgId: response.response!.id);
 
       // if (messageContent == '!@checkList') {
       //   return;

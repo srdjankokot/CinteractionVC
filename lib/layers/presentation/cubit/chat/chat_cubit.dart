@@ -74,13 +74,14 @@ class ChatCubit extends Cubit<ChatState> with BlocLoggy {
     return super.close();
   }
 
-  void _onMessages(List<ChatMessage> messages) {
-    var unread = messages.length;
-    emit(state.copyWith(
-        isInitial: true,
-        messages: messages,
-        numberOfParticipants: Random().nextInt(10000),
-        unreadMessages: unread));
+  void _onMessages(List<MessageDto> messages) {
+    int unreadCount = messages.where((element) => element.seen == false).length;
+    // emit(state.copyWith(
+    //   isInitial: true,
+    //   chatMessages: messages,
+    //   numberOfParticipants: Random().nextInt(10000),
+    //   unreadMessages: unreadCount,
+    // ));
   }
 
   void _onLocalStream(StreamRenderer localStream) {
@@ -170,6 +171,10 @@ class ChatCubit extends Cubit<ChatState> with BlocLoggy {
       emit(state.copyWith(
         isInitialLoading: false,
         chatDetails: chatDetails,
+        chatMessages: chatDetails.messages.messages,
+        unreadMessages: chatDetails.messages.messages
+            .where((element) => element.seen == false)
+            .length,
       ));
       return;
     }
@@ -196,6 +201,8 @@ class ChatCubit extends Cubit<ChatState> with BlocLoggy {
           meta: chatDetails.messages.meta,
         ),
       ),
+      unreadMessages:
+          updatedMessages.where((element) => element.seen == false).length,
     ));
   }
 
@@ -308,8 +315,12 @@ class ChatCubit extends Cubit<ChatState> with BlocLoggy {
     emit(state.copyWith(chatDetails: chatDetails));
   }
 
-  Future<void> chatMessageSeen(int index) async {
-    chatUseCases.messageSeen(index: index);
+  Future<void> chatMessageSeen(int msgId) async {
+    chatUseCases.messageSeen(msgId: msgId);
+    // state.chatMessages![index].seen = true;
+    // final int unreadCount =
+    //     state.chatMessages!.where((element) => element.seen == false).length;
+    // emit(state.copyWith(unreadMessages: unreadCount));
   }
 
   Future<void> sendFile(String name, Uint8List bytes) async {

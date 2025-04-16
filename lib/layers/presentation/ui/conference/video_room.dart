@@ -2,9 +2,11 @@ import 'dart:io';
 import 'dart:math';
 
 import 'package:cinteraction_vc/assets/colors/Colors.dart';
+import 'package:cinteraction_vc/core/app/injector.dart';
 import 'package:cinteraction_vc/core/extension/context.dart';
 import 'package:cinteraction_vc/core/ui/widget/call_button_shape.dart';
 import 'package:cinteraction_vc/core/ui/widget/engagement_progress.dart';
+import 'package:cinteraction_vc/layers/domain/usecases/chat/chat_usecases.dart';
 import 'package:cinteraction_vc/layers/presentation/cubit/chat/chat_cubit.dart';
 import 'package:cinteraction_vc/layers/presentation/cubit/chat/chat_state.dart';
 import 'package:cinteraction_vc/layers/presentation/ui/chat/widget/chat_details_widget.dart';
@@ -43,10 +45,9 @@ class VideoRoomPage extends StatelessWidget {
       // AppRoute.home.pushReplacement(context);
     }
 
-    if(state.isCallStarted && state.chatId != null)
-      {
-        context.read<ChatCubit>().load( true, state.chatId ?? 0);
-      }
+    if (state.isCallStarted && state.chatId != null) {
+      context.read<ChatCubit>().load(true, state.chatId ?? 0);
+    }
   }
 
   @override
@@ -55,7 +56,6 @@ class VideoRoomPage extends StatelessWidget {
     TextEditingController messageFieldController = TextEditingController();
     final ScrollController chatController = ScrollController();
     FocusNode messageFocusNode = FocusNode();
-
 
     return BlocConsumer<ConferenceCubit, ConferenceState>(
         builder: (context, state) {
@@ -81,13 +81,16 @@ class VideoRoomPage extends StatelessWidget {
 
           List<StreamRenderer> items = [];
           for (var i = 0; i < state.numberOfStreamsCopy; i++) {
-            items.addAll(state.streamRenderers!.entries.map((e) => e.value).toList());
+            items.addAll(
+                state.streamRenderers!.entries.map((e) => e.value).toList());
           }
 
           var subscribers = state.streamSubscribers?.toList();
 
           var borderWidth =
               state.recording == RecordingStatus.recording ? 3.0 : 0.0;
+
+          bool showingChat = state.showingChat;
 
           return Material(
             child: Center(
@@ -240,36 +243,52 @@ class VideoRoomPage extends StatelessWidget {
                                             .toggleChatWindow();
                                       },
                                     ),
-                                    Positioned(
-                                      right: 0,
-                                      top: 0,
-                                      child: AnimatedOpacity(
-                                        opacity:
-                                            (state.unreadMessages != null &&
-                                                    state.unreadMessages! > 0)
-                                                ? 1
-                                                : 0,
-                                        duration:
-                                            const Duration(milliseconds: 250),
-                                        child: Container(
-                                          width: 12,
-                                          height: 12,
-                                          decoration: const ShapeDecoration(
-                                            color: Colors.white,
-                                            shape: OvalBorder(),
+                                    BlocBuilder<ChatCubit, ChatState>(
+                                      builder: (context, state) {
+                                        final int unread = state.unreadMessages;
+
+                                        if (showingChat || unread == 0) {
+                                          return const SizedBox.shrink();
+                                        }
+
+                                        return Positioned(
+                                          right: 5,
+                                          top: 2,
+                                          child: AnimatedOpacity(
+                                            opacity: 1,
+                                            duration: const Duration(
+                                                milliseconds: 250),
+                                            child: Container(
+                                              padding:
+                                                  const EdgeInsets.symmetric(
+                                                      horizontal: 6,
+                                                      vertical: 2),
+                                              decoration: BoxDecoration(
+                                                color: Colors.redAccent,
+                                                borderRadius:
+                                                    BorderRadius.circular(12),
+                                              ),
+                                              constraints: const BoxConstraints(
+                                                minWidth: 20,
+                                                minHeight: 16,
+                                              ),
+                                              child: Text(
+                                                unread > 99
+                                                    ? '99+'
+                                                    : unread.toString(),
+                                                textAlign: TextAlign.center,
+                                                style: const TextStyle(
+                                                  color: Colors.white,
+                                                  fontSize: 10,
+                                                  fontWeight: FontWeight.bold,
+                                                ),
+                                              ),
+                                            ),
                                           ),
-                                          // child: Text(
-                                          //   '1',
-                                          //   style: context
-                                          //       .primaryTextTheme.labelSmall
-                                          //       ?.copyWith(
-                                          //           fontSize: 8,
-                                          //           fontWeight:
-                                          //               FontWeight.w700),
-                                          // )
-                                        ),
-                                      ),
-                                    ),
+                                        );
+                                      },
+                                    )
+
                                     // child: Text('${state.unreadMessages}', style: context.primaryTextTheme.labelSmall,)),
                                     //   child: Text('1', style: context.primaryTextTheme.labelSmall?.copyWith(fontSize: 8, fontWeight: FontWeight.w700),)),,
                                   ]),
@@ -460,8 +479,7 @@ class VideoRoomPage extends StatelessWidget {
                                         },
                                         listener: (BuildContext context,
                                             ChatState state) {},
-                                      )
-                                          ),
+                                      )),
                                     ],
                                   ),
                                 ),
@@ -608,37 +626,52 @@ class VideoRoomPage extends StatelessWidget {
                                                   .toggleChatWindow();
                                             },
                                           ),
-                                          Positioned(
-                                            right: 0,
-                                            top: 0,
-                                            child: AnimatedOpacity(
-                                              opacity: (state.unreadMessages !=
-                                                          null &&
-                                                      state.unreadMessages! > 0)
-                                                  ? 1
-                                                  : 0,
-                                              duration: const Duration(
-                                                  milliseconds: 250),
-                                              child: Container(
-                                                width: 12,
-                                                height: 12,
-                                                decoration:
-                                                    const ShapeDecoration(
-                                                  color: Colors.white,
-                                                  shape: OvalBorder(),
+                                          //         Expanded(
+                                          //     child: BlocConsumer<ChatCubit,
+                                          //         ChatState>(
+                                          //   builder: (context, state) {
+                                          //     return ChatDetailsWidget(state);
+                                          //   },
+                                          //   listener: (BuildContext context,
+                                          //       ChatState state) {},
+                                          // )),
+                                          BlocConsumer<ChatCubit, ChatState>(
+                                            listener: (context, state) {
+                                              print(
+                                                  'unreadChatMess: ${state.unreadMessages}');
+                                            },
+                                            builder: (context, state) {
+                                              final unreadMessages = state
+                                                  .chatMessages!
+                                                  .where((msg) =>
+                                                      msg.seen == false)
+                                                  .toList();
+
+                                              return Positioned(
+                                                right: 0,
+                                                top: 0,
+                                                child: AnimatedOpacity(
+                                                  opacity:
+                                                      unreadMessages.isNotEmpty
+                                                          ? 1
+                                                          : 0,
+                                                  duration: const Duration(
+                                                      milliseconds: 250),
+                                                  child: Container(
+                                                    width: 12,
+                                                    height: 12,
+                                                    decoration:
+                                                        const ShapeDecoration(
+                                                      color: Colors
+                                                          .red, // crveni badge
+                                                      shape: OvalBorder(),
+                                                    ),
+                                                  ),
                                                 ),
-                                                // child: Text(
-                                                //   '1',
-                                                //   style: context
-                                                //       .primaryTextTheme.labelSmall
-                                                //       ?.copyWith(
-                                                //           fontSize: 8,
-                                                //           fontWeight:
-                                                //               FontWeight.w700),
-                                                // )
-                                              ),
-                                            ),
+                                              );
+                                            },
                                           ),
+
                                           // child: Text('${state.unreadMessages}', style: context.primaryTextTheme.labelSmall,)),
                                           //   child: Text('1', style: context.primaryTextTheme.labelSmall?.copyWith(fontSize: 8, fontWeight: FontWeight.w700),)),,
                                         ]),
@@ -862,9 +895,10 @@ class VideoRoomPage extends StatelessWidget {
                         ),
                       ),
                       child: ParticipantVideoWidget(
-                          remoteStream: items[index],
-                          height: itemHeight,
-                          width: itemWidth, ),
+                        remoteStream: items[index],
+                        height: itemHeight,
+                        width: itemWidth,
+                      ),
                     );
                   },
                 ),

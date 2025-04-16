@@ -75,6 +75,7 @@ class MessageDto {
   final List<FileDto>? files;
   final String createdAt;
   final String updatedAt;
+  bool seen;
 
   MessageDto({
     this.id,
@@ -84,7 +85,30 @@ class MessageDto {
     this.files,
     required this.createdAt,
     required this.updatedAt,
+    this.seen = false,
   });
+
+  MessageDto copyWith({
+    int? id,
+    int? chatId,
+    int? senderId,
+    String? message,
+    List<FileDto>? files,
+    String? createdAt,
+    String? updatedAt,
+    bool? seen,
+  }) {
+    return MessageDto(
+      id: id ?? this.id,
+      chatId: chatId ?? this.chatId,
+      senderId: senderId ?? this.senderId,
+      message: message ?? this.message,
+      files: files ?? this.files,
+      createdAt: createdAt ?? this.createdAt,
+      updatedAt: updatedAt ?? this.updatedAt,
+      seen: seen ?? this.seen,
+    );
+  }
 
   factory MessageDto.fromJson(Map<String, dynamic> json) => MessageDto(
         id: json['id'] as int? ?? 0,
@@ -110,7 +134,7 @@ class MessageDto {
 
   @override
   String toString() {
-    return 'MessageDto(id: $id, chatId: $chatId, senderId: $senderId, message: $message, files: $files, createdAt: $createdAt, updatedAt: $updatedAt)';
+    return 'MessageDto(id: $id, chatId: $chatId, senderId: $senderId, message: $message, files: $files, createdAt: $createdAt, updatedAt: $updatedAt, seen: $seen)';
   }
 }
 
@@ -164,6 +188,7 @@ class ChatDetailsDto {
   final List<ChatParticipantDto> chatParticipants;
   final ChatPaginationDto messages;
   final bool isGroup;
+  bool haveUnreadMessages;
 
   ChatDetailsDto({
     required this.chatId,
@@ -172,6 +197,7 @@ class ChatDetailsDto {
     required this.chatParticipants,
     required this.messages,
     this.isGroup = false,
+    this.haveUnreadMessages = false,
   });
 
   ChatDetailsDto copyWith({
@@ -219,6 +245,6 @@ class ChatDetailsDto {
 
   @override
   String toString() {
-    return 'ChatDetailsDto(chatId: $chatId, chatName: $chatName, authUser: $authUser, chatParticipants: $chatParticipants, messages: $messages, isGroup: $isGroup)';
+    return 'ChatDetailsDto(chatId: $chatId, chatName: $chatName, authUser: $authUser, chatParticipants: $chatParticipants, messages: $messages, isGroup: $isGroup, haveUnreadMessages: $haveUnreadMessages)';
   }
 }
