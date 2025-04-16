@@ -395,9 +395,9 @@ class ChatRepoImpl extends ChatRepo {
         }
 
         if (data['textroom'] == 'join') {
-          // if (isInCallChat) {
-          //   getChatDetails(chatDetailsDto.chatId!, 1);
-          // }
+          if (isInCallChat) {
+            getChatDetails(chatDetailsDto.chatId!, 1);
+          }
 
           print('from: ${data['username']} Joined The Chat!');
 
