@@ -19,8 +19,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_dropzone/flutter_dropzone.dart';
+import 'package:flutter_linkify/flutter_linkify.dart';
 import 'package:intl/intl.dart';
 import 'package:universal_html/html.dart' as html;
+import 'package:url_launcher/url_launcher.dart';
 import 'package:visibility_detector/visibility_detector.dart';
 
 import '../../../../../core/ui/images/image.dart';
@@ -615,8 +617,16 @@ class _ChatDetailsWidgetState extends State<ChatDetailsWidget> {
                                                                             ),
                                                                           )
                                                                         else
-                                                                          SelectableText(
-                                                                            message.message!,
+                                                                          Linkify(
+                                                                            onOpen:
+                                                                                (link) async {
+                                                                              final uri = Uri.parse(link.url);
+                                                                              if (await canLaunchUrl(uri)) {
+                                                                                await launchUrl(uri, mode: LaunchMode.externalApplication);
+                                                                              }
+                                                                            },
+                                                                            text:
+                                                                                message.message!,
                                                                             style:
                                                                                 const TextStyle(
                                                                               color: Colors.black,
