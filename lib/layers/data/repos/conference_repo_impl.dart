@@ -7,6 +7,8 @@ import 'package:cinteraction_vc/layers/data/dto/meetings/meeting_dto.dart';
 import 'package:cinteraction_vc/layers/domain/entities/api_response.dart';
 import 'package:cinteraction_vc/layers/domain/entities/chat_message.dart';
 import 'package:cinteraction_vc/layers/domain/repos/conference_repo.dart';
+import 'package:cinteraction_vc/layers/domain/usecases/chat/chat_usecases.dart';
+import 'package:cinteraction_vc/layers/presentation/cubit/chat/chat_cubit.dart';
 import 'package:ffmpeg_kit_flutter/ffmpeg_kit.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/foundation.dart';
@@ -651,7 +653,6 @@ class ConferenceRepoImpl extends ConferenceRepo {
   ///
   @override
   Future<void> kick({required String id}) async {
-
     StreamRenderer? renderer = videoState.streamsToBeRendered[id];
     if (renderer == null) {
       return;
@@ -797,6 +798,7 @@ class ConferenceRepoImpl extends ConferenceRepo {
 
   Future<dynamic> _closeCall(String reason) async {
     await _endCall();
+    await getIt.get<ChatCubit>().loadChats(1, 20);
 
     for (var feed in videoState.feedIdToDisplayStreamsMap.entries) {
       await _unSubscribeTo(feed.key);
@@ -1250,10 +1252,7 @@ class ConferenceRepoImpl extends ConferenceRepo {
     flutterWebRTC.MediaRecorder? mediaRecorder = flutterWebRTC.MediaRecorder();
     try {
       print("mediaRecorder: $mediaRecorder");
-      mediaRecorder.startWeb(
-        stream,
-        mimeType: 'video/webm;codecs=vp8,opus'
-      );
+      mediaRecorder.startWeb(stream, mimeType: 'video/webm;codecs=vp8,opus');
       recorderList.add(mediaRecorder);
     } catch (e) {
       print("Error starting recording: $e");
@@ -1315,10 +1314,9 @@ class ConferenceRepoImpl extends ConferenceRepo {
       }
     }
 
-    await Future.wait(stopFutures).then((v){
+    await Future.wait(stopFutures).then((v) {
       print('===============_stopRecord_ finish ==============');
     }); // Ensure all recordings are stopped
-
   }
 
   @override
