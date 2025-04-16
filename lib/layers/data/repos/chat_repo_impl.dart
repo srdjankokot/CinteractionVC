@@ -12,6 +12,7 @@ import 'package:cinteraction_vc/layers/domain/repos/chat_repo.dart';
 import 'package:cinteraction_vc/layers/presentation/cubit/chat/chat_state.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/foundation.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:webrtc_interface/webrtc_interface.dart';
 import '../../../core/app/injector.dart';
 import '../../../core/io/network/models/participant.dart';
@@ -259,9 +260,9 @@ class ChatRepoImpl extends ChatRepo {
       dynamic data = parse(event.text);
       if (data != null) {
         if (data['textroom'] == 'message') {
-          if (isInCallChat) {
-            messages = chatDetailsDto.messages.messages;
-          }
+          // if (isInCallChat) {
+          //   messages = chatDetailsDto.messages.messages;
+          // }
           var senderId = int.parse(data['from'].split('-')[0]);
           final receviedMessage = data['text'] as String;
           final parsed = jsonDecode(receviedMessage);
@@ -528,6 +529,8 @@ class ChatRepoImpl extends ChatRepo {
     for (var i = 0; i < updatedMessages.length; i++) {
       if (updatedMessages[i].id == msgId) {
         updatedMessages[i] = updatedMessages[i].copyWith(seen: true);
+        final prefs = await SharedPreferences.getInstance();
+        await prefs.setBool('message_seen_$msgId', true);
         break;
       }
     }

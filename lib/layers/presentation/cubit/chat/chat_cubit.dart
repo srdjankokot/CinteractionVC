@@ -10,6 +10,7 @@ import 'package:cinteraction_vc/layers/data/repos/chat_repo_impl.dart';
 import 'package:cinteraction_vc/layers/presentation/cubit/chat/chat_state.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../../../core/io/network/models/participant.dart';
 import '../../../../core/janus/janus_client.dart';
@@ -163,16 +164,28 @@ class ChatCubit extends Cubit<ChatState> with BlocLoggy {
     }
   }
 
-  void _onChatDetails(ChatDetailsDto chatDetails) {
+  void _onChatDetails(ChatDetailsDto chatDetails) async {
+    final prefs = await SharedPreferences.getInstance();
+
     bool isPaginationActive =
         (chatDetails.messages.meta?['current_page'] ?? 1) > 1;
+
+    final List<MessageDto> locallyUpdatedMessages =
+        chatDetails.messages.messages.map((message) {
+      final seen = prefs.getBool('message_seen_${message.id}') ?? false;
+      return seen ? message.copyWith(seen: true) : message;
+    }).toList();
 
     if (!isPaginationActive) {
       emit(state.copyWith(
         isInitialLoading: false,
-        chatDetails: chatDetails,
-        chatMessages: chatDetails.messages.messages,
-        unreadMessages: chatDetails.messages.messages
+        chatDetails: chatDetails.copyWith(
+          messages: chatDetails.messages.copyWith(
+            messages: locallyUpdatedMessages,
+          ),
+        ),
+        chatMessages: locallyUpdatedMessages,
+        unreadMessages: locallyUpdatedMessages
             .where((element) => element.seen == false)
             .length,
       ));
@@ -182,7 +195,7 @@ class ChatCubit extends Cubit<ChatState> with BlocLoggy {
     List<MessageDto> updatedMessages =
         List.from(state.chatDetails!.messages.messages);
 
-    for (var newMessage in chatDetails.messages.messages) {
+    for (var newMessage in locallyUpdatedMessages) {
       int existingIndex =
           updatedMessages.indexWhere((m) => m.id == newMessage.id);
 
