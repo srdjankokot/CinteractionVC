@@ -1,11 +1,11 @@
 import '../../repos/chat_repo.dart';
 
 class MessageSeen {
-  MessageSeen({required  this.repo});
+  MessageSeen({required this.repo});
 
   final ChatRepo repo;
 
-  call({required int index}){
-    repo.messageSeen(index);
+  call({required int msgId}) {
+    repo.messageSeen(msgId);
   }
 }
