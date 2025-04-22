@@ -111,8 +111,8 @@ class _HomePageState extends State<HomePage> {
                                   selected: _selectedIndex == index,
                                   trailing: item.label == "Chat" &&
                                           chatCubit.state.unreadMessages > 0
-                                      ? Text(chatCubit.state.unreadMessages
-                                          .toString())
+                                      ? Icon(Icons.mark_chat_unread,
+                                          size: 16, color: Colors.red)
                                       : null,
                                   title: Text(item.label,
                                       style: context.textTheme.labelMedium

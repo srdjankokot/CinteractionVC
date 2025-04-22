@@ -336,6 +336,18 @@ class ChatCubit extends Cubit<ChatState> with BlocLoggy {
     // emit(state.copyWith(unreadMessages: unreadCount));
   }
 
+  void toggleEmojiVisibility() {
+    emit(state.copyWith(isEmojiVisible: !(state.isEmojiVisible ?? false)));
+  }
+
+  void showEmoji(bool show) {
+    emit(state.copyWith(isEmojiVisible: show));
+  }
+
+  void updateUploadProgress(double progress) {
+    emit(state.copyWith(uploadProgress: progress)); // Ažurira ChatState
+  }
+
   Future<void> sendFile(String name, Uint8List bytes) async {
     chatUseCases.sendFile(name, bytes);
   }
