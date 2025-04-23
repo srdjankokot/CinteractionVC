@@ -8,7 +8,6 @@ import 'package:cinteraction_vc/core/extension/context.dart';
 import 'package:cinteraction_vc/core/extension/context_user.dart';
 import 'package:cinteraction_vc/layers/presentation/cubit/chat/chat_cubit.dart';
 import 'package:cinteraction_vc/layers/presentation/cubit/chat/chat_state.dart';
-import 'package:cinteraction_vc/layers/presentation/ui/chat/widget/chat_dropzone.dart';
 import 'package:cinteraction_vc/layers/presentation/ui/chat/widget/dialogs/add_participiant_dialog.dart';
 import 'package:cinteraction_vc/layers/presentation/ui/chat/widget/chat_details_widget.dart';
 import 'package:cinteraction_vc/layers/presentation/ui/chat/widget/dialogs/editGroupDialog.dart';
@@ -20,7 +19,6 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:flutter_dropzone/flutter_dropzone.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../../assets/colors/Colors.dart';
@@ -738,7 +736,6 @@ class ChatRoomPage extends StatelessWidget {
                             ),
                             const Divider(),
                             Expanded(child: ChatDetailsWidget(state)),
-
                           ],
                         );
                       }
