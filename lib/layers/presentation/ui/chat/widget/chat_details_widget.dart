@@ -255,11 +255,6 @@ class _ChatDetailsWidgetState extends State<ChatDetailsWidget> {
             Expanded(
               child: Stack(
                 children: [
-                  DropzoneView(
-                    onCreated: (ctrl) => controller = ctrl,
-                    onDropFile: onFileDropped,
-                    onHover: () => print('eeeeeeeeeeeee'),
-                  ),
                   ChatDropzone(
                     sendFile: sendMessage,
                     child: Flex(

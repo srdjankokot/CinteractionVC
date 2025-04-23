@@ -48,7 +48,8 @@ endfunction()
 # Flutter library and tool build rules.
 set(FLUTTER_MANAGED_DIR "${CMAKE_CURRENT_SOURCE_DIR}/flutter")
 add_subdirectory(${FLUTTER_MANAGED_DIR})
-
+# Workaround for unresolved std::* vectorized symbol issues with Firebase on Windows/MSVC
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /D_ENABLE_EXTENDED_ALIGNED_STORAGE")
 # Application build; see runner/CMakeLists.txt.
 add_subdirectory("runner")
 
