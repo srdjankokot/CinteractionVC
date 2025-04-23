@@ -13,6 +13,7 @@ import 'package:cinteraction_vc/layers/presentation/cubit/conference/conference_
 import 'package:cinteraction_vc/layers/presentation/ui/chat/widget/pdf_viewer_screen.dart';
 import 'package:cinteraction_vc/layers/presentation/ui/profile/ui/widget/user_image.dart';
 import 'package:dio/dio.dart';
+import 'package:emoji_picker_flutter/emoji_picker_flutter.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -24,6 +25,7 @@ import 'package:intl/intl.dart';
 import 'package:universal_html/html.dart' as html;
 import 'package:url_launcher/url_launcher.dart';
 import 'package:visibility_detector/visibility_detector.dart';
+import 'package:flutter/foundation.dart' as foundation;
 
 import '../../../../../core/ui/images/image.dart';
 import 'chat_dropzone.dart';
@@ -656,19 +658,70 @@ class _ChatDetailsWidgetState extends State<ChatDetailsWidget> {
               ),
             ),
 
+            // if (state.uploadProgress != null)
+            //   Padding(
+            //     padding:
+            //         const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8),
+            //     child: Column(
+            //       crossAxisAlignment: CrossAxisAlignment.start,
+            //       children: [
+            //         if (state.uploadProgress > 0.0)
+            //           Padding(
+            //             padding: const EdgeInsets.only(bottom: 6),
+            //             child: Text(
+            //               'Uploading files...',
+            //               style: TextStyle(
+            //                 fontSize: 14,
+            //                 fontWeight: FontWeight.w500,
+            //                 color: state.uploadProgress == 1.0
+            //                     ? Colors.green
+            //                     : Colors.blueGrey,
+            //               ),
+            //             ),
+            //           ),
+            //         // ClipRRect(
+            //         //   borderRadius: BorderRadius.circular(8),
+            //         //   child: LinearProgressIndicator(
+            //         //     value: state.uploadProgress,
+            //         //     minHeight: 6,
+            //         //     backgroundColor: Colors.grey[300],
+            //         //     valueColor: AlwaysStoppedAnimation<Color>(
+            //         //       state.uploadProgress == 1.0
+            //         //           ? Colors.green
+            //         //           : Colors.blueAccent,
+            //         //     ),
+            //         //   ),
+            //         // ),
+            //       ],
+            //     ),
+            //   ),
+
             const SizedBox(
               height: 5,
             ),
+
             Row(
               children: [
+                IconButton(
+                  icon: Icon(Icons.emoji_emotions_outlined),
+                  onPressed: () {
+                    FocusScope.of(context).unfocus(); // zatvara tastaturu
+                    context.read<ChatCubit>().toggleEmojiVisibility();
+                  },
+                ),
                 Expanded(
                   child: TextField(
-                    textInputAction: TextInputAction.done,
                     focusNode: messageFocusNode,
                     controller: messageFieldController,
+                    textInputAction: TextInputAction.done,
                     keyboardType: TextInputType.multiline,
                     minLines: 1,
                     maxLines: 8,
+                    onTap: () {
+                      if (state.isEmojiVisible!) {
+                        context.read<ChatCubit>().showEmoji(false);
+                      }
+                    },
                     onEditingComplete: () {
                       if (messageFieldController.text.trim().isNotEmpty) {
                         sendMessage();
@@ -677,7 +730,7 @@ class _ChatDetailsWidgetState extends State<ChatDetailsWidget> {
                     decoration: InputDecoration(
                       hintText: "Send a message",
                       suffixIcon: IconButton(
-                        onPressed: () async {
+                        onPressed: () {
                           sendMessage();
                         },
                         icon: imageSVGAsset('icon_send') as Widget,
@@ -692,7 +745,43 @@ class _ChatDetailsWidgetState extends State<ChatDetailsWidget> {
                   icon: imageSVGAsset('three_dots') as Widget,
                 ),
               ],
-            )
+            ),
+
+            if (state.isEmojiVisible!)
+              SizedBox(
+                height: 250,
+                child: EmojiPicker(
+                  onEmojiSelected: (category, emoji) {
+                    messageFieldController.text += emoji.emoji;
+                    messageFieldController.selection =
+                        TextSelection.fromPosition(
+                      TextPosition(offset: messageFieldController.text.length),
+                    );
+                  },
+                  config: Config(
+                    height: 256,
+                    // bgColor: const Color(0xFFF2F2F2),
+                    checkPlatformCompatibility: true,
+                    emojiViewConfig: EmojiViewConfig(
+                      // Issue: https://github.com/flutter/flutter/issues/28894
+                      emojiSizeMax: 28 *
+                          (foundation.defaultTargetPlatform ==
+                                  TargetPlatform.iOS
+                              ? 1.20
+                              : 1.0),
+                    ),
+                    viewOrderConfig: const ViewOrderConfig(
+                      top: EmojiPickerItem.categoryBar,
+                      middle: EmojiPickerItem.emojiView,
+                      bottom: EmojiPickerItem.searchBar,
+                    ),
+                    skinToneConfig: const SkinToneConfig(),
+                    categoryViewConfig: const CategoryViewConfig(),
+                    bottomActionBarConfig: const BottomActionBarConfig(),
+                    searchViewConfig: const SearchViewConfig(),
+                  ),
+                ),
+              ),
 
             //input
           ],
