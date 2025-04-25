@@ -33,6 +33,7 @@ class ConferenceCubit extends Cubit<ConferenceState> with BlocLoggy {
   StreamSubscription<List<ChatMessage>>? _conferenceMessageStream;
   StreamSubscription<List<Participant>>? _subscribersStream;
   StreamSubscription<int>? _avgEngagementStream;
+  StreamSubscription<String>? _toastMessageStream;
 
   void _load() async {
     await conferenceUseCases.conferenceInitialize(
@@ -51,6 +52,9 @@ class ConferenceCubit extends Cubit<ConferenceState> with BlocLoggy {
         .getAvgEngagementStream()
         .listen(_onEngagementChanged);
 
+    _toastMessageStream =
+        conferenceUseCases.getToastMessageStream().listen(_onToastMessage);
+
     var meet = await conferenceUseCases.startCall();
 
     if (meet == null) {
@@ -66,7 +70,7 @@ class ConferenceCubit extends Cubit<ConferenceState> with BlocLoggy {
     _conferenceSubscription?.cancel();
     _conferenceEndedStream?.cancel();
     _subscribersStream?.cancel();
-
+    _toastMessageStream?.cancel();
     return super.close();
   }
 
@@ -78,6 +82,9 @@ class ConferenceCubit extends Cubit<ConferenceState> with BlocLoggy {
 
   Future<void> toggleChatWindow() async {
     emit(state.copyWith(showingChat: !state.showingChat));
+  }
+  void clearToast() {
+    emit(state.copyWith(toastMessage: null));
   }
 
   Future<void> chatMessageSeen(int index) async {
@@ -107,6 +114,10 @@ class ConferenceCubit extends Cubit<ConferenceState> with BlocLoggy {
     var enabled = state.engagementEnabled;
     await conferenceUseCases.toggleEngagement(!enabled);
     emit(state.copyWith(engagementEnabled: !enabled));
+  }
+
+  void _onToastMessage(String message) {
+    emit(state.copyWith(toastMessage: message));
   }
 
   //Listening streams methods
@@ -192,6 +203,14 @@ class ConferenceCubit extends Cubit<ConferenceState> with BlocLoggy {
   }
 
   Future<void> unPublishById(String id) async {
+    conferenceUseCases.unPublishById(id);
+  }
+
+  Future<void> muteByID(String id) async {
+    conferenceUseCases.muteById(id);
+  }
+
+  Future<void> mute(String id) async {
     conferenceUseCases.unPublishById(id);
   }
 

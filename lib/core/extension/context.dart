@@ -48,6 +48,7 @@ extension Context on BuildContext {
               message,
               style: TextStyle(color: foregroundColor),
             ),
+            duration: const Duration(seconds: 1),
           ),
         )
         .closed

@@ -454,6 +454,7 @@ class JanusPlugin {
   }) async {
     await _disposeMediaStreams(ignoreRemote: true);
     List<MediaDeviceInfo> videoDevices = await getVideoInputDevices();
+    print("=========== $videoDevices ============");
     List<MediaDeviceInfo> audioDevices = await getAudioInputDevices();
     if (videoDevices.isEmpty && audioDevices.isEmpty && !useDisplayMediaDevices) {
       throw Exception("No device found for media generation");
@@ -503,8 +504,16 @@ class JanusPlugin {
     }
   }
 
+  Future<bool> hasCamera() async {
+    final devices = await navigator.mediaDevices.enumerateDevices();
+    final hasVideoInput = devices.any((device) => device.kind == 'videoinput');
+    return hasVideoInput;
+  }
+
   Future<List<MediaDeviceInfo>> getVideoInputDevices() async {
-    return (await navigator.mediaDevices.enumerateDevices()).where((element) => element.kind == 'videoinput').toList();
+    List<MediaDeviceInfo> list  = await navigator.mediaDevices.enumerateDevices();
+    print('+++++++++++ $list ==============');
+    return list.where((element) => element.kind == 'videoinput' && element.deviceId != "").toList();
   }
 
   Future<List<MediaDeviceInfo>> getAudioInputDevices() async {

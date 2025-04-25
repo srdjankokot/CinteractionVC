@@ -2,8 +2,6 @@ import 'package:cinteraction_vc/assets/colors/Colors.dart';
 import 'package:cinteraction_vc/core/extension/context.dart';
 import 'package:cinteraction_vc/core/extension/context_user.dart';
 import 'package:cinteraction_vc/core/extension/image.dart';
-import 'package:cinteraction_vc/core/navigation/route.dart';
-import 'package:cinteraction_vc/core/navigation/router.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
@@ -22,6 +20,8 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
+
+
   int _selectedIndex = 0;
 
   @override
@@ -30,7 +30,9 @@ class _HomePageState extends State<HomePage> {
 
     final user = context.getCurrentUser;
 
+    _selectedIndex = user?.id == "1" ? 0 : 3;
     final content = tabs[_selectedIndex].builder(context);
+
 
     context.textTheme.labelSmall;
 
@@ -197,6 +199,10 @@ class _HomePageState extends State<HomePage> {
                     if (user != null)
                       Row(
                         children: [
+                          Visibility(
+                            visible: false,
+                              child: Text("NEXT MEETING")),
+                          
                           const SizedBox(width: 15),
                           UserImage.medium(user.imageUrl),
                           const SizedBox(width: 15),
@@ -209,11 +215,11 @@ class _HomePageState extends State<HomePage> {
                                 textAlign: TextAlign.center,
                                 style: context.textTheme.titleSmall,
                               ),
-                              Text(
-                                'Participant',
-                                textAlign: TextAlign.center,
-                                style: context.textTheme.labelSmall,
-                              ),
+                              // Text(
+                              //   'Participant',
+                              //   textAlign: TextAlign.center,
+                              //   style: context.textTheme.labelSmall,
+                              // ),
                             ],
                           ),
                           const SizedBox(width: 15),

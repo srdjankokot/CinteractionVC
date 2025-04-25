@@ -5,7 +5,11 @@ enum DataChannelCmd {
   publish('publish'),
   unPublish('unPublish'),
   engagement('engagement'),
-  message('message');
+  message('message'),
+  muteById('muteById'),
+  // trackStatus('trackStatus'),
+  // askForTrackStatus('askForTrackStatus')
+  ;
 
   const DataChannelCmd(this.value);
   final String value;

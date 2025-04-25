@@ -106,6 +106,7 @@ class ChatCubit extends Cubit<ChatState> with BlocLoggy {
   }
 
   void _onParticipants(List<Participant> participants) {
+    print("_onParticipants");
     emit(state.copyWith(
         isInitial: false,
         participants: participants,

@@ -258,6 +258,7 @@ class ChatRepoImpl extends ChatRepo {
   _setListener() {
     textRoom.data?.listen((event) {
       dynamic data = parse(event.text);
+
       if (data != null) {
         if (data['textroom'] == 'message') {
           // if (isInCallChat) {

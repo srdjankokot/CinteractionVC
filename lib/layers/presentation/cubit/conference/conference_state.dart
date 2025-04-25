@@ -31,6 +31,7 @@ class ConferenceState extends Equatable {
   final int numberOfStreamsCopy;
   final bool isGridLayout;
   final String? error;
+  final String? toastMessage;
   final RecordingStatus recording;
 
   const ConferenceState(
@@ -53,6 +54,7 @@ class ConferenceState extends Equatable {
       required this.numberOfStreamsCopy,
       required this.isGridLayout,
       this.error,
+      this.toastMessage,
       required this.recording});
 
   const ConferenceState.initial(
@@ -154,6 +156,7 @@ class ConferenceState extends Equatable {
       RecordingStatus? recording,
       int? meetId ,
       int? chatId ,
+      String? toastMessage ,
       }) {
     return ConferenceState(
         isInitial: isInitial ?? this.isInitial,
@@ -174,7 +177,8 @@ class ConferenceState extends Equatable {
         unreadMessages: unreadMessages ?? this.unreadMessages,
         meetId: meetId ?? this.meetId,
         chatId: chatId ?? this.chatId,
-        recording: recording ?? this.recording);
+        recording: recording ?? this.recording,
+        toastMessage: toastMessage);
   }
 
   @override
@@ -197,6 +201,7 @@ class ConferenceState extends Equatable {
         unreadMessages,
         meetId,
          chatId,
-        recording
+        recording,
+    toastMessage
       ];
 }

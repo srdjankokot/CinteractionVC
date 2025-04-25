@@ -48,10 +48,12 @@ final GoRouter router = GoRouter(
         );
       },
       redirect: (context, state) {
+        print('🔁 Router redirect triggered for path: ${state.uri.toString()}');
         var user = context.getCurrentUser;
         if (user != null) {
           print("router: ${AppRoute.home.path}");
           return AppRoute.home.path;
+
         }
         return null;
       },
@@ -109,12 +111,12 @@ final GoRouter router = GoRouter(
         );
       },
       redirect: (context, state) {
+        print('🔁 Router redirect triggered for path: ${state.uri.toString()}');
         var user = context.getCurrentUser;
         if (user == null) {
           print("router: ${AppRoute.auth.path}");
           return AppRoute.auth.path;
         }
-
         var roomId = getIt.get<LocalStorage>().getRoomId();
         if (roomId != null) {
           getIt.get<LocalStorage>().clearRoomId();
@@ -133,16 +135,6 @@ final GoRouter router = GoRouter(
         final display = state.extra ?? 'displayName';
         final roomId =
             state.pathParameters['roomId'] ?? Random().nextInt(999999);
-        // final display =  state.pathParameters['displayName'] ?? 'displayName';
-
-        // final roomId = state.pathParameters['roomId'];
-        // return BlocProvider(
-        //   create: (context) => ConferenceCubit(
-        //       conferenceUseCases: getIt.get<ConferenceUseCases>(),
-        //       roomId: int.parse(roomId.toString()),
-        //       displayName: display.toString()),
-        //   child: const VideoRoomPage(),
-        // );
 
         return MultiBlocProvider(providers: [
 
@@ -159,11 +151,10 @@ final GoRouter router = GoRouter(
             ),
           ),
 
-        ], child:  const VideoRoomPage());
-
-
+        ], child:   VideoRoomPage());
       },
       redirect: (context, state) {
+        print('🔁 Router redirect triggered for path: ${state.uri.toString()}');
         var user = context.getCurrentUser;
 
         if (user == null) {
@@ -225,7 +216,7 @@ final GoRouter router = GoRouter(
               create: (context) => getIt.get<ChatCubit>(),
             ),
           ],
-          child: const ChatRoomPage(),
+          child: ChatRoomPage(),
         );
       },
     ),
