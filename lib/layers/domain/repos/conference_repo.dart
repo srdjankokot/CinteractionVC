@@ -47,6 +47,7 @@ abstract class ConferenceRepo {
   Future<void> unPublishById({required String id});
 
   Future<void> publishById({required String id});
+  Future<void> muteById({required String id});
 
   Future<void> changeSubStream(
       {required ConfigureStreamQuality quality,
@@ -60,4 +61,5 @@ abstract class ConferenceRepo {
 
   Future<bool> startRecording();
   Future<void> stopRecording();
+  Stream<String> getToastStream();
 }

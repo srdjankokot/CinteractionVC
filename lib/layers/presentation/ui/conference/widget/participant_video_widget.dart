@@ -51,14 +51,24 @@ class ParticipantVideoWidget extends StatelessWidget {
                                 fontSize: [width, height].reduce(min) / 8,
                                 fontWeight: FontWeight.bold)),
                       )
-
-                    // Text("Video Paused By ${remoteStream.publisherName!}",
-                    //     style: const TextStyle(color: Colors.white)),
                   ),
                   child: RTCVideoView(
                     remoteStream.videoRenderer,
                     placeholderBuilder: (context) {
-                      return Text('data');
+                      return Center(
+                          child: CircleAvatar(
+                            backgroundColor:
+                            ([...ColorConstants.kStateColors]..shuffle()).first,
+                            radius: [width, height].reduce(min) / 4,
+                            child: Text(remoteStream.publisherName.getInitials(),
+                                style: context.primaryTextTheme.titleLarge?.copyWith(
+                                    fontSize: [width, height].reduce(min) / 8,
+                                    fontWeight: FontWeight.bold)),
+                          )
+
+                        // Text("Video Paused By ${remoteStream.publisherName!}",
+                        //     style: const TextStyle(color: Colors.white)),
+                      );
                     },
                     filterQuality: FilterQuality.none,
                     objectFit: screenShare
@@ -107,6 +117,9 @@ class ParticipantVideoWidget extends StatelessWidget {
                     PopupMenuButton<String>(
                       onSelected: (e) async {
                         switch (e) {
+                          case 'Mute/UnMute':
+                            context.read<ConferenceCubit>().muteByID(remoteStream.id);
+                            break;
                           case 'Kick':
                             context.read<ConferenceCubit>().kick(remoteStream.id);
                             break;
@@ -116,7 +129,7 @@ class ParticipantVideoWidget extends StatelessWidget {
                         }
                       },
                       itemBuilder: (BuildContext context) {
-                        return {'Kick', 'UnPublish'}.map((String choice) {
+                        return {'Mute/UnMute','Kick', 'UnPublish'}.map((String choice) {
                           return PopupMenuItem<String>(
                             value: choice,
                             child: Text(choice),

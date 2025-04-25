@@ -29,6 +29,7 @@ class JoinPopup extends StatelessWidget {
               onPressed: () {
                 // print(_textFieldController.text);
                 Navigator.pop(context);
+                // context.pushReplacement('/echo');
                 context.pushNamed('meeting',
                     pathParameters: {
                       'roomId': textFieldController.text,

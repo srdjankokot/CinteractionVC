@@ -3,6 +3,7 @@ import 'package:cinteraction_vc/layers/presentation/cubit/dashboard/dashboard_cu
 import 'package:cinteraction_vc/layers/presentation/ui/chat/chat_room.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import '../../layers/presentation/cubit/chat/chat_cubit.dart';
 import '../../layers/presentation/cubit/groups/groups_cubit.dart';
 import '../../layers/presentation/cubit/home/home_cubit.dart';
 import '../../layers/presentation/cubit/meetings/meetings_cubit.dart';
@@ -175,6 +176,19 @@ final chat = MenuItem(
   route: null,
   label: 'Chat',
   assetName: 'menu_chat',
-  body:  const ChatRoomPage(),
+  body:  MultiBlocProvider(
+    providers: [
+      BlocProvider<HomeCubit>(
+        create: (context) => getIt.get<HomeCubit>(),
+      ),
+      BlocProvider<ChatCubit>(
+        create: (context) => getIt.get<ChatCubit>(),
+      ),
+    ],
+    child: ChatRoomPage(),
+  )
+
+
+  // body:   ChatRoomPage(),
 );
 
