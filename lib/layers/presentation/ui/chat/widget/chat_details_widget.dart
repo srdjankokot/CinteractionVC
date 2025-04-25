@@ -85,7 +85,6 @@ class _ChatDetailsWidgetState extends State<ChatDetailsWidget> {
           size: fileBytes.length,
           bytes: fileBytes,
         );
-        print('sendedFiles:  $fileWithBytes');
         await sendMessage(uploadedFiles: [fileWithBytes]);
       } else {
         print('Error: Bytes not read.');
@@ -236,6 +235,7 @@ class _ChatDetailsWidgetState extends State<ChatDetailsWidget> {
     return BlocBuilder<ChatCubit, ChatState>(
       builder: (context, state) {
         final chatDetails = state.chatDetails;
+        print('ProgressInWidget: ${state.uploadProgress}');
         final messages = chatDetails?.messages.messages ?? [];
         final sortedMessages = List.of(messages)
           ..sort((a, b) {
@@ -658,43 +658,35 @@ class _ChatDetailsWidgetState extends State<ChatDetailsWidget> {
               ),
             ),
 
-            // if (state.uploadProgress != null)
-            //   Padding(
-            //     padding:
-            //         const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8),
-            //     child: Column(
-            //       crossAxisAlignment: CrossAxisAlignment.start,
-            //       children: [
-            //         if (state.uploadProgress > 0.0)
-            //           Padding(
-            //             padding: const EdgeInsets.only(bottom: 6),
-            //             child: Text(
-            //               'Uploading files...',
-            //               style: TextStyle(
-            //                 fontSize: 14,
-            //                 fontWeight: FontWeight.w500,
-            //                 color: state.uploadProgress == 1.0
-            //                     ? Colors.green
-            //                     : Colors.blueGrey,
-            //               ),
-            //             ),
-            //           ),
-            //         // ClipRRect(
-            //         //   borderRadius: BorderRadius.circular(8),
-            //         //   child: LinearProgressIndicator(
-            //         //     value: state.uploadProgress,
-            //         //     minHeight: 6,
-            //         //     backgroundColor: Colors.grey[300],
-            //         //     valueColor: AlwaysStoppedAnimation<Color>(
-            //         //       state.uploadProgress == 1.0
-            //         //           ? Colors.green
-            //         //           : Colors.blueAccent,
-            //         //     ),
-            //         //   ),
-            //         // ),
-            //       ],
-            //     ),
-            //   ),
+            if (state.uploadProgress > 0 && state.uploadProgress != 1)
+              Padding(
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    if (state.uploadProgress > 0.0)
+                      Padding(
+                        padding: const EdgeInsets.only(bottom: 6),
+                        child: Text(
+                          'Uploading files...',
+                          style: TextStyle(
+                            fontSize: 14,
+                            fontWeight: FontWeight.w500,
+                            color: state.uploadProgress == 1.0
+                                ? Colors.green
+                                : Colors.blueGrey,
+                          ),
+                        ),
+                      ),
+                    // Text(
+                    //   'Upload: ${(state.uploadProgress * 100).toStringAsFixed(0)}%',
+                    //   style: const TextStyle(
+                    //       fontSize: 16, fontWeight: FontWeight.bold),
+                    // ),
+                  ],
+                ),
+              ),
 
             const SizedBox(
               height: 5,
@@ -703,9 +695,9 @@ class _ChatDetailsWidgetState extends State<ChatDetailsWidget> {
             Row(
               children: [
                 IconButton(
-                  icon: Icon(Icons.emoji_emotions_outlined),
+                  icon: const Icon(Icons.emoji_emotions_outlined),
                   onPressed: () {
-                    FocusScope.of(context).unfocus(); // zatvara tastaturu
+                    FocusScope.of(context).unfocus();
                     context.read<ChatCubit>().toggleEmojiVisibility();
                   },
                 ),

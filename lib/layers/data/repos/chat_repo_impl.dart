@@ -21,6 +21,7 @@ import '../../../core/util/util.dart';
 import '../../domain/entities/chat_message.dart';
 import '../../domain/entities/user.dart';
 import '../../domain/source/api.dart';
+import '../../presentation/cubit/chat/chat_cubit.dart';
 import '../dto/chat/last_message_dto.dart';
 import '../source/local/local_storage.dart';
 import 'package:uuid/uuid.dart';
@@ -319,7 +320,7 @@ class ChatRepoImpl extends ChatRepo {
           }
 
           if (matchedChat != null && chatIdParsed == chatDetailsDto.chatId) {
-            final isFile = messageParsed.startsWith('http') ||
+            final isFile = messageParsed.startsWith('http') &&
                 messageParsed.contains('/storage/');
 
             final newMessage = MessageDto(
@@ -813,6 +814,9 @@ class ChatRepoImpl extends ChatRepo {
       message: messageContent == '!@checkList' ? null : messageContent,
       participantIds: participantIds,
       uploadedFiles: uploadedFiles,
+      onProgress: (double progress) {
+        getIt.get<ChatCubit>().updateUploadProgress(progress);
+      },
     );
 
     if (response.error == null && response.response != null) {
