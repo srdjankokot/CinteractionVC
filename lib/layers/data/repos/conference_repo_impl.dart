@@ -1230,7 +1230,10 @@ class ConferenceRepoImpl extends ConferenceRepo {
   _refreshStreams() {
     // print("_refreshStreams");
     // _checkVideoStreams();
-    final List<String> list = ["local", ...currentTalkerIds];
+    var screenshareKeys = videoState.streamsToBeRendered.keys
+        .where((key) => key.contains('_screenshare'))
+        .toList();
+    final List<String> list = ["local", ...currentTalkerIds, ...screenshareKeys];
     // print("_refreshStreams: $list" );
 
     _conferenceStream.add(Map.fromEntries(

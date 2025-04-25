@@ -152,15 +152,15 @@ class ParticipantVideoWidget extends StatelessWidget {
                     left: 24,
                     child:
                         imageSVGAsset('icon_microphone_disabled') as Widget)),
-            Visibility(
-                visible: width < 200,
-                child: Positioned.fill(
-                  bottom: 20,
-                  child: Align(
-                      alignment: Alignment.bottomCenter,
-                      child: EngagementProgress(
-                          engagement: remoteStream.engagement ?? 0)),
-                )),
+            // Visibility(
+            //     visible: width < 200,
+            //     child: Positioned.fill(
+            //       bottom: 20,
+            //       child: Align(
+            //           alignment: Alignment.bottomCenter,
+            //           child: EngagementProgress(
+            //               engagement: remoteStream.engagement ?? 0)),
+            //     )),
 
           ],
         ),
