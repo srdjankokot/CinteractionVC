@@ -345,7 +345,7 @@ class ChatCubit extends Cubit<ChatState> with BlocLoggy {
   }
 
   void updateUploadProgress(double progress) {
-    emit(state.copyWith(uploadProgress: progress)); // Ažurira ChatState
+    emit(state.copyWith(uploadProgress: progress));
   }
 
   Future<void> sendFile(String name, Uint8List bytes) async {

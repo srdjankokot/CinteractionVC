@@ -109,11 +109,11 @@ class _HomePageState extends State<HomePage> {
                                 margin: const EdgeInsets.only(left: 20),
                                 child: ListTile(
                                   selected: _selectedIndex == index,
-                                  trailing: item.label == "Chat" &&
-                                          chatCubit.state.unreadMessages > 0
-                                      ? Icon(Icons.mark_chat_unread,
-                                          size: 16, color: Colors.red)
-                                      : null,
+                                  // trailing: item.label == "Chat" &&
+                                  //         chatCubit.state.unreadMessages > 0
+                                  //     ? Icon(Icons.mark_chat_unread,
+                                  //         size: 16, color: Colors.red)
+                                  //     : null,
                                   title: Text(item.label,
                                       style: context.textTheme.labelMedium
                                           ?.copyWith(
