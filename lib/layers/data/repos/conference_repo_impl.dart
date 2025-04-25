@@ -16,9 +16,11 @@ import 'package:file_picker/file_picker.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_webrtc/flutter_webrtc.dart';
 import 'package:logging/logging.dart';
+
 import 'package:webrtc_interface/webrtc_interface.dart';
 
 import '../../../core/app/injector.dart';
+import '../../../core/extension/merge_videos.dart';
 import '../../../core/io/network/models/data_channel_command.dart';
 import '../../../core/janus/janus_client.dart';
 import '../../../core/util/conf.dart';
@@ -30,9 +32,10 @@ import '../../domain/source/api.dart';
 import '../source/local/local_storage.dart';
 
 import 'package:flutter_webrtc/flutter_webrtc.dart' as flutterWebRTC;
+
 import 'package:url_launcher/url_launcher.dart';
 import 'package:http/http.dart' as http;
-import 'dart:js' as js;
+// import 'dart:js' as js;
 
 class ConferenceRepoImpl extends ConferenceRepo {
   ConferenceRepoImpl({
@@ -1650,12 +1653,12 @@ class ConferenceRepoImpl extends ConferenceRepo {
     }
   }
 
-  void mergeVideos(List<dynamic> blobs) {
-    final js.JsArray blobArray = js.JsArray.from(blobs);
+  // void mergeVideos(List<dynamic> blobs) {
+  //   // final js.JsArray blobArray = js.JsArray.from(blobs);
 
-    // Call the JavaScript function directly
-    js.context.callMethod('concatenateVideos', [blobArray]);
-  }
+  //   // Call the JavaScript function directly
+  //   // js.context.callMethod('concatenateVideos', [blobArray]);
+  // }
 
   void downloadRecording(String blob) async {
     print("Recording downloaded.");

@@ -8,7 +8,9 @@ import 'package:cinteraction_vc/core/extension/context.dart';
 import 'package:cinteraction_vc/core/extension/context_user.dart';
 import 'package:cinteraction_vc/layers/presentation/cubit/chat/chat_cubit.dart';
 import 'package:cinteraction_vc/layers/presentation/cubit/chat/chat_state.dart';
+
 import 'package:cinteraction_vc/layers/presentation/cubit/home/home_cubit.dart';
+
 import 'package:cinteraction_vc/layers/presentation/ui/chat/widget/dialogs/add_participiant_dialog.dart';
 import 'package:cinteraction_vc/layers/presentation/ui/chat/widget/chat_details_widget.dart';
 import 'package:cinteraction_vc/layers/presentation/ui/chat/widget/dialogs/editGroupDialog.dart';
@@ -786,34 +788,33 @@ class ChatRoomPage extends StatelessWidget {
                             );
                           }
                           return Row(
-                            crossAxisAlignment: CrossAxisAlignment.center,
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              const SizedBox(
-                                width: 10,
-                              ),
-                              UserImage.large(user!.imageUrl),
-                              const SizedBox(
-                                width: 10,
-                              ),
-                              Column(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Text(
-                                    'Welcome!',
-                                    textAlign: TextAlign.center,
-                                    style: context.textTheme.titleLarge,
-                                  ),
-                                  Text(
-                                    user.name,
-                                    textAlign: TextAlign.center,
-                                    style: context.textTheme.titleLarge,
-                                  ),
-                                ],
-                              ),
-                            ],
-                          );
+                              crossAxisAlignment: CrossAxisAlignment.center,
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                const SizedBox(
+                                  width: 10,
+                                ),
+                                UserImage.large(user!.imageUrl),
+                                const SizedBox(
+                                  width: 10,
+                                ),
+                                Column(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      'Welcome!',
+                                      textAlign: TextAlign.center,
+                                      style: context.textTheme.titleLarge,
+                                    ),
+                                    Text(
+                                      user.name,
+                                      textAlign: TextAlign.center,
+                                      style: context.textTheme.titleLarge,
+                                    ),
+                                  ],
+                                )
+                              ]);
                         }(),
                       ),
                     ),

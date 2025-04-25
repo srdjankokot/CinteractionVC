@@ -138,7 +138,8 @@ class ApiImpl extends Api {
           chatId: chatId,
           organizerId: 0,
           organizer: "",
-          meetingStart:  DateTime.parse(response.data['meeting_start'] as String));
+          meetingStart:
+              DateTime.parse(response.data['meeting_start'] as String));
 
       return ApiResponse(response: meetingDto);
       // return login;
@@ -564,6 +565,7 @@ class ApiImpl extends Api {
     String? message,
     required List<int> participantIds,
     List<PlatformFile>? uploadedFiles,
+    void Function(double progress)? onProgress,
   }) async {
     Dio dio = await getIt.getAsync<Dio>();
 
@@ -606,10 +608,29 @@ class ApiImpl extends Api {
     var formData = FormData.fromMap(formDataMap);
 
     try {
-      Response response = await dio.post(
-        Urls.sentChatMessage,
-        data: formData,
-      );
+      Response response;
+
+      if (uploadedFiles != null && uploadedFiles.isNotEmpty) {
+        response = await dio.post(
+          options: Options(headers: {
+            Headers.contentTypeHeader: 'multipart/form-data',
+          }),
+          Urls.sentChatMessage,
+          data: formData,
+          onSendProgress: (int sent, int total) {
+            double progress = sent / total;
+            print("Progress fajlova: ${(progress * 100).toStringAsFixed(0)}%");
+            if (onProgress != null) {
+              onProgress(progress);
+            }
+          },
+        );
+      } else {
+        response = await dio.post(
+          Urls.sentChatMessage,
+          data: formData,
+        );
+      }
 
       if (response.data != null &&
           response.data['messages'] is Map<String, dynamic>) {
