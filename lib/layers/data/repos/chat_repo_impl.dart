@@ -319,7 +319,7 @@ class ChatRepoImpl extends ChatRepo {
           }
 
           if (matchedChat != null && chatIdParsed == chatDetailsDto.chatId) {
-            final isFile = messageParsed.startsWith('http') ||
+            final isFile = messageParsed.startsWith('http') &&
                 messageParsed.contains('/storage/');
 
             final newMessage = MessageDto(
