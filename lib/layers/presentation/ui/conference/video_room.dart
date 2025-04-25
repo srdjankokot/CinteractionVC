@@ -898,7 +898,7 @@ class VideoRoomPage extends StatelessWidget {
         for (var stream in items) {
           if (stream.publisherName.toLowerCase().contains('screenshare')) {
             screenshared = stream;
-            items.remove(screenshared);
+            items.remove(stream);
             break;
           }
         }
@@ -936,8 +936,14 @@ class VideoRoomPage extends StatelessWidget {
       } else {
         //desktop list layout
 
-        const double itemHeight = 182;
-        const double itemWidth = 189;
+        // const double itemHeight = 182;
+        // const double itemWidth = 189;
+
+        final list= items.take(4).toList();
+
+        final double itemWidth = (200 - borderWidth * 2);
+        final double itemHeight = (itemWidth * 16 / 9)/ list.length;
+        // final double itemWidth = (200 - borderWidth * 2);
 
         return Row(
           children: <Widget>[
@@ -946,7 +952,7 @@ class VideoRoomPage extends StatelessWidget {
                 child: ParticipantVideoWidget(
                     remoteStream: screenshared,
                     height: double.maxFinite,
-                    width: double.maxFinite - 500),
+                    width: double.maxFinite),
               ),
             ),
             Container(
@@ -955,27 +961,38 @@ class VideoRoomPage extends StatelessWidget {
               child: SizedBox(
                 width: itemWidth + 20,
                 height: MediaQuery.of(context).size.height - 156,
-                child: ListView.builder(
-                  shrinkWrap: true,
-                  itemCount: items.length,
-                  itemBuilder: (context, index) {
-                    return Container(
-                      clipBehavior: Clip.hardEdge,
-                      margin: const EdgeInsets.all(3),
-                      decoration: ShapeDecoration(
-                        shape: RoundedRectangleBorder(
-                          side: const BorderSide(width: 2, color: Colors.white),
-                          borderRadius: BorderRadius.circular(6),
-                        ),
-                      ),
-                      child: ParticipantVideoWidget(
-                        remoteStream: items[index],
-                        height: itemHeight,
-                        width: itemWidth,
-                      ),
-                    );
-                  },
-                ),
+                child:
+                Wrap(
+                  runSpacing: 0,
+                  spacing: 0,
+                  alignment: WrapAlignment.center,
+                  children: list
+                      .map((e) => ParticipantVideoWidget(
+                      remoteStream: e, height: itemHeight, width: itemWidth))
+                      .toList(),
+                )
+
+                // ListView.builder(
+                //   shrinkWrap: true,
+                //   itemCount: items.length,
+                //   itemBuilder: (context, index) {
+                //     return Container(
+                //       clipBehavior: Clip.hardEdge,
+                //       margin: const EdgeInsets.all(3),
+                //       decoration: ShapeDecoration(
+                //         shape: RoundedRectangleBorder(
+                //           side: const BorderSide(width: 2, color: Colors.white),
+                //           borderRadius: BorderRadius.circular(6),
+                //         ),
+                //       ),
+                //       child: ParticipantVideoWidget(
+                //         remoteStream: items[index],
+                //         height: itemHeight,
+                //         width: itemWidth,
+                //       ),
+                //     );
+                //   },
+                // ),
               ),
             ),
           ],
