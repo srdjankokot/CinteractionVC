@@ -5,6 +5,7 @@ import 'package:cinteraction_vc/core/extension/image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
+import '../../../../../../core/app/injector.dart';
 import '../../../../../../core/ui/images/image.dart';
 import '../../../../../../core/util/menu_items.dart';
 
@@ -21,8 +22,15 @@ class HomePage extends StatefulWidget {
 
 class _HomePageState extends State<HomePage> {
 
-
   int _selectedIndex = 0;
+  @override
+  void initState() {
+    super.initState();
+    setState(() {
+      _selectedIndex =  context.getCurrentUser?.id == "1" ? 0 : 3;
+    });
+  }
+
 
   @override
   Widget build(BuildContext context) {
@@ -30,7 +38,7 @@ class _HomePageState extends State<HomePage> {
 
     final user = context.getCurrentUser;
 
-    _selectedIndex = user?.id == "1" ? 0 : 3;
+
     final content = tabs[_selectedIndex].builder(context);
 
 
@@ -44,7 +52,7 @@ class _HomePageState extends State<HomePage> {
       }
     }
 
-    final chatCubit = context.watch<ChatCubit>();
+    // final chatCubit = context.watch<ChatCubit>();
 
     // return BlocConsumer<ChatCubit, ChatState>(
     //   builder: (context, state) {
@@ -130,7 +138,10 @@ class _HomePageState extends State<HomePage> {
                                               BlendMode.srcIn))
                                       : imageSVGAsset(item.assetName),
                                   onTap: () =>
-                                      {setState(() => _selectedIndex = index)},
+                                      {
+                                        setState(
+                                                () => _selectedIndex = index
+                                        )},
                                 ),
                               ),
                             ],

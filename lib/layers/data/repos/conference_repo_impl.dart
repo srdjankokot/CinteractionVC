@@ -191,7 +191,6 @@ class ConferenceRepoImpl extends ConferenceRepo {
 
     print('PUBLISHER CHANGE: publishers: ${publishers}');
 
-
     List<Map> sources = [];
     for (Map publisher in publishers) {
       if ([myId, screenShareId.toString()].contains(publisher['id'])) {
@@ -226,6 +225,14 @@ class ConferenceRepoImpl extends ConferenceRepo {
         stream['id'] = publisher['id'];
         stream['display'] = publisher['display'];
 
+        var metadata = publisher['metadata'];
+
+        stream['metadataMuted'] = stream['type'] == 'audio'
+            ? metadata['isAudioMuted']
+            : stream['type'] == 'video'
+                ? metadata['isVideoMuted']
+                : null;
+
         sources.add(stream);
       }
       // sources.add(mappedStreams);
@@ -237,22 +244,47 @@ class ConferenceRepoImpl extends ConferenceRepo {
 
   _eventMessagesHandler() async {
     videoPlugin?.messages?.listen((payload) async {
-      print('eventMessagesHandlerTest: $payload');
+      // print('eventMessagesHandlerTest: $payload');
 
       JanusEvent event = JanusEvent.fromJson(payload.event);
       List<dynamic>? publishers = event.plugindata?.data['publishers'];
 
-      publishers?.forEach((publisher){
+      publishers?.forEach((publisher) {
         String display = publisher['display'];
         _conferenceToastMessageStream.add('$display joined');
       });
+
       await _attachSubscriberOnPublisherChange(publishers);
+
+      List<dynamic>? participants = event.plugindata?.data['participants'];
+
+      if (participants != null) {
+        participants.forEach((publisher) {
+          var metadata = publisher['metadata'];
+          if (metadata != null) {
+            var id =  publisher['id'];
+            _manageMuteUIEvents(
+                id.toString(), 'audio', metadata['isAudioMuted']);
+            _manageMuteUIEvents(
+                id.toString(), 'video', metadata['isVideoMuted']);
+          }
+        });
+      }
+
+      var metadata = event.plugindata?.data['metadata'];
+      if (metadata != null) {
+        var id = event.plugindata?.data['id'];
+        _manageMuteUIEvents(
+            id.toString(), 'audio', metadata['isAudioMuted']);
+        _manageMuteUIEvents(
+            id.toString(), 'video', metadata['isVideoMuted']);
+      }
+
 
       var kicked = event.plugindata?.data['kicked'];
       if (kicked != null) {
         _unSubscribeTo(kicked);
       }
-
 
       var unpublished = event.plugindata?.data['unpublished'];
       if (unpublished != null) {
@@ -282,17 +314,18 @@ class ConferenceRepoImpl extends ConferenceRepo {
 
           // {event: {janus: event, session_id: 8890060192473935, sender: 4573435648381413, plugindata: {plugin: janus.plugin.videoroom, data: {videoroom: event, room: 1234, id: 57, mid: 1, moderation: muted}}}, jsep: null}
           // {event: {janus: event, session_id: 8890060192473935, sender: 4573435648381413, plugindata: {plugin: janus.plugin.videoroom, data: {videoroom: event, room: 1234, id: 57, mid: 1, moderation: unmuted}}}, jsep: null}
-          if (dataMap.containsKey('moderation')) {
-            var moderation = dataMap['moderation'];
-            print('moderation: $moderation');
-            if (moderation == 'muted' || moderation == 'unmuted') {
-              var id = '${dataMap['id']}';
-              var mid = dataMap['mid'];
-              var kind = mid == '0' ? 'audio' : 'video';
-              var muted = moderation == 'muted';
-              _manageMuteUIEvents(id, kind, muted);
-            }
-          }
+
+          // if (dataMap.containsKey('moderation')) {
+          //   var moderation = dataMap['moderation'];
+          //   print('moderation: $moderation');
+          //   if (moderation == 'muted' || moderation == 'unmuted') {
+          //     var id = '${dataMap['id']}';
+          //     var mid = dataMap['mid'];
+          //     var kind = mid == '0' ? 'audio' : 'video';
+          //     var muted = moderation == 'muted';
+          //     _manageMuteUIEvents(id, kind, muted);
+          //   }
+          // }
 
           if (data.containsKey("videoroom")) {
             var videoroom = dataMap['videoroom'];
@@ -310,9 +343,9 @@ class ConferenceRepoImpl extends ConferenceRepo {
       }
 
       var errorCode = event.plugindata?.data['error_code'];
-      if(errorCode != null){
-        if(errorCode == 436) //already in the room
-            {
+      if (errorCode != null) {
+        if (errorCode == 436) //already in the room
+        {
           _selfKickAndJoin();
         }
       }
@@ -411,65 +444,59 @@ class ConferenceRepoImpl extends ConferenceRepo {
   _configureLocalVideoRenderer() async {
     await localVideoRenderer.init();
 
-
-    try{
+    try {
       bool? cameraAvailable = await videoPlugin?.hasCamera();
 
-      if(cameraAvailable!)
-        {
-          localVideoRenderer.mediaStream = await videoPlugin?.initializeMediaDevices(simulcastSendEncodings: [
-            RTCRtpEncoding(
-                rid: "h",
-                minBitrate: 256000,
-                // 256 kbps
-                maxBitrate: 512000,
-                // 512 kbps
-                active: true,
-                scalabilityMode: 'L2T2',
-                maxFramerate: 24),
-            RTCRtpEncoding(
-                rid: "m",
-                minBitrate: 128000,
-                // 128 kbps
-                maxBitrate: 256000,
-                // 256 kbps
-                active: true,
-                scalabilityMode: 'L2T2',
-                scaleResolutionDownBy: 2,
-                // 240p
-                maxFramerate: 24),
-            RTCRtpEncoding(
-              rid: "l",
-              minBitrate: 64000,
-              // 64 kbps
-              maxBitrate: 128000,
-              // 128 kbps
+      if (cameraAvailable!) {
+        localVideoRenderer.mediaStream =
+            await videoPlugin?.initializeMediaDevices(simulcastSendEncodings: [
+          RTCRtpEncoding(
+              rid: "h",
+              minBitrate: 256000,
+              // 256 kbps
+              maxBitrate: 512000,
+              // 512 kbps
               active: true,
               scalabilityMode: 'L2T2',
-              scaleResolutionDownBy: 4, // 180pmaxFramerate: 24
-            ),
-          ], mediaConstraints: {
-            'video': {'width': 640, 'height': 360},
-            // 720p max for higher quality
-            'audio': true,
-          });
-        }
-      else{
+              maxFramerate: 24),
+          RTCRtpEncoding(
+              rid: "m",
+              minBitrate: 128000,
+              // 128 kbps
+              maxBitrate: 256000,
+              // 256 kbps
+              active: true,
+              scalabilityMode: 'L2T2',
+              scaleResolutionDownBy: 2,
+              // 240p
+              maxFramerate: 24),
+          RTCRtpEncoding(
+            rid: "l",
+            minBitrate: 64000,
+            // 64 kbps
+            maxBitrate: 128000,
+            // 128 kbps
+            active: true,
+            scalabilityMode: 'L2T2',
+            scaleResolutionDownBy: 4, // 180pmaxFramerate: 24
+          ),
+        ], mediaConstraints: {
+          'video': {'width': 640, 'height': 360},
+          // 720p max for higher quality
+          'audio': true,
+        });
+      } else {
         localVideoRenderer.isVideoMuted = true;
         print("System dont detect any camera.");
         localVideoRenderer.mediaStream =
-        await videoPlugin?.initializeMediaDevices();
+            await videoPlugin?.initializeMediaDevices();
       }
-
-
-    }
-    catch(e){
+    } catch (e) {
       localVideoRenderer.isVideoMuted = true;
       print("Camera not available. Falling back to audio only.");
       localVideoRenderer.mediaStream =
-      await videoPlugin?.initializeMediaDevices();
+          await videoPlugin?.initializeMediaDevices();
     }
-
 
     localVideoRenderer.videoRenderer.srcObject = localVideoRenderer.mediaStream;
     localVideoRenderer.publisherName = displayName;
@@ -513,10 +540,6 @@ class ConferenceRepoImpl extends ConferenceRepo {
             String mid = element['mid'].toString();
             videoMids[feedId] = mid; // latest video MID per feed
           }
-          print("latest video streams ids: $videoMids");
-          print('substreams: ${element['mid']} ${element['feed_id']} ${element['active']} ');
-
-
 
           videoState.subStreamsToFeedIdMap[element['mid']] = element;
           // to avoid duplicate subscriptions
@@ -524,7 +547,6 @@ class ConferenceRepoImpl extends ConferenceRepo {
             videoState.feedIdToMidSubscriptionMap[element['feed_id']] = {};
           videoState.feedIdToMidSubscriptionMap[element['feed_id']]
               [element['mid']] = true;
-
         });
 
         // print("print liste: ${videoState.feedIdToMidSubscriptionMap}");
@@ -538,7 +560,6 @@ class ConferenceRepoImpl extends ConferenceRepo {
       });
 
       remotePlugin?.webRTCHandle!.peerConnection!.onDataChannel = (channel) {
-        print("ondatachannel $channel");
         channel.onBufferedAmountLow = (currentAmount) {
           print("onBufferedAmountLow ${currentAmount.toString()}");
         };
@@ -579,19 +600,18 @@ class ConferenceRepoImpl extends ConferenceRepo {
       };
 
       remotePlugin?.remoteTrack?.listen((event) async {
-        print({
-          'mid': event.mid,
-          'flowing': event.flowing,
-          'TrackId': event.track?.id,
-          'TrackKind': event.track?.kind,
-          'TrackLabel': event.track?.label!,
-          'TrackMuted': event.track?.muted!,
-          'TrackEnabled': event.track?.enabled
-        });
-        print(sources);
+        // print({
+        //   'mid': event.mid,
+        //   'flowing': event.flowing,
+        //   'TrackId': event.track?.id,
+        //   'TrackKind': event.track?.kind,
+        //   'TrackLabel': event.track?.label!,
+        //   'TrackMuted': event.track?.muted!,
+        //   'TrackEnabled': event.track?.enabled
+        // });
+        // print(event);
 
         int? feedId = videoState.subStreamsToFeedIdMap[event.mid]?['feed_id'];
-        _manageMuteUIEvents('$feedId', event.track!.kind!, !event.flowing!);
 
         Publisher? feed = videoState.feedIdToDisplayStreamsMap[feedId];
         if (feed == null) {
@@ -609,7 +629,8 @@ class ConferenceRepoImpl extends ConferenceRepo {
           if (renderer == null) {
             renderer = StreamRenderer(feedKey, feedKey);
             await renderer.init();
-            renderer.mediaStream = await flutterWebRTC.createLocalMediaStream(feedKey);
+            renderer.mediaStream =
+                await flutterWebRTC.createLocalMediaStream(feedKey);
             videoState.streamsToBeRendered[feedKey] = renderer;
             print("Created new renderer for $feedKey");
           }
@@ -632,13 +653,12 @@ class ConferenceRepoImpl extends ConferenceRepo {
             renderer.videoRenderer.srcObject = renderer.mediaStream;
             renderer.videoRenderer.muted = false;
 
-            final audioSource = sources.firstWhere((item) => item['id'] == feedId && item['type']== 'audio');
-            renderer.isAudioMuted = audioSource['moderated'] ?? false;
+            final audioSource = sources.firstWhere(
+                (item) => item['id'] == feedId && item['type'] == 'audio');
+            renderer.isAudioMuted = audioSource['metadataMuted'];
 
             renderer.audioMid = event.mid;
           } else if (isVideo) {
-            print("Handling VIDEO for $feedId");
-
             // Remove existing video tracks
             renderer.mediaStream?.getVideoTracks().forEach((track) {
               renderer?.mediaStream?.removeTrack(track);
@@ -654,12 +674,14 @@ class ConferenceRepoImpl extends ConferenceRepo {
             await Future.delayed(const Duration(milliseconds: 10));
             renderer.videoRenderer.srcObject = renderer.mediaStream;
             renderer.videoRenderer.onResize = () => _refreshStreams();
+            renderer.videoRenderer.muted = false;
 
-            final audioSource = sources.firstWhere((item) => item['id'] == feedId && item['type']== 'video');
-            renderer.isVideoMuted = audioSource['moderated'] ?? false;
+            final videoSource = sources.firstWhere(
+                (item) => item['id'] == feedId && item['type'] == 'video');
+            renderer.isVideoMuted = videoSource['metadataMuted'];
 
             renderer.videoMid = event.mid;
-            renderer.isVideoMuted = event.track!.muted!;
+            // renderer.isVideoMuted = event.track!.muted!;
           }
 
           _checkVideoStreams();
@@ -782,10 +804,10 @@ class ConferenceRepoImpl extends ConferenceRepo {
   Future<void> _unSubscribeVideoTo(int id) async {
     String? mid = videoMids[id];
 
-    var feed = videoState.streamsToBeRendered[id.toString()];
+    // var feed = videoState.streamsToBeRendered[id.toString()];
     if (mid == null) return;
 
-    feed?.isVideoMuted = true;
+    // feed?.isVideoMuted = true;
 
     List<Map> unsubscribeStreams = [];
     unsubscribeStreams.add({
@@ -812,13 +834,13 @@ class ConferenceRepoImpl extends ConferenceRepo {
     if (feed == null) return;
     feed.mirrorVideo = true;
 
-    feed.isVideoMuted = false;
-
     String? mid = videoMids[id];
-    if (mid!=null) {
+    if (mid != null) {
       print("allready subscribed");
       return;
     }
+
+    // feed.isVideoMuted = false;
 
     List<Map> subscribeStreams = [];
     subscribeStreams.add({
@@ -839,9 +861,7 @@ class ConferenceRepoImpl extends ConferenceRepo {
     }
   }
 
-
-  _selfKickAndJoin() async
-  {
+  _selfKickAndJoin() async {
     await _kick(id: myId);
     await _joinPublisher();
   }
@@ -851,7 +871,6 @@ class ConferenceRepoImpl extends ConferenceRepo {
   ///
   @override
   Future<void> kick({required String id}) async {
-
     StreamRenderer? renderer = videoState.streamsToBeRendered[id];
     if (renderer == null) {
       return;
@@ -862,8 +881,7 @@ class ConferenceRepoImpl extends ConferenceRepo {
     // _unSubscribeVideoTo(int.parse(id));
   }
 
-  _kick({required String id}) async
-  {
+  _kick({required String id}) async {
     var payload = {
       "request": "kick",
       "room": room,
@@ -882,7 +900,7 @@ class ConferenceRepoImpl extends ConferenceRepo {
       "mute": muted
     };
 
-    await videoPlugin?.send(data: payload);
+    // await videoPlugin?.send(data: payload);
     localVideoRenderer.mediaStream
         ?.getTracks()
         .where((element) => element.kind == kind)
@@ -897,6 +915,7 @@ class ConferenceRepoImpl extends ConferenceRepo {
       localVideoRenderer.isVideoMuted = muted;
     }
 
+    await _changeMetaData();
     _refreshStreams();
     _getEngagement();
   }
@@ -1064,7 +1083,7 @@ class ConferenceRepoImpl extends ConferenceRepo {
   @override
   Future<void> publishById({required String id}) async {
     // _changeTalker(id);
-    // _manageTalkingEvents(int.parse(id), true);
+    _manageTalkingEvents(int.parse(id), true);
     await videoPlugin?.sendData(jsonEncode(
         DataChannelCommand(command: DataChannelCmd.publish, id: id).toJson()));
   }
@@ -1171,8 +1190,17 @@ class ConferenceRepoImpl extends ConferenceRepo {
     });
   }
 
+  _changeMetaData() async {
+    var metadata = {
+      "isAudioMuted": localVideoRenderer.isAudioMuted,
+      "isVideoMuted": localVideoRenderer.isVideoMuted
+    };
+
+    await videoPlugin?.configure(metadata: metadata);
+  }
+
   ///End Stream actions
-  var maxVisibleSlots = 3;
+  var maxVisibleSlots = 8;
   List<String> currentTalkerIds = [];
 
   void updateTalkerSlots(Map<dynamic, StreamRenderer> publisherMap,
@@ -1233,7 +1261,11 @@ class ConferenceRepoImpl extends ConferenceRepo {
     var screenshareKeys = videoState.streamsToBeRendered.keys
         .where((key) => key.contains('_screenshare'))
         .toList();
-    final List<String> list = ["local", ...currentTalkerIds, ...screenshareKeys];
+    final List<String> list = [
+      "local",
+      ...currentTalkerIds,
+      ...screenshareKeys
+    ];
     // print("_refreshStreams: $list" );
 
     _conferenceStream.add(Map.fromEntries(
@@ -1281,9 +1313,12 @@ class ConferenceRepoImpl extends ConferenceRepo {
 
   _joinPublisher() async {
     roomDetails = await _getRoomDetails(room);
+    print(roomDetails);
     await videoPlugin?.joinPublisher(room,
-        displayName: displayName, id: int.parse(myId));
-
+        displayName: displayName,
+        id: int.parse(myId),
+        isAudioMuted: localVideoRenderer.isAudioMuted,
+        isVideoMuted: localVideoRenderer.isVideoMuted);
   }
 
   Future<JanusVideoRoom?> _getRoomDetails(int roomId) async {
@@ -1302,20 +1337,20 @@ class ConferenceRepoImpl extends ConferenceRepo {
     return null;
   }
 
-  // Future<List<JanusVideoRoom>> _listRooms() async {
-  //   print('get all rooms');
-  //   var payload = {"request": "list"};
-  //   Map allRooms = await videoPlugin?.send(data: payload);
-  //   JanusEvent event = JanusEvent.fromJson(allRooms);
-  //
-  //   List<JanusVideoRoom> rooms = [];
-  //
-  //   for (var room in event.plugindata?.data['list']) {
-  //     var participant = JanusVideoRoom.fromJson(room as Map<String, dynamic>);
-  //     rooms.add(participant);
-  //   }
-  //   return rooms;
-  // }
+  Future<List<JanusVideoRoom>> _listRooms() async {
+    print('get all rooms');
+    var payload = {"request": "list"};
+    Map allRooms = await videoPlugin?.send(data: payload);
+    JanusEvent event = JanusEvent.fromJson(allRooms);
+
+    List<JanusVideoRoom> rooms = [];
+
+    for (var room in event.plugindata?.data['list']) {
+      var participant = JanusVideoRoom.fromJson(room as Map<String, dynamic>);
+      rooms.add(participant);
+    }
+    return rooms;
+  }
 
   _cleanupWebRTC() async {
     StreamRenderer? rendererRemoved;
@@ -1465,7 +1500,6 @@ class ConferenceRepoImpl extends ConferenceRepo {
   // data: data)
   //     .toJson()));
   // }
-
 
   _sendMyEngagementToServer(double engagement) async {
     await _api.sendEngagement(
@@ -1681,6 +1715,6 @@ class ConferenceRepoImpl extends ConferenceRepo {
 
   @override
   Stream<String> getToastStream() {
-      return _conferenceToastMessageStream.stream;
+    return _conferenceToastMessageStream.stream;
   }
 }

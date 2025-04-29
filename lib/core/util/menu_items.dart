@@ -181,8 +181,8 @@ final chat = MenuItem(
       BlocProvider<HomeCubit>(
         create: (context) => getIt.get<HomeCubit>(),
       ),
-      BlocProvider<ChatCubit>(
-        create: (context) => getIt.get<ChatCubit>(),
+      BlocProvider<ChatCubit>.value(
+        value:  getIt.get<ChatCubit>(),
       ),
     ],
     child: ChatRoomPage(),

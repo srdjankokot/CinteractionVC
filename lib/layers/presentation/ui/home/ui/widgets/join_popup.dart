@@ -11,11 +11,29 @@ class JoinPopup extends StatelessWidget {
 
     TextEditingController textFieldController = TextEditingController();
 
+    void join()
+    {
+      Navigator.pop(context);
+      // context.pushReplacement('/echo');
+      context.pushNamed('meeting',
+          pathParameters: {
+            'roomId': textFieldController.text,
+          },
+          extra: context.getCurrentUser?.name);
+    }
+
         return AlertDialog(
           title: const Text('Enter room ID'),
           content: TextField(
+            autofocus: true,
             controller: textFieldController,
             decoration: const InputDecoration(hintText: "Room ID"),
+            textInputAction: TextInputAction.done,
+            onSubmitted: (value) {
+              // Your action here
+              join();
+            },
+
           ),
           actions: <Widget>[
             ElevatedButton(
@@ -27,20 +45,10 @@ class JoinPopup extends StatelessWidget {
             ElevatedButton(
               child: const Text('Join'),
               onPressed: () {
-                // print(_textFieldController.text);
-                Navigator.pop(context);
-                // context.pushReplacement('/echo');
-                context.pushNamed('meeting',
-                    pathParameters: {
-                      'roomId': textFieldController.text,
-                    },
-                    extra: context.getCurrentUser?.name);
-
-                // context.go("${AppRoute.meeting.path}/${_textFieldController.text}");
+                join();
               },
             ),
           ],
     );
   }
-
 }
