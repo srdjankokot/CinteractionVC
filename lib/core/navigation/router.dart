@@ -105,10 +105,16 @@ final GoRouter router = GoRouter(
       path: AppRoute.home.path,
       builder: (context, state) {
         print("router: ${AppRoute.home.path}");
-        return BlocProvider(
-          create: (context) => getIt.get<ChatCubit>(),
+        // return BlocProvider(
+        //   create: (context) => getIt.get<ChatCubit>(),
+        //   child: const HomePage(),
+        // );
+
+        return BlocProvider<ChatCubit>.value(
+          value: getIt.get<ChatCubit>(),
           child: const HomePage(),
         );
+
       },
       redirect: (context, state) {
         print('🔁 Router redirect triggered for path: ${state.uri.toString()}');
@@ -212,11 +218,11 @@ final GoRouter router = GoRouter(
             BlocProvider<HomeCubit>(
               create: (context) => getIt.get<HomeCubit>(),
             ),
-            BlocProvider<ChatCubit>(
-              create: (context) => getIt.get<ChatCubit>(),
+            BlocProvider<ChatCubit>.value(
+              value: getIt.get<ChatCubit>(),
             ),
           ],
-          child: ChatRoomPage(),
+          child: const ChatRoomPage(),
         );
       },
     ),

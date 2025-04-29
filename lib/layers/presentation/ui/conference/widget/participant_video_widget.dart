@@ -145,13 +145,26 @@ class ParticipantVideoWidget extends StatelessWidget {
                 top: 10,
                 child: Text('${remoteStream.publisherName}', style: context.textTheme.displayLarge?.copyWith(color: Colors.white),)),
 
-            Visibility(
-                visible: remoteStream.isAudioMuted == true,
-                child: Positioned(
-                    bottom: 50,
-                    left: 24,
-                    child:
-                        imageSVGAsset('icon_microphone_disabled') as Widget)),
+
+            Positioned(
+                bottom: 16,
+                left: 16,
+                child: Row(
+                  children: [
+                    Visibility(
+                        visible: remoteStream.isAudioMuted == true,
+                            child:
+                            imageSVGAsset('icon_microphone_disabled') as Widget),
+
+                    Visibility(
+                        visible: remoteStream.isVideoMuted == true,
+                            child:
+                            imageSVGAsset('icon_video_recorder_disabled') as Widget),
+                  ],
+                )
+            ),
+
+
             // Visibility(
             //     visible: width < 200,
             //     child: Positioned.fill(

@@ -48,7 +48,7 @@ String apiSecret = "";
 String mixTurnServerUsernameHuawei = 'test';
 String mixTurnServerCredentialHuawei = 'test123';
 
-int maxPublishersDefault = 9;
+int maxPublishersDefault = 30;
 
 List<RTCIceServer> iceServers = <RTCIceServer>[
   RTCIceServer(

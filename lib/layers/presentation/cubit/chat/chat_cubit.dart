@@ -29,18 +29,20 @@ class ChatCubit extends Cubit<ChatState> with BlocLoggy {
 
   final bool isInCallChat;
   bool isLoaded = false;
+  int myRoomId = 0;
 
   ChatCubit(
       {required this.chatUseCases,
       required this.callUseCases,
       required this.isInCallChat})
       : super(const ChatState.initial()) {
-    print("Chat Cubit is created");
     if (!isInCallChat) load(isInCallChat, 1234);
   }
 
   void load(bool isInCall, int roomId) async {
     if (!isLoaded) {
+      myRoomId = roomId;
+      print("Chat Cubit is created for $myRoomId");
       await chatUseCases.chatInitialize(
           isInCall: isInCall, chatGroupId: roomId);
       if (!isInCall) {
@@ -71,7 +73,7 @@ class ChatCubit extends Cubit<ChatState> with BlocLoggy {
 
   @override
   Future<void> close() {
-    print('Cubit is being disposed');
+    print('Chat Cubit for room: $myRoomId is being disposed');
     return super.close();
   }
 

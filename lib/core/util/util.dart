@@ -45,7 +45,7 @@ class StreamRenderer {
     if (value == true && _isTalking != true) {
       // it just switched to true — record time
       talkingStartTime = DateTime.now();
-      print("Talking started at: $talkingStartTime");
+      // print("Talking started at: $talkingStartTime");
     }
     _isTalking = value;
   }
