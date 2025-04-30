@@ -67,11 +67,12 @@ class ConferenceRepoImpl extends ConferenceRepo {
   int room = 12344321;
   late JanusVideoRoom? roomDetails;
 
-  final _conferenceStream =
-      StreamController<Map<dynamic, StreamRenderer>>.broadcast();
+  final _conferenceStream = StreamController<Map<dynamic, StreamRenderer>>.broadcast();
+  // final _contributorsStream = StreamController<Map<dynamic, StreamRenderer>>.broadcast();
+
   final _conferenceEndedStream = StreamController<String>.broadcast();
   final _conferenceChatStream = StreamController<List<ChatMessage>>.broadcast();
-  final _participantsStream = StreamController<List<Participant>>.broadcast();
+  final _participantsStream = StreamController<Map<dynamic, StreamRenderer>>.broadcast();
   final _avgEngagementStream = StreamController<int>.broadcast();
   final _talkingIdStream = StreamController<int>.broadcast();
   final _conferenceToastMessageStream = StreamController<String>.broadcast();
@@ -116,7 +117,7 @@ class ConferenceRepoImpl extends ConferenceRepo {
   }
 
   @override
-  Stream<List<Participant>> getSubscribersStream() {
+  Stream<Map<dynamic, StreamRenderer>>  getSubscribersStream() {
     return _participantsStream.stream;
   }
 
@@ -202,14 +203,6 @@ class ConferenceRepoImpl extends ConferenceRepo {
         currentTalkerIds.add(publisher['id'].toString());
       }
 
-      // videoState.feedIdToDisplayStreamsMap[publisher['id']] = {
-      //   'id': publisher['id'],
-      //   'display': publisher['display'],
-      //   'streams': publisher['streams']
-      // };
-      // videoState.feedIdToDisplayStreamsMap[publisher['id']] = Publisher(id: publisher['id'], displayName: publisher['display']);
-      // print(publisher.toString());
-      // Map<String, dynamic> json = jsonDecode(publisher.toString());
       videoState.feedIdToDisplayStreamsMap[publisher['id']] =
           Publisher.fromJson(publisher as Map<String, dynamic>);
 
@@ -225,13 +218,16 @@ class ConferenceRepoImpl extends ConferenceRepo {
         stream['id'] = publisher['id'];
         stream['display'] = publisher['display'];
 
-        var metadata = publisher['metadata'];
-
-        stream['metadataMuted'] = stream['type'] == 'audio'
-            ? metadata['isAudioMuted']
-            : stream['type'] == 'video'
+        if(publisher.containsKey('metadata'))
+          {
+            var metadata = publisher['metadata'];
+            stream['metadataMuted'] = stream['type'] == 'audio'
+                ? metadata['isAudioMuted']
+                : stream['type'] == 'video'
                 ? metadata['isVideoMuted']
                 : null;
+            stream['isHandUp'] = metadata['isHandUp'];
+          }
 
         sources.add(stream);
       }
@@ -263,10 +259,7 @@ class ConferenceRepoImpl extends ConferenceRepo {
           var metadata = publisher['metadata'];
           if (metadata != null) {
             var id =  publisher['id'];
-            _manageMuteUIEvents(
-                id.toString(), 'audio', metadata['isAudioMuted']);
-            _manageMuteUIEvents(
-                id.toString(), 'video', metadata['isVideoMuted']);
+            _manageMetadata(id.toString(), metadata);
           }
         });
       }
@@ -274,10 +267,7 @@ class ConferenceRepoImpl extends ConferenceRepo {
       var metadata = event.plugindata?.data['metadata'];
       if (metadata != null) {
         var id = event.plugindata?.data['id'];
-        _manageMuteUIEvents(
-            id.toString(), 'audio', metadata['isAudioMuted']);
-        _manageMuteUIEvents(
-            id.toString(), 'video', metadata['isVideoMuted']);
+        _manageMetadata(id.toString(), metadata);
       }
 
 
@@ -407,15 +397,30 @@ class ConferenceRepoImpl extends ConferenceRepo {
     });
   }
 
-  _manageMuteUIEvents(String mid, String kind, bool muted) async {
-    var feedId = mid;
-    StreamRenderer? renderer =
-        videoState.streamsToBeRendered[feedId.toString()];
+  _manageMetadata(String id, Map<String, dynamic> metadata){
+    StreamRenderer? renderer = videoState.streamsToBeRendered[id];
 
     if (renderer == null) {
       return;
     }
+    _manageMuteUIEvents(renderer, 'audio', metadata['isAudioMuted']);
+    _manageMuteUIEvents(renderer, 'video', metadata['isVideoMuted']);
+    _manageHandUp(renderer, metadata['isHandUp']);
 
+    _refreshStreams();
+  }
+
+  _manageHandUp(StreamRenderer renderer, bool handUp)
+  {
+    print("${renderer.publisherName}: ${renderer.isHandUp} new value: $handUp");
+    if (renderer.isHandUp != handUp && handUp) {
+      _conferenceToastMessageStream.add('${renderer.publisherName} raised hand!');
+    }
+
+    renderer.isHandUp = handUp;
+  }
+
+  _manageMuteUIEvents(StreamRenderer renderer, String kind, bool muted) async {
     if (renderer.publisherName.toLowerCase().contains('screenshare')) {
       return;
     }
@@ -427,18 +432,14 @@ class ConferenceRepoImpl extends ConferenceRepo {
       if (muted) {
         renderer.isTalking = false;
       }
-
-      print("mute audio for ${renderer.publisherName}");
       renderer.isAudioMuted = muted;
-    } else {
+
+    } else if (kind == 'video'){
       if (renderer.isVideoMuted == muted) {
         return;
       }
       renderer.isVideoMuted = muted;
     }
-
-    print('feedId: $feedId mid: $mid muted: $muted $kind');
-    _refreshStreams();
   }
 
   _configureLocalVideoRenderer() async {
@@ -654,10 +655,17 @@ class ConferenceRepoImpl extends ConferenceRepo {
             renderer.videoRenderer.muted = false;
 
             final audioSource = sources.firstWhere(
-                (item) => item['id'] == feedId && item['type'] == 'audio');
-            renderer.isAudioMuted = audioSource['metadataMuted'];
+                  (item) => item['id'] == feedId && item['type'] == 'audio',
+              orElse: () => <String, dynamic>{},
+            );
 
-            renderer.audioMid = event.mid;
+            if (audioSource.isNotEmpty) {
+              renderer.isAudioMuted = audioSource['metadataMuted'];
+            }
+
+            renderer.isHandUp = audioSource['isHandUp'];
+
+                renderer.audioMid = event.mid;
           } else if (isVideo) {
             // Remove existing video tracks
             renderer.mediaStream?.getVideoTracks().forEach((track) {
@@ -676,9 +684,15 @@ class ConferenceRepoImpl extends ConferenceRepo {
             renderer.videoRenderer.onResize = () => _refreshStreams();
             renderer.videoRenderer.muted = false;
 
-            final videoSource = sources.firstWhere(
-                (item) => item['id'] == feedId && item['type'] == 'video');
-            renderer.isVideoMuted = videoSource['metadataMuted'];
+
+            final Map<dynamic, dynamic> videoSource = sources.firstWhere(
+                  (item) => item['id'] == feedId && item['type'] == 'video',
+              orElse: () => <String, dynamic>{},
+            );
+
+            if (videoSource.isNotEmpty) {
+              renderer.isVideoMuted = videoSource['metadataMuted'];
+            }
 
             renderer.videoMid = event.mid;
             // renderer.isVideoMuted = event.track!.muted!;
@@ -920,6 +934,13 @@ class ConferenceRepoImpl extends ConferenceRepo {
     _getEngagement();
   }
 
+
+  @override
+  Future<void> handUp({required bool handUp}) async{
+    localVideoRenderer.isHandUp = handUp;
+    await _changeMetaData();
+  }
+
   @override
   Future<void> ping({required String msg}) async {
     await videoPlugin?.sendData(msg);
@@ -1156,19 +1177,20 @@ class ConferenceRepoImpl extends ConferenceRepo {
 
   @override
   Future<List<Participant>> getParticipants() async {
-    var payload = {"request": "listparticipants", "room": room};
-    Map participants = await videoPlugin?.send(data: payload);
-    JanusEvent event = JanusEvent.fromJson(participants);
-
-    List<Participant> subscribers = [];
-
-    for (var par in event.plugindata?.data['participants']) {
-      var participant = Participant.fromJson(par as Map<String, dynamic>);
-      subscribers.add(participant);
-    }
-    _participantsStream.add(subscribers);
-
-    return subscribers;
+  //   var payload = {"request": "listparticipants", "room": room};
+  //   Map participants = await videoPlugin?.send(data: payload);
+  //   JanusEvent event = JanusEvent.fromJson(participants);
+  //
+  //   List<Participant> subscribers = [];
+  //
+  //   for (var par in event.plugindata?.data['participants']) {
+  //     var participant = Participant.fromJson(par as Map<String, dynamic>);
+  //     subscribers.add(participant);
+  //   }
+  //   _participantsStream.add(subscribers);
+  //
+  //   return subscribers;
+    return List.empty();
   }
 
   @override
@@ -1193,14 +1215,15 @@ class ConferenceRepoImpl extends ConferenceRepo {
   _changeMetaData() async {
     var metadata = {
       "isAudioMuted": localVideoRenderer.isAudioMuted,
-      "isVideoMuted": localVideoRenderer.isVideoMuted
+      "isVideoMuted": localVideoRenderer.isVideoMuted,
+      "isHandUp": localVideoRenderer.isHandUp
     };
 
     await videoPlugin?.configure(metadata: metadata);
   }
 
   ///End Stream actions
-  var maxVisibleSlots = 8;
+  var maxVisibleSlots = 3;
   List<String> currentTalkerIds = [];
 
   void updateTalkerSlots(Map<dynamic, StreamRenderer> publisherMap,
@@ -1259,7 +1282,7 @@ class ConferenceRepoImpl extends ConferenceRepo {
     // print("_refreshStreams");
     // _checkVideoStreams();
     var screenshareKeys = videoState.streamsToBeRendered.keys
-        .where((key) => key.contains('_screenshare'))
+        .where((key) => key.contains('_screenshare') || key.contains('ScreenShare'))
         .toList();
     final List<String> list = [
       "local",
@@ -1274,7 +1297,7 @@ class ConferenceRepoImpl extends ConferenceRepo {
           .map((key) => MapEntry(key, videoState.streamsToBeRendered[key]!)),
     ));
 
-    // _conferenceStream.add(videoState.streamsToBeRendered);
+    _participantsStream.add(videoState.streamsToBeRendered);
   }
 
   _joinRoom() async {
@@ -1314,11 +1337,17 @@ class ConferenceRepoImpl extends ConferenceRepo {
   _joinPublisher() async {
     roomDetails = await _getRoomDetails(room);
     print(roomDetails);
+
+    var metadata = {
+      "isAudioMuted": localVideoRenderer.isAudioMuted,
+      "isVideoMuted": localVideoRenderer.isVideoMuted,
+      "isHandUp": localVideoRenderer.isHandUp
+    };
+
     await videoPlugin?.joinPublisher(room,
         displayName: displayName,
         id: int.parse(myId),
-        isAudioMuted: localVideoRenderer.isAudioMuted,
-        isVideoMuted: localVideoRenderer.isVideoMuted);
+        metadata: metadata);
   }
 
   Future<JanusVideoRoom?> _getRoomDetails(int roomId) async {

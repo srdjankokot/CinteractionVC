@@ -31,7 +31,7 @@ class ConferenceCubit extends Cubit<ConferenceState> with BlocLoggy {
   StreamSubscription<Map<dynamic, StreamRenderer>>? _conferenceSubscription;
   StreamSubscription<String>? _conferenceEndedStream;
   StreamSubscription<List<ChatMessage>>? _conferenceMessageStream;
-  StreamSubscription<List<Participant>>? _subscribersStream;
+  StreamSubscription<Map<dynamic, StreamRenderer>>? _subscribersStream;
   StreamSubscription<int>? _avgEngagementStream;
   StreamSubscription<String>? _toastMessageStream;
 
@@ -81,8 +81,17 @@ class ConferenceCubit extends Cubit<ConferenceState> with BlocLoggy {
   }
 
   Future<void> toggleChatWindow() async {
-    emit(state.copyWith(showingChat: !state.showingChat));
+    emit(state.copyWith(
+        showingChat: !state.showingChat,
+        showingParticipants: false));
   }
+
+  Future<void> toggleParticipantsWindow() async {
+    emit(state.copyWith(
+        showingParticipants: !state.showingParticipants,
+        showingChat: false));
+  }
+
   void clearToast() {
     emit(state.copyWith(toastMessage: null));
   }
@@ -110,6 +119,12 @@ class ConferenceCubit extends Cubit<ConferenceState> with BlocLoggy {
     emit(state.copyWith(videoMuted: !muted));
   }
 
+  Future<void> handUp() async {
+    var handUp = state.handUp;
+    await conferenceUseCases.handUpU(!handUp);
+    emit(state.copyWith(handUp: !handUp));
+  }
+
   Future<void> toggleEngagement() async {
     var enabled = state.engagementEnabled;
     await conferenceUseCases.toggleEngagement(!enabled);
@@ -133,8 +148,12 @@ class ConferenceCubit extends Cubit<ConferenceState> with BlocLoggy {
     emit(const ConferenceState.ended());
   }
 
-  void _onSubscribers(List<Participant> subscribers) {
+  void _onSubscribers(Map<dynamic, StreamRenderer> subscribers) {
+
+    var local = subscribers['local'];
     emit(state.copyWith(
+      audioMuted: local?.isAudioMuted,
+        handUp: local?.isHandUp,
         isInitial: false,
         streamSubscribers: subscribers,
         numberOfStreams: Random().nextInt(10000)));
