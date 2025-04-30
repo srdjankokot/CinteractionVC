@@ -235,7 +235,7 @@ class _ChatDetailsWidgetState extends State<ChatDetailsWidget> {
     return BlocBuilder<ChatCubit, ChatState>(
       builder: (context, state) {
         final chatDetails = state.chatDetails;
-        print('ProgressInWidget: ${state.uploadProgress}');
+        // print('ProgressInWidget: ${state.uploadProgress}');
         final messages = chatDetails?.messages.messages ?? [];
         final sortedMessages = List.of(messages)
           ..sort((a, b) {

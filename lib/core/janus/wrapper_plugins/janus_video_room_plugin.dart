@@ -161,11 +161,7 @@ class JanusVideoRoomPlugin extends JanusPlugin {
   }
 
   /// joins the [JanusVideoRoom] as a media publisher on provided [roomId] with its name as [displayName] and optionally can provide your own [id].
-  Future<void> joinPublisher(dynamic roomId, {String? pin, int? id, String? token, String? displayName, bool? isAudioMuted = false, bool? isVideoMuted = false}) async {
-    var metadata = {
-      "isAudioMuted": isAudioMuted,
-      "isVideoMuted": isVideoMuted
-    };
+  Future<void> joinPublisher(dynamic roomId, {String? pin, int? id, String? token, String? displayName, Map<String, dynamic>? metadata}) async {
 
     var payload = {
       "request": "join",

@@ -12,6 +12,7 @@ class StreamRenderer {
   String? audioMid;
   String? videoMid;
   bool? isAudioMuted;
+  bool? isHandUp;
   // List<bool> selectedQuality = [false, false, true];
   bool? isVideoMuted;
   bool? mirrorVideo = false;
@@ -68,6 +69,7 @@ class StreamRenderer {
     isAudioMuted = false;
     isVideoMuted = false;
     isTalking = false;
+    isHandUp = false;
     videoRenderer = RTCVideoRenderer();
     await videoRenderer.initialize();
     videoRenderer.srcObject = mediaStream;

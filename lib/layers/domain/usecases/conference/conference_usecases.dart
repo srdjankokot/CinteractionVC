@@ -9,6 +9,7 @@ import 'conference_finish_call.dart';
 import 'conference_get_engagement_stream.dart';
 import 'conference_get_participants.dart';
 import 'conference_get_renderer_stream.dart';
+import 'conference_hand_up.dart';
 import 'conference_initialize.dart';
 import 'conference_kick.dart';
 import 'conference_messages_stream.dart';
@@ -53,7 +54,8 @@ class ConferenceUseCases {
         startRecording = ConferenceStartRecording(repo: repo),
         muteById = ConferenceMuteById(repo: repo),
         stopRecording = ConferenceStopRecording(repo: repo),
-        getToastMessageStream = ConferenceToastMessageStream(repo: repo);
+        getToastMessageStream = ConferenceToastMessageStream(repo: repo),
+        handUpU = ConferenceHandUp(repo: repo);
 
   final ConferenceRepo repo;
 
@@ -82,4 +84,5 @@ class ConferenceUseCases {
   ConferenceStopRecording stopRecording;
   ConferenceMuteById muteById;
   ConferenceToastMessageStream getToastMessageStream;
+  ConferenceHandUp handUpU;
 }

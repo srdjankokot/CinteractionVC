@@ -129,7 +129,7 @@ class ParticipantVideoWidget extends StatelessWidget {
                         }
                       },
                       itemBuilder: (BuildContext context) {
-                        return {'Mute/UnMute','Kick', 'UnPublish'}.map((String choice) {
+                        return {'Mute/UnMute','Kick'}.map((String choice) {
                           return PopupMenuItem<String>(
                             value: choice,
                             child: Text(choice),
@@ -160,6 +160,11 @@ class ParticipantVideoWidget extends StatelessWidget {
                         visible: remoteStream.isVideoMuted == true,
                             child:
                             imageSVGAsset('icon_video_recorder_disabled') as Widget),
+
+                       Visibility(
+                        visible: remoteStream.isHandUp == true,
+                            child: const Icon(Icons.waving_hand_outlined, color: Colors.white),
+                       )
                   ],
                 )
             ),
