@@ -2,6 +2,8 @@
 
 import 'package:audioplayers/audioplayers.dart';
 import 'package:cinteraction_vc/core/extension/context.dart';
+import 'package:cinteraction_vc/core/extension/string.dart';
+import 'package:cinteraction_vc/core/util/conf.dart';
 import 'package:cinteraction_vc/layers/data/dto/chat/chat_dto.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -179,10 +181,7 @@ class _ChatsListViewState extends State<ChatsListView> {
                               Row(
                                 crossAxisAlignment: CrossAxisAlignment.center,
                                 children: [
-                                  UserImage.medium(
-                                    chat.userImage ??
-                                        "https://ui-avatars.com/api/?name=G+R&color=ffffff&background=f34320",
-                                  ),
+                                  UserImage.medium( chat.name.getInitials(), chatId: chat.chatParticipants != null && chat.chatParticipants!.isNotEmpty ? chat.chatParticipants!.length > 1 ? chat.id :   chat.chatParticipants?.first.id ?? 12332 : 12332),
                                   const SizedBox(width: 12),
                                   Expanded(
                                     child: Column(

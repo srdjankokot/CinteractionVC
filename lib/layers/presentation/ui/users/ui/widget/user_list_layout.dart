@@ -1,5 +1,6 @@
 import 'package:cinteraction_vc/assets/colors/Colors.dart';
 import 'package:cinteraction_vc/core/extension/context.dart';
+import 'package:cinteraction_vc/core/extension/string.dart';
 import 'package:cinteraction_vc/core/ui/images/image.dart';
 import 'package:cinteraction_vc/core/ui/widget/engagement_progress.dart';
 import 'package:flutter/material.dart';
@@ -119,7 +120,7 @@ class UserListLayout extends StatelessWidget {
                             child: Row(
                               crossAxisAlignment: CrossAxisAlignment.center,
                               children: [
-                                UserImage.medium(user.imageUrl),
+                                UserImage.medium(user.imageUrl, chatId: int.parse(user.id),),
                                 Padding(
                                   padding: const EdgeInsets.only(left: 12.0),
                                   child: Column(
@@ -208,7 +209,7 @@ class UserListLayout extends StatelessWidget {
                             child: Row(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                UserImage.medium(user.imageUrl),
+                                UserImage.medium(user.name.getInitials(), chatId: int.parse(user.id),),
                                 Expanded(
                                   child: Padding(
                                     padding: const EdgeInsets.only(

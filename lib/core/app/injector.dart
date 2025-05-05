@@ -164,7 +164,7 @@ Future<void> initializeGetIt() async {
   getIt.registerSingleton<ProfileRepository>(
       ProfileRepository(profileProvider: getIt()));
 
-  getIt.registerSingleton<ProfileCubit>(ProfileCubit(userRepository: getIt()));
+  // getIt.registerSingleton<ProfileCubit>(ProfileCubit(userRepository: getIt()));
   getIt.registerFactory<HomeCubit>(() => HomeCubit(homeUseCases: getIt()));
   getIt.registerFactory<MeetingCubit>(
       () => MeetingCubit(meetingUseCases: getIt()));
