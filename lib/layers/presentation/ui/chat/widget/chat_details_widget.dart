@@ -3,6 +3,7 @@ import 'dart:io';
 
 import 'package:cinteraction_vc/assets/colors/Colors.dart';
 import 'package:cinteraction_vc/core/extension/context.dart';
+import 'package:cinteraction_vc/core/extension/string.dart';
 import 'package:cinteraction_vc/core/io/network/models/participant.dart';
 import 'package:cinteraction_vc/core/util/text_file.dart';
 import 'package:cinteraction_vc/layers/data/dto/chat/chat_detail_dto.dart';
@@ -419,8 +420,7 @@ class _ChatDetailsWidgetState extends State<ChatDetailsWidget> {
                                                       Positioned(
                                                         top: -10,
                                                         left: -50,
-                                                        child: UserImage.medium(
-                                                          "https://ui-avatars.com/api/?name=${user.name}&color=ffffff&background=f34320",
+                                                        child: UserImage.medium(user.name.getInitials(), chatId: user.id,
                                                         ),
                                                       ),
                                                     Column(

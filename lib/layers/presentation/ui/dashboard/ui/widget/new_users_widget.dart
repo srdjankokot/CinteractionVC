@@ -1,6 +1,7 @@
 import 'dart:math';
 
 import 'package:cinteraction_vc/core/extension/context.dart';
+import 'package:cinteraction_vc/core/extension/string.dart';
 import 'package:cinteraction_vc/core/ui/images/image.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -129,7 +130,7 @@ class NewUsersWidgetState extends State<NewUsersWidget> {
                           width: constraints.maxWidth / 2,
                           child: Row(
                             children: [
-                              UserImage.medium(user.imageUrl),
+                              UserImage.medium(user.name.getInitials(), chatId: int.parse(user.id),),
                               const SizedBox(
                                 width: 10,
                               ),

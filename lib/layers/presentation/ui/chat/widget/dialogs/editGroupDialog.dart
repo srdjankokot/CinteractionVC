@@ -1,9 +1,12 @@
+import 'package:cinteraction_vc/assets/colors/Colors.dart';
 import 'package:cinteraction_vc/core/app/injector.dart';
+import 'package:cinteraction_vc/core/extension/string.dart';
 import 'package:cinteraction_vc/layers/presentation/cubit/chat/chat_cubit.dart';
 import 'package:cinteraction_vc/layers/presentation/cubit/chat/chat_state.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
+import '../../../../../data/dto/chat/chat_detail_dto.dart';
 import '../../../profile/ui/widget/user_image.dart';
 import 'add_participiant_dialog.dart';
 
@@ -195,7 +198,7 @@ class EditGroupDialog extends StatelessWidget {
 }
 
 class HoverParticipantTile extends StatefulWidget {
-  final dynamic participant;
+  final ChatParticipantDto participant;
   final bool isAuthUser;
   final VoidCallback onRemove;
 
@@ -219,14 +222,10 @@ class _HoverParticipantTileState extends State<HoverParticipantTile> {
       onEnter: (_) => setState(() => _isHovered = true),
       onExit: (_) => setState(() => _isHovered = false),
       child: ListTile(
-        leading: CircleAvatar(
-          backgroundImage: NetworkImage(
-            widget.participant?.image ??
-                "https://ui-avatars.com/api/?name=${widget.participant?.name}+${widget.participant?.name}&color=ffffff&background=007bff",
-          ),
-        ),
+        contentPadding: const EdgeInsets.all(2),
+        leading: UserImage.medium(widget.participant.name.getInitials(), chatId: widget.participant.id, ),
         title: Text(
-          "${widget.participant?.name}",
+          widget.participant.name,
           style: const TextStyle(fontSize: 16),
         ),
         trailing: (_isHovered && !widget.isAuthUser)
@@ -234,7 +233,7 @@ class _HoverParticipantTileState extends State<HoverParticipantTile> {
                 onPressed: widget.onRemove,
                 child: const Text(
                   "Remove",
-                  style: TextStyle(color: Colors.red),
+                  style: TextStyle(color: ColorConstants.kPrimaryColor),
                 ),
               )
             : null,

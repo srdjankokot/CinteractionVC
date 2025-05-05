@@ -1,5 +1,6 @@
 import 'package:cinteraction_vc/assets/colors/Colors.dart';
 import 'package:cinteraction_vc/core/extension/context.dart';
+import 'package:cinteraction_vc/core/extension/string.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
@@ -133,7 +134,7 @@ class _UsersListViewState extends State<UsersListView> {
                             const SizedBox(width: 10),
                             Stack(
                               children: [
-                                UserImage.medium(user.imageUrl),
+                                UserImage.medium(user.name.getInitials(), chatId: int.parse(user.id),),
                                 Visibility(
                                   visible: user.online,
                                   child: Positioned(

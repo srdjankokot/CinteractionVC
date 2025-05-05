@@ -2,6 +2,7 @@ import 'package:cinteraction_vc/assets/colors/Colors.dart';
 import 'package:cinteraction_vc/core/extension/context.dart';
 import 'package:cinteraction_vc/core/extension/context_user.dart';
 import 'package:cinteraction_vc/core/extension/image.dart';
+import 'package:cinteraction_vc/core/extension/string.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
@@ -215,7 +216,7 @@ class _HomePageState extends State<HomePage> {
                               child: Text("NEXT MEETING")),
                           
                           const SizedBox(width: 15),
-                          UserImage.medium(user.imageUrl),
+                          UserImage.medium(user.name.getInitials(), chatId: int.parse(user.id),),
                           const SizedBox(width: 15),
                           Column(
                             mainAxisAlignment: MainAxisAlignment.center,

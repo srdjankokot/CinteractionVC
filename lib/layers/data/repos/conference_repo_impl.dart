@@ -8,9 +8,7 @@ import 'package:cinteraction_vc/layers/domain/entities/api_response.dart';
 import 'package:cinteraction_vc/layers/domain/entities/chat_message.dart';
 import 'package:cinteraction_vc/layers/domain/repos/conference_repo.dart';
 
-import 'package:cinteraction_vc/layers/domain/usecases/chat/chat_usecases.dart';
 import 'package:cinteraction_vc/layers/presentation/cubit/chat/chat_cubit.dart';
-import 'package:ffmpeg_kit_flutter/ffmpeg_kit.dart';
 
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/foundation.dart';

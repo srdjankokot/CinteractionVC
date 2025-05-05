@@ -282,9 +282,8 @@ class VideoRoomPage extends StatelessWidget {
                                                         crossAxisAlignment:
                                                         CrossAxisAlignment.center,
                                                         children: [
-                                                          UserImage.medium(
-                                                            "https://ui-avatars.com/api/?name=${name
-                                                                .getInitials()}&color=ffffff&background=f34320",
+                                                          UserImage.medium(name
+                                                                .getInitials(), chatId:int.parse( contributor.id),
                                                           ),
                                                           const SizedBox(width: 12),
                                                           Expanded(
@@ -332,8 +331,7 @@ class VideoRoomPage extends StatelessWidget {
                                                               CrossAxisAlignment.center,
                                                               children: [
                                                                 UserImage.medium(
-                                                                  "https://ui-avatars.com/api/?name=${name
-                                                                      .getInitials()}&color=ffffff&background=f34320",
+                                                                  name.getInitials(), chatId: int.parse(contributor.id),
                                                                 ),
                                                                 const SizedBox(width: 12),
                                                                 Expanded(

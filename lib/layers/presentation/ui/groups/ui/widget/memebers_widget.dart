@@ -1,3 +1,4 @@
+import 'package:cinteraction_vc/core/extension/string.dart';
 import 'package:flutter/material.dart';
 
 import '../../../../../domain/entities/user.dart';
@@ -49,7 +50,7 @@ class MembersWidget extends StatelessWidget {
                     child: SizedBox(
                       width: height,
                       height: height,
-                      child: UserImage.medium(user.imageUrl),
+                      child: UserImage.medium(user.name.getInitials(), chatId: int.parse(user.id)),
                     ))
           ]),
         );
