@@ -229,6 +229,9 @@ class _ChatDetailsWidgetState extends State<ChatDetailsWidget> {
   void initState() {
     super.initState();
     _scrollController.addListener(_scrollListener);
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      context.read<ChatCubit>().showEmoji(false);
+    });
   }
 
   @override
