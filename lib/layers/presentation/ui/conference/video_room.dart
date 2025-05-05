@@ -283,7 +283,7 @@ class VideoRoomPage extends StatelessWidget {
                                                         CrossAxisAlignment.center,
                                                         children: [
                                                           UserImage.medium(name
-                                                                .getInitials(), chatId:int.parse( contributor.id),
+                                                                .getInitials(), chatId: int.parse(contributor.publisherId!),
                                                           ),
                                                           const SizedBox(width: 12),
                                                           Expanded(
@@ -331,7 +331,7 @@ class VideoRoomPage extends StatelessWidget {
                                                               CrossAxisAlignment.center,
                                                               children: [
                                                                 UserImage.medium(
-                                                                  name.getInitials(), chatId: int.parse(contributor.id),
+                                                                  name.getInitials(), chatId: int.parse(contributor.publisherId!),
                                                                 ),
                                                                 const SizedBox(width: 12),
                                                                 Expanded(

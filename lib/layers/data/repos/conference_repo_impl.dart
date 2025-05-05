@@ -1221,7 +1221,7 @@ class ConferenceRepoImpl extends ConferenceRepo {
   }
 
   ///End Stream actions
-  var maxVisibleSlots = 3;
+  var maxVisibleSlots = 5;
   List<String> currentTalkerIds = [];
 
   void updateTalkerSlots(Map<dynamic, StreamRenderer> publisherMap,
