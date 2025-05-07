@@ -1,5 +1,7 @@
 import 'dart:typed_data';
 
+import '../../../presentation/ui/profile/ui/widget/user_image.dart';
+
 class ChatParticipantDto {
   final int id;
   final String image;
@@ -33,6 +35,16 @@ class ChatParticipantDto {
   @override
   String toString() {
     return 'ChatParticipantDto(id: $id, image: $image, name: $name, email: $email, isOnline: $isOnline)';
+  }
+
+
+  UserImageDto getUserImageDTO()
+  {
+    return UserImageDto(
+        id: id,
+        name: name,
+        imageUrl: image
+    );
   }
 }
 

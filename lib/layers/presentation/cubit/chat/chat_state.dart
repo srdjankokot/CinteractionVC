@@ -207,4 +207,35 @@ class ChatState extends Equatable {
       chatMessages: chatMessages,
     );
   }
+
+
+  ChatState clearCurrentChat() {
+    return ChatState(
+      isLoading: isLoading,
+      isInitial: isInitial,
+      isInitialLoading: isInitialLoading,
+      stateIndex: stateIndex,
+      users: users,
+      messages: messages,
+      chats: chats,
+      pagination: pagination,
+      lastMessage: lastMessage,
+      participants: participants,
+      unreadMessages: unreadMessages,
+      incomingCall: incomingCall,
+      caller: caller,
+      calling: calling,
+      localStream: localStream,
+      remoteStream: remoteStream,
+      currentParticipant: currentParticipant,
+      currentChat: null,
+      audioMuted: audioMuted,
+      videoMuted: videoMuted,
+      listType: ListType.Chats,
+      chatDetails: chatDetails,
+      chatMessages: chatMessages,
+    );
+  }
+
+
 }

@@ -235,9 +235,14 @@ class ChatCubit extends Cubit<ChatState> with BlocLoggy {
     emit(state.copyWith(currentParticipant: user));
   }
 
-  Future<void> setCurrentChat(ChatDto chat) async {
+  Future<void> setCurrentChat(ChatDto? chat) async {
     chatUseCases.setCurrentChat(chat);
     emit(state.copyWith(currentChat: chat));
+  }
+
+  Future<void> clearCurrentChat() async {
+    chatUseCases.setCurrentChat(null);
+    emit(state.clearCurrentChat());
   }
 
   Future<void> openDownloadMedia(int id, String fileName) async {

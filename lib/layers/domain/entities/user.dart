@@ -2,6 +2,9 @@ import 'dart:math';
 
 import 'package:json_annotation/json_annotation.dart';
 
+import '../../data/dto/chat/chat_detail_dto.dart';
+import '../../presentation/ui/profile/ui/widget/user_image.dart';
+
 class User {
   User(
       {required this.id,
@@ -32,4 +35,16 @@ class User {
 
   final bool onboarded = Random().nextInt(2) == 1;
   late final bool checked = Random().nextInt(2) == 1;
+
+
+
+
+  UserImageDto getUserImageDTO()
+  {
+    return UserImageDto(
+      id: int.parse(id),
+        name: name,
+        imageUrl: imageUrl
+    );
+  }
 }

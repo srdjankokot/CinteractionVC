@@ -10,6 +10,7 @@ import 'package:cinteraction_vc/layers/presentation/cubit/chat/chat_cubit.dart';
 import 'package:cinteraction_vc/layers/presentation/cubit/home/home_cubit.dart';
 import 'package:cinteraction_vc/layers/presentation/ui/auth/reset_pass_enter_new.dart';
 import 'package:cinteraction_vc/layers/presentation/ui/chat/chat_room.dart';
+import 'package:flutter/foundation.dart';
 
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
@@ -26,6 +27,7 @@ import '../../layers/presentation/ui/conference/video_room.dart';
 import '../../layers/presentation/ui/echotest/EchoTestWidget.dart';
 import '../../layers/presentation/ui/landing/ui/page/home_page.dart';
 import '../util/menu_items.dart';
+import '../util/platform/platform.dart';
 
 final GoRouter router = GoRouter(
   initialLocation: AppRoute.splash.path,
@@ -53,7 +55,6 @@ final GoRouter router = GoRouter(
         if (user != null) {
           print("router: ${AppRoute.home.path}");
           return AppRoute.home.path;
-
         }
         return null;
       },
@@ -114,7 +115,6 @@ final GoRouter router = GoRouter(
           value: getIt.get<ChatCubit>(),
           child: const HomePage(),
         );
-
       },
       redirect: (context, state) {
         print('🔁 Router redirect triggered for path: ${state.uri.toString()}');
@@ -142,25 +142,31 @@ final GoRouter router = GoRouter(
         final roomId =
             state.pathParameters['roomId'] ?? Random().nextInt(999999);
 
+
+
         return MultiBlocProvider(providers: [
-
-          BlocProvider<ConferenceCubit>(create: (context) => ConferenceCubit(
-              conferenceUseCases: getIt.get<ConferenceUseCases>(),
-              roomId: int.parse(roomId.toString()),
-              displayName: display.toString())),
-
+          BlocProvider<ConferenceCubit>(
+              create: (context) => ConferenceCubit(
+                  conferenceUseCases: getIt.get<ConferenceUseCases>(),
+                  roomId: int.parse(roomId.toString()),
+                  displayName: display.toString())),
           BlocProvider<ChatCubit>(
             create: (context) => ChatCubit(
-              callUseCases: getIt.get<CallUseCases>(),
-              chatUseCases: getIt.get<ChatUseCases>(),
-              isInCallChat: true
-            ),
+                callUseCases: getIt.get<CallUseCases>(),
+                chatUseCases: getIt.get<ChatUseCases>(),
+                isInCallChat: true),
           ),
-
-        ], child:   VideoRoomPage());
+        ], child: VideoRoomPage());
       },
       redirect: (context, state) {
         print('🔁 Router redirect triggered for path: ${state.uri.toString()}');
+
+        // if (kIsWeb) {
+        //   var roomId = state.pathParameters['roomId'];
+        //   startMeetOnDesktop(int.parse(roomId.toString()));
+        //   return AppRoute.auth.path;
+        // }
+
         var user = context.getCurrentUser;
 
         if (user == null) {
@@ -168,12 +174,14 @@ final GoRouter router = GoRouter(
           if (roomId != null) {
             getIt.get<LocalStorage>().saveRoomId(roomId: roomId);
           }
+
           return AppRoute.auth.path;
         }
 
         return null;
       },
     ),
+
     // Users
     GoRoute(
       path: AppRoute.users.path,
@@ -194,7 +202,8 @@ final GoRouter router = GoRouter(
       path: AppRoute.roles.path,
       builder: (context, state) {
         return roles.builder(context);
-      },),
+      },
+    ),
 
     GoRoute(
       path: AppRoute.echo.path,

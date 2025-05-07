@@ -50,7 +50,7 @@ class MembersWidget extends StatelessWidget {
                     child: SizedBox(
                       width: height,
                       height: height,
-                      child: UserImage.medium(user.name.getInitials(), chatId: int.parse(user.id)),
+                      child: UserImage.medium([user.getUserImageDTO()]),
                     ))
           ]),
         );

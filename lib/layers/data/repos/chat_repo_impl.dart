@@ -26,9 +26,6 @@ import '../dto/chat/last_message_dto.dart';
 import '../source/local/local_storage.dart';
 import 'package:uuid/uuid.dart';
 
-import 'package:firebase_storage/firebase_storage.dart';
-import 'package:path/path.dart' as Path;
-
 class ChatRepoImpl extends ChatRepo {
   ChatRepoImpl({required Api api}) : _api = api;
   User? user = getIt.get<LocalStorage>().loadLoggedUser();
@@ -391,7 +388,7 @@ class ChatRepoImpl extends ChatRepo {
               }
             }
           }
-          getChatMessages(chatDetailsDto.chatId!);
+          // getChatMessages(chatDetailsDto.chatId!);
           _participantsStream.add(subscribers);
           _matchParticipantWithUser();
           _matchParticipantWithChat();
@@ -619,7 +616,7 @@ class ChatRepoImpl extends ChatRepo {
   }
 
   @override
-  Future<void> setCurrentChat(ChatDto chat) async {
+  Future<void> setCurrentChat(ChatDto? chat) async {
     currentChat = chat;
     // messages = getUserMessages()!;
     // _messagesStream.add(messages);
@@ -883,17 +880,17 @@ class ChatRepoImpl extends ChatRepo {
 
   uploadImageToStorage(String name, Uint8List? bytes) async {
     if (kIsWeb) {
-      Reference _reference = FirebaseStorage.instance
-          .ref()
-          .child('files/${Path.basename("$name")}');
-      await _reference.putData(bytes!).whenComplete(() async {
-        await _reference.getDownloadURL().then((value) {
-          // uploadedPhotoUrl = value;
-
-          print(value);
-          // sendMessage(value);
-        });
-      });
+      // Reference _reference = FirebaseStorage.instance
+      //     .ref()
+      //     .child('files/${Path.basename("$name")}');
+      // await _reference.putData(bytes!).whenComplete(() async {
+      //   await _reference.getDownloadURL().then((value) {
+      //     // uploadedPhotoUrl = value;
+      //
+      //     print(value);
+      //     // sendMessage(value);
+      //   });
+      // });
     } else {
 //write a code for android or ios
     }

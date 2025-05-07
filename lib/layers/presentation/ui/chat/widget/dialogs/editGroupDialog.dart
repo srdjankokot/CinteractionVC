@@ -27,6 +27,8 @@ class EditGroupDialog extends StatelessWidget {
       state.chatDetails!.authUser,
     ];
 
+    List<UserImageDto> userImages = allParticipants.map((a) => a.getUserImageDTO()).toList();
+
     return AlertDialog(
       contentPadding: const EdgeInsets.all(16.0),
       content: Stack(
@@ -35,8 +37,7 @@ class EditGroupDialog extends StatelessWidget {
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                const UserImage.medium(
-                    "https://ui-avatars.com/api/?name=G+R&color=ffffff&background=f34320"),
+                UserImage.medium(userImages),
                 const SizedBox(height: 16.0),
                 Text(
                   state.chatDetails?.chatName ?? "Group Name",
@@ -223,7 +224,7 @@ class _HoverParticipantTileState extends State<HoverParticipantTile> {
       onExit: (_) => setState(() => _isHovered = false),
       child: ListTile(
         contentPadding: const EdgeInsets.all(2),
-        leading: UserImage.medium(widget.participant.name.getInitials(), chatId: widget.participant.id, ),
+        leading: UserImage.medium([widget.participant.getUserImageDTO()] ),
         title: Text(
           widget.participant.name,
           style: const TextStyle(fontSize: 16),

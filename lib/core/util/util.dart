@@ -1,5 +1,7 @@
 import 'package:flutter_webrtc/flutter_webrtc.dart';
 
+import '../../layers/data/dto/chat/chat_detail_dto.dart';
+import '../../layers/presentation/ui/profile/ui/widget/user_image.dart';
 import '../janus/janus_client.dart';
 
 class StreamRenderer {
@@ -13,12 +15,24 @@ class StreamRenderer {
   String? videoMid;
   bool? isAudioMuted;
   bool? isHandUp;
+  String? imageUrl;
   // List<bool> selectedQuality = [false, false, true];
   bool? isVideoMuted;
   bool? mirrorVideo = false;
   ConfigureStreamQuality subStreamQuality = ConfigureStreamQuality.HIGH;
   // bool? isTalking;
 
+
+  UserImageDto getUserImageDTO()
+  {
+    return UserImageDto(
+        id: int.parse(publisherId??"0"),
+        name: publisherName,
+        imageUrl: imageUrl ?? ""
+    );
+  }
+  
+  
   Future<void> dispose() async {
     if(!isRendererDisposed(videoRenderer))
       {

@@ -2,7 +2,6 @@ import 'dart:math';
 
 import 'package:cinteraction_vc/assets/colors/Colors.dart';
 import 'package:cinteraction_vc/core/extension/context.dart';
-import 'package:cinteraction_vc/core/extension/string.dart';
 import 'package:cinteraction_vc/core/ui/widget/call_button_shape.dart';
 import 'package:cinteraction_vc/layers/presentation/cubit/chat/chat_cubit.dart';
 import 'package:cinteraction_vc/layers/presentation/cubit/chat/chat_state.dart';
@@ -141,11 +140,11 @@ class VideoRoomPage extends StatelessWidget {
               state.streamSubscribers!.entries.map((e) => e.value).toList());
           contributorsHandUp.addAll(state.streamSubscribers!.entries
               .where((e) => e.value.isHandUp == true)
-              .map((e) => e.value).toList());
-
+              .map((e) => e.value)
+              .toList());
 
           var borderWidth =
-          state.recording == RecordingStatus.recording ? 3.0 : 0.0;
+              state.recording == RecordingStatus.recording ? 3.0 : 0.0;
 
           bool showingChat = state.showingChat;
 
@@ -184,237 +183,23 @@ class VideoRoomPage extends StatelessWidget {
                                                     state.isGridLayout,
                                                     borderWidth,
                                                     expandedHeight,
-                                                    state.showingParticipants || state.showingChat
-                                                );
+                                                    state.showingParticipants ||
+                                                        state.showingChat);
                                               },
                                             ),
                                           ),
                                           Visibility(
                                             visible: state.showingChat,
-                                              child: Container(
-                                                width: chatContainedWidth,
-                                                height: double.maxFinite,
-                                                color: Colors.white,
-                                                child: Padding(
-                                                  padding: const EdgeInsets.all(23.0),
-                                                  child: Column(
-                                                    // crossAxisAlignment: CrossAxisAlignment.start,
-                                                    children: [
-                                                      Row(
-                                                        children: [
-                                                          Expanded(
-                                                            child: Text(
-                                                              'Chat messages',
-                                                              style: context
-                                                                  .titleTheme.titleMedium,
-                                                            ),
-                                                          ),
-                                                          IconButton(
-                                                            icon: const Icon(Icons.close),
-                                                            onPressed: () {
-                                                              context
-                                                                  .read<ConferenceCubit>()
-                                                                  .toggleChatWindow();
-                                                            },
-                                                          )
-                                                        ],
-                                                      ),
-                                                      Expanded(
-                                                          child: BlocConsumer<ChatCubit,
-                                                              ChatState>(
-                                                            builder: (context, state) {
-                                                              return ChatDetailsWidget(state);
-                                                            },
-                                                            listener: (BuildContext context,
-                                                                ChatState state) {},
-                                                          )),
-                                                    ],
-                                                  ),
-                                                ),
-                                              ),
+                                            child: getChatView(context, chatContainedWidth),
                                             // ),
                                           ),
                                           Visibility(
                                             visible: state.showingParticipants,
-                                            child: Container(
-                                              width: chatContainedWidth,
-                                              height: double.maxFinite,
-                                              color: Colors.white,
-                                              child: Padding(
-                                                padding: const EdgeInsets.all(23.0),
-                                                child: Column(
-                                                  // crossAxisAlignment: CrossAxisAlignment.start,
-                                                  children: [
-                                                    Row(
-                                                      children: [
-                                                        Expanded(
-                                                          child: Text(
-                                                            'IN THE MEETING',
-                                                            style: context
-                                                                .titleTheme.titleMedium,
-                                                          ),
-                                                        ),
-                                                        IconButton(
-                                                          icon: const Icon(Icons.close),
-                                                          onPressed: () {
-                                                            context
-                                                                .read<ConferenceCubit>()
-                                                                .toggleParticipantsWindow();
-                                                          },
-                                                        )
-                                                      ],
-                                                    ),
-
-
-                                                    Visibility(
-                                                      visible: contributorsHandUp.isNotEmpty,
-                                                      child: Text(
-                                                        'Raised hands',
-                                                        style: context
-                                                            .titleTheme.titleSmall,
-                                                      ),
-                                                    ),
-
-                                                    ...contributorsHandUp.map((
-                                                        contributor) {
-                                                      var name = contributor.publisherName;
-                                                      return Row(
-                                                        crossAxisAlignment:
-                                                        CrossAxisAlignment.center,
-                                                        children: [
-                                                          UserImage.medium(name
-                                                                .getInitials(), chatId: int.parse(contributor.publisherId!),
-                                                          ),
-                                                          const SizedBox(width: 12),
-                                                          Expanded(
-                                                            child: Column(
-                                                              crossAxisAlignment:
-                                                              CrossAxisAlignment
-                                                                  .start,
-                                                              children: [
-                                                                Text(
-                                                                  name,
-                                                                  style: const TextStyle(
-                                                                    fontFamily:
-                                                                    'Montserrat',
-                                                                    fontSize: 16,
-                                                                    fontWeight:
-                                                                    FontWeight.w500,
-                                                                    color: Colors.black87,
-                                                                  ),
-                                                                  overflow: TextOverflow
-                                                                      .ellipsis,
-                                                                  maxLines: 1,
-                                                                ),
-                                                              ],
-                                                            ),
-                                                          ),
-                                                        ],
-                                                      );
-                                                    }
-                                                    ).toList(),
-
-                                                    Text(
-                                                      'Contributors',
-                                                      style: context
-                                                          .titleTheme.titleSmall,
-                                                    ),
-                                                    Expanded(
-                                                        child: ListView.builder(
-                                                          itemCount: contributors.length,
-                                                          itemBuilder: (context, index) {
-                                                            var contributor = contributors[index];
-                                                            var name = contributor
-                                                                .publisherName;
-                                                            return Row(
-                                                              crossAxisAlignment:
-                                                              CrossAxisAlignment.center,
-                                                              children: [
-                                                                UserImage.medium(
-                                                                  name.getInitials(), chatId: int.parse(contributor.publisherId!),
-                                                                ),
-                                                                const SizedBox(width: 12),
-                                                                Expanded(
-                                                                  child: Column(
-                                                                    crossAxisAlignment:
-                                                                    CrossAxisAlignment
-                                                                        .start,
-                                                                    children: [
-                                                                      Text(
-                                                                        name,
-                                                                        style: const TextStyle(
-                                                                          fontFamily:
-                                                                          'Montserrat',
-                                                                          fontSize: 16,
-                                                                          fontWeight:
-                                                                          FontWeight.w500,
-                                                                          color: Colors
-                                                                              .black87,
-                                                                        ),
-                                                                        overflow: TextOverflow
-                                                                            .ellipsis,
-                                                                        maxLines: 1,
-                                                                      ),
-                                                                    ],
-                                                                  ),
-                                                                ),
-
-
-                                                                CallButtonShape(
-                                                                    size: 35,
-                                                                    bgColor: !contributor
-                                                                        .isAudioMuted!
-                                                                        ? ColorConstants
-                                                                        .kStateSuccess
-                                                                        : ColorConstants
-                                                                        .kPrimaryColor,
-                                                                    image: !contributor
-                                                                        .isAudioMuted!
-                                                                        ? imageSVGAsset(
-                                                                        'icon_microphone') as Widget
-                                                                        : imageSVGAsset(
-                                                                        'icon_microphone_disabled')
-                                                                    as Widget,
-                                                                    onClickAction:
-                                                                        () async {
-                                                                      await context.read<
-                                                                          ConferenceCubit>()
-                                                                          .muteByID(
-                                                                          contributor.id);
-                                                                    }),
-
-                                                                const SizedBox(width: 6),
-                                                                TextButton(
-                                                                    onPressed: () {
-                                                                      context.read<
-                                                                          ConferenceCubit>()
-                                                                          .kick(
-                                                                          contributor.id);
-                                                                    },
-
-                                                                    child: Text("Kick",
-                                                                      style: context
-                                                                          .textTheme
-                                                                          .bodySmall,)
-
-                                                                )
-
-
-                                                              ],
-                                                            );
-                                                          },
-                                                        )),
-                                                  ],
-                                                ),
-                                              ),
-                                            ),
-                                          )
+                                            child: getParticipantsView(context, chatContainedWidth, contributors, contributorsHandUp)
+                                          ),
                                         ],
                                       ),
                                     ),
-
-
-
                                     Container(
                                         height: 80,
                                         color: ColorConstants.kBlack3,
@@ -430,138 +215,137 @@ class VideoRoomPage extends StatelessWidget {
                                                 height: double.maxFinite,
                                                 child: Row(
                                                   mainAxisAlignment:
-                                                  MainAxisAlignment.center,
+                                                      MainAxisAlignment.center,
                                                   crossAxisAlignment:
-                                                  CrossAxisAlignment.center,
+                                                      CrossAxisAlignment.center,
                                                   children: [
                                                     CallButtonShape(
                                                         image: !state
-                                                            .audioMuted!
+                                                                .audioMuted!
                                                             ? imageSVGAsset(
-                                                            'icon_microphone')
-                                                        as Widget
+                                                                    'icon_microphone')
+                                                                as Widget
                                                             : imageSVGAsset(
-                                                            'icon_microphone_disabled')
-                                                        as Widget,
+                                                                    'icon_microphone_disabled')
+                                                                as Widget,
                                                         onClickAction:
                                                             () async {
                                                           await context
                                                               .read<
-                                                              ConferenceCubit>()
+                                                                  ConferenceCubit>()
                                                               .audioMute();
                                                         }),
                                                     const SizedBox(width: 20),
                                                     CallButtonShape(
                                                         image: !state.videoMuted
                                                             ? imageSVGAsset(
-                                                            'icon_video_recorder')
-                                                        as Widget
+                                                                    'icon_video_recorder')
+                                                                as Widget
                                                             : imageSVGAsset(
-                                                            'icon_video_recorder_disabled')
-                                                        as Widget,
+                                                                    'icon_video_recorder_disabled')
+                                                                as Widget,
                                                         onClickAction:
                                                             () async {
                                                           await context
                                                               .read<
-                                                              ConferenceCubit>()
+                                                                  ConferenceCubit>()
                                                               .videoMute();
                                                         }),
                                                     const SizedBox(width: 20),
                                                     CallButtonShape(
                                                         image: imageSVGAsset(
-                                                            'icon_arrow_square_up')
-                                                        as Widget,
+                                                                'icon_arrow_square_up')
+                                                            as Widget,
                                                         bgColor: state
-                                                            .screenShared
+                                                                .screenShared
                                                             ? ColorConstants
-                                                            .kPrimaryColor
+                                                                .kPrimaryColor
                                                             : ColorConstants
-                                                            .kWhite30,
+                                                                .kWhite30,
                                                         onClickAction:
                                                             () async {
                                                           if (state
                                                               .screenShared) {
                                                             await context
                                                                 .read<
-                                                                ConferenceCubit>()
+                                                                    ConferenceCubit>()
                                                                 .shareScreen(
-                                                                null);
+                                                                    null);
                                                           } else {
                                                             await context
                                                                 .read<
-                                                                ConferenceCubit>()
+                                                                    ConferenceCubit>()
                                                                 .shareScreen(
-                                                                await navigator
-                                                                    .mediaDevices
-                                                                    .getDisplayMedia(
-                                                                    {
-                                                                      'video': true,
-                                                                      'audio': true
-                                                                    }));
+                                                                    await navigator
+                                                                        .mediaDevices
+                                                                        .getDisplayMedia({
+                                                                  'video': true,
+                                                                  'audio': true
+                                                                }));
                                                           }
                                                         }),
                                                     const SizedBox(width: 20),
-
                                                     CallButtonShape(
-                                                        image: Icon(state.handUp
-                                                            ? Icons
-                                                            .waving_hand_outlined
-                                                            : Icons
-                                                            .front_hand_outlined,
-                                                          color: Colors.white,),
+                                                        image: Icon(
+                                                          state.handUp
+                                                              ? Icons
+                                                                  .waving_hand_outlined
+                                                              : Icons
+                                                                  .front_hand_outlined,
+                                                          color: Colors.white,
+                                                        ),
                                                         bgColor: ColorConstants
                                                             .kWhite30,
                                                         onClickAction:
                                                             () async {
                                                           await context
                                                               .read<
-                                                              ConferenceCubit>()
+                                                                  ConferenceCubit>()
                                                               .handUp();
                                                         }),
-
                                                     const SizedBox(width: 20),
                                                     CallButtonShape(
                                                       // image: state.recording ? const Icon(Icons.stop, size: 30, color: Colors.red): const  Icon(Icons.fiber_manual_record, size: 30, color: Colors.red),
                                                       image: state.recording ==
-                                                          RecordingStatus
-                                                              .notRecording
+                                                              RecordingStatus
+                                                                  .notRecording
                                                           ? const Icon(
-                                                          Icons
-                                                              .fiber_manual_record,
-                                                          size: 30,
-                                                          color: Colors.red)
+                                                              Icons
+                                                                  .fiber_manual_record,
+                                                              size: 30,
+                                                              color: Colors.red)
                                                           : state.recording ==
-                                                          RecordingStatus
-                                                              .loading
-                                                          ? const CircularProgressIndicator(
-                                                        strokeWidth:
-                                                        2,
-                                                        color: Colors
-                                                            .white,
-                                                      )
-                                                          : const Icon(
-                                                          Icons.stop,
-                                                          size: 30,
-                                                          color: Colors
-                                                              .red),
+                                                                  RecordingStatus
+                                                                      .loading
+                                                              ? const CircularProgressIndicator(
+                                                                  strokeWidth:
+                                                                      2,
+                                                                  color: Colors
+                                                                      .white,
+                                                                )
+                                                              : const Icon(
+                                                                  Icons.stop,
+                                                                  size: 30,
+                                                                  color: Colors
+                                                                      .red),
                                                       onClickAction: () async {
                                                         await context
                                                             .read<
-                                                            ConferenceCubit>()
+                                                                ConferenceCubit>()
                                                             .recordingMeet();
                                                       },
                                                     ),
                                                     const SizedBox(width: 20),
                                                     CallButtonShape(
                                                       image: imageSVGAsset(
-                                                          'icon_phone')
-                                                      as Widget,
+                                                              'icon_phone')
+                                                          as Widget,
                                                       bgColor: ColorConstants
                                                           .kPrimaryColor,
                                                       onClickAction: () async {
                                                         await context
                                                             .read<
-                                                            ConferenceCubit>()
+                                                                ConferenceCubit>()
                                                             .finishCall();
                                                       },
                                                     ),
@@ -574,30 +358,27 @@ class VideoRoomPage extends StatelessWidget {
                                                 height: double.maxFinite,
                                                 child: Row(
                                                     mainAxisAlignment:
-                                                    MainAxisAlignment.end,
+                                                        MainAxisAlignment.end,
                                                     crossAxisAlignment:
-                                                    CrossAxisAlignment
-                                                        .center,
+                                                        CrossAxisAlignment
+                                                            .center,
                                                     children: [
                                                       Stack(children: [
                                                         CallButtonShape(
-                                                          image:
-
-                                                          const Icon(
+                                                          image: const Icon(
                                                             Icons.group,
                                                             color: Colors.white,
-                                                          )
-                                                          ,
+                                                          ),
                                                           bgColor:
-                                                          ColorConstants
-                                                              .kPrimaryColor
-                                                              .withOpacity(
-                                                              0.4),
+                                                              ColorConstants
+                                                                  .kPrimaryColor
+                                                                  .withOpacity(
+                                                                      0.4),
                                                           onClickAction:
                                                               () async {
                                                             await context
                                                                 .read<
-                                                                ConferenceCubit>()
+                                                                    ConferenceCubit>()
                                                                 .toggleParticipantsWindow();
                                                           },
                                                         ),
@@ -606,31 +387,31 @@ class VideoRoomPage extends StatelessWidget {
                                                           right: 5,
                                                           top: 2,
                                                           child:
-                                                          AnimatedOpacity(
+                                                              AnimatedOpacity(
                                                             opacity: 1,
                                                             duration:
-                                                            const Duration(
-                                                                milliseconds:
-                                                                250),
+                                                                const Duration(
+                                                                    milliseconds:
+                                                                        250),
                                                             child: Container(
                                                               padding:
-                                                              const EdgeInsets
-                                                                  .symmetric(
-                                                                  horizontal:
-                                                                  6,
-                                                                  vertical:
-                                                                  2),
+                                                                  const EdgeInsets
+                                                                      .symmetric(
+                                                                      horizontal:
+                                                                          6,
+                                                                      vertical:
+                                                                          2),
                                                               decoration:
-                                                              BoxDecoration(
+                                                                  BoxDecoration(
                                                                 color: Colors
                                                                     .redAccent,
                                                                 borderRadius:
-                                                                BorderRadius
-                                                                    .circular(
-                                                                    12),
+                                                                    BorderRadius
+                                                                        .circular(
+                                                                            12),
                                                               ),
                                                               constraints:
-                                                              const BoxConstraints(
+                                                                  const BoxConstraints(
                                                                 minWidth: 20,
                                                                 minHeight: 16,
                                                               ),
@@ -639,16 +420,16 @@ class VideoRoomPage extends StatelessWidget {
                                                                     .length
                                                                     .toString(),
                                                                 textAlign:
-                                                                TextAlign
-                                                                    .center,
+                                                                    TextAlign
+                                                                        .center,
                                                                 style:
-                                                                const TextStyle(
+                                                                    const TextStyle(
                                                                   color: Colors
                                                                       .white,
                                                                   fontSize: 10,
                                                                   fontWeight:
-                                                                  FontWeight
-                                                                      .bold,
+                                                                      FontWeight
+                                                                          .bold,
                                                                 ),
                                                               ),
                                                             ),
@@ -662,18 +443,18 @@ class VideoRoomPage extends StatelessWidget {
                                                       Stack(children: [
                                                         CallButtonShape(
                                                           image: imageSVGAsset(
-                                                              'icon_message')
-                                                          as Widget,
+                                                                  'icon_message')
+                                                              as Widget,
                                                           bgColor:
-                                                          ColorConstants
-                                                              .kPrimaryColor
-                                                              .withOpacity(
-                                                              0.4),
+                                                              ColorConstants
+                                                                  .kPrimaryColor
+                                                                  .withOpacity(
+                                                                      0.4),
                                                           onClickAction:
                                                               () async {
                                                             await context
                                                                 .read<
-                                                                ConferenceCubit>()
+                                                                    ConferenceCubit>()
                                                                 .toggleChatWindow();
                                                           },
                                                         ),
@@ -691,6 +472,226 @@ class VideoRoomPage extends StatelessWidget {
                                                             }
 
                                                             return Positioned(
+                                                              right: 5,
+                                                              top: 2,
+                                                              child:
+                                                                  AnimatedOpacity(
+                                                                opacity: 1,
+                                                                duration:
+                                                                    const Duration(
+                                                                        milliseconds:
+                                                                            250),
+                                                                child:
+                                                                    Container(
+                                                                  padding: const EdgeInsets
+                                                                      .symmetric(
+                                                                      horizontal:
+                                                                          6,
+                                                                      vertical:
+                                                                          2),
+                                                                  decoration:
+                                                                      BoxDecoration(
+                                                                    color: Colors
+                                                                        .redAccent,
+                                                                    borderRadius:
+                                                                        BorderRadius.circular(
+                                                                            12),
+                                                                  ),
+                                                                  constraints:
+                                                                      const BoxConstraints(
+                                                                    minWidth:
+                                                                        20,
+                                                                    minHeight:
+                                                                        16,
+                                                                  ),
+                                                                  child: Text(
+                                                                    unread > 99
+                                                                        ? '99+'
+                                                                        : unread
+                                                                            .toString(),
+                                                                    textAlign:
+                                                                        TextAlign
+                                                                            .center,
+                                                                    style:
+                                                                        const TextStyle(
+                                                                      color: Colors
+                                                                          .white,
+                                                                      fontSize:
+                                                                          10,
+                                                                      fontWeight:
+                                                                          FontWeight
+                                                                              .bold,
+                                                                    ),
+                                                                  ),
+                                                                ),
+                                                              ),
+                                                            );
+                                                          },
+                                                        )
+
+                                                        // child: Text('${state.unreadMessages}', style: context.primaryTextTheme.labelSmall,)),
+                                                        //   child: Text('1', style: context.primaryTextTheme.labelSmall?.copyWith(fontSize: 8, fontWeight: FontWeight.w700),)),,
+                                                      ]),
+                                                      const SizedBox(width: 20),
+                                                    ]),
+                                              ),
+                                            ),
+                                          ],
+                                        )),
+                                  ],
+                                ),
+                              ),
+                            ],
+                          );
+                        } else {
+                          return SafeArea(
+                              child: Stack(
+                            children: [
+                              Column(
+                                children: [
+                                  Expanded(
+                                      child: Container(
+                                          child: getLayout(
+                                              context,
+                                              items,
+                                              state.isGridLayout,
+                                              borderWidth,
+                                              0,
+                                              false))),
+                                  Padding(
+                                      padding: const EdgeInsets.all( 18.0),
+                                      child: Row(
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.center,
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.center,
+                                        children: [
+                                          // CallButtonShape(
+                                          //     image: Icon(
+                                          //       state.handUp
+                                          //           ? Icons
+                                          //           .waving_hand_outlined
+                                          //           : Icons
+                                          //           .front_hand_outlined,
+                                          //       color: Colors.white,
+                                          //     ),
+                                          //     bgColor: ColorConstants
+                                          //         .kWhite30,
+                                          //     onClickAction:
+                                          //         () async {
+                                          //       await context
+                                          //           .read<
+                                          //           ConferenceCubit>()
+                                          //           .handUp();
+                                          //     }),
+                                          // const Spacer(),
+                                          CallButtonShape(
+                                            image: imageSVGAsset('icon_phone')
+                                                as Widget,
+                                            bgColor:
+                                                ColorConstants.kPrimaryColor,
+                                            onClickAction: () async {
+                                              await context
+                                                  .read<ConferenceCubit>()
+                                                  .finishCall();
+                                            },
+                                          ),
+                                          const Spacer(),
+                                          CallButtonShape(
+                                              image: !state.audioMuted
+                                                  ? imageSVGAsset(
+                                                          'icon_microphone')
+                                                      as Widget
+                                                  : imageSVGAsset(
+                                                          'icon_microphone_disabled')
+                                                      as Widget,
+                                              onClickAction: () async {
+                                                await context
+                                                    .read<ConferenceCubit>()
+                                                    .audioMute();
+                                              }),
+                                          const Spacer(),
+                                          CallButtonShape(
+                                              image: !state.videoMuted
+                                                  ? imageSVGAsset(
+                                                          'icon_video_recorder')
+                                                      as Widget
+                                                  : imageSVGAsset(
+                                                          'icon_video_recorder_disabled')
+                                                      as Widget,
+                                              onClickAction: () async {
+                                                await context
+                                                    .read<ConferenceCubit>()
+                                                    .videoMute();
+                                              }),
+                                          const Spacer(),
+                                          CallButtonShape(
+                                              image: imageSVGAsset(
+                                                  'icon_switch_camera') as Widget,
+                                              onClickAction: () async {
+                                                await context
+                                                    .read<ConferenceCubit>()
+                                                    .switchCamera();
+                                              }),
+                                          const Spacer(),
+
+                                          BlocBuilder<ChatCubit,
+                                              ChatState>(
+                                            builder:
+                                                (context, state) {
+                                              final int unread = state
+                                                  .unreadMessages;
+
+                                              // if (showingChat ||
+                                              //     unread == 0) {
+                                              //   return const SizedBox
+                                              //       .shrink();
+                                              // }
+
+                                              return  Stack(children: [
+                                                PopupMenuButton<String>(
+                                                  iconColor: Colors.white,
+                                                  icon: const Icon(Icons.more_vert),
+                                                  onSelected: (e) async {
+                                                    switch (e) {
+                                                      case 'Chat':
+                                                        await context
+                                                            .read<
+                                                            ConferenceCubit>()
+                                                            .toggleChatWindow();
+                                                        break;
+                                                      case 'Participants':
+                                                        await context
+                                                            .read<
+                                                            ConferenceCubit>()
+                                                            .toggleParticipantsWindow();
+                                                        break;
+                                                      case 'HandUp':
+                                                        await context
+                                                            .read<
+                                                            ConferenceCubit>()
+                                                            .handUp();
+                                                        break;
+
+                                                      case 'Switch Camera':
+                                                        await context
+                                                            .read<
+                                                            ConferenceCubit>()
+                                                            .switchCamera();
+                                                        break;
+                                                    }
+                                                  },
+                                                  itemBuilder: (BuildContext context) {
+                                                    return {'Chat','Participants', 'HandUp'}.map((String choice) {
+                                                      return PopupMenuItem<String>(
+                                                        value: choice,
+                                                        child: choice=='Chat' ?
+                                                        Row(children: [
+                                                          Text(choice),
+                                                          const SizedBox(width: 5,),
+                                                          Visibility(
+                                                            visible: unread > 0,
+                                                            child: Positioned(
                                                               right: 5,
                                                               top: 2,
                                                               child:
@@ -713,8 +714,7 @@ class VideoRoomPage extends StatelessWidget {
                                                                     color: Colors
                                                                         .redAccent,
                                                                     borderRadius:
-                                                                    BorderRadius
-                                                                        .circular(
+                                                                    BorderRadius.circular(
                                                                         12),
                                                                   ),
                                                                   constraints:
@@ -745,352 +745,119 @@ class VideoRoomPage extends StatelessWidget {
                                                                   ),
                                                                 ),
                                                               ),
-                                                            );
-                                                          },
-                                                        )
-
-                                                        // child: Text('${state.unreadMessages}', style: context.primaryTextTheme.labelSmall,)),
-                                                        //   child: Text('1', style: context.primaryTextTheme.labelSmall?.copyWith(fontSize: 8, fontWeight: FontWeight.w700),)),,
-                                                      ]),
-                                                      const SizedBox(width: 20),
-                                                    ]),
-                                              ),
-                                            ),
-                                          ],
-                                        )),
-                                  ],
-                                ),
-                              ),
-
-                            ],
-                          );
-                        } else {
-                          return SafeArea(
-                            child: Stack(
-                              children: [
-                                Column(
-                                  children: [
-                                    Row(
-                                      children: [
-                                        // IconButton(
-                                        //     icon: const Icon(
-                                        //       Icons.add,
-                                        //       color: Colors.white,
-                                        //     ),
-                                        //     onPressed: () async {
-                                        //       await context
-                                        //           .read<ConferenceCubit>()
-                                        //           .increaseNumberOfCopies();
-                                        //       // setState(() {
-                                        //       //   _numberOfStream++;
-                                        //       // })
-                                        //     }),
-                                        // IconButton(
-                                        //     icon: const Icon(
-                                        //       Icons.remove,
-                                        //       color: Colors.white,
-                                        //     ),
-                                        //     onPressed: () async {
-                                        //       await context
-                                        //           .read<ConferenceCubit>()
-                                        //           .decreaseNumberOfCopies();
-                                        //
-                                        //       // setState(() {
-                                        //       //   _numberOfStream--;
-                                        //       // })
-                                        //     }),
-                                        IconButton(
-                                            icon: imageSVGAsset(
-                                                'icon_switch_camera') as Widget,
-                                            onPressed: () async {
-                                              await context
-                                                  .read<ConferenceCubit>()
-                                                  .switchCamera();
-                                            }),
-                                      ],
-                                    ),
-                                    Expanded(
-                                      child: getLayout(context, items,
-                                          state.isGridLayout, borderWidth, 0, false),
-                                    ),
-                                    Padding(
-                                      padding: const EdgeInsets.only(
-                                          top: 18.0, bottom: 18.0),
-                                      child: Row(
-                                        mainAxisAlignment:
-                                        MainAxisAlignment.center,
-                                        crossAxisAlignment:
-                                        CrossAxisAlignment.center,
-                                        children: [
-                                          // ElevatedButton(
-                                          //   onPressed: () {
-                                          //     context.read<ConferenceCubit>().publish();
-                                          //   },
-                                          //   child: Text('Publish'),
-                                          //
-                                          // ),
-                                          //
-                                          // ElevatedButton(
-                                          //   onPressed: () {
-                                          //     context.read<ConferenceCubit>().unpublish();
-                                          //   },
-                                          //   child: Text('Unpublish'),
-                                          //
-                                          // ),
-                                          CallButtonShape(
-                                            image: imageSVGAsset('icon_phone')
-                                            as Widget,
-                                            bgColor:
-                                            ColorConstants.kPrimaryColor,
-                                            onClickAction: () async {
-                                              await context
-                                                  .read<ConferenceCubit>()
-                                                  .finishCall();
-                                            },
-                                          ),
-
-                                          const SizedBox(width: 20),
-                                          CallButtonShape(
-                                              image: !state.audioMuted
-                                                  ? imageSVGAsset(
-                                                  'icon_microphone')
-                                              as Widget
-                                                  : imageSVGAsset(
-                                                  'icon_microphone_disabled')
-                                              as Widget,
-                                              onClickAction: () async {
-                                                await context
-                                                    .read<ConferenceCubit>()
-                                                    .audioMute();
-                                              }),
-                                          const SizedBox(width: 20),
-                                          CallButtonShape(
-                                              image: !state.videoMuted
-                                                  ? imageSVGAsset(
-                                                  'icon_video_recorder')
-                                              as Widget
-                                                  : imageSVGAsset(
-                                                  'icon_video_recorder_disabled')
-                                              as Widget,
-                                              onClickAction: () async {
-                                                await context
-                                                    .read<ConferenceCubit>()
-                                                    .videoMute();
-                                              }),
-                                          // const SizedBox(width: 20),
-                                          // CallButtonShape(
-                                          //     image: imageSVGAsset('icon_arrow_square_up')
-                                          //     as Widget,
-                                          //     onClickAction: joined
-                                          //         ? () async {
-                                          //       // if (screenSharing) {
-                                          //       //   await disposeScreenSharing();
-                                          //       //   return;
-                                          //       // }
-                                          //       // await screenShare();
-                                          //     }
-                                          //         : null),
-                                          const SizedBox(width: 20),
-
-                                          Stack(children: [
-                                            CallButtonShape(
-                                              image:
-                                              imageSVGAsset('icon_message')
-                                              as Widget,
-                                              bgColor: ColorConstants
-                                                  .kPrimaryColor
-                                                  .withOpacity(0.4),
-                                              onClickAction: () async {
-                                                await context
-                                                    .read<ConferenceCubit>()
-                                                    .toggleChatWindow();
-                                              },
-                                            ),
-                                            //         Expanded(
-                                            //     child: BlocConsumer<ChatCubit,
-                                            //         ChatState>(
-                                            //   builder: (context, state) {
-                                            //     return ChatDetailsWidget(state);
-                                            //   },
-                                            //   listener: (BuildContext context,
-                                            //       ChatState state) {},
-                                            // )),
-                                            BlocConsumer<ChatCubit, ChatState>(
-                                              listener: (context, state) {
-                                                print(
-                                                    'unreadChatMess: ${state
-                                                        .unreadMessages}');
-                                              },
-                                              builder: (context, state) {
-                                                final unreadMessages = state
-                                                    .chatMessages!
-                                                    .where((msg) =>
-                                                msg.seen == false)
-                                                    .toList();
-
-                                                return Positioned(
-                                                  right: 0,
-                                                  top: 0,
-                                                  child: AnimatedOpacity(
-                                                    opacity: unreadMessages
-                                                        .isNotEmpty
-                                                        ? 1
-                                                        : 0,
-                                                    duration: const Duration(
-                                                        milliseconds: 250),
-                                                    child: Container(
-                                                      width: 12,
-                                                      height: 12,
-                                                      decoration:
-                                                      const ShapeDecoration(
-                                                        color: Colors.red,
-                                                        // crveni badge
-                                                        shape: OvalBorder(),
+                                                            ),
+                                                          ),
+                                                        ]) :
+                                                        Text(choice),
+                                                      );
+                                                    }).toList();
+                                                  },
+                                                ),
+                                                Visibility(
+                                                  visible: unread > 0,
+                                                  child: Positioned(
+                                                    right: 5,
+                                                    top: 2,
+                                                    child:
+                                                    AnimatedOpacity(
+                                                      opacity: 1,
+                                                      duration:
+                                                      const Duration(
+                                                          milliseconds:
+                                                          250),
+                                                      child:
+                                                      Container(
+                                                        width: 10,
+                                                        height: 10,
+                                                        decoration: const BoxDecoration(
+                                                          color: ColorConstants.kPrimaryColor,
+                                                          shape: BoxShape.circle,
+                                                        ),
                                                       ),
                                                     ),
                                                   ),
-                                                );
-                                              },
-                                            ),
+                                                )
+                                                // child: Text('${state.unreadMessages}', style: context.primaryTextTheme.labelSmall,)),
+                                                //   child: Text('1', style: context.primaryTextTheme.labelSmall?.copyWith(fontSize: 8, fontWeight: FontWeight.w700),)),,
+                                              ]);
 
-                                            // child: Text('${state.unreadMessages}', style: context.primaryTextTheme.labelSmall,)),
-                                            //   child: Text('1', style: context.primaryTextTheme.labelSmall?.copyWith(fontSize: 8, fontWeight: FontWeight.w700),)),,
-                                          ]),
 
-                                          // CallButtonShape(
-                                          //     image: imageSVGAsset('three_dots') as Widget,
-                                          //     // onClickAction: joined ? switchCamera : null),
-                                          //     onClickAction: joined ? null : null),
+
+                                              return Positioned(
+                                                right: 5,
+                                                top: 2,
+                                                child:
+                                                AnimatedOpacity(
+                                                  opacity: 1,
+                                                  duration:
+                                                  const Duration(
+                                                      milliseconds:
+                                                      250),
+                                                  child:
+                                                  Container(
+                                                    padding: const EdgeInsets
+                                                        .symmetric(
+                                                        horizontal:
+                                                        6,
+                                                        vertical:
+                                                        2),
+                                                    decoration:
+                                                    BoxDecoration(
+                                                      color: Colors
+                                                          .redAccent,
+                                                      borderRadius:
+                                                      BorderRadius.circular(
+                                                          12),
+                                                    ),
+                                                    constraints:
+                                                    const BoxConstraints(
+                                                      minWidth:
+                                                      20,
+                                                      minHeight:
+                                                      16,
+                                                    ),
+                                                    child: Text(
+                                                      unread > 99
+                                                          ? '99+'
+                                                          : unread
+                                                          .toString(),
+                                                      textAlign:
+                                                      TextAlign
+                                                          .center,
+                                                      style:
+                                                      const TextStyle(
+                                                        color: Colors
+                                                            .white,
+                                                        fontSize:
+                                                        10,
+                                                        fontWeight:
+                                                        FontWeight
+                                                            .bold,
+                                                      ),
+                                                    ),
+                                                  ),
+                                                ),
+                                              );
+                                            },
+                                          ),
+
+
+
                                         ],
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                                AnimatedPositioned(
-                                    bottom: state.showingChat
-                                        ? 0
-                                        : -MediaQuery
-                                        .of(context)
-                                        .size
-                                        .height *
-                                        0.8,
-                                    right: 0,
-                                    left: 0,
-                                    duration: const Duration(milliseconds: 250),
-                                    child: BlocConsumer<ChatCubit, ChatState>(
-                                      builder: (context, state) {
-                                        return ChatDetailsWidget(state);
-                                      },
-                                      listener: (BuildContext context,
-                                          ChatState state) {},
-                                    )
-
-                                  // Container(
-                                  //   width: double.maxFinite,
-                                  //   height:
-                                  //       MediaQuery.of(context).size.height * 0.8,
-                                  //   color: Colors.white,
-                                  //   child: Padding(
-                                  //     padding: EdgeInsets.only(
-                                  //         bottom: MediaQuery.of(context)
-                                  //                 .viewInsets
-                                  //                 .bottom +
-                                  //             23,
-                                  //         top: 23,
-                                  //         right: 23,
-                                  //         left: 23),
-                                  //     child: Column(
-                                  //       // crossAxisAlignment: CrossAxisAlignment.start,
-                                  //       children: [
-                                  //         Row(
-                                  //           children: [
-                                  //             Expanded(
-                                  //               child: Text(
-                                  //                 'Chat messages',
-                                  //                 style: context
-                                  //                     .titleTheme.titleMedium,
-                                  //               ),
-                                  //             ),
-                                  //             IconButton(
-                                  //               icon: const Icon(Icons.close),
-                                  //               onPressed: () {
-                                  //                 context
-                                  //                     .read<ConferenceCubit>()
-                                  //                     .toggleChatWindow();
-                                  //               },
-                                  //             )
-                                  //           ],
-                                  //         ),
-                                  //         Expanded(
-                                  //           child: Container(
-                                  //             child: state.messages == null
-                                  //                 ? const Center(
-                                  //                     child: Text('No Messages'))
-                                  //                 : ListView.builder(
-                                  //                     controller: chatController,
-                                  //                     itemCount:
-                                  //                         state.messages?.length,
-                                  //                     itemBuilder:
-                                  //                         (BuildContext context,
-                                  //                             int index) {
-                                  //                       return VisibilityDetector(
-                                  //                           key: Key(
-                                  //                               index.toString()),
-                                  //                           onVisibilityChanged:
-                                  //                               (VisibilityInfo
-                                  //                                   info) {
-                                  //                             // print('${state.messages![int.parse('${(info.key as ValueKey).value}')]} (message seen)');
-                                  //                             context
-                                  //                                 .read<
-                                  //                                     ConferenceCubit>()
-                                  //                                 .chatMessageSeen(
-                                  //                                     index);
-                                  //                           },
-                                  //                           child: ChatMessageWidget(
-                                  //                               message: state
-                                  //                                       .messages![
-                                  //                                   index]));
-                                  //                     },
-                                  //                   ),
-                                  //           ),
-                                  //         ),
-                                  //         const SizedBox(
-                                  //           height: 5,
-                                  //         ),
-                                  //         Row(
-                                  //           children: [
-                                  //             Expanded(
-                                  //               child: TextField(
-                                  //                 textInputAction:
-                                  //                     TextInputAction.go,
-                                  //                 focusNode: messageFocusNode,
-                                  //                 onSubmitted: (value) {
-                                  //                   sendMessage();
-                                  //                 },
-                                  //                 controller:
-                                  //                     messageFieldController,
-                                  //                 decoration: InputDecoration(
-                                  //                     hintText: "Send a message",
-                                  //                     suffixIcon: IconButton(
-                                  //                       onPressed: () {
-                                  //                         sendMessage();
-                                  //                       },
-                                  //                       icon: imageSVGAsset(
-                                  //                               'icon_send')
-                                  //                           as Widget,
-                                  //                     )),
-                                  //               ),
-                                  //             )
-                                  //           ],
-                                  //         ),
-                                  //       ],
-                                  //     ),
-                                  //   ),
-                                  // ),
-                                ),
-                              ],
-                            ),
-                          );
+                                      ))
+                                ],
+                              ),
+                              Visibility(
+                                visible: state.showingChat,
+                                child: getChatView(context, double.maxFinite),
+                                // ),
+                              ),
+                              Visibility(
+                                  visible: state.showingParticipants,
+                                  child: getParticipantsView(context, double.maxFinite, contributors, contributorsHandUp)
+                              ),
+                            ],
+                          ));
                         }
                       },
                     )),
@@ -1102,8 +869,13 @@ class VideoRoomPage extends StatelessWidget {
         listener: _onConferenceState);
   }
 
-  Widget getLayout(BuildContext context, List<StreamRenderer> items,
-      bool isGrid, double borderWidth, double parrentHeight, bool isSideWidowOpen) {
+  Widget getLayout(
+      BuildContext context,
+      List<StreamRenderer> items,
+      bool isGrid,
+      double borderWidth,
+      double parrentHeight,
+      bool isSideWidowOpen) {
     StreamRenderer? screenshared;
 
     try {
@@ -1127,14 +899,8 @@ class VideoRoomPage extends StatelessWidget {
     // var size = MediaQuery.of(context).size;
     // var size = MediaQuery.of(context).size;
     var height =
-    parrentHeight == 0 ? MediaQuery
-        .of(context)
-        .size
-        .height : parrentHeight;
-    var width = MediaQuery
-        .of(context)
-        .size
-        .width - (isSideWidowOpen ? 400 : 0);
+        parrentHeight == 0 ? MediaQuery.of(context).size.height : parrentHeight;
+    var width = MediaQuery.of(context).size.width - (isSideWidowOpen ? 400 : 0);
     // final double itemHeight = (size.height - kToolbarHeight - 24) / row;
 
     if (context.isWide) {
@@ -1149,12 +915,8 @@ class VideoRoomPage extends StatelessWidget {
           spacing: 0,
           alignment: WrapAlignment.center,
           children: items
-              .map((e) =>
-
-              ParticipantVideoWidget(
-                  remoteStream: e, height: itemHeight, width: itemWidth)
-
-          )
+              .map((e) => ParticipantVideoWidget(
+                  remoteStream: e, height: itemHeight, width: itemWidth))
               .toList(),
         );
       } else {
@@ -1184,45 +946,41 @@ class VideoRoomPage extends StatelessWidget {
               margin: const EdgeInsets.only(right: 30, left: 30),
               child: SizedBox(
                   width: itemWidth + 20,
-                  height: MediaQuery
-                      .of(context)
-                      .size
-                      .height - 156,
+                  height: MediaQuery.of(context).size.height - 156,
                   child: Wrap(
                     runSpacing: 0,
                     spacing: 0,
                     alignment: WrapAlignment.center,
                     children: list
-                        .map((e) =>
-                        ParticipantVideoWidget(
+                        .map((e) => ParticipantVideoWidget(
                             remoteStream: e,
                             height: itemHeight,
                             width: itemWidth))
                         .toList(),
                   )
 
-                // ListView.builder(
-                //   shrinkWrap: true,
-                //   itemCount: items.length,
-                //   itemBuilder: (context, index) {
-                //     return Container(
-                //       clipBehavior: Clip.hardEdge,
-                //       margin: const EdgeInsets.all(3),
-                //       decoration: ShapeDecoration(
-                //         shape: RoundedRectangleBorder(
-                //           side: const BorderSide(width: 2, color: Colors.white),
-                //           borderRadius: BorderRadius.circular(6),
-                //         ),
-                //       ),
-                //       child: ParticipantVideoWidget(
-                //         remoteStream: items[index],
-                //         height: itemHeight,
-                //         width: itemWidth,
-                //       ),
-                //     );
-                //   },
-                // ),
-              ),
+                  // ListView.builder(
+                  //   shrinkWrap: true,
+                  //   itemCount: items.length,
+                  //   itemBuilder: (context, index) {
+                  //     return Container(
+                  //       clipBehavior: Clip.hardEdge,
+                  //       margin: const EdgeInsets.all(3),
+                  //       decoration: ShapeDecoration(
+                  //         shape: RoundedRectangleBorder(
+                  //           side: const BorderSide(width: 2, color: Colors.white),
+                  //           borderRadius: BorderRadius.circular(6),
+                  //         ),
+                  //       ),
+                  //       child: ParticipantVideoWidget(
+                  //         remoteStream: items[index],
+                  //         height: itemHeight,
+                  //         width: itemWidth,
+                  //       ),
+                  //     );
+                  //   },
+                  // ),
+                  ),
             ),
           ],
         );
@@ -1247,4 +1005,261 @@ class VideoRoomPage extends StatelessWidget {
 
     return const Text("NO LAYOUT");
   }
+}
+
+
+
+Widget getChatView(BuildContext context, double width)
+{
+  return Container(
+    width: width,
+    height: double.maxFinite,
+    color: Colors.white,
+    child: Padding(
+      padding:
+      const EdgeInsets.all(23.0),
+      child: Column(
+        // crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Expanded(
+                child: Text(
+                  'Chat messages',
+                  style: context
+                      .titleTheme
+                      .titleMedium,
+                ),
+              ),
+              IconButton(
+                icon: const Icon(
+                    Icons.close),
+                onPressed: () {
+                  context
+                      .read<
+                      ConferenceCubit>()
+                      .toggleChatWindow();
+                },
+              )
+            ],
+          ),
+          Expanded(
+              child: BlocConsumer<
+                  ChatCubit,
+                  ChatState>(
+                builder:
+                    (context, state) {
+                  return ChatDetailsWidget(
+                      state);
+                },
+                listener: (BuildContext
+                context,
+                    ChatState state) {},
+              )),
+        ],
+      ),
+    ),
+  );
+}
+
+Widget getParticipantsView(BuildContext context, double width, List<StreamRenderer> contributors, List<StreamRenderer> contributorsHandUp){
+  return Container(
+    width: width,
+    height: double.maxFinite,
+    color: Colors.white,
+    child: Padding(
+      padding:
+      const EdgeInsets.all(23.0),
+      child: Column(
+        // crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Expanded(
+                child: Text(
+                  'IN THE MEETING',
+                  style: context
+                      .titleTheme
+                      .titleMedium,
+                ),
+              ),
+              IconButton(
+                icon: const Icon(
+                    Icons.close),
+                onPressed: () {
+                  context
+                      .read<
+                      ConferenceCubit>()
+                      .toggleParticipantsWindow();
+                },
+              )
+            ],
+          ),
+          Visibility(
+            visible:
+            contributorsHandUp
+                .isNotEmpty,
+            child: Text(
+              'Raised hands',
+              style: context
+                  .titleTheme
+                  .titleSmall,
+            ),
+          ),
+          ...contributorsHandUp
+              .map((contributor) {
+            var name = contributor
+                .publisherName;
+            return Row(
+              crossAxisAlignment:
+              CrossAxisAlignment
+                  .center,
+              children: [
+                UserImage.medium(
+                  [
+                    contributor
+                        .getUserImageDTO()
+                  ],
+                ),
+                const SizedBox(
+                    width: 12),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment:
+                    CrossAxisAlignment
+                        .start,
+                    children: [
+                      Text(
+                        name,
+                        style:
+                        const TextStyle(
+                          fontFamily:
+                          'Montserrat',
+                          fontSize:
+                          16,
+                          fontWeight:
+                          FontWeight
+                              .w500,
+                          color: Colors
+                              .black87,
+                        ),
+                        overflow:
+                        TextOverflow
+                            .ellipsis,
+                        maxLines: 1,
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            );
+          }).toList(),
+          Text(
+            'Contributors',
+            style: context.titleTheme
+                .titleSmall,
+          ),
+          Expanded(
+              child: ListView.builder(
+                itemCount:
+                contributors.length,
+                itemBuilder:
+                    (context, index) {
+                  var contributor =
+                  contributors[index];
+                  var name = contributor
+                      .publisherName;
+
+                  return Padding(
+                    padding:
+                    const EdgeInsets
+                        .all(2.0),
+                    child: Row(
+                      crossAxisAlignment:
+                      CrossAxisAlignment
+                          .center,
+                      children: [
+                        UserImage.medium([
+                          contributor
+                              .getUserImageDTO()
+                        ]),
+                        const SizedBox(
+                            width: 12),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment:
+                            CrossAxisAlignment
+                                .start,
+                            children: [
+                              Text(
+                                name,
+                                style:
+                                const TextStyle(
+                                  fontFamily:
+                                  'Montserrat',
+                                  fontSize:
+                                  16,
+                                  fontWeight:
+                                  FontWeight.w500,
+                                  color: Colors
+                                      .black87,
+                                ),
+                                overflow:
+                                TextOverflow
+                                    .ellipsis,
+                                maxLines:
+                                1,
+                              ),
+                            ],
+                          ),
+                        ),
+                        CallButtonShape(
+                            size: 35,
+                            bgColor: !contributor.isAudioMuted!
+                                ? ColorConstants
+                                .kStateSuccess
+                                : ColorConstants
+                                .kPrimaryColor,
+                            image: !contributor
+                                .isAudioMuted!
+                                ? imageSVGAsset(
+                                'icon_microphone')
+                            as Widget
+                                : imageSVGAsset(
+                                'icon_microphone_disabled')
+                            as Widget,
+                            onClickAction:
+                                () async {
+                              await context
+                                  .read<
+                                  ConferenceCubit>()
+                                  .muteByID(
+                                  contributor.id);
+                            }),
+                        const SizedBox(
+                            width: 6),
+                        TextButton(
+                            onPressed:
+                                () {
+                              context
+                                  .read<
+                                  ConferenceCubit>()
+                                  .kick(contributor
+                                  .id);
+                            },
+                            child: Text(
+                              "Kick",
+                              style: context
+                                  .textTheme
+                                  .bodySmall,
+                            ))
+                      ],
+                    ),
+                  );
+                },
+              )),
+        ],
+      ),
+    ),
+  );
 }

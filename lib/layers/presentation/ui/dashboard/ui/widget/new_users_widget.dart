@@ -130,7 +130,7 @@ class NewUsersWidgetState extends State<NewUsersWidget> {
                           width: constraints.maxWidth / 2,
                           child: Row(
                             children: [
-                              UserImage.medium(user.name.getInitials(), chatId: int.parse(user.id),),
+                              UserImage.medium([user.getUserImageDTO()]),
                               const SizedBox(
                                 width: 10,
                               ),

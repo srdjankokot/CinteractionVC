@@ -1,4 +1,7 @@
+import 'package:cinteraction_vc/layers/presentation/ui/profile/ui/widget/user_image.dart';
+
 import '../../domain/entities/user.dart';
+import 'chat/chat_detail_dto.dart';
 
 class UserDto extends User {
   UserDto({
@@ -45,7 +48,20 @@ class UserDto extends User {
       online: online ?? this.online,
     );
   }
+
+
+  UserImageDto getUserImageDTO()
+  {
+    return UserImageDto(
+         id: int.parse(id),
+        name: name,
+        imageUrl: imageUrl
+    );
+  }
 }
+
+
+
 
 class UserListResponse {
   final List<UserDto> users;

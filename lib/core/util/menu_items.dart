@@ -24,9 +24,10 @@ import '../app/injector.dart';
 import '../navigation/route.dart';
 
 final mobileBottomMenu = <MenuItem>[
-  home,
+  chat,
   dashboard,
   meetings,
+
   // insights,
   profile
 ];
@@ -40,10 +41,11 @@ final mobileProfileMenu = <MenuItem>[
   // settings
 ];
 final desktopMenu = <MenuItem>[
-  home,
+  // home,
+  chat,
   dashboard,
   meetings,
-  chat,
+
   // insights,
   // users,
   // groups,
@@ -107,7 +109,8 @@ final meetings = MenuItem(
   route: null,
   label: 'Meetings',
   assetName: 'menu_meetings',
-  body: BlocProvider(
+  body:
+  BlocProvider(
     create: (context) => getIt.get<MeetingCubit>(),
     child: const MeetingsPage(),
   )
