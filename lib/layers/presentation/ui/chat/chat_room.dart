@@ -192,7 +192,7 @@ class ChatRoomPage extends StatelessWidget {
                     getLeftSide(
                         context,
                         state,
-                        400,
+                        300,
                         () => {displayJoinRoomPopup(context)},
                         () => {displayAddScheduleMeetingPopup()},
                         () => {displayCreateGroupPopup(context, state)}),
