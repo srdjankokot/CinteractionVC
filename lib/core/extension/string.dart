@@ -16,7 +16,7 @@ extension StringExtension on String {
       {
         return '${names.first.substring(0, 1)}${names.last.substring(0, 1)}';
       }
-    return names.first.substring(0, 2);
+    return names.first.substring(0, 1);
   }
 }
 

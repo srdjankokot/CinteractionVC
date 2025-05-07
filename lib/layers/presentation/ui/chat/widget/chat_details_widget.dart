@@ -3,6 +3,7 @@ import 'dart:io';
 
 import 'package:cinteraction_vc/assets/colors/Colors.dart';
 import 'package:cinteraction_vc/core/extension/context.dart';
+import 'package:cinteraction_vc/core/extension/string.dart';
 import 'package:cinteraction_vc/core/io/network/models/participant.dart';
 import 'package:cinteraction_vc/core/util/text_file.dart';
 import 'package:cinteraction_vc/layers/data/dto/chat/chat_detail_dto.dart';
@@ -13,6 +14,7 @@ import 'package:cinteraction_vc/layers/presentation/cubit/conference/conference_
 import 'package:cinteraction_vc/layers/presentation/ui/chat/widget/pdf_viewer_screen.dart';
 import 'package:cinteraction_vc/layers/presentation/ui/profile/ui/widget/user_image.dart';
 import 'package:dio/dio.dart';
+import 'package:emoji_picker_flutter/emoji_picker_flutter.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -24,6 +26,7 @@ import 'package:intl/intl.dart';
 import 'package:universal_html/html.dart' as html;
 import 'package:url_launcher/url_launcher.dart';
 import 'package:visibility_detector/visibility_detector.dart';
+import 'package:flutter/foundation.dart' as foundation;
 
 import '../../../../../core/ui/images/image.dart';
 import 'chat_dropzone.dart';
@@ -41,6 +44,14 @@ class _ChatDetailsWidgetState extends State<ChatDetailsWidget> {
   final ScrollController _scrollController = ScrollController();
   final Map<int, bool> _hoverStates = {};
   bool _isLoadingMore = false;
+
+  late ChatCubit provider;
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    provider = context.read<ChatCubit>(); // ✅ cache it safely
+  }
 
   @override
   void didUpdateWidget(covariant ChatDetailsWidget oldWidget) {
@@ -83,7 +94,6 @@ class _ChatDetailsWidgetState extends State<ChatDetailsWidget> {
           size: fileBytes.length,
           bytes: fileBytes,
         );
-        print('sendedFiles:  $fileWithBytes');
         await sendMessage(uploadedFiles: [fileWithBytes]);
       } else {
         print('Error: Bytes not read.');
@@ -227,6 +237,9 @@ class _ChatDetailsWidgetState extends State<ChatDetailsWidget> {
   void initState() {
     super.initState();
     _scrollController.addListener(_scrollListener);
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      context.read<ChatCubit>().showEmoji(false);
+    });
   }
 
   @override
@@ -234,6 +247,7 @@ class _ChatDetailsWidgetState extends State<ChatDetailsWidget> {
     return BlocBuilder<ChatCubit, ChatState>(
       builder: (context, state) {
         final chatDetails = state.chatDetails;
+        // print('ProgressInWidget: ${state.uploadProgress}');
         final messages = chatDetails?.messages.messages ?? [];
         final sortedMessages = List.of(messages)
           ..sort((a, b) {
@@ -255,11 +269,6 @@ class _ChatDetailsWidgetState extends State<ChatDetailsWidget> {
             Expanded(
               child: Stack(
                 children: [
-                  DropzoneView(
-                    onCreated: (ctrl) => controller = ctrl,
-                    onDropFile: onFileDropped,
-                    onHover: () => print('eeeeeeeeeeeee'),
-                  ),
                   ChatDropzone(
                     sendFile: sendMessage,
                     child: Flex(
@@ -293,16 +302,12 @@ class _ChatDetailsWidgetState extends State<ChatDetailsWidget> {
                                             sortedMessages[index + 1]
                                                     .senderId !=
                                                 message.senderId);
-                                    // print(
-                                    //     'unseenMessages: ${state.chatMessages}');
 
                                     return VisibilityDetector(
                                       key: Key(index.toString()),
                                       onVisibilityChanged:
                                           (VisibilityInfo info) {
-                                        context
-                                            .read<ChatCubit>()
-                                            .chatMessageSeen(message.id!);
+                                       provider.chatMessageSeen(message.id!);
                                       },
                                       child: MouseRegion(
                                         onEnter: (_) => setState(
@@ -422,8 +427,7 @@ class _ChatDetailsWidgetState extends State<ChatDetailsWidget> {
                                                       Positioned(
                                                         top: -10,
                                                         left: -50,
-                                                        child: UserImage.medium(
-                                                          "https://ui-avatars.com/api/?name=${user.name}&color=ffffff&background=f34320",
+                                                        child: UserImage.medium([user.getUserImageDTO()],
                                                         ),
                                                       ),
                                                     Column(
@@ -661,19 +665,62 @@ class _ChatDetailsWidgetState extends State<ChatDetailsWidget> {
               ),
             ),
 
+            if (state.uploadProgress > 0 && state.uploadProgress != 1)
+              Padding(
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    if (state.uploadProgress > 0.0)
+                      Padding(
+                        padding: const EdgeInsets.only(bottom: 6),
+                        child: Text(
+                          'Uploading files...',
+                          style: TextStyle(
+                            fontSize: 14,
+                            fontWeight: FontWeight.w500,
+                            color: state.uploadProgress == 1.0
+                                ? Colors.green
+                                : Colors.blueGrey,
+                          ),
+                        ),
+                      ),
+                    // Text(
+                    //   'Upload: ${(state.uploadProgress * 100).toStringAsFixed(0)}%',
+                    //   style: const TextStyle(
+                    //       fontSize: 16, fontWeight: FontWeight.bold),
+                    // ),
+                  ],
+                ),
+              ),
+
             const SizedBox(
               height: 5,
             ),
+
             Row(
               children: [
+                IconButton(
+                  icon: const Icon(Icons.emoji_emotions_outlined),
+                  onPressed: () {
+                    FocusScope.of(context).unfocus();
+                    context.read<ChatCubit>().toggleEmojiVisibility();
+                  },
+                ),
                 Expanded(
                   child: TextField(
-                    textInputAction: TextInputAction.done,
                     focusNode: messageFocusNode,
                     controller: messageFieldController,
+                    textInputAction: TextInputAction.done,
                     keyboardType: TextInputType.multiline,
                     minLines: 1,
                     maxLines: 8,
+                    onTap: () {
+                      if (state.isEmojiVisible!) {
+                        context.read<ChatCubit>().showEmoji(false);
+                      }
+                    },
                     onEditingComplete: () {
                       if (messageFieldController.text.trim().isNotEmpty) {
                         sendMessage();
@@ -682,7 +729,7 @@ class _ChatDetailsWidgetState extends State<ChatDetailsWidget> {
                     decoration: InputDecoration(
                       hintText: "Send a message",
                       suffixIcon: IconButton(
-                        onPressed: () async {
+                        onPressed: () {
                           sendMessage();
                         },
                         icon: imageSVGAsset('icon_send') as Widget,
@@ -697,7 +744,43 @@ class _ChatDetailsWidgetState extends State<ChatDetailsWidget> {
                   icon: imageSVGAsset('three_dots') as Widget,
                 ),
               ],
-            )
+            ),
+
+            if (state.isEmojiVisible!)
+              SizedBox(
+                height: 250,
+                child: EmojiPicker(
+                  onEmojiSelected: (category, emoji) {
+                    messageFieldController.text += emoji.emoji;
+                    messageFieldController.selection =
+                        TextSelection.fromPosition(
+                      TextPosition(offset: messageFieldController.text.length),
+                    );
+                  },
+                  config: Config(
+                    height: 256,
+                    // bgColor: const Color(0xFFF2F2F2),
+                    checkPlatformCompatibility: true,
+                    emojiViewConfig: EmojiViewConfig(
+                      // Issue: https://github.com/flutter/flutter/issues/28894
+                      emojiSizeMax: 28 *
+                          (foundation.defaultTargetPlatform ==
+                                  TargetPlatform.iOS
+                              ? 1.20
+                              : 1.0),
+                    ),
+                    viewOrderConfig: const ViewOrderConfig(
+                      top: EmojiPickerItem.categoryBar,
+                      middle: EmojiPickerItem.emojiView,
+                      bottom: EmojiPickerItem.searchBar,
+                    ),
+                    skinToneConfig: const SkinToneConfig(),
+                    categoryViewConfig: const CategoryViewConfig(),
+                    bottomActionBarConfig: const BottomActionBarConfig(),
+                    searchViewConfig: const SearchViewConfig(),
+                  ),
+                ),
+              ),
 
             //input
           ],

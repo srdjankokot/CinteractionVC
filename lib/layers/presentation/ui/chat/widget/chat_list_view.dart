@@ -2,6 +2,8 @@
 
 import 'package:audioplayers/audioplayers.dart';
 import 'package:cinteraction_vc/core/extension/context.dart';
+import 'package:cinteraction_vc/core/extension/string.dart';
+import 'package:cinteraction_vc/core/util/conf.dart';
 import 'package:cinteraction_vc/layers/data/dto/chat/chat_dto.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -21,7 +23,7 @@ class ChatsListView extends StatefulWidget {
 }
 
 class _ChatsListViewState extends State<ChatsListView> {
-  int? selectedChat;
+  // int? selectedChat;
   late ScrollController _scrollController;
   int currentPage = 1;
   final int paginate = 20;
@@ -32,8 +34,14 @@ class _ChatsListViewState extends State<ChatsListView> {
   void initState() {
     super.initState();
     _scrollController = ScrollController()..addListener(_scrollListener);
-    _updateSelectedChat();
-    context.read<ChatCubit>().setCurrentChat(widget.state.chats![0]);
+
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (context.isWide) {
+        _updateSelectedChat();
+        context.read<ChatCubit>().setCurrentChat(widget.state.chats![0]);
+      }
+    });
+
   }
 
   @override
@@ -58,17 +66,17 @@ class _ChatsListViewState extends State<ChatsListView> {
           return bTime.compareTo(aTime);
         });
 
-      setState(() {
-        selectedChat = sortedChats.first.id;
-      });
+      // setState(() {
+      //   selectedChat = sortedChats.first.id;
+      // });
 
       WidgetsBinding.instance.addPostFrameCallback((_) {
-        context.read<ChatCubit>().getChatDetails(selectedChat, 1);
+        context.read<ChatCubit>().getChatDetails(widget.state.currentChat?.id, 1);
       });
     } else {
-      setState(() {
-        selectedChat = null;
-      });
+      // setState(() {
+      //   selectedChat = null;
+      // });
     }
   }
 
@@ -150,15 +158,24 @@ class _ChatsListViewState extends State<ChatsListView> {
                 itemBuilder: (context, index) {
                   if (index < sortedChats.length) {
                     var chat = sortedChats[index];
-                    bool isSelected = chat.id == selectedChat;
+                    bool isSelected = chat.id == widget.state.currentChat?.id;
+
+                    final allParticipants = [
+                      ...?chat.chatParticipants,
+                      if (chat.chatGroup && state.chatDetails != null)
+                        state.chatDetails!.authUser,
+                    ];
+                    List<UserImageDto> userImages = allParticipants
+                        .map((a) => a.getUserImageDTO())
+                        .toList();
 
                     return MouseRegion(
                       cursor: SystemMouseCursors.click,
                       child: GestureDetector(
                         onTap: () async {
-                          setState(() {
-                            selectedChat = chat.id;
-                          });
+                          // setState(() {
+                          //   selectedChat = chat.id;
+                          // });
                           await context.read<ChatCubit>().chatSeen(chat.id);
                           await context
                               .read<ChatCubit>()
@@ -179,10 +196,7 @@ class _ChatsListViewState extends State<ChatsListView> {
                               Row(
                                 crossAxisAlignment: CrossAxisAlignment.center,
                                 children: [
-                                  UserImage.medium(
-                                    chat.userImage ??
-                                        "https://ui-avatars.com/api/?name=G+R&color=ffffff&background=f34320",
-                                  ),
+                                  UserImage.medium(userImages),
                                   const SizedBox(width: 12),
                                   Expanded(
                                     child: Column(

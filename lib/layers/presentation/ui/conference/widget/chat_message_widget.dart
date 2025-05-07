@@ -32,7 +32,7 @@ class ChatMessageWidget extends StatelessWidget {
             : MainAxisAlignment.start,
         children: [
           if (message.displayName != 'Me' && message.avatarUrl.isNotEmpty)
-            UserImage.medium(message.avatarUrl),
+            UserImage.medium([message.getUserImageDTO()]),
           const SizedBox(width: 12),
           Expanded(
             child: Column(

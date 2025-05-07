@@ -37,6 +37,8 @@ class ChatState extends Equatable {
   final ListType listType;
   final StreamRenderer? localStream;
   final StreamRenderer? remoteStream;
+  final double uploadProgress;
+  final bool? isEmojiVisible;
 
   const ChatState({
     required this.isLoading,
@@ -60,6 +62,8 @@ class ChatState extends Equatable {
     this.pagination,
     this.usersPagination,
     this.chatMessages,
+    this.uploadProgress = 0.0,
+    this.isEmojiVisible,
     required this.audioMuted,
     required this.videoMuted,
     required this.listType,
@@ -72,6 +76,7 @@ class ChatState extends Equatable {
     int unreadMessages = 0,
     bool audioMuted = false,
     bool videoMuted = false,
+    bool isEmojiVisible = false,
     ListType listType = ListType.Chats,
     ChatDetailsDto? chatDetails,
   }) : this(
@@ -84,6 +89,7 @@ class ChatState extends Equatable {
           listType: listType,
           lastMessage: null,
           chatDetails: chatDetails,
+          isEmojiVisible: isEmojiVisible,
         );
 
   @override
@@ -111,7 +117,9 @@ class ChatState extends Equatable {
         chatDetails,
         pagination,
         usersPagination,
-        chatMessages
+        chatMessages,
+        uploadProgress,
+        isEmojiVisible,
       ];
 
   ChatState copyWith({
@@ -127,6 +135,7 @@ class ChatState extends Equatable {
     bool? incomingCall,
     String? caller,
     bool? calling,
+    bool? isEmojiVisible,
     StreamRenderer? localStream,
     StreamRenderer? remoteStream,
     UserDto? currentParticipant,
@@ -139,6 +148,7 @@ class ChatState extends Equatable {
     ChatPagination? pagination,
     UserListResponse? usersPagination,
     List<MessageDto>? chatMessages,
+    double? uploadProgress,
   }) {
     return ChatState(
       isLoading: isLoading ?? this.isLoading,
@@ -165,6 +175,8 @@ class ChatState extends Equatable {
       pagination: pagination ?? this.pagination,
       usersPagination: usersPagination ?? this.usersPagination,
       chatMessages: chatMessages ?? this.chatMessages,
+      uploadProgress: uploadProgress ?? this.uploadProgress,
+      isEmojiVisible: isEmojiVisible ?? this.isEmojiVisible,
     );
   }
 
@@ -195,4 +207,35 @@ class ChatState extends Equatable {
       chatMessages: chatMessages,
     );
   }
+
+
+  ChatState clearCurrentChat() {
+    return ChatState(
+      isLoading: isLoading,
+      isInitial: isInitial,
+      isInitialLoading: isInitialLoading,
+      stateIndex: stateIndex,
+      users: users,
+      messages: messages,
+      chats: chats,
+      pagination: pagination,
+      lastMessage: lastMessage,
+      participants: participants,
+      unreadMessages: unreadMessages,
+      incomingCall: incomingCall,
+      caller: caller,
+      calling: calling,
+      localStream: localStream,
+      remoteStream: remoteStream,
+      currentParticipant: currentParticipant,
+      currentChat: null,
+      audioMuted: audioMuted,
+      videoMuted: videoMuted,
+      listType: ListType.Chats,
+      chatDetails: chatDetails,
+      chatMessages: chatMessages,
+    );
+  }
+
+
 }

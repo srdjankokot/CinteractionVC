@@ -2,6 +2,7 @@ import 'dart:math';
 
 import 'package:cinteraction_vc/core/extension/context.dart';
 import 'package:cinteraction_vc/core/extension/string.dart';
+import 'package:cinteraction_vc/layers/presentation/ui/profile/ui/widget/user_image.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_webrtc/flutter_webrtc.dart';
@@ -41,24 +42,39 @@ class ParticipantVideoWidget extends StatelessWidget {
               children: [
                 Visibility(
                   visible: remoteStream.isVideoMuted == false,
-                  replacement: Center(
-                      child: CircleAvatar(
-                        backgroundColor:
-                        ([...ColorConstants.kStateColors]..shuffle()).first,
-                        radius: [width, height].reduce(min) / 4,
-                        child: Text(remoteStream.publisherName.getInitials(),
-                            style: context.primaryTextTheme.titleLarge?.copyWith(
-                                fontSize: [width, height].reduce(min) / 8,
-                                fontWeight: FontWeight.bold)),
-                      )
+                  replacement:
+                      Center(child: UserImage.large([remoteStream.getUserImageDTO()]))
 
-                    // Text("Video Paused By ${remoteStream.publisherName!}",
-                    //     style: const TextStyle(color: Colors.white)),
-                  ),
+                  // Center(
+                  //     child: CircleAvatar(
+                  //       backgroundColor:
+                  //       ([...ColorConstants.kStateColors]..shuffle()).first,
+                  //       radius: [width, height].reduce(min) / 4,
+                  //       child: Text(remoteStream.publisherName.getInitials(),
+                  //           style: context.primaryTextTheme.titleLarge?.copyWith(
+                  //               fontSize: [width, height].reduce(min) / 8,
+                  //               fontWeight: FontWeight.bold)),
+                  //     )
+                  // )
+
+                  ,
                   child: RTCVideoView(
                     remoteStream.videoRenderer,
                     placeholderBuilder: (context) {
-                      return Text('data');
+                      return Center(
+                          child: CircleAvatar(
+                            backgroundColor:
+                            ([...ColorConstants.kStateColors]..shuffle()).first,
+                            radius: [width, height].reduce(min) / 4,
+                            child: Text(remoteStream.publisherName.getInitials(),
+                                style: context.primaryTextTheme.titleLarge?.copyWith(
+                                    fontSize: [width, height].reduce(min) / 8,
+                                    fontWeight: FontWeight.bold)),
+                          )
+
+                        // Text("Video Paused By ${remoteStream.publisherName!}",
+                        //     style: const TextStyle(color: Colors.white)),
+                      );
                     },
                     filterQuality: FilterQuality.none,
                     objectFit: screenShare
@@ -107,6 +123,9 @@ class ParticipantVideoWidget extends StatelessWidget {
                     PopupMenuButton<String>(
                       onSelected: (e) async {
                         switch (e) {
+                          case 'Mute/UnMute':
+                            context.read<ConferenceCubit>().muteByID(remoteStream.id);
+                            break;
                           case 'Kick':
                             context.read<ConferenceCubit>().kick(remoteStream.id);
                             break;
@@ -116,7 +135,7 @@ class ParticipantVideoWidget extends StatelessWidget {
                         }
                       },
                       itemBuilder: (BuildContext context) {
-                        return {'Kick', 'UnPublish'}.map((String choice) {
+                        return {'Mute/UnMute','Kick'}.map((String choice) {
                           return PopupMenuItem<String>(
                             value: choice,
                             child: Text(choice),
@@ -132,22 +151,40 @@ class ParticipantVideoWidget extends StatelessWidget {
                 top: 10,
                 child: Text('${remoteStream.publisherName}', style: context.textTheme.displayLarge?.copyWith(color: Colors.white),)),
 
-            Visibility(
-                visible: remoteStream.isAudioMuted == true,
-                child: Positioned(
-                    bottom: 50,
-                    left: 24,
-                    child:
-                        imageSVGAsset('icon_microphone_disabled') as Widget)),
-            Visibility(
-                visible: width < 200,
-                child: Positioned.fill(
-                  bottom: 20,
-                  child: Align(
-                      alignment: Alignment.bottomCenter,
-                      child: EngagementProgress(
-                          engagement: remoteStream.engagement ?? 0)),
-                )),
+
+            Positioned(
+                bottom: 16,
+                left: 16,
+                child: Row(
+                  children: [
+                    Visibility(
+                        visible: remoteStream.isAudioMuted == true,
+                            child:
+                            imageSVGAsset('icon_microphone_disabled') as Widget),
+
+                    Visibility(
+                        visible: remoteStream.isVideoMuted == true,
+                            child:
+                            imageSVGAsset('icon_video_recorder_disabled') as Widget),
+
+                       Visibility(
+                        visible: remoteStream.isHandUp == true,
+                            child: const Icon(Icons.waving_hand_outlined, color: Colors.white),
+                       )
+                  ],
+                )
+            ),
+
+
+            // Visibility(
+            //     visible: width < 200,
+            //     child: Positioned.fill(
+            //       bottom: 20,
+            //       child: Align(
+            //           alignment: Alignment.bottomCenter,
+            //           child: EngagementProgress(
+            //               engagement: remoteStream.engagement ?? 0)),
+            //     )),
 
           ],
         ),
@@ -171,20 +208,9 @@ class ParticipantVideoWidget extends StatelessWidget {
               borderRadius: BorderRadius.circular(6),
               child: Visibility(
                 visible: remoteStream.isVideoMuted == false,
-                replacement: Center(
-                    child: CircleAvatar(
-                  backgroundColor:
-                      ([...ColorConstants.kStateColors]..shuffle()).first,
-                  radius: [width, height].reduce(min) / 4,
-                  child: Text(remoteStream.publisherName.getInitials(),
-                      style: context.primaryTextTheme.titleLarge?.copyWith(
-                          fontSize: [width, height].reduce(min) / 8,
-                          fontWeight: FontWeight.bold)),
-                )
-
-                    // Text("Video Paused By ${remoteStream.publisherName!}",
-                    //     style: const TextStyle(color: Colors.white)),
-                    ),
+                replacement:
+                Center(child: UserImage.large([remoteStream.getUserImageDTO()]))
+                ,
                 child: RTCVideoView(
                   remoteStream.videoRenderer,
                   placeholderBuilder: (context) {
@@ -198,34 +224,65 @@ class ParticipantVideoWidget extends StatelessWidget {
                 ),
               ),
             ),
+            // Positioned(
+            //     right: 0,
+            //     child: Row(
+            //       children: [
+            //         EngagementProgress(
+            //             engagement: remoteStream.engagement ?? 0),
+            //         PopupMenuButton<String>(
+            //           onSelected: (e) async {
+            //             switch (e) {
+            //               case 'Kick':
+            //                 context.read<ConferenceCubit>().kick(remoteStream.id);
+            //                 break;
+            //               case 'UnPublish':
+            //                 context.read<ConferenceCubit>().unPublishById(remoteStream.id);
+            //                 break;
+            //             }
+            //           },
+            //           itemBuilder: (BuildContext context) {
+            //             return {'Kick', 'UnPublish'}.map((String choice) {
+            //               return PopupMenuItem<String>(
+            //                 value: choice,
+            //                 child: Text(choice),
+            //               );
+            //             }).toList();
+            //           },
+            //         ),
+            //       ],
+            //     )),
+
+
             Positioned(
-                right: 0,
+                left: 10,
+                top: 10,
+                child: Text('${remoteStream.publisherName}', style: context.textTheme.displayLarge?.copyWith(color: Colors.white),)),
+
+
+            Positioned(
+                bottom: 16,
+                left: 16,
                 child: Row(
                   children: [
-                    EngagementProgress(
-                        engagement: remoteStream.engagement ?? 0),
-                    PopupMenuButton<String>(
-                      onSelected: (e) async {
-                        switch (e) {
-                          case 'Kick':
-                            context.read<ConferenceCubit>().kick(remoteStream.id);
-                            break;
-                          case 'UnPublish':
-                            context.read<ConferenceCubit>().unPublishById(remoteStream.id);
-                            break;
-                        }
-                      },
-                      itemBuilder: (BuildContext context) {
-                        return {'Kick', 'UnPublish'}.map((String choice) {
-                          return PopupMenuItem<String>(
-                            value: choice,
-                            child: Text(choice),
-                          );
-                        }).toList();
-                      },
-                    ),
+                    Visibility(
+                        visible: remoteStream.isAudioMuted == true,
+                        child:
+                        imageSVGAsset('icon_microphone_disabled') as Widget),
+
+                    Visibility(
+                        visible: remoteStream.isVideoMuted == true,
+                        child:
+                        imageSVGAsset('icon_video_recorder_disabled') as Widget),
+
+                    Visibility(
+                      visible: remoteStream.isHandUp == true,
+                      child: const Icon(Icons.waving_hand_outlined, color: Colors.white),
+                    )
                   ],
-                )),
+                )
+            ),
+
           ],
         ),
       ),

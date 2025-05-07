@@ -25,4 +25,7 @@ const _$DataChannelCmdEnumMap = {
   DataChannelCmd.unPublish: 'unPublish',
   DataChannelCmd.engagement: 'engagement',
   DataChannelCmd.message: 'message',
+  DataChannelCmd.muteById: 'muteById',
+  // DataChannelCmd.trackStatus: 'trackStatus',
+  // DataChannelCmd.askForTrackStatus: 'askForTrackStatus',
 };

@@ -161,7 +161,8 @@ class JanusVideoRoomPlugin extends JanusPlugin {
   }
 
   /// joins the [JanusVideoRoom] as a media publisher on provided [roomId] with its name as [displayName] and optionally can provide your own [id].
-  Future<void> joinPublisher(dynamic roomId, {String? pin, int? id, String? token, String? displayName}) async {
+  Future<void> joinPublisher(dynamic roomId, {String? pin, int? id, String? token, String? displayName, Map<String, dynamic>? metadata}) async {
+
     var payload = {
       "request": "join",
       "ptype": "publisher",
@@ -170,6 +171,7 @@ class JanusVideoRoomPlugin extends JanusPlugin {
       "id": id,
       "display": displayName,
       "token": token,
+      "metadata": metadata,
     }..removeWhere((key, value) => value == null);
     _handleRoomIdTypeDifference(payload);
     await this.send(data: payload);
@@ -270,7 +272,9 @@ class JanusVideoRoomPlugin extends JanusPlugin {
       List<Map<String, String>>? descriptions,
       List<ConfigureStream>? streams,
       bool? restart,
-      RTCSessionDescription? sessionDescription}) async {
+      RTCSessionDescription? sessionDescription,
+      Map<String, dynamic>? metadata,
+      }) async {
     var payload = {
       "request": "configure",
       "bitrate": bitrate,
@@ -282,7 +286,8 @@ class JanusVideoRoomPlugin extends JanusPlugin {
       "audio_level_average": audioLevelAverage,
       "streams": streams?.map((e) => e.toMap()).toList(),
       "restart": restart,
-      "descriptions": descriptions
+      "descriptions": descriptions,
+      "metadata": metadata
     }..removeWhere((key, value) => value == null);
     await this.send(data: payload, jsep: sessionDescription);
   }

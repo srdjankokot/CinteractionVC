@@ -29,7 +29,8 @@ abstract class Api {
   Future<ApiResponse<bool>> sendEngagement(
       {required engagement, required userId, required callId});
 
-  Future<ApiResponse<MeetingDto>> startCall({required streamId, required userId});
+  Future<ApiResponse<MeetingDto>> startCall(
+      {required streamId, required userId});
   Future<bool> endCall({required callId, required userId});
 
   Future<ApiResponse<MeetingResponse?>> getMeetings(int page);
@@ -83,5 +84,6 @@ abstract class Api {
     String? message,
     required List<int> participantIds,
     List<PlatformFile>? uploadedFiles,
+    Function(double progress)? onProgress,
   });
 }
