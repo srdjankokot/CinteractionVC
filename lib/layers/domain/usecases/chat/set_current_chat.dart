@@ -7,7 +7,7 @@ class SetCurrentChat {
 
   final ChatRepo repo;
 
-  call(ChatDto chat) {
+  call(ChatDto? chat) {
     repo.setCurrentChat(chat);
   }
 }

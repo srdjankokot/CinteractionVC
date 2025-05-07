@@ -120,7 +120,7 @@ class UserListLayout extends StatelessWidget {
                             child: Row(
                               crossAxisAlignment: CrossAxisAlignment.center,
                               children: [
-                                UserImage.medium(user.imageUrl, chatId: int.parse(user.id),),
+                                UserImage.medium([user.getUserImageDTO()]),
                                 Padding(
                                   padding: const EdgeInsets.only(left: 12.0),
                                   child: Column(
@@ -209,7 +209,7 @@ class UserListLayout extends StatelessWidget {
                             child: Row(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                UserImage.medium(user.name.getInitials(), chatId: int.parse(user.id),),
+                                UserImage.medium([user.getUserImageDTO()]),
                                 Expanded(
                                   child: Padding(
                                     padding: const EdgeInsets.only(

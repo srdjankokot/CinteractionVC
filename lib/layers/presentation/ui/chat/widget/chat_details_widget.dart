@@ -45,6 +45,14 @@ class _ChatDetailsWidgetState extends State<ChatDetailsWidget> {
   final Map<int, bool> _hoverStates = {};
   bool _isLoadingMore = false;
 
+  late ChatCubit provider;
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    provider = context.read<ChatCubit>(); // ✅ cache it safely
+  }
+
   @override
   void didUpdateWidget(covariant ChatDetailsWidget oldWidget) {
     super.didUpdateWidget(oldWidget);
@@ -294,16 +302,12 @@ class _ChatDetailsWidgetState extends State<ChatDetailsWidget> {
                                             sortedMessages[index + 1]
                                                     .senderId !=
                                                 message.senderId);
-                                    // print(
-                                    //     'unseenMessages: ${state.chatMessages}');
 
                                     return VisibilityDetector(
                                       key: Key(index.toString()),
                                       onVisibilityChanged:
                                           (VisibilityInfo info) {
-                                        context
-                                            .read<ChatCubit>()
-                                            .chatMessageSeen(message.id!);
+                                       provider.chatMessageSeen(message.id!);
                                       },
                                       child: MouseRegion(
                                         onEnter: (_) => setState(
@@ -423,7 +427,7 @@ class _ChatDetailsWidgetState extends State<ChatDetailsWidget> {
                                                       Positioned(
                                                         top: -10,
                                                         left: -50,
-                                                        child: UserImage.medium(user.name.getInitials(), chatId: user.id,
+                                                        child: UserImage.medium([user.getUserImageDTO()],
                                                         ),
                                                       ),
                                                     Column(

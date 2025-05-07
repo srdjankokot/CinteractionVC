@@ -41,7 +41,7 @@ class ProfileTab extends StatelessWidget {
               margin: const EdgeInsets.only(top: 20, bottom: 20),
               child: Row(
                 children: [
-                  UserImage.medium(user.name, chatId: int.parse(user.id),),
+                  UserImage.medium([user.getUserImageDTO()]),
                   const SizedBox(width: 10,),
                   Column(
                     mainAxisAlignment: MainAxisAlignment.center,

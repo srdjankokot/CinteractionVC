@@ -139,6 +139,7 @@ class ConferenceRepoImpl extends ConferenceRepo {
     localScreenSharingRenderer =
         StreamRenderer('localScreenShare', 'local_screenshare');
     localVideoRenderer = StreamRenderer('local', 'local');
+    localVideoRenderer.imageUrl = user?.imageUrl;
   }
 
   _configureConnection() async {
@@ -225,6 +226,7 @@ class ConferenceRepoImpl extends ConferenceRepo {
                 ? metadata['isVideoMuted']
                 : null;
             stream['isHandUp'] = metadata['isHandUp'];
+            stream['imageUrl'] = metadata['imageUrl'];
           }
 
         sources.add(stream);
@@ -404,6 +406,7 @@ class ConferenceRepoImpl extends ConferenceRepo {
     _manageMuteUIEvents(renderer, 'audio', metadata['isAudioMuted']);
     _manageMuteUIEvents(renderer, 'video', metadata['isVideoMuted']);
     _manageHandUp(renderer, metadata['isHandUp']);
+    renderer.imageUrl =  metadata['imageUrl'];
 
     _refreshStreams();
   }
@@ -662,6 +665,7 @@ class ConferenceRepoImpl extends ConferenceRepo {
             }
 
             renderer.isHandUp = audioSource['isHandUp'];
+            renderer.imageUrl = audioSource['imageUrl'];
 
                 renderer.audioMid = event.mid;
           } else if (isVideo) {
@@ -952,7 +956,7 @@ class ConferenceRepoImpl extends ConferenceRepo {
     await localVideoRenderer.init();
     localVideoRenderer.videoRenderer.srcObject =
         videoPlugin?.webRTCHandle!.localStream;
-    localVideoRenderer.publisherName = "My Camera";
+    localVideoRenderer.publisherName = user!.name;
     videoState.streamsToBeRendered['local'] = localVideoRenderer;
   }
 
@@ -1214,7 +1218,8 @@ class ConferenceRepoImpl extends ConferenceRepo {
     var metadata = {
       "isAudioMuted": localVideoRenderer.isAudioMuted,
       "isVideoMuted": localVideoRenderer.isVideoMuted,
-      "isHandUp": localVideoRenderer.isHandUp
+      "isHandUp": localVideoRenderer.isHandUp,
+      "imageUrl": user?.imageUrl
     };
 
     await videoPlugin?.configure(metadata: metadata);
@@ -1339,7 +1344,8 @@ class ConferenceRepoImpl extends ConferenceRepo {
     var metadata = {
       "isAudioMuted": localVideoRenderer.isAudioMuted,
       "isVideoMuted": localVideoRenderer.isVideoMuted,
-      "isHandUp": localVideoRenderer.isHandUp
+      "isHandUp": localVideoRenderer.isHandUp,
+      "imageUrl": "https://www.shareicon.net/data/512x512/2016/07/26/802043_man_512x512.png"
     };
 
     await videoPlugin?.joinPublisher(room,

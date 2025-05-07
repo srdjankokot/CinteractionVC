@@ -1,5 +1,8 @@
 import 'package:file_picker/file_picker.dart';
 
+import '../../data/dto/chat/chat_detail_dto.dart';
+import '../../presentation/ui/profile/ui/widget/user_image.dart';
+
 class ChatMessage {
   ChatMessage(
       {required this.message,
@@ -15,4 +18,14 @@ class ChatMessage {
   final String avatarUrl;
   final List<PlatformFile>? files;
   bool? seen;
+
+
+  UserImageDto getUserImageDTO()
+  {
+    return UserImageDto(
+      id: 0,
+        name: displayName,
+        imageUrl: avatarUrl
+    );
+  }
 }

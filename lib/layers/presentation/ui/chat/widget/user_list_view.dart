@@ -134,7 +134,7 @@ class _UsersListViewState extends State<UsersListView> {
                             const SizedBox(width: 10),
                             Stack(
                               children: [
-                                UserImage.medium(user.name.getInitials(), chatId: int.parse(user.id),),
+                                UserImage.medium([user.getUserImageDTO()]),
                                 Visibility(
                                   visible: user.online,
                                   child: Positioned(
