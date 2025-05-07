@@ -566,25 +566,6 @@ class VideoRoomPage extends StatelessWidget {
                                         crossAxisAlignment:
                                             CrossAxisAlignment.center,
                                         children: [
-                                          // CallButtonShape(
-                                          //     image: Icon(
-                                          //       state.handUp
-                                          //           ? Icons
-                                          //           .waving_hand_outlined
-                                          //           : Icons
-                                          //           .front_hand_outlined,
-                                          //       color: Colors.white,
-                                          //     ),
-                                          //     bgColor: ColorConstants
-                                          //         .kWhite30,
-                                          //     onClickAction:
-                                          //         () async {
-                                          //       await context
-                                          //           .read<
-                                          //           ConferenceCubit>()
-                                          //           .handUp();
-                                          //     }),
-                                          // const Spacer(),
                                           CallButtonShape(
                                             image: imageSVGAsset('icon_phone')
                                                 as Widget,
@@ -648,7 +629,7 @@ class VideoRoomPage extends StatelessWidget {
                                               //       .shrink();
                                               // }
 
-                                              return  Stack(children: [
+                                              return Stack(children: [
                                                 PopupMenuButton<String>(
                                                   iconColor: Colors.white,
                                                   icon: const Icon(Icons.more_vert),
@@ -691,10 +672,7 @@ class VideoRoomPage extends StatelessWidget {
                                                           const SizedBox(width: 5,),
                                                           Visibility(
                                                             visible: unread > 0,
-                                                            child: Positioned(
-                                                              right: 5,
-                                                              top: 2,
-                                                              child:
+                                                            child:
                                                               AnimatedOpacity(
                                                                 opacity: 1,
                                                                 duration:
@@ -746,7 +724,6 @@ class VideoRoomPage extends StatelessWidget {
                                                                 ),
                                                               ),
                                                             ),
-                                                          ),
                                                         ]) :
                                                         Text(choice),
                                                       );
@@ -759,13 +736,6 @@ class VideoRoomPage extends StatelessWidget {
                                                     right: 5,
                                                     top: 2,
                                                     child:
-                                                    AnimatedOpacity(
-                                                      opacity: 1,
-                                                      duration:
-                                                      const Duration(
-                                                          milliseconds:
-                                                          250),
-                                                      child:
                                                       Container(
                                                         width: 10,
                                                         height: 10,
@@ -775,7 +745,7 @@ class VideoRoomPage extends StatelessWidget {
                                                         ),
                                                       ),
                                                     ),
-                                                  ),
+
                                                 )
                                                 // child: Text('${state.unreadMessages}', style: context.primaryTextTheme.labelSmall,)),
                                                 //   child: Text('1', style: context.primaryTextTheme.labelSmall?.copyWith(fontSize: 8, fontWeight: FontWeight.w700),)),,
