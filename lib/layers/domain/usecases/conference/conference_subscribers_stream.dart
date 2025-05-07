@@ -1,5 +1,6 @@
 
 import '../../../../core/io/network/models/participant.dart';
+import '../../../../core/util/util.dart';
 import '../../repos/conference_repo.dart';
 
 class GetSubscriberStream
@@ -7,7 +8,7 @@ class GetSubscriberStream
   GetSubscriberStream({required  this.repo});
 
   final ConferenceRepo repo;
-  Stream<List<Participant>>  call()
+  Stream<Map<dynamic, StreamRenderer>>   call()
   {
     return repo.getSubscribersStream();
   }

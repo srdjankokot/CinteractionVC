@@ -29,18 +29,20 @@ class ChatCubit extends Cubit<ChatState> with BlocLoggy {
 
   final bool isInCallChat;
   bool isLoaded = false;
+  int myRoomId = 0;
 
   ChatCubit(
       {required this.chatUseCases,
       required this.callUseCases,
       required this.isInCallChat})
       : super(const ChatState.initial()) {
-    print("Chat Cubit is created");
     if (!isInCallChat) load(isInCallChat, 1234);
   }
 
   void load(bool isInCall, int roomId) async {
     if (!isLoaded) {
+      myRoomId = roomId;
+      print("Chat Cubit is created for $myRoomId");
       await chatUseCases.chatInitialize(
           isInCall: isInCall, chatGroupId: roomId);
       if (!isInCall) {
@@ -71,7 +73,7 @@ class ChatCubit extends Cubit<ChatState> with BlocLoggy {
 
   @override
   Future<void> close() {
-    print('Cubit is being disposed');
+    print('Chat Cubit for room: $myRoomId is being disposed');
     return super.close();
   }
 
@@ -106,6 +108,7 @@ class ChatCubit extends Cubit<ChatState> with BlocLoggy {
   }
 
   void _onParticipants(List<Participant> participants) {
+    print("_onParticipants");
     emit(state.copyWith(
         isInitial: false,
         participants: participants,
@@ -232,9 +235,14 @@ class ChatCubit extends Cubit<ChatState> with BlocLoggy {
     emit(state.copyWith(currentParticipant: user));
   }
 
-  Future<void> setCurrentChat(ChatDto chat) async {
+  Future<void> setCurrentChat(ChatDto? chat) async {
     chatUseCases.setCurrentChat(chat);
     emit(state.copyWith(currentChat: chat));
+  }
+
+  Future<void> clearCurrentChat() async {
+    chatUseCases.setCurrentChat(null);
+    emit(state.clearCurrentChat());
   }
 
   Future<void> openDownloadMedia(int id, String fileName) async {
@@ -334,6 +342,18 @@ class ChatCubit extends Cubit<ChatState> with BlocLoggy {
     // final int unreadCount =
     //     state.chatMessages!.where((element) => element.seen == false).length;
     // emit(state.copyWith(unreadMessages: unreadCount));
+  }
+
+  void toggleEmojiVisibility() {
+    emit(state.copyWith(isEmojiVisible: !(state.isEmojiVisible ?? false)));
+  }
+
+  void showEmoji(bool show) {
+    emit(state.copyWith(isEmojiVisible: show));
+  }
+
+  void updateUploadProgress(double progress) {
+    emit(state.copyWith(uploadProgress: progress));
   }
 
   Future<void> sendFile(String name, Uint8List bytes) async {

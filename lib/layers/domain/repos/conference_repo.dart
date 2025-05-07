@@ -20,7 +20,7 @@ abstract class ConferenceRepo {
   Stream<String> getConferenceEndedStream();
   Stream<List<ChatMessage>> getConferenceMessagesStream();
 
-  Stream<List<Participant>> getSubscribersStream();
+  Stream<Map<dynamic, StreamRenderer>>  getSubscribersStream();
 
   Stream<int> getAvgEngagementStream();
 
@@ -31,6 +31,7 @@ abstract class ConferenceRepo {
   Future<void> changeSubstream(
       {required String remoteStreamId, required int substream});
   Future<void> kick({required String id});
+  Future<void> handUp({required bool handUp});
 
   Future<void> unPublish();
 
@@ -47,6 +48,7 @@ abstract class ConferenceRepo {
   Future<void> unPublishById({required String id});
 
   Future<void> publishById({required String id});
+  Future<void> muteById({required String id});
 
   Future<void> changeSubStream(
       {required ConfigureStreamQuality quality,
@@ -60,4 +62,5 @@ abstract class ConferenceRepo {
 
   Future<bool> startRecording();
   Future<void> stopRecording();
+  Stream<String> getToastStream();
 }

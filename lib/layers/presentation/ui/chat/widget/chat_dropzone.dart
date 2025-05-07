@@ -1,4 +1,5 @@
 import 'package:file_picker/file_picker.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_dropzone/flutter_dropzone.dart';
 
@@ -6,7 +7,8 @@ class ChatDropzone extends StatefulWidget {
   final Widget child;
   final Future<void> Function({List<PlatformFile>? uploadedFiles}) sendFile;
 
-  const ChatDropzone({Key? key, required this.child, required this.sendFile}) : super(key: key);
+  const ChatDropzone({Key? key, required this.child, required this.sendFile})
+      : super(key: key);
 
   @override
   _ChatDropzoneState createState() => _ChatDropzoneState();
@@ -39,12 +41,13 @@ class _ChatDropzoneState extends State<ChatDropzone> {
   Widget build(BuildContext context) {
     return Stack(
       children: [
-        DropzoneView(
-          onCreated: (ctrl) => controller = ctrl,
-          onDropFile: onFileDropped,
-          onHover: () => setState(() => isDragging = true),
-          onLeave: () => setState(() => isDragging = false),
-        ),
+        if (kIsWeb)
+          DropzoneView(
+            onCreated: (ctrl) => controller = ctrl,
+            onDropFile: onFileDropped,
+            onHover: () => setState(() => isDragging = true),
+            onLeave: () => setState(() => isDragging = false),
+          ),
         if (isDragging)
           Positioned.fill(
             child: Container(

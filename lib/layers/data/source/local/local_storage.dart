@@ -26,7 +26,14 @@ class LocalStorageImpl extends LocalStorage {
     final jsonString = _sharedPref.getString('user');
     if (jsonString != null) {
       var userMap = json.decode(jsonString);
-      return UserDto.fromJson(userMap);
+      try{
+        var user = UserDto.fromJson(userMap);
+        return user;
+      }
+      catch(e){
+        return null;
+      }
+
     }
     return null;
   }

@@ -225,6 +225,12 @@ Future<void> stopAllTracks(MediaStream? stream) async {
   }
 }
 
+Future<void> stopVideoTracks(MediaStream? stream) async {
+  for (MediaStreamTrack track in stream?.getVideoTracks() ?? []) {
+    await track.stop();
+  }
+}
+
 Future<String> getCameraDeviceId(front) async {
   List<MediaDeviceInfo> videoDevices = (await navigator.mediaDevices.enumerateDevices()).where((element) => element.kind == 'videoinput').toList();
   if (videoDevices.isEmpty) {

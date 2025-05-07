@@ -176,7 +176,7 @@ class HomeTab extends StatelessWidget {
                         ),
                          Visibility(
                           visible: state.nextMeeting!=null,
-                          child: state.nextMeeting==null? Container():NextMeetingWidget(meeting: state.nextMeeting!),
+                          child: state.nextMeeting==null? Container():NextMeetingWidget(meeting: state.nextMeeting!, banner: false,),
                         ),
                         const Spacer(),
                       ],
@@ -248,7 +248,7 @@ class HomeTab extends StatelessWidget {
                         const SizedBox(
                           height: 30,
                         ),
-                        state.nextMeeting==null? Container():NextMeetingWidget(meeting: state.nextMeeting!)
+                        state.nextMeeting==null? Container():NextMeetingWidget(meeting: state.nextMeeting!, banner: false,)
 
                         // Container(
                         //     margin: const EdgeInsets.only(right: 20, left: 20),

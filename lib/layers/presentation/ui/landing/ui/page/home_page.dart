@@ -2,11 +2,11 @@ import 'package:cinteraction_vc/assets/colors/Colors.dart';
 import 'package:cinteraction_vc/core/extension/context.dart';
 import 'package:cinteraction_vc/core/extension/context_user.dart';
 import 'package:cinteraction_vc/core/extension/image.dart';
-import 'package:cinteraction_vc/core/navigation/route.dart';
-import 'package:cinteraction_vc/core/navigation/router.dart';
+import 'package:cinteraction_vc/core/extension/string.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
+import '../../../../../../core/app/injector.dart';
 import '../../../../../../core/ui/images/image.dart';
 import '../../../../../../core/util/menu_items.dart';
 
@@ -22,7 +22,16 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
+
   int _selectedIndex = 0;
+  @override
+  void initState() {
+    super.initState();
+    // setState(() {
+    //   _selectedIndex =  context.getCurrentUser?.id == "1" ? 0 : 2;
+    // });
+  }
+
 
   @override
   Widget build(BuildContext context) {
@@ -30,7 +39,9 @@ class _HomePageState extends State<HomePage> {
 
     final user = context.getCurrentUser;
 
+
     final content = tabs[_selectedIndex].builder(context);
+
 
     context.textTheme.labelSmall;
 
@@ -42,7 +53,7 @@ class _HomePageState extends State<HomePage> {
       }
     }
 
-    final chatCubit = context.watch<ChatCubit>();
+    // final chatCubit = context.watch<ChatCubit>();
 
     // return BlocConsumer<ChatCubit, ChatState>(
     //   builder: (context, state) {
@@ -53,8 +64,10 @@ class _HomePageState extends State<HomePage> {
       body = Row(
         children: [
           Visibility(
-            visible: _selectedIndex != 3,
+            // visible: _selectedIndex != 3,
+            visible: true,
             child: Drawer(
+              width: 50,
               child: Container(
                 color: Colors.white,
                 padding: const EdgeInsets.only(top: 20),
@@ -64,7 +77,8 @@ class _HomePageState extends State<HomePage> {
                       Column(
                         children: [
                           Visibility(
-                              visible: index == 4,
+                              visible: false,
+                              // visible: index == 4,
                               child: Container(
                                 margin: const EdgeInsets.all(16),
                                 child: Column(
@@ -106,30 +120,20 @@ class _HomePageState extends State<HomePage> {
                               ),
                               Container(
                                 height: 50,
-                                margin: const EdgeInsets.only(left: 20),
-                                child: ListTile(
-                                  selected: _selectedIndex == index,
-                                  trailing: item.label == "Chat" &&
-                                          chatCubit.state.unreadMessages > 0
-                                      ? Text(chatCubit.state.unreadMessages
-                                          .toString())
-                                      : null,
-                                  title: Text(item.label,
-                                      style: context.textTheme.labelMedium
-                                          ?.copyWith(
-                                        color: _selectedIndex == index
-                                            ? ColorConstants.kPrimaryColor
-                                            : ColorConstants.kGray2,
-                                      )),
-                                  leading: _selectedIndex == index
-                                      ? imageSVGAsset(item.assetName)?.copyWith(
-                                          colorFilter: const ColorFilter.mode(
-                                              ColorConstants.kPrimaryColor,
-                                              BlendMode.srcIn))
-                                      : imageSVGAsset(item.assetName),
-                                  onTap: () =>
-                                      {setState(() => _selectedIndex = index)},
-                                ),
+                                margin: const EdgeInsets.only(left: 0),
+                                child:
+
+                                IconButton(onPressed: ()=>{
+                                          setState(
+                                                  () => _selectedIndex = index
+                                          )
+                                }, icon:
+                                    (_selectedIndex == index ? imageSVGAsset(item.assetName)?.copyWith(
+                                      colorFilter: const ColorFilter.mode(
+                                          ColorConstants.kPrimaryColor,
+                                          BlendMode.srcIn)) : imageSVGAsset(item.assetName))
+                                    as Widget
+                                )
                               ),
                             ],
                           ),
@@ -140,6 +144,9 @@ class _HomePageState extends State<HomePage> {
               ),
             ),
           ),
+
+
+
           const VerticalDivider(thickness: 1, width: 1),
           Expanded(child: content),
         ],
@@ -197,8 +204,12 @@ class _HomePageState extends State<HomePage> {
                     if (user != null)
                       Row(
                         children: [
+                          Visibility(
+                            visible: false,
+                              child: Text("NEXT MEETING")),
+                          
                           const SizedBox(width: 15),
-                          UserImage.medium(user.imageUrl),
+                          UserImage.medium([user.getUserImageDTO()]),
                           const SizedBox(width: 15),
                           Column(
                             mainAxisAlignment: MainAxisAlignment.center,
@@ -209,11 +220,11 @@ class _HomePageState extends State<HomePage> {
                                 textAlign: TextAlign.center,
                                 style: context.textTheme.titleSmall,
                               ),
-                              Text(
-                                'Participant',
-                                textAlign: TextAlign.center,
-                                style: context.textTheme.labelSmall,
-                              ),
+                              // Text(
+                              //   'Participant',
+                              //   textAlign: TextAlign.center,
+                              //   style: context.textTheme.labelSmall,
+                              // ),
                             ],
                           ),
                           const SizedBox(width: 15),
@@ -245,15 +256,3 @@ class _HomePageState extends State<HomePage> {
   }
 }
 
-// Child widget
-class ChildWidget extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    return BlocBuilder<ChatCubit, ChatState>(builder: (context, state) {
-      if (state.isInitial) {
-        return Text('Initial State');
-      } else
-        return Text('Loaded State: ${state.unreadMessages}');
-    });
-  }
-}

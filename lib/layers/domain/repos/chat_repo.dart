@@ -33,7 +33,7 @@ abstract class ChatRepo {
   Future<void> loadChats(int page, int paginate);
   Future<void> loadUsers(int page, int paginate);
   Future<void> setCurrentParticipant(UserDto user);
-  Future<void> setCurrentChat(ChatDto chat);
+  Future<void> setCurrentChat(ChatDto? chat);
   Future<void> getChatDetails(int id, int page);
   Future<void> getChatDetailsByParticipiant(int id, int page);
   Future<void> deleteChat(int id);

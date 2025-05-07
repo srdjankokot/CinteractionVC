@@ -1,5 +1,6 @@
 import 'dart:io';
 
+import 'package:cinteraction_vc/core/navigation/router.dart';
 import 'package:cinteraction_vc/layers/presentation/cubit/home/home_cubit.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -13,6 +14,7 @@ import 'core/app/app.dart';
 import 'package:loggy/loggy.dart';
 
 import 'core/app/injector.dart';
+import 'core/deep_link_router.dart';
 import 'core/util/nonweb_url_strategy.dart' if (dart.library.html) 'core/util/web_url_strategy.dart';
 
 
@@ -22,6 +24,9 @@ import 'firebase_options.dart';
 late SharedPreferences sharedPref;
 
 Future<void> main() async {
+
+  final GlobalKey<NavigatorState> _navKey = GlobalKey<NavigatorState>();
+
   HttpOverrides.global = MyHttpOverrides();
 
   WidgetsFlutterBinding.ensureInitialized();
@@ -51,6 +56,12 @@ Future<void> main() async {
 
   configureUrl();
   runApp(const CinteractionFlutterApp());
+
+  DeepLinkHandler.init((route) {
+    print('🟢 Navigating to $route from main');
+    _navKey.currentState?.context.go(route);
+    router.push(route);
+  });
 }
 
 class MyHttpOverrides extends HttpOverrides {
