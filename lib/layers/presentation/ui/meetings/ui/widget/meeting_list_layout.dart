@@ -588,20 +588,6 @@ class _MeetingListLayoutState extends State<MeetingListLayout> {
                 ],
               ),
             ),
-            // Expanded(
-            //   child: SingleChildScrollView(
-            //       scrollDirection: Axis.vertical,
-            //       child: ListView.builder(itemBuilder: (context, index) =>
-            //          Text(meetings[index].name)
-            //       )),
-            // ),
-
-            // Expanded(
-            //   child: SingleChildScrollView(
-            //       scrollDirection: Axis.vertical,
-            //       child: ListView.builder(itemBuilder: (context, index) =>
-            //          Text(meetings[index].name)
-            //       )),
           );
         }
 
@@ -613,10 +599,10 @@ class _MeetingListLayoutState extends State<MeetingListLayout> {
         );
       },
       listener: (context, state) {
-          double currentScrollPosition = _controller.position.pixels;
-          WidgetsBinding.instance.addPostFrameCallback((_) {
-            _controller.jumpTo(currentScrollPosition);
-        });
+        //   double currentScrollPosition = _controller.position.pixels;
+        //   WidgetsBinding.instance.addPostFrameCallback((_) {
+        //     _controller.jumpTo(currentScrollPosition);
+        // });
       },
     );
   }
