@@ -2,6 +2,7 @@ import 'dart:io';
 import 'dart:math';
 
 import 'package:audioplayers/audioplayers.dart';
+import 'package:auto_size_text/auto_size_text.dart';
 import 'package:cinteraction_vc/core/app/injector.dart';
 import 'package:cinteraction_vc/core/app/style.dart';
 import 'package:cinteraction_vc/core/extension/context.dart';
@@ -220,7 +221,8 @@ class ChatRoomPage extends StatelessWidget {
                         () => {displayAddScheduleMeetingPopup()},
                         () => {displayCreateGroupPopup(context, state)}),
                     Visibility(
-                        visible: state.currentChat != null,
+                        visible: state.currentChat != null ||
+                            state.currentParticipant != null,
                         // visible: false,
 
                         child: getChatDetailsView(context, state, user,
@@ -608,11 +610,7 @@ Widget getChatDetailsView(
                       children: [
                         Text(
                           state.listType == ListType.Chats
-                              ? (state.chatDetails?.chatName != null
-                                  ? state.chatDetails?.chatName ?? ""
-                                  : state.chatDetails!.chatParticipants
-                                      .map((participant) => participant.name)
-                                      .join(", "))
+                              ? (state.currentChat?.getChatName() ?? "")
                               : state.currentParticipant?.name ?? "",
                           style: titleThemeStyle.textTheme.titleLarge,
                         ),

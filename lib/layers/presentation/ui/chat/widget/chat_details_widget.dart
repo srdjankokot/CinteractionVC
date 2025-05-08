@@ -435,6 +435,8 @@ class _ChatDetailsWidgetState extends State<ChatDetailsWidget> {
                                                             user.name
                                                                 .split(" ")
                                                                 .first,
+
+
                                                             style:
                                                                 const TextStyle(
                                                               color:
@@ -746,7 +748,6 @@ class _ChatDetailsWidgetState extends State<ChatDetailsWidget> {
                 ),
               ],
             ),
-
             if (state.isEmojiVisible!)
               SizedBox(
                 height: 250,

@@ -18,7 +18,7 @@ class UsersListView extends StatefulWidget {
 }
 
 class _UsersListViewState extends State<UsersListView> {
-  int? selectedUserId;
+  // int? selectedUserId;
   late ScrollController _scrollController;
   bool isLoading = false;
 
@@ -26,7 +26,12 @@ class _UsersListViewState extends State<UsersListView> {
   void initState() {
     super.initState();
     _scrollController = ScrollController()..addListener(_scrollListener);
-    _updateSelectedUser();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (context.isWide) {
+        _updateSelectedUser();
+        context.read<ChatCubit>().setCurrentChat(widget.state.chats![0]);
+      }
+    });
   }
 
   @override
@@ -39,21 +44,22 @@ class _UsersListViewState extends State<UsersListView> {
 
   void _updateSelectedUser() {
     if (widget.state.users != null && widget.state.users!.isNotEmpty) {
-      setState(() {
-        selectedUserId = int.parse(widget.state.users!.first.id);
-      });
+      // setState(() {
+      //   selectedUserId = int.parse(widget.state.users!.first.id);
+      // });
 
       WidgetsBinding.instance.addPostFrameCallback((_) {
         context
             .read<ChatCubit>()
-            .getChatDetailsByParticipiant(selectedUserId!, 1);
+            .getChatDetailsByParticipiant(int.parse(widget.state.users!.first.id), 1);
         context.read<ChatCubit>().setCurrentParticipant(widget.state.users![0]);
       });
-    } else {
-      setState(() {
-        selectedUserId = null;
-      });
     }
+    // else {
+    //   setState(() {
+    //     selectedUserId = null;
+    //   });
+    // }
   }
 
   void _scrollListener() {
@@ -106,15 +112,15 @@ class _UsersListViewState extends State<UsersListView> {
               if (index < widget.state.users!.length) {
                 var user = widget.state.users![index];
                 int userId = int.parse(user.id);
-                bool isSelected = userId == selectedUserId;
+                bool isSelected = userId == int.parse(widget.state.currentParticipant?.id ?? "-1");
 
                 return MouseRegion(
                   cursor: SystemMouseCursors.click,
                   child: GestureDetector(
                     onTap: () async {
-                      setState(() {
-                        selectedUserId = userId;
-                      });
+                      // setState(() {
+                      //   selectedUserId = userId;
+                      // });
                       await context
                           .read<ChatCubit>()
                           .getChatDetailsByParticipiant(userId, 1);
