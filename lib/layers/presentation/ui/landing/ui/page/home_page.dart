@@ -22,8 +22,8 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
-
   int _selectedIndex = 0;
+
   @override
   void initState() {
     super.initState();
@@ -32,16 +32,13 @@ class _HomePageState extends State<HomePage> {
     // });
   }
 
-
   @override
   Widget build(BuildContext context) {
     final tabs = context.isWide ? desktopMenu : mobileBottomMenu;
 
     final user = context.getCurrentUser;
 
-
     final content = tabs[_selectedIndex].builder(context);
-
 
     context.textTheme.labelSmall;
 
@@ -66,87 +63,67 @@ class _HomePageState extends State<HomePage> {
           Visibility(
             // visible: _selectedIndex != 3,
             visible: true,
-            child: Drawer(
-              width: 50,
-              child: Container(
-                color: Colors.white,
-                padding: const EdgeInsets.only(top: 20),
-                child: Column(
-                  children: [
-                    for (final (index, item) in tabs.indexed)
-                      Column(
-                        children: [
-                          Visibility(
-                              visible: false,
-                              // visible: index == 4,
-                              child: Container(
-                                margin: const EdgeInsets.all(16),
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    const Divider(),
-                                    const SizedBox(height: 16),
-                                    Container(
-                                      margin: const EdgeInsets.only(left: 10),
-                                      child: Text('Admin',
-                                          textAlign: TextAlign.left,
-                                          style: context.textTheme.labelSmall
-                                              ?.copyWith(
-                                                  color:
-                                                      ColorConstants.kGray3)),
-                                    ),
-                                  ],
-                                ),
-                              )),
-                          Stack(
-                            children: [
-                              Visibility(
-                                visible: _selectedIndex == index,
-                                child: Row(
-                                  children: [
-                                    Container(
-                                        width: 2,
-                                        height: 50,
-                                        color: ColorConstants.kPrimaryColor),
-                                    Expanded(
-                                      flex: 1,
-                                      child: Container(
-                                          height: 50,
-                                          color: ColorConstants.kPrimaryColor
-                                              .withOpacity(0.05)),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                              Container(
-                                height: 50,
-                                margin: const EdgeInsets.only(left: 0),
-                                child:
 
-                                IconButton(onPressed: ()=>{
-                                          setState(
-                                                  () => _selectedIndex = index
-                                          )
-                                }, icon:
-                                    (_selectedIndex == index ? imageSVGAsset(item.assetName)?.copyWith(
-                                      colorFilter: const ColorFilter.mode(
-                                          ColorConstants.kPrimaryColor,
-                                          BlendMode.srcIn)) : imageSVGAsset(item.assetName))
-                                    as Widget
-                                )
-                              ),
-                            ],
-                          ),
-                        ],
+            child: SizedBox(
+              width: 70,
+              child: Column(
+                children: [
+                  for (final (index, item) in tabs.indexed)
+                    Container(
+                      color: _selectedIndex == index
+                          ? ColorConstants.kPrimaryColor
+                          .withOpacity(0.05)
+                          : Colors.white,
+                      child: Padding(
+                        padding: const EdgeInsets.only(top: 8.0, bottom: 8.0),
+                        child: Column(
+                          children: [
+                            Stack(
+                              children: [
+                                InkWell(
+                                  onTap: () => {
+                                    setState(() {
+                                      _selectedIndex = index;
+                                    })
+                                  },
+                                  child: Container(
+                                      width: double.maxFinite,
+                                      child: Column(
+                                        children: [
+                                          (_selectedIndex == index
+                                              ? imageSVGAsset(item.assetName)
+                                                  ?.copyWith(
+                                                      colorFilter:
+                                                          const ColorFilter.mode(
+                                                              ColorConstants
+                                                                  .kPrimaryColor,
+                                                              BlendMode.srcIn))
+                                              : imageSVGAsset(
+                                                  item.assetName)) as Widget,
+                                          // ),
+
+                                          Text(
+                                            item.label,
+                                            style: context.textTheme.labelSmall
+                                                ?.copyWith(
+                                                    color: _selectedIndex == index
+                                                        ? ColorConstants
+                                                            .kPrimaryColor
+                                                        : Colors.black45),
+                                          ),
+                                        ],
+                                      )),
+                                ),
+                              ],
+                            ),
+                          ],
+                        ),
                       ),
-                  ],
-                ),
+                    ),
+                ],
               ),
             ),
           ),
-
-
-
           const VerticalDivider(thickness: 1, width: 1),
           Expanded(child: content),
         ],
@@ -205,9 +182,7 @@ class _HomePageState extends State<HomePage> {
                       Row(
                         children: [
                           Visibility(
-                            visible: false,
-                              child: Text("NEXT MEETING")),
-                          
+                              visible: false, child: Text("NEXT MEETING")),
                           const SizedBox(width: 15),
                           UserImage.medium([user.getUserImageDTO()]),
                           const SizedBox(width: 15),
@@ -255,4 +230,3 @@ class _HomePageState extends State<HomePage> {
     // );
   }
 }
-
