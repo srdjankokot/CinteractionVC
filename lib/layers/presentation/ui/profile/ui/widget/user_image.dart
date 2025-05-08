@@ -48,6 +48,9 @@ class MultiUserAvatar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+
+
+
     final displayUsers = users.take(4).toList();
     final numberOfCol = displayUsers.length > 1 ? 2 : 1;
     final numberOfRow = displayUsers.length > 2 ? 2 : 1;
@@ -61,6 +64,11 @@ class MultiUserAvatar extends StatelessWidget {
           children: List.generate(displayUsers.length, (i) {
             final user = displayUsers[i];
 
+            if(user.id == 7)
+            {
+              print("Image for ${user.name} is ${user.imageUrl}");
+            }
+
             final width = (i == 2 && displayUsers.length == 3)
                 ? size
                 : size / numberOfCol;
@@ -73,8 +81,10 @@ class MultiUserAvatar extends StatelessWidget {
               child: Center(
                   child: Stack(
                 children: [
-                  // Center(
-                    //                   //     child: Padding(
+                  Center(
+                                          child:
+                  //
+                  //                   Padding(
                     //                   //   padding: const EdgeInsets.all(4),
                     //                   //   child:
                     //                   //   AutoSizeText(
@@ -98,7 +108,7 @@ class MultiUserAvatar extends StatelessWidget {
                         ),
                       ),
 
-                      // ),
+                      ),
                   if (user.imageUrl != '' &&
                       !user.imageUrl.contains('ui-avatars'))
                     Center(
