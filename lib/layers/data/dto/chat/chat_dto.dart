@@ -112,6 +112,19 @@ class ChatDto {
   String toString() {
     return 'ChatDto(id: $id, name: $name, userImage: $userImage, lastMessage: $lastMessage, chatParticipants: $chatParticipants, createdAt: $createdAt, currentPage: $currentPage, lastPage: $lastPage, nextPageUrl: $nextPageUrl, prevPageUrl: $prevPageUrl, isOnline: $isOnline, chatGroup: $chatGroup, haveUnread: $haveUnread)';
   }
+
+
+  String getChatName()
+  {
+    if(chatGroup && name == "Meeting Group")
+    {
+      final participants = chatParticipants
+          ?.map((e) => e.name)
+          .join(', ') ?? '';
+      return "Meeting with $participants";
+    }
+    return name;
+  }
 }
 
 class ChatPagination {

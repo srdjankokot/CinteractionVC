@@ -73,31 +73,32 @@ class MultiUserAvatar extends StatelessWidget {
               child: Center(
                   child: Stack(
                 children: [
-                  Center(
-                      child: Padding(
-                    padding: const EdgeInsets.all(4),
-                    child: AutoSizeText(
-                      user.name.getInitials(),
-                      style: const TextStyle(
-                          fontSize: 100,
+                  // Center(
+                    //                   //     child: Padding(
+                    //                   //   padding: const EdgeInsets.all(4),
+                    //                   //   child:
+                    //                   //   AutoSizeText(
+                    //                   //     user.name.getInitials(),
+                    //                   //     style: const TextStyle(
+                    //                   //         fontSize: 100,
+                    //                   //         color: Colors.white,
+                    //                   //         fontWeight: FontWeight.bold),
+                    //                   //     maxLines: 1,
+                    //                   //     minFontSize: 10,
+                    //                   //     overflow: TextOverflow.ellipsis,
+                    //                   //   ),
+                    //                   // )
+
+                      Text(
+                        user.name.getInitials(),
+                        style: TextStyle(
+                          fontSize: displayUsers.length == 1 ? null : 10,
                           color: Colors.white,
-                          fontWeight: FontWeight.bold),
-                      maxLines: 1,
-                      minFontSize: 10,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                  )
-
-                      // Text(
-                      //   user.name.getInitials(),
-                      //   style: TextStyle(
-                      //     fontSize: displayUsers.length == 1 ? null : 10,
-                      //     color: Colors.white,
-                      //     fontWeight: FontWeight.bold,
-                      //   ),
-                      // ),
-
+                          fontWeight: FontWeight.bold,
+                        ),
                       ),
+
+                      // ),
                   if (user.imageUrl != '' &&
                       !user.imageUrl.contains('ui-avatars'))
                     Center(
