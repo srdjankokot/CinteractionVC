@@ -24,7 +24,7 @@ import '../app/injector.dart';
 import '../navigation/route.dart';
 
 final mobileBottomMenu = <MenuItem>[
-  chat,
+  buildChatMenuItem(),
   dashboard,
   meetings,
 
@@ -42,7 +42,7 @@ final mobileProfileMenu = <MenuItem>[
 ];
 final desktopMenu = <MenuItem>[
   // home,
-  chat,
+  buildChatMenuItem(),
   dashboard,
   meetings,
 
@@ -55,66 +55,64 @@ final desktopMenu = <MenuItem>[
   // settings
 ];
 
-
 class MenuItem {
-   MenuItem({
+  MenuItem({
     required this.label,
     required this.assetName,
     required this.body,
     this.route,
-  }
-  );
+  });
 
   final String label;
   final String assetName;
   final Widget body;
 
   late WidgetBuilder builder = (context) => DefaultTextStyle(
-  style: context.textTheme.bodySmall!.copyWith(),
-  child: body);
+      style: context.textTheme.bodySmall!.copyWith(), child: body);
 
   final AppRoute? route;
 }
-class UsersScreen extends MenuItem{
 
-  UsersScreen({required this.id}) : super(label: 'Users', assetName: 'menu_profile', body: BlocProvider(
-    create: (context) => UsersCubit(usersRepository: getIt.get<UsersRepository>(), groupRepository: getIt.get<GroupsRepository>(),),
-    child: UsersPage(groupId: id),
-  ));
+class UsersScreen extends MenuItem {
+  UsersScreen({required this.id})
+      : super(
+            label: 'Users',
+            assetName: 'menu_profile',
+            body: BlocProvider(
+              create: (context) => UsersCubit(
+                usersRepository: getIt.get<UsersRepository>(),
+                groupRepository: getIt.get<GroupsRepository>(),
+              ),
+              child: UsersPage(groupId: id),
+            ));
 
   final String id;
 }
 
 final home = MenuItem(
-  route: AppRoute.home,
-  label: 'Home',
-  assetName: 'menu_home',
-  body:
-  BlocProvider(
-    create: (context) => getIt.get<HomeCubit>(),
-    child: const HomeTab(),
-  )
-);
+    route: AppRoute.home,
+    label: 'Home',
+    assetName: 'menu_home',
+    body: BlocProvider(
+      create: (context) => getIt.get<HomeCubit>(),
+      child: const HomeTab(),
+    ));
 final dashboard = MenuItem(
-  route: null,
-  label: 'Dashboard',
-  assetName: 'menu_dashboard',
-  body:
-  BlocProvider(
-    create: (context) => getIt.get<DashboardCubit>(),
-    child: const DashboardScreen(),
-  )
-);
+    route: null,
+    label: 'Dashboard',
+    assetName: 'menu_dashboard',
+    body: BlocProvider(
+      create: (context) => getIt.get<DashboardCubit>(),
+      child: const DashboardScreen(),
+    ));
 final meetings = MenuItem(
-  route: null,
-  label: 'Meetings',
-  assetName: 'menu_meetings',
-  body:
-  BlocProvider(
-    create: (context) => getIt.get<MeetingCubit>(),
-    child: const MeetingsPage(),
-  )
-);
+    route: null,
+    label: 'Meetings',
+    assetName: 'menu_meetings',
+    body: BlocProvider(
+      create: (context) => getIt.get<MeetingCubit>(),
+      child: const MeetingsPage(),
+    ));
 final insights = MenuItem(
   route: null,
   label: 'Insights',
@@ -160,38 +158,40 @@ final permissions = MenuItem(
   route: null,
   label: 'Permissions',
   assetName: 'menu_permissions',
-  body:  const Center(child: Text('Permissions')),
+  body: const Center(child: Text('Permissions')),
 );
 final settings = MenuItem(
   route: null,
   label: 'Settings',
   assetName: 'menu_settings',
-  body:  const Center(child: Text('Settings')),
+  body: const Center(child: Text('Settings')),
 );
 final notifications = MenuItem(
   route: null,
   label: 'Notifications',
   assetName: 'menu_notifications',
-  body:  const Center(child: Text('Notifications')),
+  body: const Center(child: Text('Notifications')),
 );
 
-final chat = MenuItem(
-  route: null,
-  label: 'Chat',
-  assetName: 'menu_chat',
-  body:  MultiBlocProvider(
-    providers: [
-      BlocProvider<HomeCubit>(
-        create: (context) => getIt.get<HomeCubit>(),
-      ),
-      BlocProvider<ChatCubit>.value(
-        value:  getIt.get<ChatCubit>(),
-      ),
-    ],
-    child: ChatRoomPage(),
-  )
-
-
-  // body:   ChatRoomPage(),
-);
-
+MenuItem buildChatMenuItem() {
+  return MenuItem(
+    route: null,
+    label: 'Chat',
+    assetName: 'menu_chat',
+    body: MultiBlocProvider(
+      providers: [
+        BlocProvider<HomeCubit>(
+          create: (context) => getIt.get<HomeCubit>(),
+        ),
+        BlocProvider<ChatCubit>(
+          create: (context) => ChatCubit(
+            chatUseCases: getIt.get(),
+            callUseCases: getIt.get(),
+            isInCallChat: false,
+          ),
+        ),
+      ],
+      child: const ChatRoomPage(),
+    ),
+  );
+}
