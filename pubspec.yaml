@@ -85,10 +85,10 @@ dependencies:
   emoji_picker_flutter: ^4.3.0
   flutter_dropzone: ^4.0.0
   syncfusion_flutter_pdfviewer: ^27.2.5
-  flutter_screen_recording: ^2.0.16
-  connectivity_plus: ^6.1.3
+  # flutter_screen_recording: ^2.0.16
+  # connectivity_plus: ^6.1.3
   universal_html: ^2.2.4
-#  ffmpeg_kit_flutter_full: ^6.0.3
+  #  ffmpeg_kit_flutter_full: ^6.0.3
   path_provider: ^2.1.5
   #  google_sign_in_web: ^0.12.4+4
 
