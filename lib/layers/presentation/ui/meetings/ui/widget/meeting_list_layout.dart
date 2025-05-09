@@ -533,9 +533,7 @@ class _MeetingListLayoutState extends State<MeetingListLayout> {
                                                 children: [
                                                   Row(
                                                     children: [
-                                                      const Expanded(
-                                                          child: Text(
-                                                              'Duration: XX min')),
+                                                       Expanded(child: Text('Duration: ${state.meetings[index].formatMeetingDuration()}')),
                                                       const Text('Recorded: '),
                                                       imageSVGAsset(state
                                                                       .meetings[
@@ -588,20 +586,6 @@ class _MeetingListLayoutState extends State<MeetingListLayout> {
                 ],
               ),
             ),
-            // Expanded(
-            //   child: SingleChildScrollView(
-            //       scrollDirection: Axis.vertical,
-            //       child: ListView.builder(itemBuilder: (context, index) =>
-            //          Text(meetings[index].name)
-            //       )),
-            // ),
-
-            // Expanded(
-            //   child: SingleChildScrollView(
-            //       scrollDirection: Axis.vertical,
-            //       child: ListView.builder(itemBuilder: (context, index) =>
-            //          Text(meetings[index].name)
-            //       )),
           );
         }
 
@@ -613,10 +597,10 @@ class _MeetingListLayoutState extends State<MeetingListLayout> {
         );
       },
       listener: (context, state) {
-          double currentScrollPosition = _controller.position.pixels;
-          WidgetsBinding.instance.addPostFrameCallback((_) {
-            _controller.jumpTo(currentScrollPosition);
-        });
+        //   double currentScrollPosition = _controller.position.pixels;
+        //   WidgetsBinding.instance.addPostFrameCallback((_) {
+        //     _controller.jumpTo(currentScrollPosition);
+        // });
       },
     );
   }

@@ -29,7 +29,7 @@ class ChatState extends Equatable {
   final LastMessageDto? lastMessage;
   final int? stateIndex;
   final int unreadMessages;
-  final bool? incomingCall;
+  final bool incomingCall;
   final bool? calling;
   final String? caller;
   final bool audioMuted;
@@ -38,7 +38,7 @@ class ChatState extends Equatable {
   final StreamRenderer? localStream;
   final StreamRenderer? remoteStream;
   final double uploadProgress;
-  final bool? isEmojiVisible;
+  final bool isEmojiVisible;
 
   const ChatState({
     required this.isLoading,
@@ -48,7 +48,7 @@ class ChatState extends Equatable {
     this.participants,
     this.stateIndex,
     required this.unreadMessages,
-    this.incomingCall,
+    this.incomingCall = false,
     this.caller,
     this.calling,
     this.localStream,
@@ -63,7 +63,7 @@ class ChatState extends Equatable {
     this.usersPagination,
     this.chatMessages,
     this.uploadProgress = 0.0,
-    this.isEmojiVisible,
+    this.isEmojiVisible = false,
     required this.audioMuted,
     required this.videoMuted,
     required this.listType,
@@ -227,7 +227,7 @@ class ChatState extends Equatable {
       calling: calling,
       localStream: localStream,
       remoteStream: remoteStream,
-      currentParticipant: currentParticipant,
+      currentParticipant: null,
       currentChat: null,
       audioMuted: audioMuted,
       videoMuted: videoMuted,
