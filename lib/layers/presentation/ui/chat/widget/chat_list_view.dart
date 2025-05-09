@@ -4,6 +4,7 @@ import 'package:audioplayers/audioplayers.dart';
 import 'package:cinteraction_vc/core/extension/context.dart';
 import 'package:cinteraction_vc/core/extension/string.dart';
 import 'package:cinteraction_vc/core/util/conf.dart';
+import 'package:cinteraction_vc/layers/data/dto/chat/chat_detail_dto.dart';
 import 'package:cinteraction_vc/layers/data/dto/chat/chat_dto.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -122,8 +123,23 @@ class _ChatsListViewState extends State<ChatsListView> {
 
   String formatTime(String? dateTime) {
     if (dateTime == null) return "";
-    DateTime parsedTime = DateTime.parse(dateTime);
-    return "${parsedTime.hour}:${parsedTime.minute.toString().padLeft(2, '0')}";
+
+    DateTime parsed = DateTime.parse(dateTime);
+    DateTime now = DateTime.now();
+
+    DateTime today = DateTime(now.year, now.month, now.day);
+    DateTime yesterday = today.subtract(Duration(days: 1));
+    DateTime parsedDate = DateTime(parsed.year, parsed.month, parsed.day);
+
+    if (parsedDate == today) {
+      return "${parsed.hour}:${parsed.minute.toString().padLeft(2, '0')}";
+    } else if (parsedDate == yesterday) {
+      return "Yesterday";
+    } else if (parsed.year == now.year) {
+      return "${parsed.day.toString().padLeft(2, '0')}.${parsed.month.toString().padLeft(2, '0')}.";
+    } else {
+      return "${parsed.day.toString().padLeft(2, '0')}.${parsed.month.toString().padLeft(2, '0')}.${parsed.year}";
+    }
   }
 
   @override
@@ -204,7 +220,7 @@ class _ChatsListViewState extends State<ChatsListView> {
                                           CrossAxisAlignment.start,
                                       children: [
                                         Text(
-                                          chat.name,
+                                           chat.getChatName(),
                                           style: const TextStyle(
                                             fontFamily: 'Montserrat',
                                             fontSize: 16,
@@ -244,18 +260,18 @@ class _ChatsListViewState extends State<ChatsListView> {
                                   Column(
                                     children: [
                                       Text(
-                                        formatTime(chat.lastMessage?.createdAt!
-                                            .toIso8601String()),
+                                        formatTime(chat.lastMessage?.createdAt!.toIso8601String()),
                                         style: const TextStyle(
                                             fontSize: 12,
                                             color: Colors.black45),
                                       ),
                                       if (isSelected)
+
                                         IconButton(
                                           icon: Icon(
                                             Icons.delete,
-                                            color: Color(0xFFFF6B6B),
-                                            size: 26,
+                                            color: ColorConstants.kPrimaryColor,
+                                            size: 18,
                                           ),
                                           onPressed: () => _showRemoveDialog(
                                               chat.id, context, _deleteChat),
