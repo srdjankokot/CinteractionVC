@@ -533,9 +533,7 @@ class _MeetingListLayoutState extends State<MeetingListLayout> {
                                                 children: [
                                                   Row(
                                                     children: [
-                                                      const Expanded(
-                                                          child: Text(
-                                                              'Duration: XX min')),
+                                                       Expanded(child: Text('Duration: ${state.meetings[index].formatMeetingDuration()}')),
                                                       const Text('Recorded: '),
                                                       imageSVGAsset(state
                                                                       .meetings[

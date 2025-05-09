@@ -1,3 +1,4 @@
+import 'package:intl/intl.dart';
 import 'package:json_annotation/json_annotation.dart';
 
 class Meeting {
@@ -36,12 +37,32 @@ class Meeting {
 
   bool? recorded;
 
+  @JsonKey(name: 'event_name')
+  String? eventName;
+
+
   @JsonKey(name: 'meeting_start')
   DateTime meetingStart;
 
   @JsonKey(name: 'meeting_end')
   DateTime? meetingEnd;
 
-  @JsonKey(name: 'event_name')
-  String? eventName;
+
+  String formatMeetingDuration() {
+    if (meetingEnd == null) return '';
+
+    final duration = meetingEnd!.difference(meetingStart);
+    final hours = duration.inHours;
+    final minutes = duration.inMinutes.remainder(60);
+
+    if (hours > 0) {
+      return '$hours hour${hours > 1 ? 's' : ''}'
+          '${minutes > 0 ? ' $minutes minute${minutes > 1 ? 's' : ''}' : ''}';
+    } else {
+      return '$minutes minute${minutes != 1 ? 's' : ''}';
+    }
+  }
+
+
+
 }
