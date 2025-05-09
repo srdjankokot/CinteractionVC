@@ -7,7 +7,7 @@ import 'package:cinteraction_vc/layers/domain/usecases/conference/conference_use
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:flutter_screen_recording/flutter_screen_recording.dart';
+// import 'package:flutter_screen_recording/flutter_screen_recording.dart';
 import 'package:webrtc_interface/webrtc_interface.dart';
 
 import '../../../../core/janus/janus_client.dart';
@@ -82,14 +82,12 @@ class ConferenceCubit extends Cubit<ConferenceState> with BlocLoggy {
 
   Future<void> toggleChatWindow() async {
     emit(state.copyWith(
-        showingChat: !state.showingChat,
-        showingParticipants: false));
+        showingChat: !state.showingChat, showingParticipants: false));
   }
 
   Future<void> toggleParticipantsWindow() async {
     emit(state.copyWith(
-        showingParticipants: !state.showingParticipants,
-        showingChat: false));
+        showingParticipants: !state.showingParticipants, showingChat: false));
   }
 
   void clearToast() {
@@ -149,10 +147,9 @@ class ConferenceCubit extends Cubit<ConferenceState> with BlocLoggy {
   }
 
   void _onSubscribers(Map<dynamic, StreamRenderer> subscribers) {
-
     var local = subscribers['local'];
     emit(state.copyWith(
-      audioMuted: local?.isAudioMuted,
+        audioMuted: local?.isAudioMuted,
         handUp: local?.isHandUp,
         isInitial: false,
         streamSubscribers: subscribers,
