@@ -23,6 +23,7 @@ import 'package:cinteraction_vc/layers/domain/usecases/chat/send_file.dart';
 import 'package:cinteraction_vc/layers/domain/usecases/chat/send_message.dart';
 import 'package:cinteraction_vc/layers/domain/usecases/chat/set_current_chat.dart';
 import 'package:cinteraction_vc/layers/domain/usecases/chat/set_current_participant.dart';
+import 'package:cinteraction_vc/layers/domain/usecases/chat/set_user_status.dart';
 
 import '../../repos/chat_repo.dart';
 import 'chat_initialize.dart';
@@ -57,7 +58,8 @@ class ChatUseCases {
         removeUserFromGroup = RemoveUserFromGroup(repo: repo),
         deleteChat = DeleteChat(repo: repo),
         downloadMedia = DownloadMedia(repo: repo),
-        leaveRoom = LeaveRoom(repo: repo);
+        leaveRoom = LeaveRoom(repo: repo),
+        setUserStatus = SetUserStatus(repo: repo);
 
   ChatInitialize chatInitialize;
   SendMessage sendMessage;
@@ -85,4 +87,5 @@ class ChatUseCases {
   GetUsersPaginationStream getUsersPaginationStream;
   DownloadMedia downloadMedia;
   LeaveRoom leaveRoom;
+  SetUserStatus setUserStatus;
 }

@@ -8,6 +8,7 @@ import 'package:cinteraction_vc/layers/domain/usecases/chat/send_message.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:webrtc_interface/webrtc_interface.dart';
 
+import '../../../core/io/network/models/data_channel_command.dart';
 import '../../../core/io/network/models/participant.dart';
 import '../../../core/util/util.dart';
 import '../../data/dto/chat/chat_dto.dart';
@@ -34,6 +35,7 @@ abstract class ChatRepo {
   Future<void> loadUsers(int page, int paginate);
   Future<void> setCurrentParticipant(UserDto user);
   Future<void> setCurrentChat(ChatDto? chat);
+  Future<void> setUserStatus(String status);
   Future<void> getChatDetails(int id, int page);
   Future<void> getChatDetailsByParticipiant(int id, int page);
   Future<void> deleteChat(int id);

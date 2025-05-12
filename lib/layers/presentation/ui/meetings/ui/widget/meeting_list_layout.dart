@@ -372,218 +372,220 @@ class _MeetingListLayoutState extends State<MeetingListLayout> {
             ),
           );
         } else {
-          body = SizedBox(
-            height: MediaQuery.of(context).size.height - 85,
-            child: Padding(
-              padding: const EdgeInsets.all(10),
-              child: Column(
-                children: [
-                  Container(
-                    margin: const EdgeInsets.only(top: 15.0, bottom: 15.0),
-                    child: Text(
-                      'Meetings',
-                      style: context.titleTheme.headlineLarge,
+          body = Expanded(
+            child: SizedBox(
+              height: MediaQuery.of(context).size.height - 85,
+              child: Padding(
+                padding: const EdgeInsets.all(10),
+                child: Column(
+                  children: [
+                    Container(
+                      margin: const EdgeInsets.only(top: 15.0, bottom: 15.0),
+                      child: Text(
+                        'Meetings',
+                        style: context.titleTheme.headlineLarge,
+                      ),
                     ),
-                  ),
-                  const Divider(),
-                  Row(
-                    children: [
-                      Expanded(
-                        child: InkWell(
-                          onTap: () => showPastMeetings(),
-                          child: Stack(
-                            alignment: Alignment.center,
-                            children: [
-                              Visibility(
-                                visible: state.isShowingPastMeetings,
-                                child: SizedBox(
-                                  height: 52,
-                                  child: Column(
-                                    children: [
-                                      Expanded(
-                                        flex: 1,
-                                        child: Container(
-                                            color: ColorConstants.kPrimaryColor
-                                                .withOpacity(0.05)),
-                                      ),
-                                      Container(
-                                          height: 2,
-                                          color: ColorConstants.kPrimaryColor),
-                                    ],
+                    const Divider(),
+                    Row(
+                      children: [
+                        Expanded(
+                          child: InkWell(
+                            onTap: () => showPastMeetings(),
+                            child: Stack(
+                              alignment: Alignment.center,
+                              children: [
+                                Visibility(
+                                  visible: state.isShowingPastMeetings,
+                                  child: SizedBox(
+                                    height: 52,
+                                    child: Column(
+                                      children: [
+                                        Expanded(
+                                          flex: 1,
+                                          child: Container(
+                                              color: ColorConstants.kPrimaryColor
+                                                  .withOpacity(0.05)),
+                                        ),
+                                        Container(
+                                            height: 2,
+                                            color: ColorConstants.kPrimaryColor),
+                                      ],
+                                    ),
                                   ),
                                 ),
-                              ),
-                              SizedBox(
-                                height: 52,
-                                child: Center(
-                                  child: Text('Past Meetings',
-                                      style: context.textTheme.labelMedium
-                                          ?.copyWith(
-                                        color: state.isShowingPastMeetings
-                                            ? ColorConstants.kPrimaryColor
-                                            : ColorConstants.kGray2,
-                                      )),
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ),
-                      Expanded(
-                        child: InkWell(
-                          onTap: () => showScheduledMeetings(),
-                          child: Stack(
-                            alignment: Alignment.center,
-                            children: [
-                              Visibility(
-                                visible: !state.isShowingPastMeetings,
-                                child: SizedBox(
+                                SizedBox(
                                   height: 52,
-                                  child: Column(
-                                    children: [
-                                      Expanded(
-                                        flex: 1,
-                                        child: Container(
-                                            color: ColorConstants.kPrimaryColor
-                                                .withOpacity(0.05)),
-                                      ),
-                                      Container(
-                                          height: 2,
-                                          color: ColorConstants.kPrimaryColor),
-                                    ],
+                                  child: Center(
+                                    child: Text('Past Meetings',
+                                        style: context.textTheme.labelMedium
+                                            ?.copyWith(
+                                          color: state.isShowingPastMeetings
+                                              ? ColorConstants.kPrimaryColor
+                                              : ColorConstants.kGray2,
+                                        )),
                                   ),
                                 ),
-                              ),
-                              SizedBox(
-                                height: 52,
-                                child: Center(
-                                  child: Text('Schedule Meeting',
-                                      style: context.textTheme.labelMedium
-                                          ?.copyWith(
-                                        color: !state.isShowingPastMeetings
-                                            ? ColorConstants.kPrimaryColor
-                                            : ColorConstants.kGray2,
-                                      )),
-                                ),
-                              ),
-                            ],
+                              ],
+                            ),
                           ),
                         ),
-                      ),
-                    ],
-                  ),
-                  Expanded(
-                      child: Column(
-                    children: [
-                      Expanded(
-                          child: ListView.builder(
-                              itemCount: state.meetings.length,
-                              itemBuilder: (BuildContext context, int index) {
-                                return Padding(
-                                  padding: const EdgeInsets.only(
-                                      top: 10, bottom: 20, right: 10, left: 10),
-                                  child: Column(
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.start,
-                                    children: [
-                                      Row(
-                                        children: [
-                                          Text(
-                                            '${index + 1}.',
-                                            style: context.textTheme.titleSmall,
-                                          ),
-                                          const SizedBox(
-                                            width: 3,
-                                          ),
-                                          Expanded(
-                                            child: Text(
-                                                state.meetings[index].callId
-                                                    .toString(),
-                                                style: context
-                                                    .textTheme.titleSmall),
-                                          ),
-                                          Visibility(
-                                              visible:
-                                                  !state.isShowingPastMeetings,
-                                              child: Text(
-                                                  '${state.meetings[index].meetingStart.day}.${state.meetings[index].meetingStart.month}.${state.meetings[index].meetingStart.year}')),
-                                        ],
-                                      ),
-                                      const SizedBox(
-                                        height: 10,
-                                      ),
-                                      Container(
-                                        margin: const EdgeInsets.only(left: 10),
-                                        child: Column(
-                                          crossAxisAlignment:
-                                              CrossAxisAlignment.start,
+                        Expanded(
+                          child: InkWell(
+                            onTap: () => showScheduledMeetings(),
+                            child: Stack(
+                              alignment: Alignment.center,
+                              children: [
+                                Visibility(
+                                  visible: !state.isShowingPastMeetings,
+                                  child: SizedBox(
+                                    height: 52,
+                                    child: Column(
+                                      children: [
+                                        Expanded(
+                                          flex: 1,
+                                          child: Container(
+                                              color: ColorConstants.kPrimaryColor
+                                                  .withOpacity(0.05)),
+                                        ),
+                                        Container(
+                                            height: 2,
+                                            color: ColorConstants.kPrimaryColor),
+                                      ],
+                                    ),
+                                  ),
+                                ),
+                                SizedBox(
+                                  height: 52,
+                                  child: Center(
+                                    child: Text('Schedule Meeting',
+                                        style: context.textTheme.labelMedium
+                                            ?.copyWith(
+                                          color: !state.isShowingPastMeetings
+                                              ? ColorConstants.kPrimaryColor
+                                              : ColorConstants.kGray2,
+                                        )),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                    Expanded(
+                        child: Column(
+                      children: [
+                        Expanded(
+                            child: ListView.builder(
+                                itemCount: state.meetings.length,
+                                itemBuilder: (BuildContext context, int index) {
+                                  return Padding(
+                                    padding: const EdgeInsets.only(
+                                        top: 10, bottom: 20, right: 10, left: 10),
+                                    child: Column(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
+                                      children: [
+                                        Row(
                                           children: [
-                                            Text(state.meetings[index]
-                                                    .organizer ??
-                                                ''),
+                                            Text(
+                                              '${index + 1}.',
+                                              style: context.textTheme.titleSmall,
+                                            ),
                                             const SizedBox(
-                                              height: 10,
+                                              width: 3,
+                                            ),
+                                            Expanded(
+                                              child: Text(
+                                                  state.meetings[index].callId
+                                                      .toString(),
+                                                  style: context
+                                                      .textTheme.titleSmall),
                                             ),
                                             Visibility(
-                                              visible:
-                                                  state.isShowingPastMeetings,
-                                              child: Column(
-                                                crossAxisAlignment:
-                                                    CrossAxisAlignment.start,
-                                                children: [
-                                                  Row(
-                                                    children: [
-                                                       Expanded(child: Text('Duration: ${state.meetings[index].formatMeetingDuration()}')),
-                                                      const Text('Recorded: '),
-                                                      imageSVGAsset(state
-                                                                      .meetings[
-                                                                          index]
-                                                                      .recorded ??
-                                                                  false
-                                                              ? 'badge_approved'
-                                                              : 'badge_waiting')
-                                                          as Widget
-                                                    ],
-                                                  ),
-                                                  const SizedBox(
-                                                    height: 10,
-                                                  ),
-                                                  EngagementProgress(
-                                                    engagement: (state
-                                                                .meetings[index]
-                                                                .averageEngagement! *
-                                                            100)
-                                                        .toInt(),
-                                                    width: double.maxFinite,
-                                                  )
-                                                ],
-                                              ),
-                                            ),
-                                            Visibility(
-                                              visible:
-                                                  !state.isShowingPastMeetings,
-                                              child: Column(
-                                                children: [
-                                                  Text(
-                                                      'Start: ${state.meetings[index].meetingStart.hour}:${state.meetings[index].meetingStart.minute}'),
-                                                  const SizedBox(
-                                                    height: 10,
-                                                  ),
-                                                  Text(
-                                                      'Start: ${state.meetings[index].meetingEnd?.hour}:${state.meetings[index].meetingEnd?.minute}'),
-                                                ],
-                                              ),
-                                            ),
+                                                visible:
+                                                    !state.isShowingPastMeetings,
+                                                child: Text(
+                                                    '${state.meetings[index].meetingStart.day}.${state.meetings[index].meetingStart.month}.${state.meetings[index].meetingStart.year}')),
                                           ],
                                         ),
-                                      )
-                                    ],
-                                  ),
-                                );
-                              })),
-                    ],
-                  ))
-                ],
+                                        const SizedBox(
+                                          height: 10,
+                                        ),
+                                        Container(
+                                          margin: const EdgeInsets.only(left: 10),
+                                          child: Column(
+                                            crossAxisAlignment:
+                                                CrossAxisAlignment.start,
+                                            children: [
+                                              Text(state.meetings[index]
+                                                      .organizer ??
+                                                  ''),
+                                              const SizedBox(
+                                                height: 10,
+                                              ),
+                                              Visibility(
+                                                visible:
+                                                    state.isShowingPastMeetings,
+                                                child: Column(
+                                                  crossAxisAlignment:
+                                                      CrossAxisAlignment.start,
+                                                  children: [
+                                                    Row(
+                                                      children: [
+                                                         Expanded(child: Text('Duration: ${state.meetings[index].formatMeetingDuration()}')),
+                                                        const Text('Recorded: '),
+                                                        imageSVGAsset(state
+                                                                        .meetings[
+                                                                            index]
+                                                                        .recorded ??
+                                                                    false
+                                                                ? 'badge_approved'
+                                                                : 'badge_waiting')
+                                                            as Widget
+                                                      ],
+                                                    ),
+                                                    const SizedBox(
+                                                      height: 10,
+                                                    ),
+                                                    EngagementProgress(
+                                                      engagement: (state
+                                                                  .meetings[index]
+                                                                  .averageEngagement! *
+                                                              100)
+                                                          .toInt(),
+                                                      width: double.maxFinite,
+                                                    )
+                                                  ],
+                                                ),
+                                              ),
+                                              Visibility(
+                                                visible:
+                                                    !state.isShowingPastMeetings,
+                                                child: Column(
+                                                  children: [
+                                                    Text(
+                                                        'Start: ${state.meetings[index].meetingStart.hour}:${state.meetings[index].meetingStart.minute}'),
+                                                    const SizedBox(
+                                                      height: 10,
+                                                    ),
+                                                    Text(
+                                                        'Start: ${state.meetings[index].meetingEnd?.hour}:${state.meetings[index].meetingEnd?.minute}'),
+                                                  ],
+                                                ),
+                                              ),
+                                            ],
+                                          ),
+                                        )
+                                      ],
+                                    ),
+                                  );
+                                })),
+                      ],
+                    ))
+                  ],
+                ),
               ),
             ),
           );

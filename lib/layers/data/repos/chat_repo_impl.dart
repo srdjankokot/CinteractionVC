@@ -1,24 +1,21 @@
 import 'dart:async';
 import 'dart:convert';
-import 'dart:io';
-import 'dart:math';
-// import 'dart:html' as html;
 
 import 'package:audioplayers/audioplayers.dart';
 import 'package:cinteraction_vc/layers/data/dto/chat/chat_detail_dto.dart';
 import 'package:cinteraction_vc/layers/data/dto/chat/chat_dto.dart';
 import 'package:cinteraction_vc/layers/data/dto/user_dto.dart';
 import 'package:cinteraction_vc/layers/domain/repos/chat_repo.dart';
-import 'package:cinteraction_vc/layers/presentation/cubit/chat/chat_state.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/foundation.dart';
+import 'package:flutter/services.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:webrtc_interface/webrtc_interface.dart';
 import '../../../core/app/injector.dart';
+import '../../../core/io/network/models/data_channel_command.dart';
 import '../../../core/io/network/models/participant.dart';
 import '../../../core/janus/janus_client.dart';
 import '../../../core/util/util.dart';
-import '../../domain/entities/chat_message.dart';
 import '../../domain/entities/user.dart';
 import '../../domain/source/api.dart';
 import '../../presentation/cubit/chat/chat_cubit.dart';
@@ -30,13 +27,8 @@ class ChatRepoImpl extends ChatRepo {
   ChatRepoImpl({required Api api}) : _api = api;
   User? user = getIt.get<LocalStorage>().loadLoggedUser();
 
-  // User? user;
-
   final Api _api;
   int room = 1234;
-
-  // final JanusClient _client;
-  // int room = 111223;
 
   late String myId = user?.id ?? "";
   late String displayName = user?.name ?? 'User $myId';
@@ -46,8 +38,6 @@ class ChatRepoImpl extends ChatRepo {
   late JanusTextRoomPlugin textRoom;
 
   AudioPlayer audioPlayer = AudioPlayer();
-
-  // late WebSocketJanusTransport ws;
 
   VideoRoomPluginStateManager videoState = VideoRoomPluginStateManager();
 
@@ -204,11 +194,13 @@ class ChatRepoImpl extends ChatRepo {
   _setup() async {
     await textRoom.setup();
     textRoom.onData?.listen((event) async {
+
       if (RTCDataChannelState.RTCDataChannelOpen == event) {
         _checkRoom(room);
+        _setListener();
       }
     });
-    _setListener();
+
   }
 
   bool _haveUnread(List<MessageDto> messages) {
@@ -255,6 +247,8 @@ class ChatRepoImpl extends ChatRepo {
 
   _setListener() {
     textRoom.data?.listen((event) {
+
+      print("print event: ${event.text}");
       dynamic data = parse(event.text);
 
       if (data != null) {
@@ -268,16 +262,22 @@ class ChatRepoImpl extends ChatRepo {
           int? chatIdParsed = parsed['chatId'];
           int? msgIdParsed = parsed['msgId'];
           print('recevidedMsgId: $msgIdParsed');
-          String messageParsed = parsed['message'];
-          // if (isInCallChat) {
-          //   {
-          //     getChatMessages(chatIdParsed!);
-          //     _chatDetailsStream.add(chatDetailsDto);
-          //   }
-          // }
-          if (messageParsed == '!@checkList') {
-            loadChats(1, 20);
+
+          try {
+            Map<String, dynamic> result = jsonDecode(receviedMessage);
+            var command = DataChannelCommand.fromJson(result);
+            _renderCommand(command);
+            return;
+          }  catch (e) {
+            print(e.toString()); // Log raw message
           }
+
+            String messageParsed = parsed['message'];
+            if (messageParsed == '!@checkList') {
+              loadChats(1, 20);
+              return;
+            }
+
 
           List<ChatParticipantDto> chatParticipants =
               chatDetailsDto.chatParticipants;
@@ -899,5 +899,32 @@ class ChatRepoImpl extends ChatRepo {
   @override
   Future<void> sendFile(String name, Uint8List bytes) async {
     uploadImageToStorage(name, bytes);
+  }
+
+  _renderCommand(DataChannelCommand command) {
+    if (command.command == DataChannelCmd.userStatus) {
+      chats = chats.map((chat) {
+        if (chat.chatParticipants!.map((e) => e.id == int.parse(command.id)).toList().isNotEmpty ) {
+          return chat.copyWith(userStatus: command.data["userStatus"] as String);
+        } else {
+          return chat;
+        }
+      }).toList();
+
+      print("change user ${command.id} status to ${command.data["userStatus"]}");
+      _chatStream.add(chats);
+
+    }
+  }
+
+  @override
+  Future<void> setUserStatus(String status) async{
+    var data = {'userStatus': status};
+    var json = DataChannelCommand(
+        command: DataChannelCmd.userStatus,
+        id: user!.id.toString(),
+        data: data);
+
+    await textRoom.sendMessage(room, jsonEncode(json.toJson()));
   }
 }

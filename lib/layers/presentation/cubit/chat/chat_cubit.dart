@@ -1,15 +1,12 @@
 import 'dart:async';
-import 'dart:io';
 import 'dart:math';
 import 'dart:typed_data';
 
-import 'package:cinteraction_vc/core/app/injector.dart';
+import 'package:cinteraction_vc/core/io/network/models/data_channel_command.dart';
 import 'package:cinteraction_vc/layers/data/dto/chat/chat_detail_dto.dart';
 import 'package:cinteraction_vc/layers/data/dto/chat/chat_dto.dart';
-import 'package:cinteraction_vc/layers/data/repos/chat_repo_impl.dart';
 import 'package:cinteraction_vc/layers/presentation/cubit/chat/chat_state.dart';
 import 'package:file_picker/file_picker.dart';
-import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../../../core/io/network/models/participant.dart';
@@ -19,7 +16,6 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../../../core/util/util.dart';
 import '../../../data/dto/user_dto.dart';
-import '../../../domain/entities/chat_message.dart';
 import '../../../domain/usecases/call/call_use_cases.dart';
 import '../../../domain/usecases/chat/chat_usecases.dart';
 
@@ -150,13 +146,16 @@ class ChatCubit extends Cubit<ChatState> with BlocLoggy {
           lastMessage: chat.lastMessage,
           isOnline: chat.isOnline,
           haveUnread: chat.haveUnread,
+          userStatus: chat.userStatus
         );
       } else {
         updatedChats.add(chat);
       }
+
+
       if (state.currentChat?.id == chat.id) {
         emit(state.copyWith(
-          currentChat: state.currentChat!.copyWith(isOnline: chat.isOnline),
+          currentChat: state.currentChat!.copyWith(isOnline: chat.isOnline, userStatus: chat.userStatus),
         ));
       }
 
@@ -434,5 +433,12 @@ class ChatCubit extends Cubit<ChatState> with BlocLoggy {
 
   void changeListType(ListType listType) {
     emit(state.copyWith(listType: listType));
+  }
+
+
+  Future<void>setUserStatus(String status) async
+  {
+    print("call setUserStatus from chat cubit");
+    chatUseCases.setUserStatus(status);
   }
 }

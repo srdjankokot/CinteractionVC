@@ -1443,21 +1443,14 @@ class ConferenceRepoImpl extends ConferenceRepo {
         _conferenceChatStream.add(messages);
         break;
 
-      // case DataChannelCmd.trackStatus:
-      //      var audio =  command.data['audioMuted'];
-      //      var video =  command.data['videoMuted'];
-      //   _manageMuteUIEvents(command.id, 'audio', audio);
-      //   _manageMuteUIEvents(command.id, 'video', video);
-      //   break;
-      //
-      // case DataChannelCmd.askForTrackStatus:
-      //   _sendMyTrackStatus();
-      //   break;
       case DataChannelCmd.muteById:
         if (command.id == myId.toString()) {
           mute(kind: 'audio', muted: !localVideoRenderer.isAudioMuted!);
         }
         break;
+      case DataChannelCmd.userStatus:
+        // TODO: Handle this case.
+        throw UnimplementedError();
     }
   }
 
