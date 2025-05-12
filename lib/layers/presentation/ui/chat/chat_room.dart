@@ -27,6 +27,8 @@ import '../../../../assets/colors/Colors.dart';
 import '../../../../core/ui/images/image.dart';
 import '../../../../core/ui/widget/call_button_shape.dart';
 import '../../../domain/entities/user.dart';
+import '../../cubit/app/app_cubit.dart';
+import '../../cubit/app/app_state.dart';
 import '../home/ui/widgets/next_meeting_widget.dart';
 import 'widget/chat_list_view.dart';
 import '../home/ui/widgets/home_item.dart';
@@ -157,81 +159,166 @@ class ChatRoomPage extends StatelessWidget {
           });
     }
 
-    return BlocConsumer<ChatCubit, ChatState>(
-        listenWhen: (previous, current) =>
-            previous.incomingCall != current.incomingCall ||
-            previous.calling != current.calling,
-        listener: (context, state) async {
-          if (state.incomingCall ?? false) {
-            // String callerName = "Caller Name"; // Replace with actual caller name
-            await showIncomingCallDialog(context, state.caller!);
-            return;
-          } else {
-            if (Navigator.canPop(context)) {
-              Navigator.of(context).pop(incomingDialog);
-              stopIncomingCallSound();
+
+    return BlocListener<AppCubit, AppState>(
+      listenWhen: (previous, current) =>
+      previous.userStatus != current.userStatus,
+      listener: (context, state) {
+       print(state.userStatus.value);
+       context.read<ChatCubit>().setUserStatus(state.userStatus.value);
+      },
+      child: BlocConsumer<ChatCubit, ChatState>(
+          listenWhen: (previous, current) =>
+          previous.incomingCall != current.incomingCall ||
+              previous.calling != current.calling,
+          listener: (context, state) async {
+            if (state.incomingCall ?? false) {
+              // String callerName = "Caller Name"; // Replace with actual caller name
+              await showIncomingCallDialog(context, state.caller!);
+              return;
+            } else {
+              if (Navigator.canPop(context)) {
+                Navigator.of(context).pop(incomingDialog);
+                stopIncomingCallSound();
+              }
             }
-          }
 
-          if (state.calling ?? false) {
-            await makeCallDialog();
-            return;
-          } else {
-            if (Navigator.canPop(context)) {
-              Navigator.of(context).pop(incomingDialog);
+            if (state.calling ?? false) {
+              await makeCallDialog();
+              return;
+            } else {
+              if (Navigator.canPop(context)) {
+                Navigator.of(context).pop(incomingDialog);
+              }
             }
-          }
-        },
-        builder: (context, state) {
-          return Scaffold(
-              body: Stack(
-            children: [
-              if (context.isWide)
-                Row(
+          },
+          builder: (context, state) {
+            return Scaffold(
+                body: Stack(
                   children: [
-                    // First column
-                    getLeftSide(
-                        context,
-                        state,
-                        300,
-                        () => {displayJoinRoomPopup(context)},
-                        () => {displayAddScheduleMeetingPopup()},
-                        () => {displayCreateGroupPopup(context, state)}),
+                    if (context.isWide)
+                      Row(
+                        children: [
+                          // First column
+                          getLeftSide(
+                              context,
+                              state,
+                              300,
+                                  () => {displayJoinRoomPopup(context)},
+                                  () => {displayAddScheduleMeetingPopup()},
+                                  () => {displayCreateGroupPopup(context, state)}),
 
-                    const VerticalDivider(
-                      color: Colors.grey, // Color of the divider
-                      thickness: 1, // Thickness of the divider
-                      width: 20, // Width of the space taken by the divider
-                    ),
-                    Expanded(
-                      flex: 2,
-                      child: getChatDetailsView(context, state, user,
-                          () => {displayEditGroupPopup(context, state)}),
-                    ),
-                  ],
-                )
-              else
-                Stack(
-                  children: [
-                    getLeftSide(
-                        context,
-                        state,
-                        double.maxFinite,
-                        () => {displayJoinRoomPopup(context)},
-                        () => {displayAddScheduleMeetingPopup()},
-                        () => {displayCreateGroupPopup(context, state)}),
-                    Visibility(
-                        visible: state.currentChat != null ||
-                            state.currentParticipant != null,
-                        // visible: false,
+                          const VerticalDivider(
+                            color: Colors.grey, // Color of the divider
+                            thickness: 1, // Thickness of the divider
+                            width: 20, // Width of the space taken by the divider
+                          ),
+                          Expanded(
+                            flex: 2,
+                            child: getChatDetailsView(context, state, user,
+                                    () => {displayEditGroupPopup(context, state)}),
+                          ),
+                        ],
+                      )
+                    else
+                      Stack(
+                        children: [
+                          getLeftSide(
+                              context,
+                              state,
+                              double.maxFinite,
+                                  () => {displayJoinRoomPopup(context)},
+                                  () => {displayAddScheduleMeetingPopup()},
+                                  () => {displayCreateGroupPopup(context, state)}),
+                          Visibility(
+                              visible: state.currentChat != null ||
+                                  state.currentParticipant != null,
+                              // visible: false,
 
-                        child: getChatDetailsView(context, state, user,
-                            () => {displayEditGroupPopup(context, state)}))
+                              child: getChatDetailsView(context, state, user,
+                                      () => {displayEditGroupPopup(context, state)}))
+                        ],
+                      )
                   ],
-                )
-            ],
-          ));
-        });
+                ));
+          }), // The rest of your UI
+    );
+
+    // return BlocConsumer<ChatCubit, ChatState>(
+    //     listenWhen: (previous, current) =>
+    //         previous.incomingCall != current.incomingCall ||
+    //         previous.calling != current.calling,
+    //     listener: (context, state) async {
+    //       if (state.incomingCall ?? false) {
+    //         // String callerName = "Caller Name"; // Replace with actual caller name
+    //         await showIncomingCallDialog(context, state.caller!);
+    //         return;
+    //       } else {
+    //         if (Navigator.canPop(context)) {
+    //           Navigator.of(context).pop(incomingDialog);
+    //           stopIncomingCallSound();
+    //         }
+    //       }
+    //
+    //       if (state.calling ?? false) {
+    //         await makeCallDialog();
+    //         return;
+    //       } else {
+    //         if (Navigator.canPop(context)) {
+    //           Navigator.of(context).pop(incomingDialog);
+    //         }
+    //       }
+    //     },
+    //     builder: (context, state) {
+    //       return Scaffold(
+    //           body: Stack(
+    //         children: [
+    //           if (context.isWide)
+    //             Row(
+    //               children: [
+    //                 // First column
+    //                 getLeftSide(
+    //                     context,
+    //                     state,
+    //                     300,
+    //                     () => {displayJoinRoomPopup(context)},
+    //                     () => {displayAddScheduleMeetingPopup()},
+    //                     () => {displayCreateGroupPopup(context, state)}),
+    //
+    //                 const VerticalDivider(
+    //                   color: Colors.grey, // Color of the divider
+    //                   thickness: 1, // Thickness of the divider
+    //                   width: 20, // Width of the space taken by the divider
+    //                 ),
+    //                 Expanded(
+    //                   flex: 2,
+    //                   child: getChatDetailsView(context, state, user,
+    //                       () => {displayEditGroupPopup(context, state)}),
+    //                 ),
+    //               ],
+    //             )
+    //           else
+    //             Stack(
+    //               children: [
+    //                 getLeftSide(
+    //                     context,
+    //                     state,
+    //                     double.maxFinite,
+    //                     () => {displayJoinRoomPopup(context)},
+    //                     () => {displayAddScheduleMeetingPopup()},
+    //                     () => {displayCreateGroupPopup(context, state)}),
+    //                 Visibility(
+    //                     visible: state.currentChat != null ||
+    //                         state.currentParticipant != null,
+    //                     // visible: false,
+    //
+    //                     child: getChatDetailsView(context, state, user,
+    //                         () => {displayEditGroupPopup(context, state)}))
+    //               ],
+    //             )
+    //         ],
+    //       ));
+    //     });
   }
 }
 
@@ -674,6 +761,9 @@ Widget getChatDetailsView(
                                       : "Away",
                                   style: titleThemeStyle.textTheme.labelLarge,
                                 ),
+                                const SizedBox(width: 5.0),
+                                Text(state.currentChat!.userStatus)
+
                               ],
                             )
                           ],

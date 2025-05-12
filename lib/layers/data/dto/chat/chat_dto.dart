@@ -1,4 +1,5 @@
 import 'package:cinteraction_vc/layers/data/dto/chat/chat_detail_dto.dart';
+import '../../../../core/io/network/models/data_channel_command.dart';
 import 'last_message_dto.dart';
 
 class ChatDto {
@@ -13,6 +14,7 @@ class ChatDto {
   final String? prevPageUrl;
   final DateTime? createdAt;
   bool isOnline;
+  String userStatus;
   bool haveUnread;
   final bool chatGroup;
 
@@ -29,6 +31,7 @@ class ChatDto {
     this.createdAt,
     this.isOnline = false,
     this.haveUnread = false,
+    this.userStatus = "offline",
     required this.chatGroup,
   });
 
@@ -46,6 +49,7 @@ class ChatDto {
     bool? isOnline,
     bool? haveUnread,
     bool? chatGroup,
+    String? userStatus,
   }) {
     return ChatDto(
       id: id ?? this.id,
@@ -61,6 +65,7 @@ class ChatDto {
       isOnline: isOnline ?? this.isOnline,
       haveUnread: haveUnread ?? this.haveUnread,
       chatGroup: chatGroup ?? this.chatGroup,
+      userStatus: userStatus ?? this.userStatus,
     );
   }
 
@@ -106,11 +111,12 @@ class ChatDto {
           'prev': prevPageUrl,
         },
         'chat_group': chatGroup,
+        'userStatus': userStatus,
       };
 
   @override
   String toString() {
-    return 'ChatDto(id: $id, name: $name, userImage: $userImage, lastMessage: $lastMessage, chatParticipants: $chatParticipants, createdAt: $createdAt, currentPage: $currentPage, lastPage: $lastPage, nextPageUrl: $nextPageUrl, prevPageUrl: $prevPageUrl, isOnline: $isOnline, chatGroup: $chatGroup, haveUnread: $haveUnread)';
+    return 'ChatDto(id: $id, name: $name, userImage: $userImage, lastMessage: $lastMessage, chatParticipants: $chatParticipants, createdAt: $createdAt, currentPage: $currentPage, lastPage: $lastPage, nextPageUrl: $nextPageUrl, prevPageUrl: $prevPageUrl, isOnline: $isOnline, chatGroup: $chatGroup, haveUnread: $haveUnread, userStatus: $userStatus )';
   }
 
 

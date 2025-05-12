@@ -4,6 +4,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
+import '../../layers/presentation/cubit/app/app_cubit.dart';
 import '../../layers/presentation/cubit/profile/profile_cubit.dart';
 import '../deep_link_router.dart';
 import '../navigation/router.dart';
@@ -15,11 +16,14 @@ class CinteractionFlutterApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp.router(
+     return  BlocProvider<AppCubit>(
+        create: (_) => AppCubit(),
+        child: MaterialApp.router(
           title: 'Cinteraction',
           theme: lightTheme,
           debugShowCheckedModeBanner: false,
           routerConfig: router,
-    );
+        ),
+      );
   }
 }

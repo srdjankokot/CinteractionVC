@@ -45,7 +45,7 @@ final desktopMenu = <MenuItem>[
   buildChatMenuItem(),
   dashboard,
   meetings,
-
+profile,
   // insights,
   // users,
   // groups,

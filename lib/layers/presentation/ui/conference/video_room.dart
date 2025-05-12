@@ -12,9 +12,12 @@ import 'package:flutter/scheduler.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_webrtc/flutter_webrtc.dart';
 
+import '../../../../core/io/network/models/data_channel_command.dart';
 import '../../../../core/navigation/route.dart';
 import '../../../../core/ui/images/image.dart';
 import '../../../../core/util/util.dart';
+import '../../cubit/app/app_cubit.dart';
+import '../../cubit/app/app_state.dart';
 import '../../cubit/conference/conference_cubit.dart';
 import '../../cubit/conference/conference_state.dart';
 import '../profile/ui/widget/user_image.dart';
@@ -105,6 +108,7 @@ class VideoRoomPage extends StatelessWidget {
     double chatContainedWidth = 400;
     final ScrollController chatController = ScrollController();
 
+
     return BlocConsumer<ConferenceCubit, ConferenceState>(
         builder: (context, state) {
           if (state.isInitial) {
@@ -144,7 +148,7 @@ class VideoRoomPage extends StatelessWidget {
               .toList());
 
           var borderWidth =
-              state.recording == RecordingStatus.recording ? 3.0 : 0.0;
+          state.recording == RecordingStatus.recording ? 3.0 : 0.0;
 
           bool showingChat = state.showingChat;
 
@@ -194,8 +198,8 @@ class VideoRoomPage extends StatelessWidget {
                                             // ),
                                           ),
                                           Visibility(
-                                            visible: state.showingParticipants,
-                                            child: getParticipantsView(context, chatContainedWidth, contributors, contributorsHandUp)
+                                              visible: state.showingParticipants,
+                                              child: getParticipantsView(context, chatContainedWidth, contributors, contributorsHandUp)
                                           ),
                                         ],
                                       ),
@@ -215,70 +219,81 @@ class VideoRoomPage extends StatelessWidget {
                                                 height: double.maxFinite,
                                                 child: Row(
                                                   mainAxisAlignment:
-                                                      MainAxisAlignment.center,
+                                                  MainAxisAlignment.center,
                                                   crossAxisAlignment:
-                                                      CrossAxisAlignment.center,
+                                                  CrossAxisAlignment.center,
                                                   children: [
                                                     CallButtonShape(
                                                         image: !state
-                                                                .audioMuted!
+                                                            .audioMuted!
                                                             ? imageSVGAsset(
-                                                                    'icon_microphone')
-                                                                as Widget
+                                                            'icon_microphone')
+                                                        as Widget
                                                             : imageSVGAsset(
-                                                                    'icon_microphone_disabled')
-                                                                as Widget,
+                                                            'icon_microphone_disabled')
+                                                        as Widget,
                                                         onClickAction:
                                                             () async {
                                                           await context
                                                               .read<
-                                                                  ConferenceCubit>()
-                                                              .audioMute();
+                                                              AppCubit>()
+                                                              .changeUserStatus(UserStatus.inTheCall);
+
+                                                          // await context
+                                                          //     .read<
+                                                          //     ConferenceCubit>()
+                                                          //     .audioMute();
                                                         }),
                                                     const SizedBox(width: 20),
                                                     CallButtonShape(
                                                         image: !state.videoMuted
                                                             ? imageSVGAsset(
-                                                                    'icon_video_recorder')
-                                                                as Widget
+                                                            'icon_video_recorder')
+                                                        as Widget
                                                             : imageSVGAsset(
-                                                                    'icon_video_recorder_disabled')
-                                                                as Widget,
+                                                            'icon_video_recorder_disabled')
+                                                        as Widget,
                                                         onClickAction:
                                                             () async {
+
                                                           await context
                                                               .read<
-                                                                  ConferenceCubit>()
-                                                              .videoMute();
+                                                              AppCubit>()
+                                                              .changeUserStatus(UserStatus.offline);
+
+                                                          // await context
+                                                          //     .read<
+                                                          //     ConferenceCubit>()
+                                                          //     .videoMute();
                                                         }),
                                                     const SizedBox(width: 20),
                                                     CallButtonShape(
                                                         image: imageSVGAsset(
-                                                                'icon_arrow_square_up')
-                                                            as Widget,
+                                                            'icon_arrow_square_up')
+                                                        as Widget,
                                                         bgColor: state
-                                                                .screenShared
+                                                            .screenShared
                                                             ? ColorConstants
-                                                                .kPrimaryColor
+                                                            .kPrimaryColor
                                                             : ColorConstants
-                                                                .kWhite30,
+                                                            .kWhite30,
                                                         onClickAction:
                                                             () async {
                                                           if (state
                                                               .screenShared) {
                                                             await context
                                                                 .read<
-                                                                    ConferenceCubit>()
+                                                                ConferenceCubit>()
                                                                 .shareScreen(
-                                                                    null);
+                                                                null);
                                                           } else {
                                                             await context
                                                                 .read<
-                                                                    ConferenceCubit>()
+                                                                ConferenceCubit>()
                                                                 .shareScreen(
-                                                                    await navigator
-                                                                        .mediaDevices
-                                                                        .getDisplayMedia({
+                                                                await navigator
+                                                                    .mediaDevices
+                                                                    .getDisplayMedia({
                                                                   'video': true,
                                                                   'audio': true
                                                                 }));
@@ -289,9 +304,9 @@ class VideoRoomPage extends StatelessWidget {
                                                         image: Icon(
                                                           state.handUp
                                                               ? Icons
-                                                                  .waving_hand_outlined
+                                                              .waving_hand_outlined
                                                               : Icons
-                                                                  .front_hand_outlined,
+                                                              .front_hand_outlined,
                                                           color: Colors.white,
                                                         ),
                                                         bgColor: ColorConstants
@@ -300,52 +315,52 @@ class VideoRoomPage extends StatelessWidget {
                                                             () async {
                                                           await context
                                                               .read<
-                                                                  ConferenceCubit>()
+                                                              ConferenceCubit>()
                                                               .handUp();
                                                         }),
                                                     const SizedBox(width: 20),
                                                     CallButtonShape(
                                                       // image: state.recording ? const Icon(Icons.stop, size: 30, color: Colors.red): const  Icon(Icons.fiber_manual_record, size: 30, color: Colors.red),
                                                       image: state.recording ==
-                                                              RecordingStatus
-                                                                  .notRecording
+                                                          RecordingStatus
+                                                              .notRecording
                                                           ? const Icon(
-                                                              Icons
-                                                                  .fiber_manual_record,
-                                                              size: 30,
-                                                              color: Colors.red)
+                                                          Icons
+                                                              .fiber_manual_record,
+                                                          size: 30,
+                                                          color: Colors.red)
                                                           : state.recording ==
-                                                                  RecordingStatus
-                                                                      .loading
-                                                              ? const CircularProgressIndicator(
-                                                                  strokeWidth:
-                                                                      2,
-                                                                  color: Colors
-                                                                      .white,
-                                                                )
-                                                              : const Icon(
-                                                                  Icons.stop,
-                                                                  size: 30,
-                                                                  color: Colors
-                                                                      .red),
+                                                          RecordingStatus
+                                                              .loading
+                                                          ? const CircularProgressIndicator(
+                                                        strokeWidth:
+                                                        2,
+                                                        color: Colors
+                                                            .white,
+                                                      )
+                                                          : const Icon(
+                                                          Icons.stop,
+                                                          size: 30,
+                                                          color: Colors
+                                                              .red),
                                                       onClickAction: () async {
                                                         await context
                                                             .read<
-                                                                ConferenceCubit>()
+                                                            ConferenceCubit>()
                                                             .recordingMeet();
                                                       },
                                                     ),
                                                     const SizedBox(width: 20),
                                                     CallButtonShape(
                                                       image: imageSVGAsset(
-                                                              'icon_phone')
-                                                          as Widget,
+                                                          'icon_phone')
+                                                      as Widget,
                                                       bgColor: ColorConstants
                                                           .kPrimaryColor,
                                                       onClickAction: () async {
                                                         await context
                                                             .read<
-                                                                ConferenceCubit>()
+                                                            ConferenceCubit>()
                                                             .finishCall();
                                                       },
                                                     ),
@@ -358,10 +373,10 @@ class VideoRoomPage extends StatelessWidget {
                                                 height: double.maxFinite,
                                                 child: Row(
                                                     mainAxisAlignment:
-                                                        MainAxisAlignment.end,
+                                                    MainAxisAlignment.end,
                                                     crossAxisAlignment:
-                                                        CrossAxisAlignment
-                                                            .center,
+                                                    CrossAxisAlignment
+                                                        .center,
                                                     children: [
                                                       Stack(children: [
                                                         CallButtonShape(
@@ -370,15 +385,15 @@ class VideoRoomPage extends StatelessWidget {
                                                             color: Colors.white,
                                                           ),
                                                           bgColor:
-                                                              ColorConstants
-                                                                  .kPrimaryColor
-                                                                  .withOpacity(
-                                                                      0.4),
+                                                          ColorConstants
+                                                              .kPrimaryColor
+                                                              .withOpacity(
+                                                              0.4),
                                                           onClickAction:
                                                               () async {
                                                             await context
                                                                 .read<
-                                                                    ConferenceCubit>()
+                                                                ConferenceCubit>()
                                                                 .toggleParticipantsWindow();
                                                           },
                                                         ),
@@ -387,31 +402,31 @@ class VideoRoomPage extends StatelessWidget {
                                                           right: 5,
                                                           top: 2,
                                                           child:
-                                                              AnimatedOpacity(
+                                                          AnimatedOpacity(
                                                             opacity: 1,
                                                             duration:
-                                                                const Duration(
-                                                                    milliseconds:
-                                                                        250),
+                                                            const Duration(
+                                                                milliseconds:
+                                                                250),
                                                             child: Container(
                                                               padding:
-                                                                  const EdgeInsets
-                                                                      .symmetric(
-                                                                      horizontal:
-                                                                          6,
-                                                                      vertical:
-                                                                          2),
+                                                              const EdgeInsets
+                                                                  .symmetric(
+                                                                  horizontal:
+                                                                  6,
+                                                                  vertical:
+                                                                  2),
                                                               decoration:
-                                                                  BoxDecoration(
+                                                              BoxDecoration(
                                                                 color: Colors
                                                                     .redAccent,
                                                                 borderRadius:
-                                                                    BorderRadius
-                                                                        .circular(
-                                                                            12),
+                                                                BorderRadius
+                                                                    .circular(
+                                                                    12),
                                                               ),
                                                               constraints:
-                                                                  const BoxConstraints(
+                                                              const BoxConstraints(
                                                                 minWidth: 20,
                                                                 minHeight: 16,
                                                               ),
@@ -420,16 +435,16 @@ class VideoRoomPage extends StatelessWidget {
                                                                     .length
                                                                     .toString(),
                                                                 textAlign:
-                                                                    TextAlign
-                                                                        .center,
+                                                                TextAlign
+                                                                    .center,
                                                                 style:
-                                                                    const TextStyle(
+                                                                const TextStyle(
                                                                   color: Colors
                                                                       .white,
                                                                   fontSize: 10,
                                                                   fontWeight:
-                                                                      FontWeight
-                                                                          .bold,
+                                                                  FontWeight
+                                                                      .bold,
                                                                 ),
                                                               ),
                                                             ),
@@ -443,18 +458,18 @@ class VideoRoomPage extends StatelessWidget {
                                                       Stack(children: [
                                                         CallButtonShape(
                                                           image: imageSVGAsset(
-                                                                  'icon_message')
-                                                              as Widget,
+                                                              'icon_message')
+                                                          as Widget,
                                                           bgColor:
-                                                              ColorConstants
-                                                                  .kPrimaryColor
-                                                                  .withOpacity(
-                                                                      0.4),
+                                                          ColorConstants
+                                                              .kPrimaryColor
+                                                              .withOpacity(
+                                                              0.4),
                                                           onClickAction:
                                                               () async {
                                                             await context
                                                                 .read<
-                                                                    ConferenceCubit>()
+                                                                ConferenceCubit>()
                                                                 .toggleChatWindow();
                                                           },
                                                         ),
@@ -475,204 +490,6 @@ class VideoRoomPage extends StatelessWidget {
                                                               right: 5,
                                                               top: 2,
                                                               child:
-                                                                  AnimatedOpacity(
-                                                                opacity: 1,
-                                                                duration:
-                                                                    const Duration(
-                                                                        milliseconds:
-                                                                            250),
-                                                                child:
-                                                                    Container(
-                                                                  padding: const EdgeInsets
-                                                                      .symmetric(
-                                                                      horizontal:
-                                                                          6,
-                                                                      vertical:
-                                                                          2),
-                                                                  decoration:
-                                                                      BoxDecoration(
-                                                                    color: Colors
-                                                                        .redAccent,
-                                                                    borderRadius:
-                                                                        BorderRadius.circular(
-                                                                            12),
-                                                                  ),
-                                                                  constraints:
-                                                                      const BoxConstraints(
-                                                                    minWidth:
-                                                                        20,
-                                                                    minHeight:
-                                                                        16,
-                                                                  ),
-                                                                  child: Text(
-                                                                    unread > 99
-                                                                        ? '99+'
-                                                                        : unread
-                                                                            .toString(),
-                                                                    textAlign:
-                                                                        TextAlign
-                                                                            .center,
-                                                                    style:
-                                                                        const TextStyle(
-                                                                      color: Colors
-                                                                          .white,
-                                                                      fontSize:
-                                                                          10,
-                                                                      fontWeight:
-                                                                          FontWeight
-                                                                              .bold,
-                                                                    ),
-                                                                  ),
-                                                                ),
-                                                              ),
-                                                            );
-                                                          },
-                                                        )
-
-                                                        // child: Text('${state.unreadMessages}', style: context.primaryTextTheme.labelSmall,)),
-                                                        //   child: Text('1', style: context.primaryTextTheme.labelSmall?.copyWith(fontSize: 8, fontWeight: FontWeight.w700),)),,
-                                                      ]),
-                                                      const SizedBox(width: 20),
-                                                    ]),
-                                              ),
-                                            ),
-                                          ],
-                                        )),
-                                  ],
-                                ),
-                              ),
-                            ],
-                          );
-                        } else {
-                          return SafeArea(
-                              child: Stack(
-                            children: [
-                              Column(
-                                children: [
-                                  Expanded(
-                                      child: Container(
-                                          child: getLayout(
-                                              context,
-                                              items,
-                                              state.isGridLayout,
-                                              borderWidth,
-                                              0,
-                                              false))),
-                                  Padding(
-                                      padding: const EdgeInsets.all( 18.0),
-                                      child: Row(
-                                        mainAxisAlignment:
-                                            MainAxisAlignment.center,
-                                        crossAxisAlignment:
-                                            CrossAxisAlignment.center,
-                                        children: [
-                                          CallButtonShape(
-                                            image: imageSVGAsset('icon_phone')
-                                                as Widget,
-                                            bgColor:
-                                                ColorConstants.kPrimaryColor,
-                                            onClickAction: () async {
-                                              await context
-                                                  .read<ConferenceCubit>()
-                                                  .finishCall();
-                                            },
-                                          ),
-                                          const Spacer(),
-                                          CallButtonShape(
-                                              image: !state.audioMuted
-                                                  ? imageSVGAsset(
-                                                          'icon_microphone')
-                                                      as Widget
-                                                  : imageSVGAsset(
-                                                          'icon_microphone_disabled')
-                                                      as Widget,
-                                              onClickAction: () async {
-                                                await context
-                                                    .read<ConferenceCubit>()
-                                                    .audioMute();
-                                              }),
-                                          const Spacer(),
-                                          CallButtonShape(
-                                              image: !state.videoMuted
-                                                  ? imageSVGAsset(
-                                                          'icon_video_recorder')
-                                                      as Widget
-                                                  : imageSVGAsset(
-                                                          'icon_video_recorder_disabled')
-                                                      as Widget,
-                                              onClickAction: () async {
-                                                await context
-                                                    .read<ConferenceCubit>()
-                                                    .videoMute();
-                                              }),
-                                          const Spacer(),
-                                          CallButtonShape(
-                                              image: imageSVGAsset(
-                                                  'icon_switch_camera') as Widget,
-                                              onClickAction: () async {
-                                                await context
-                                                    .read<ConferenceCubit>()
-                                                    .switchCamera();
-                                              }),
-                                          const Spacer(),
-
-                                          BlocBuilder<ChatCubit,
-                                              ChatState>(
-                                            builder:
-                                                (context, state) {
-                                              final int unread = state
-                                                  .unreadMessages;
-
-                                              // if (showingChat ||
-                                              //     unread == 0) {
-                                              //   return const SizedBox
-                                              //       .shrink();
-                                              // }
-
-                                              return Stack(children: [
-                                                PopupMenuButton<String>(
-                                                  iconColor: Colors.white,
-                                                  icon: const Icon(Icons.more_vert),
-                                                  onSelected: (e) async {
-                                                    switch (e) {
-                                                      case 'Chat':
-                                                        await context
-                                                            .read<
-                                                            ConferenceCubit>()
-                                                            .toggleChatWindow();
-                                                        break;
-                                                      case 'Participants':
-                                                        await context
-                                                            .read<
-                                                            ConferenceCubit>()
-                                                            .toggleParticipantsWindow();
-                                                        break;
-                                                      case 'HandUp':
-                                                        await context
-                                                            .read<
-                                                            ConferenceCubit>()
-                                                            .handUp();
-                                                        break;
-
-                                                      case 'Switch Camera':
-                                                        await context
-                                                            .read<
-                                                            ConferenceCubit>()
-                                                            .switchCamera();
-                                                        break;
-                                                    }
-                                                  },
-                                                  itemBuilder: (BuildContext context) {
-                                                    return {'Chat','Participants', 'HandUp'}.map((String choice) {
-                                                      return PopupMenuItem<String>(
-                                                        value: choice,
-                                                        child: choice=='Chat' ?
-                                                        Row(children: [
-                                                          Text(choice),
-                                                          const SizedBox(width: 5,),
-                                                          Visibility(
-                                                            visible: unread > 0,
-                                                            child:
                                                               AnimatedOpacity(
                                                                 opacity: 1,
                                                                 duration:
@@ -723,111 +540,309 @@ class VideoRoomPage extends StatelessWidget {
                                                                   ),
                                                                 ),
                                                               ),
-                                                            ),
-                                                        ]) :
-                                                        Text(choice),
-                                                      );
-                                                    }).toList();
-                                                  },
-                                                ),
-                                                Visibility(
-                                                  visible: unread > 0,
-                                                  child: Positioned(
+                                                            );
+                                                          },
+                                                        )
+
+                                                        // child: Text('${state.unreadMessages}', style: context.primaryTextTheme.labelSmall,)),
+                                                        //   child: Text('1', style: context.primaryTextTheme.labelSmall?.copyWith(fontSize: 8, fontWeight: FontWeight.w700),)),,
+                                                      ]),
+                                                      const SizedBox(width: 20),
+                                                    ]),
+                                              ),
+                                            ),
+                                          ],
+                                        )),
+                                  ],
+                                ),
+                              ),
+                            ],
+                          );
+                        } else {
+                          return SafeArea(
+                              child: Stack(
+                                children: [
+                                  Column(
+                                    children: [
+                                      Expanded(
+                                          child: Container(
+                                              child: getLayout(
+                                                  context,
+                                                  items,
+                                                  state.isGridLayout,
+                                                  borderWidth,
+                                                  0,
+                                                  false))),
+                                      Padding(
+                                          padding: const EdgeInsets.all( 18.0),
+                                          child: Row(
+                                            mainAxisAlignment:
+                                            MainAxisAlignment.center,
+                                            crossAxisAlignment:
+                                            CrossAxisAlignment.center,
+                                            children: [
+                                              CallButtonShape(
+                                                image: imageSVGAsset('icon_phone')
+                                                as Widget,
+                                                bgColor:
+                                                ColorConstants.kPrimaryColor,
+                                                onClickAction: () async {
+                                                  await context
+                                                      .read<ConferenceCubit>()
+                                                      .finishCall();
+                                                },
+                                              ),
+                                              const Spacer(),
+                                              CallButtonShape(
+                                                  image: !state.audioMuted
+                                                      ? imageSVGAsset(
+                                                      'icon_microphone')
+                                                  as Widget
+                                                      : imageSVGAsset(
+                                                      'icon_microphone_disabled')
+                                                  as Widget,
+                                                  onClickAction: () async {
+                                                    await context
+                                                        .read<ConferenceCubit>()
+                                                        .audioMute();
+                                                  }),
+                                              const Spacer(),
+                                              CallButtonShape(
+                                                  image: !state.videoMuted
+                                                      ? imageSVGAsset(
+                                                      'icon_video_recorder')
+                                                  as Widget
+                                                      : imageSVGAsset(
+                                                      'icon_video_recorder_disabled')
+                                                  as Widget,
+                                                  onClickAction: () async {
+                                                    await context
+                                                        .read<ConferenceCubit>()
+                                                        .videoMute();
+                                                  }),
+                                              const Spacer(),
+                                              CallButtonShape(
+                                                  image: imageSVGAsset(
+                                                      'icon_switch_camera') as Widget,
+                                                  onClickAction: () async {
+                                                    await context
+                                                        .read<ConferenceCubit>()
+                                                        .switchCamera();
+                                                  }),
+                                              const Spacer(),
+
+                                              BlocBuilder<ChatCubit,
+                                                  ChatState>(
+                                                builder:
+                                                    (context, state) {
+                                                  final int unread = state
+                                                      .unreadMessages;
+
+                                                  // if (showingChat ||
+                                                  //     unread == 0) {
+                                                  //   return const SizedBox
+                                                  //       .shrink();
+                                                  // }
+
+                                                  return Stack(children: [
+                                                    PopupMenuButton<String>(
+                                                      iconColor: Colors.white,
+                                                      icon: const Icon(Icons.more_vert),
+                                                      onSelected: (e) async {
+                                                        switch (e) {
+                                                          case 'Chat':
+                                                            await context
+                                                                .read<
+                                                                ConferenceCubit>()
+                                                                .toggleChatWindow();
+                                                            break;
+                                                          case 'Participants':
+                                                            await context
+                                                                .read<
+                                                                ConferenceCubit>()
+                                                                .toggleParticipantsWindow();
+                                                            break;
+                                                          case 'HandUp':
+                                                            await context
+                                                                .read<
+                                                                ConferenceCubit>()
+                                                                .handUp();
+                                                            break;
+
+                                                          case 'Switch Camera':
+                                                            await context
+                                                                .read<
+                                                                ConferenceCubit>()
+                                                                .switchCamera();
+                                                            break;
+                                                        }
+                                                      },
+                                                      itemBuilder: (BuildContext context) {
+                                                        return {'Chat','Participants', 'HandUp'}.map((String choice) {
+                                                          return PopupMenuItem<String>(
+                                                            value: choice,
+                                                            child: choice=='Chat' ?
+                                                            Row(children: [
+                                                              Text(choice),
+                                                              const SizedBox(width: 5,),
+                                                              Visibility(
+                                                                visible: unread > 0,
+                                                                child:
+                                                                AnimatedOpacity(
+                                                                  opacity: 1,
+                                                                  duration:
+                                                                  const Duration(
+                                                                      milliseconds:
+                                                                      250),
+                                                                  child:
+                                                                  Container(
+                                                                    padding: const EdgeInsets
+                                                                        .symmetric(
+                                                                        horizontal:
+                                                                        6,
+                                                                        vertical:
+                                                                        2),
+                                                                    decoration:
+                                                                    BoxDecoration(
+                                                                      color: Colors
+                                                                          .redAccent,
+                                                                      borderRadius:
+                                                                      BorderRadius.circular(
+                                                                          12),
+                                                                    ),
+                                                                    constraints:
+                                                                    const BoxConstraints(
+                                                                      minWidth:
+                                                                      20,
+                                                                      minHeight:
+                                                                      16,
+                                                                    ),
+                                                                    child: Text(
+                                                                      unread > 99
+                                                                          ? '99+'
+                                                                          : unread
+                                                                          .toString(),
+                                                                      textAlign:
+                                                                      TextAlign
+                                                                          .center,
+                                                                      style:
+                                                                      const TextStyle(
+                                                                        color: Colors
+                                                                            .white,
+                                                                        fontSize:
+                                                                        10,
+                                                                        fontWeight:
+                                                                        FontWeight
+                                                                            .bold,
+                                                                      ),
+                                                                    ),
+                                                                  ),
+                                                                ),
+                                                              ),
+                                                            ]) :
+                                                            Text(choice),
+                                                          );
+                                                        }).toList();
+                                                      },
+                                                    ),
+                                                    Visibility(
+                                                      visible: unread > 0,
+                                                      child: Positioned(
+                                                        right: 5,
+                                                        top: 2,
+                                                        child:
+                                                        Container(
+                                                          width: 10,
+                                                          height: 10,
+                                                          decoration: const BoxDecoration(
+                                                            color: ColorConstants.kPrimaryColor,
+                                                            shape: BoxShape.circle,
+                                                          ),
+                                                        ),
+                                                      ),
+
+                                                    )
+                                                    // child: Text('${state.unreadMessages}', style: context.primaryTextTheme.labelSmall,)),
+                                                    //   child: Text('1', style: context.primaryTextTheme.labelSmall?.copyWith(fontSize: 8, fontWeight: FontWeight.w700),)),,
+                                                  ]);
+
+
+
+                                                  return Positioned(
                                                     right: 5,
                                                     top: 2,
                                                     child:
+                                                    AnimatedOpacity(
+                                                      opacity: 1,
+                                                      duration:
+                                                      const Duration(
+                                                          milliseconds:
+                                                          250),
+                                                      child:
                                                       Container(
-                                                        width: 10,
-                                                        height: 10,
-                                                        decoration: const BoxDecoration(
-                                                          color: ColorConstants.kPrimaryColor,
-                                                          shape: BoxShape.circle,
+                                                        padding: const EdgeInsets
+                                                            .symmetric(
+                                                            horizontal:
+                                                            6,
+                                                            vertical:
+                                                            2),
+                                                        decoration:
+                                                        BoxDecoration(
+                                                          color: Colors
+                                                              .redAccent,
+                                                          borderRadius:
+                                                          BorderRadius.circular(
+                                                              12),
+                                                        ),
+                                                        constraints:
+                                                        const BoxConstraints(
+                                                          minWidth:
+                                                          20,
+                                                          minHeight:
+                                                          16,
+                                                        ),
+                                                        child: Text(
+                                                          unread > 99
+                                                              ? '99+'
+                                                              : unread
+                                                              .toString(),
+                                                          textAlign:
+                                                          TextAlign
+                                                              .center,
+                                                          style:
+                                                          const TextStyle(
+                                                            color: Colors
+                                                                .white,
+                                                            fontSize:
+                                                            10,
+                                                            fontWeight:
+                                                            FontWeight
+                                                                .bold,
+                                                          ),
                                                         ),
                                                       ),
                                                     ),
-
-                                                )
-                                                // child: Text('${state.unreadMessages}', style: context.primaryTextTheme.labelSmall,)),
-                                                //   child: Text('1', style: context.primaryTextTheme.labelSmall?.copyWith(fontSize: 8, fontWeight: FontWeight.w700),)),,
-                                              ]);
+                                                  );
+                                                },
+                                              ),
 
 
 
-                                              return Positioned(
-                                                right: 5,
-                                                top: 2,
-                                                child:
-                                                AnimatedOpacity(
-                                                  opacity: 1,
-                                                  duration:
-                                                  const Duration(
-                                                      milliseconds:
-                                                      250),
-                                                  child:
-                                                  Container(
-                                                    padding: const EdgeInsets
-                                                        .symmetric(
-                                                        horizontal:
-                                                        6,
-                                                        vertical:
-                                                        2),
-                                                    decoration:
-                                                    BoxDecoration(
-                                                      color: Colors
-                                                          .redAccent,
-                                                      borderRadius:
-                                                      BorderRadius.circular(
-                                                          12),
-                                                    ),
-                                                    constraints:
-                                                    const BoxConstraints(
-                                                      minWidth:
-                                                      20,
-                                                      minHeight:
-                                                      16,
-                                                    ),
-                                                    child: Text(
-                                                      unread > 99
-                                                          ? '99+'
-                                                          : unread
-                                                          .toString(),
-                                                      textAlign:
-                                                      TextAlign
-                                                          .center,
-                                                      style:
-                                                      const TextStyle(
-                                                        color: Colors
-                                                            .white,
-                                                        fontSize:
-                                                        10,
-                                                        fontWeight:
-                                                        FontWeight
-                                                            .bold,
-                                                      ),
-                                                    ),
-                                                  ),
-                                                ),
-                                              );
-                                            },
-                                          ),
-
-
-
-                                        ],
-                                      ))
+                                            ],
+                                          ))
+                                    ],
+                                  ),
+                                  Visibility(
+                                    visible: state.showingChat,
+                                    child: getChatView(context, double.maxFinite),
+                                    // ),
+                                  ),
+                                  Visibility(
+                                      visible: state.showingParticipants,
+                                      child: getParticipantsView(context, double.maxFinite, contributors, contributorsHandUp)
+                                  ),
                                 ],
-                              ),
-                              Visibility(
-                                visible: state.showingChat,
-                                child: getChatView(context, double.maxFinite),
-                                // ),
-                              ),
-                              Visibility(
-                                  visible: state.showingParticipants,
-                                  child: getParticipantsView(context, double.maxFinite, contributors, contributorsHandUp)
-                              ),
-                            ],
-                          ));
+                              ));
                         }
                       },
                     )),
@@ -837,6 +852,7 @@ class VideoRoomPage extends StatelessWidget {
           // }
         },
         listener: _onConferenceState);
+
   }
 
   Widget getLayout(
