@@ -329,7 +329,7 @@ class ChatRepoImpl extends ChatRepo {
               id: msgIdParsed,
               chatId: chatDetailsDto.chatId!,
               senderId: senderId,
-              createdAt: data['date'],
+              createdAt: data['date'] as String,
               updatedAt: data['date'],
               message: isFile || messageParsed == '!@checkList'
                   ? null
@@ -839,7 +839,7 @@ class ChatRepoImpl extends ChatRepo {
       // }
       chatDetailsDto.messages.messages.add(MessageDto(
         chatId: response.response!.chatId,
-        createdAt: DateTime.now().toIso8601String(),
+        createdAt: response.response!.createdAt,
         message: response.response!.message,
         senderId: response.response!.senderId,
         updatedAt: DateTime.now().toIso8601String(),

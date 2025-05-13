@@ -1,5 +1,7 @@
 import 'dart:typed_data';
 
+import 'package:intl/intl.dart';
+
 import '../../../presentation/ui/profile/ui/widget/user_image.dart';
 
 class ChatParticipantDto {
@@ -85,7 +87,16 @@ class MessageDto {
   final int senderId;
   final String? message;
   final List<FileDto>? files;
-  final String createdAt;
+
+
+  String? _createdAt = '';
+  String get createdAt => _createdAt ?? "";
+  set createdAt(String? createdAt) {
+
+    var date = DateTime.parse(createdAt!);
+      _createdAt = DateFormat('yyyy-MM-dd HH:mm:ss').format(date);
+  }
+
   final String updatedAt;
   bool seen;
 
@@ -95,10 +106,12 @@ class MessageDto {
     required this.senderId,
     this.message,
     this.files,
-    required this.createdAt,
+    String? createdAt,
     required this.updatedAt,
     this.seen = false,
-  });
+  }){
+    this.createdAt = createdAt;
+  }
 
   MessageDto copyWith({
     int? id,
