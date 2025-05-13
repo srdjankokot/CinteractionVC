@@ -86,15 +86,26 @@ class VideoRoomPage extends StatelessWidget {
       context.showSnackBarMessage(state.error ?? 'Error', isError: true);
     }
 
+
     if (state.isEnded) {
       if (Navigator.of(context).canPop()) {
         Navigator.of(context).pop();
       }
       AppRoute.home.pushReplacement(context);
+
+      await context
+          .read<
+          AppCubit>()
+          .changeUserStatus(UserStatus.online);
     }
 
     if (state.isCallStarted && state.chatId != null) {
       context.read<ChatCubit>().load(true, state.chatId ?? 0);
+
+      await context
+          .read<
+          AppCubit>()
+          .changeUserStatus(UserStatus.inTheCall);
     }
 
     if (state.toastMessage != null) {
@@ -236,13 +247,8 @@ class VideoRoomPage extends StatelessWidget {
                                                             () async {
                                                           await context
                                                               .read<
-                                                              AppCubit>()
-                                                              .changeUserStatus(UserStatus.inTheCall);
-
-                                                          // await context
-                                                          //     .read<
-                                                          //     ConferenceCubit>()
-                                                          //     .audioMute();
+                                                              ConferenceCubit>()
+                                                              .audioMute();
                                                         }),
                                                     const SizedBox(width: 20),
                                                     CallButtonShape(
@@ -255,16 +261,10 @@ class VideoRoomPage extends StatelessWidget {
                                                         as Widget,
                                                         onClickAction:
                                                             () async {
-
                                                           await context
                                                               .read<
-                                                              AppCubit>()
-                                                              .changeUserStatus(UserStatus.offline);
-
-                                                          // await context
-                                                          //     .read<
-                                                          //     ConferenceCubit>()
-                                                          //     .videoMute();
+                                                              ConferenceCubit>()
+                                                              .videoMute();
                                                         }),
                                                     const SizedBox(width: 20),
                                                     CallButtonShape(

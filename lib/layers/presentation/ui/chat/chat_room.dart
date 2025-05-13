@@ -7,6 +7,8 @@ import 'package:cinteraction_vc/core/app/injector.dart';
 import 'package:cinteraction_vc/core/app/style.dart';
 import 'package:cinteraction_vc/core/extension/context.dart';
 import 'package:cinteraction_vc/core/extension/context_user.dart';
+import 'package:cinteraction_vc/core/io/network/models/data_channel_command.dart';
+import 'package:cinteraction_vc/core/io/network/urls.dart';
 import 'package:cinteraction_vc/layers/presentation/cubit/chat/chat_cubit.dart';
 import 'package:cinteraction_vc/layers/presentation/cubit/chat/chat_state.dart';
 
@@ -193,6 +195,10 @@ class ChatRoomPage extends StatelessWidget {
             }
           },
           builder: (context, state) {
+
+
+
+
             return Scaffold(
                 body: Stack(
                   children: [
@@ -243,82 +249,6 @@ class ChatRoomPage extends StatelessWidget {
                 ));
           }), // The rest of your UI
     );
-
-    // return BlocConsumer<ChatCubit, ChatState>(
-    //     listenWhen: (previous, current) =>
-    //         previous.incomingCall != current.incomingCall ||
-    //         previous.calling != current.calling,
-    //     listener: (context, state) async {
-    //       if (state.incomingCall ?? false) {
-    //         // String callerName = "Caller Name"; // Replace with actual caller name
-    //         await showIncomingCallDialog(context, state.caller!);
-    //         return;
-    //       } else {
-    //         if (Navigator.canPop(context)) {
-    //           Navigator.of(context).pop(incomingDialog);
-    //           stopIncomingCallSound();
-    //         }
-    //       }
-    //
-    //       if (state.calling ?? false) {
-    //         await makeCallDialog();
-    //         return;
-    //       } else {
-    //         if (Navigator.canPop(context)) {
-    //           Navigator.of(context).pop(incomingDialog);
-    //         }
-    //       }
-    //     },
-    //     builder: (context, state) {
-    //       return Scaffold(
-    //           body: Stack(
-    //         children: [
-    //           if (context.isWide)
-    //             Row(
-    //               children: [
-    //                 // First column
-    //                 getLeftSide(
-    //                     context,
-    //                     state,
-    //                     300,
-    //                     () => {displayJoinRoomPopup(context)},
-    //                     () => {displayAddScheduleMeetingPopup()},
-    //                     () => {displayCreateGroupPopup(context, state)}),
-    //
-    //                 const VerticalDivider(
-    //                   color: Colors.grey, // Color of the divider
-    //                   thickness: 1, // Thickness of the divider
-    //                   width: 20, // Width of the space taken by the divider
-    //                 ),
-    //                 Expanded(
-    //                   flex: 2,
-    //                   child: getChatDetailsView(context, state, user,
-    //                       () => {displayEditGroupPopup(context, state)}),
-    //                 ),
-    //               ],
-    //             )
-    //           else
-    //             Stack(
-    //               children: [
-    //                 getLeftSide(
-    //                     context,
-    //                     state,
-    //                     double.maxFinite,
-    //                     () => {displayJoinRoomPopup(context)},
-    //                     () => {displayAddScheduleMeetingPopup()},
-    //                     () => {displayCreateGroupPopup(context, state)}),
-    //                 Visibility(
-    //                     visible: state.currentChat != null ||
-    //                         state.currentParticipant != null,
-    //                     // visible: false,
-    //
-    //                     child: getChatDetailsView(context, state, user,
-    //                         () => {displayEditGroupPopup(context, state)}))
-    //               ],
-    //             )
-    //         ],
-    //       ));
-    //     });
   }
 }
 
@@ -469,8 +399,46 @@ Widget getLeftSide(BuildContext context, ChatState state, double? width,
   );
 }
 
+
+String getUserStatus(bool isOnline, String userStatus){
+  return isOnline ?  userStatus == UserStatus.inTheCall.value ? "In The Call" : "Available" : "Unavailable";
+}
+
+
+Widget userStatusWidget(ChatState state)
+{
+  String currentUserState =  getUserStatus(state.currentChat?.isOnline ?? false, state.currentChat?.userStatus ?? UserStatus.online.value);
+
+  return Row(
+    children: [
+      Container(
+        width: 15.0,
+        // Adjust the width as needed
+        height: 15.0,
+        // Adjust the height as needed
+        decoration: BoxDecoration(
+          color: (state.listType == ListType.Chats
+              ? state.currentChat?.isOnline ==
+              true
+              : state.currentParticipant
+              ?.online ==
+              true)
+              ? Colors.green
+              : Colors.amber,
+          shape: BoxShape.circle,
+        ),
+      ),
+      const SizedBox(width: 5.0),
+      Text(currentUserState),
+    ],
+  );
+
+}
+
 Widget getChatDetailsView(
     BuildContext context, ChatState state, User? user, Function editGroup) {
+
+
   return Container(
     width: double.maxFinite,
     height: double.maxFinite,
@@ -730,42 +698,7 @@ Widget getChatDetailsView(
                                 ),
                               ],
                             )
-                                : Row(
-                              children: [
-                                Container(
-                                  width: 15.0,
-                                  // Adjust the width as needed
-                                  height: 15.0,
-                                  // Adjust the height as needed
-                                  decoration: BoxDecoration(
-                                    color: (state.listType == ListType.Chats
-                                        ? state.currentChat?.isOnline ==
-                                        true
-                                        : state.currentParticipant
-                                        ?.online ==
-                                        true)
-                                        ? Colors.green
-                                        : Colors.amber,
-                                    shape: BoxShape.circle,
-                                  ),
-                                ),
-                                const SizedBox(width: 5.0),
-                                Text(
-                                  (state.listType == ListType.Chats
-                                      ? state.currentChat?.isOnline ==
-                                      true
-                                      : state.currentParticipant
-                                      ?.online ==
-                                      true)
-                                      ? "Active now"
-                                      : "Away",
-                                  style: titleThemeStyle.textTheme.labelLarge,
-                                ),
-                                const SizedBox(width: 5.0),
-                                Text(state.currentChat!.userStatus)
-
-                              ],
-                            )
+                                : userStatusWidget(state)
                           ],
                         )),
                     const SizedBox(
