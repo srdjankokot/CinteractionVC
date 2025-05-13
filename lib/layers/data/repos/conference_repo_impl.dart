@@ -1163,10 +1163,10 @@ class ConferenceRepoImpl extends ConferenceRepo {
 
     _addOnEndedToTrack(audioTrack);
 
-    List<RTCRtpSender>? senders =
-        await videoPlugin?.webRTCHandle?.peerConnection?.senders;
+    List<RTCRtpSender>? senders = await videoPlugin?.webRTCHandle?.peerConnection?.senders;
     senders?.forEach((sender) async {
       if (sender.track?.kind == 'audio') {
+        print('${sender.track?.label} track is replaced');
         await sender.replaceTrack(audioTrack);
         print('${sender.track?.label} track is replaced');
       }
