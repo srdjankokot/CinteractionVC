@@ -69,6 +69,8 @@ class ChatRepoImpl extends ChatRepo {
 
   late bool isInCallChat;
 
+  late String userStatus = UserStatus.online.value;
+
   @override
   Future<void> initialize(
       {required int chatGroupId, required bool isInCall}) async {
@@ -88,6 +90,8 @@ class ChatRepoImpl extends ChatRepo {
       loadChats(1, 20);
     }
     _setup();
+
+    print("initialize chat");
   }
 
   @override
@@ -430,6 +434,8 @@ class ChatRepoImpl extends ChatRepo {
           _participantsStream.add(subscribers);
           _matchParticipantWithUser();
           _matchParticipantWithChat();
+
+          _sendUserStatus();
         }
 
         if (data['participants'] != null) {
@@ -904,27 +910,35 @@ class ChatRepoImpl extends ChatRepo {
   _renderCommand(DataChannelCommand command) {
     if (command.command == DataChannelCmd.userStatus) {
       chats = chats.map((chat) {
-        if (chat.chatParticipants!.map((e) => e.id == int.parse(command.id)).toList().isNotEmpty ) {
+        if (chat.chatParticipants!.any((p) => p.id == int.parse(command.id)) && !chat.chatGroup) {
           return chat.copyWith(userStatus: command.data["userStatus"] as String);
         } else {
           return chat;
         }
       }).toList();
-
-      print("change user ${command.id} status to ${command.data["userStatus"]}");
       _chatStream.add(chats);
-
     }
   }
 
   @override
   Future<void> setUserStatus(String status) async{
-    var data = {'userStatus': status};
-    var json = DataChannelCommand(
-        command: DataChannelCmd.userStatus,
-        id: user!.id.toString(),
-        data: data);
+    print("send my status future: $status");
+    userStatus = status;
+    _sendUserStatus();
+  }
 
-    await textRoom.sendMessage(room, jsonEncode(json.toJson()));
+  _sendUserStatus() async
+  {
+    if(!isInCallChat){
+      print("send my status: $userStatus");
+      var data = {'userStatus': userStatus};
+      var json = DataChannelCommand(
+          command: DataChannelCmd.userStatus,
+          id: user!.id.toString(),
+          data: data);
+
+      await textRoom.sendMessage(room, jsonEncode(json.toJson()));
+    }
+
   }
 }

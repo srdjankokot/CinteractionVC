@@ -620,29 +620,16 @@ class _ChatDetailsWidgetState extends State<ChatDetailsWidget> {
                                                                       ),
                                                                     )
                                                                   else
-                                                                    Linkify(
-                                                                      onOpen:
-                                                                          (link) async {
-                                                                        final uri =
-                                                                            Uri.parse(link.url);
-                                                                        if (await canLaunchUrl(
-                                                                            uri)) {
+                                                                    SelectableLinkify(
+                                                                      onOpen: (link) async {
+                                                                        final uri = Uri.parse(link.url);
+                                                                        if (await canLaunchUrl(uri)) {
                                                                           await launchUrl(
                                                                               uri,
                                                                               mode: LaunchMode.externalApplication);
                                                                         }
                                                                       },
-                                                                      text: message
-                                                                          .message!,
-                                                                      style:
-                                                                          const TextStyle(
-                                                                        color: Colors
-                                                                            .black,
-                                                                        fontSize:
-                                                                            15,
-                                                                        fontFamily:
-                                                                            'Roboto',
-                                                                      ),
+                                                                      text: message.message!, style: const TextStyle(color: Colors.black, fontSize: 15, fontFamily: 'Roboto'),
                                                                     ),
                                                               ],
                                                             ),
