@@ -64,7 +64,7 @@ class ProfileTab extends StatelessWidget {
     return BlocBuilder<AppCubit, AppState>(
       builder: (context, state) {
         final currentUser = state.user;
-        final user = state.user;
+
         final _nameController = TextEditingController();
         final _passwordController = TextEditingController();
         final _confirmPasswordController = TextEditingController();

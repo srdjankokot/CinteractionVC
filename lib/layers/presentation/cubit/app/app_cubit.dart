@@ -1,4 +1,5 @@
 import 'package:cinteraction_vc/core/io/network/models/data_channel_command.dart';
+import 'package:cinteraction_vc/layers/data/dto/user_dto.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:cinteraction_vc/core/app/injector.dart';
 import 'package:cinteraction_vc/layers/data/source/local/local_storage.dart';
@@ -40,8 +41,14 @@ class AppCubit extends Cubit<AppState> {
       password: password,
       passwordConfirmation: passwordConfirmation,
     );
-
+    final currentUser = state.user;
     final updatedUser = await api.getUserDetails();
+    getIt.get<LocalStorage>().saveLoggedUser(
+        user: UserDto(
+            id: currentUser!.id,
+            name: currentUser.name,
+            email: currentUser.email,
+            imageUrl: currentUser.imageUrl));
     emit(state.copyWith(user: updatedUser.response));
   }
 
@@ -50,6 +57,12 @@ class AppCubit extends Cubit<AppState> {
     if (currentUser == null) return;
     await api.changeProfileImage(file: file, user: currentUser);
     final updatedUser = await api.getUserDetails();
+    getIt.get<LocalStorage>().saveLoggedUser(
+        user: UserDto(
+            id: currentUser.id,
+            name: currentUser.name,
+            email: currentUser.email,
+            imageUrl: currentUser.imageUrl));
     emit(state.copyWith(user: updatedUser.response));
   }
 
