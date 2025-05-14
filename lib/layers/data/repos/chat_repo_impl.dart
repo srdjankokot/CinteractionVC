@@ -252,7 +252,7 @@ class ChatRepoImpl extends ChatRepo {
   _setListener() {
     textRoom.data?.listen((event) {
 
-      print("print event: ${event.text}");
+      // print("print event: ${event.text}");
       dynamic data = parse(event.text);
 
       if (data != null) {
@@ -922,7 +922,6 @@ class ChatRepoImpl extends ChatRepo {
 
   @override
   Future<void> setUserStatus(String status) async{
-    print("send my status future: $status");
     userStatus = status;
     _sendUserStatus();
   }
@@ -930,7 +929,6 @@ class ChatRepoImpl extends ChatRepo {
   _sendUserStatus() async
   {
     if(!isInCallChat){
-      print("send my status: $userStatus");
       var data = {'userStatus': userStatus};
       var json = DataChannelCommand(
           command: DataChannelCmd.userStatus,
