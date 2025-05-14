@@ -2,11 +2,13 @@ import 'dart:convert';
 import 'dart:io';
 import 'dart:typed_data';
 
+import 'package:cinteraction_vc/assets/colors/Colors.dart';
 import 'package:cinteraction_vc/core/app/injector.dart';
 import 'package:cinteraction_vc/core/extension/context.dart';
 import 'package:cinteraction_vc/core/extension/context_user.dart';
 import 'package:cinteraction_vc/core/navigation/route.dart';
 import 'package:cinteraction_vc/core/ui/input/input_field.dart';
+import 'package:cinteraction_vc/core/ui/widget/call_button_shape.dart';
 import 'package:cinteraction_vc/layers/data/source/local/local_storage.dart';
 import 'package:cinteraction_vc/layers/data/source/network/api_impl.dart';
 import 'package:cinteraction_vc/layers/domain/entities/user.dart';
@@ -85,218 +87,444 @@ class ProfileTab extends StatelessWidget {
               );
         }
 
-        return Scaffold(
-          backgroundColor: const Color(0xFFF5F6FA),
-          body: LayoutBuilder(
-            builder: (context, constraints) {
-              return SingleChildScrollView(
-                child: ConstrainedBox(
-                  constraints: BoxConstraints(minHeight: constraints.maxHeight),
-                  child: Center(
-                    child: Padding(
-                      padding: const EdgeInsets.all(24.0),
-                      child: Form(
-                        key: _formKey,
-                        child: Column(
-                          children: [
-                            Card(
-                              elevation: 8,
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(20),
-                              ),
-                              color: Colors.white,
-                              child: Padding(
-                                padding: const EdgeInsets.symmetric(
-                                    horizontal: 24, vertical: 32),
-                                child: ConstrainedBox(
-                                  constraints:
-                                      const BoxConstraints(maxWidth: 700),
-                                  child: Column(
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.center,
-                                    children: [
-                                      Stack(
+
+        if(context.isWide)
+          {
+            return Scaffold(
+              body: LayoutBuilder(
+                builder: (context, constraints) {
+                  return SingleChildScrollView(
+                    child: ConstrainedBox(
+                      constraints: BoxConstraints(minHeight: constraints.maxHeight),
+                        child: Padding(
+                          padding: const EdgeInsets.only(top: 48.0, bottom: 24, left: 24, right: 24),
+                          child: Form(
+                            key: _formKey,
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                    Row(
+                                        crossAxisAlignment: CrossAxisAlignment.center,
+
                                         children: [
-                                          ClipOval(
-                                            child: SizedBox(
-                                              width: 120,
-                                              height: 120,
-                                              child: UserImage.large([
-                                                currentUser!.getUserImageDTO()
-                                              ]),
-                                            ),
-                                          ),
-                                          Positioned(
-                                            bottom: 4,
-                                            right: 4,
-                                            child: CircleAvatar(
-                                              radius: 20,
-                                              backgroundColor:
-                                                  Colors.blueAccent,
-                                              child: IconButton(
-                                                icon: const Icon(Icons.edit,
-                                                    size: 16,
-                                                    color: Colors.white),
-                                                padding: EdgeInsets.zero,
-                                                onPressed: () =>
-                                                    _pickAndSendFile(context),
+                                          Stack(
+                                            children: [
+                                              ClipOval(
+                                                child: SizedBox(
+                                                  width: 300,
+                                                  height: 300,
+                                                  child: UserImage.size([
+                                                    currentUser!.getUserImageDTO()
+                                                  ], 300),
+                                                ),
                                               ),
+                                              Positioned(
+                                                bottom: 4,
+                                                right: 4,
+                                                child: CircleAvatar(
+                                                  radius: 20,
+                                                  backgroundColor:
+                                                  ColorConstants.kPrimaryColor,
+                                                  child: IconButton(
+                                                    icon: const Icon(Icons.edit,
+                                                        size: 16,
+                                                        color: Colors.white),
+                                                    padding: EdgeInsets.zero,
+                                                    onPressed: () =>
+                                                        _pickAndSendFile(context),
+                                                  ),
+                                                ),
+                                              ),
+                                            ],
+                                          ),
+                                          const SizedBox(width: 24),
+
+                                          Expanded(
+                                            child: Column(
+                                              children: [
+                                                TextField(
+                                                  controller: _nameController,
+                                                  decoration: InputDecoration(
+                                                    labelText: currentUser.name,
+                                                    filled: true,
+                                                    fillColor: Colors.grey[100],
+                                                    border: OutlineInputBorder(
+                                                      borderRadius:
+                                                      BorderRadius.circular(12),
+                                                    ),
+                                                    prefixIcon: const Icon(Icons.person),
+                                                  ),
+                                                ),
+                                                // const SizedBox(height: 16),
+
+                                                // Email
+                                                // TextField(
+                                                //   controller: TextEditingController(
+                                                //       text: user.email),
+                                                //   decoration: InputDecoration(
+                                                //     labelText: 'Email',
+                                                //     filled: true,
+                                                //     fillColor: Colors.grey[100],
+                                                //     border: OutlineInputBorder(
+                                                //       borderRadius:
+                                                //           BorderRadius.circular(12),
+                                                //     ),
+                                                //     prefixIcon: const Icon(Icons.email),
+                                                //   ),
+                                                // ),
+                                                const SizedBox(height: 16),
+
+                                                // Password
+                                                InputField.password(
+                                                  label: 'Enter your password',
+                                                  controller: _passwordController,
+                                                  textInputAction: TextInputAction.next,
+                                                  onFieldSubmitted: null,
+                                                  // textInputAction: state.isSignUp
+                                                  //     ? TextInputAction.next
+                                                  //     : TextInputAction.done,
+                                                  // onFieldSubmitted:  (){}
+                                                ),
+
+                                                const SizedBox(height: 4),
+
+                                                // Confirm Password
+                                                InputField(
+                                                  label: 'Confirm password',
+                                                  controller: _confirmPasswordController,
+                                                  textInputAction: TextInputAction.done,
+                                                  //  onFieldSubmitted: (_) => submit(),
+                                                  keyboardType:
+                                                  TextInputType.visiblePassword,
+                                                  autofillHints: const [
+                                                    AutofillHints.password
+                                                  ],
+                                                  validator: (confirmPassword) {
+                                                    if (confirmPassword == null ||
+                                                        confirmPassword.isEmpty) {
+                                                      return 'Required';
+                                                    }
+
+                                                    if (_passwordController.text !=
+                                                        confirmPassword) {
+                                                      return 'Password doesn\'t match';
+                                                    }
+                                                  },
+                                                ),
+
+                                                const SizedBox(height: 24),
+
+                                                Row(
+                                                  children: [
+
+                                                    Expanded(
+                                                      child:
+
+                                                      ElevatedButton.icon(
+                                                        onPressed: () async {
+                                                          submit();
+                                                        },
+                                                        icon: const Icon(Icons.save),
+                                                        label: const Text('Save'),
+                                                        style: ElevatedButton.styleFrom(
+                                                            padding: const EdgeInsets.symmetric(vertical: 14),
+                                                            shape: RoundedRectangleBorder(
+                                                              borderRadius:
+                                                              BorderRadius.circular(10),
+                                                            ),
+                                                            backgroundColor: ColorConstants.kStateSuccess
+                                                        ),
+                                                      ),
+                                                    ),
+                                                    const SizedBox(width: 16),
+                                                    Expanded(
+                                                      child: OutlinedButton.icon(
+                                                        onPressed: () {},
+                                                        icon: const Icon(Icons.cancel),
+                                                        label: const Text('Cancel'),
+                                                        style: OutlinedButton.styleFrom(
+                                                          padding:
+                                                          const EdgeInsets.symmetric(
+                                                              vertical: 14),
+                                                          shape: RoundedRectangleBorder(
+                                                            borderRadius:
+                                                            BorderRadius.circular(10),
+                                                          ),
+                                                        ),
+                                                      ),
+                                                    ),
+                                                  ],
+                                                ),
+
+
+                                              ],
                                             ),
                                           ),
+
+
                                         ],
                                       ),
+                                const SizedBox(height: 24),
+                                SizedBox(
+                                  width: 300,
+                                  child: ElevatedButton.icon(
+                                    onPressed: () {
+                                      context.logOut();
+                                    },
+                                    icon: const Icon(Icons.logout),
+                                    label: const Text('Log out'),
+                                    style: ElevatedButton.styleFrom(
+                                      backgroundColor: ColorConstants.kPrimaryColor,
+                                      foregroundColor: Colors.white,
+                                      padding:
+                                      const EdgeInsets.symmetric(vertical: 16),
+                                      shape: RoundedRectangleBorder(
+                                        borderRadius: BorderRadius.circular(12),
+                                      ),
+                                    ),
+                                  ),
+                                ),
 
-                                      const SizedBox(height: 24),
+                              ],
+                            ),
+                          ),
+                        ),
+                      ),
+                  );
+                },
+              ),
+            );
+          }
+        else{
+          return Scaffold(
+            backgroundColor: const Color(0xFFF5F6FA),
+            body: LayoutBuilder(
+              builder: (context, constraints) {
+                return SingleChildScrollView(
+                  child: ConstrainedBox(
+                    constraints: BoxConstraints(minHeight: constraints.maxHeight),
+                    child: Center(
+                      child: Padding(
+                        padding: const EdgeInsets.all(24.0),
+                        child: Form(
+                          key: _formKey,
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.center,
+                            children: [
+                              Stack(
+                                children: [
+                                  Container(
+                                    padding: EdgeInsets.only(top: 80),
+                                    child: Card(
+                                        elevation: 8,
+                                        shape: RoundedRectangleBorder(
+                                          borderRadius: BorderRadius.circular(20),
+                                        ),
+                                        color: Colors.white,
+                                        child: Padding(
+                                          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 32),
+                                          child: ConstrainedBox(
+                                            constraints:
+                                            const BoxConstraints(maxWidth: 700),
+                                            child: Column(
+                                              crossAxisAlignment:
+                                              CrossAxisAlignment.center,
+                                              children: [
+                                                const SizedBox(height: 60),
+                                                TextField(
+                                                  controller: _nameController,
+                                                  decoration: InputDecoration(
+                                                    labelText: currentUser?.name,
+                                                    filled: true,
+                                                    fillColor: Colors.grey[100],
+                                                    border: OutlineInputBorder(
+                                                      borderRadius:
+                                                      BorderRadius.circular(12),
+                                                    ),
+                                                    prefixIcon: const Icon(Icons.person),
+                                                  ),
+                                                ),
 
-                                      TextField(
-                                        controller: _nameController,
-                                        decoration: InputDecoration(
-                                          labelText: currentUser.name,
-                                          filled: true,
-                                          fillColor: Colors.grey[100],
-                                          border: OutlineInputBorder(
-                                            borderRadius:
-                                                BorderRadius.circular(12),
+                                                const SizedBox(height: 16),
+
+                                                // Email
+                                                // TextField(
+                                                //   controller: TextEditingController(
+                                                //       text: user.email),
+                                                //   decoration: InputDecoration(
+                                                //     labelText: 'Email',
+                                                //     filled: true,
+                                                //     fillColor: Colors.grey[100],
+                                                //     border: OutlineInputBorder(
+                                                //       borderRadius:
+                                                //           BorderRadius.circular(12),
+                                                //     ),
+                                                //     prefixIcon: const Icon(Icons.email),
+                                                //   ),
+                                                // ),
+
+                                                const SizedBox(height: 24),
+
+                                                // Password
+                                                InputField.password(
+                                                  label: 'Enter your password',
+                                                  controller: _passwordController,
+                                                  textInputAction: TextInputAction.next,
+                                                  onFieldSubmitted: null,
+                                                  // textInputAction: state.isSignUp
+                                                  //     ? TextInputAction.next
+                                                  //     : TextInputAction.done,
+                                                  // onFieldSubmitted:  (){}
+                                                ),
+
+                                                const SizedBox(height: 16),
+
+                                                // Confirm Password
+                                                InputField(
+                                                  label: 'Confirm password',
+                                                  controller: _confirmPasswordController,
+                                                  textInputAction: TextInputAction.done,
+                                                  //  onFieldSubmitted: (_) => submit(),
+                                                  keyboardType:
+                                                  TextInputType.visiblePassword,
+                                                  autofillHints: const [
+                                                    AutofillHints.password
+                                                  ],
+                                                  validator: (confirmPassword) {
+                                                    if (confirmPassword == null ||
+                                                        confirmPassword.isEmpty) {
+                                                      return 'Required';
+                                                    }
+
+                                                    if (_passwordController.text !=
+                                                        confirmPassword) {
+                                                      return 'Password doesn\'t match';
+                                                    }
+                                                  },
+                                                ),
+
+                                                const SizedBox(height: 24),
+
+                                                Row(
+                                                  children: [
+                                                    Expanded(
+                                                      child: ElevatedButton.icon(
+                                                        onPressed: () async {
+                                                          if(_formKey.currentState!.validate()){
+                                                            submit();
+                                                          }
+                                                        },
+                                                        icon: const Icon(Icons.save),
+                                                        label: const Text('Save'),
+                                                        style: ElevatedButton.styleFrom(
+                                                            padding: const EdgeInsets.symmetric(vertical: 14),
+                                                            shape: RoundedRectangleBorder(
+                                                              borderRadius:
+                                                              BorderRadius.circular(10),
+                                                            ),
+                                                            backgroundColor: _formKey.currentState?.validate() ?? false ? ColorConstants.kStateSuccess : ColorConstants.kStateSuccess.withValues(alpha: 0.4)
+                                                        ),
+                                                      ),
+                                                    ),
+                                                    const SizedBox(width: 16),
+                                                    Expanded(
+                                                      child: OutlinedButton.icon(
+                                                        onPressed: () {},
+                                                        icon: const Icon(Icons.cancel),
+                                                        label: const Text('Cancel'),
+                                                        style: OutlinedButton.styleFrom(
+                                                          padding:
+                                                          const EdgeInsets.symmetric(
+                                                              vertical: 14),
+                                                          shape: RoundedRectangleBorder(
+                                                            borderRadius:
+                                                            BorderRadius.circular(10),
+                                                          ),
+                                                        ),
+                                                      ),
+                                                    ),
+                                                  ],
+                                                ),
+                                              ],
+                                            ),
                                           ),
-                                          prefixIcon: const Icon(Icons.person),
+                                        ),
+                                      ),
+                                  ),
+
+                                      Center(
+                                        child: Stack(
+                                          children: [
+                                            ClipOval(
+                                              child: SizedBox(
+                                                width: 140,
+                                                height: 140,
+                                                child: UserImage.size([
+                                                  currentUser!.getUserImageDTO()
+                                                ], 140),
+                                              ),
+                                            ),
+                                            Positioned(
+                                              bottom: 4,
+                                              right: 4,
+                                              child: CircleAvatar(
+                                                radius: 20,
+                                                backgroundColor:
+                                                ColorConstants.kPrimaryColor,
+                                                child: IconButton(
+                                                  icon: const Icon(Icons.edit,
+                                                      size: 16,
+                                                      color: Colors.white),
+                                                  padding: EdgeInsets.zero,
+                                                  onPressed: () =>
+                                                      _pickAndSendFile(context),
+                                                ),
+                                              ),
+                                            ),
+                                          ],
                                         ),
                                       ),
 
-                                      const SizedBox(height: 16),
+                                ],
+                              ),
 
-                                      // Email
-                                      // TextField(
-                                      //   controller: TextEditingController(
-                                      //       text: user.email),
-                                      //   decoration: InputDecoration(
-                                      //     labelText: 'Email',
-                                      //     filled: true,
-                                      //     fillColor: Colors.grey[100],
-                                      //     border: OutlineInputBorder(
-                                      //       borderRadius:
-                                      //           BorderRadius.circular(12),
-                                      //     ),
-                                      //     prefixIcon: const Icon(Icons.email),
-                                      //   ),
-                                      // ),
 
-                                      const SizedBox(height: 24),
 
-                                      // Password
-                                      InputField.password(
-                                        label: 'Enter your password',
-                                        controller: _passwordController,
-                                        textInputAction: TextInputAction.next,
-                                        onFieldSubmitted: null,
-                                        // textInputAction: state.isSignUp
-                                        //     ? TextInputAction.next
-                                        //     : TextInputAction.done,
-                                        // onFieldSubmitted:  (){}
-                                      ),
-
-                                      const SizedBox(height: 16),
-
-                                      // Confirm Password
-                                      InputField(
-                                        label: 'Confirm password',
-                                        controller: _confirmPasswordController,
-                                        textInputAction: TextInputAction.done,
-                                        //  onFieldSubmitted: (_) => submit(),
-                                        keyboardType:
-                                            TextInputType.visiblePassword,
-                                        autofillHints: const [
-                                          AutofillHints.password
-                                        ],
-                                        validator: (confirmPassword) {
-                                          if (confirmPassword == null ||
-                                              confirmPassword.isEmpty) {
-                                            return 'Required';
-                                          }
-
-                                          if (_passwordController.text !=
-                                              confirmPassword) {
-                                            return 'Password doesn\'t match';
-                                          }
-                                        },
-                                      ),
-
-                                      const SizedBox(height: 24),
-
-                                      Row(
-                                        children: [
-                                          Expanded(
-                                            child: ElevatedButton.icon(
-                                              onPressed: () async {
-                                                submit();
-                                              },
-                                              icon: const Icon(Icons.save),
-                                              label: const Text('Save'),
-                                              style: ElevatedButton.styleFrom(
-                                                padding:
-                                                    const EdgeInsets.symmetric(
-                                                        vertical: 14),
-                                                shape: RoundedRectangleBorder(
-                                                  borderRadius:
-                                                      BorderRadius.circular(10),
-                                                ),
-                                              ),
-                                            ),
-                                          ),
-                                          const SizedBox(width: 16),
-                                          Expanded(
-                                            child: OutlinedButton.icon(
-                                              onPressed: () {},
-                                              icon: const Icon(Icons.cancel),
-                                              label: const Text('Cancel'),
-                                              style: OutlinedButton.styleFrom(
-                                                padding:
-                                                    const EdgeInsets.symmetric(
-                                                        vertical: 14),
-                                                shape: RoundedRectangleBorder(
-                                                  borderRadius:
-                                                      BorderRadius.circular(10),
-                                                ),
-                                              ),
-                                            ),
-                                          ),
-                                        ],
-                                      ),
-                                    ],
+                              const SizedBox(height: 24),
+                              SizedBox(
+                                width: 300,
+                                child: ElevatedButton.icon(
+                                  onPressed: () {
+                                    context.logOut();
+                                  },
+                                  icon: const Icon(Icons.logout),
+                                  label: const Text('Log out'),
+                                  style: ElevatedButton.styleFrom(
+                                    backgroundColor: ColorConstants.kPrimaryColor,
+                                    foregroundColor: Colors.white,
+                                    padding:
+                                    const EdgeInsets.symmetric(vertical: 16),
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(12),
+                                    ),
                                   ),
                                 ),
                               ),
-                            ),
-                            const SizedBox(height: 24),
-                            SizedBox(
-                              width: 300,
-                              child: ElevatedButton.icon(
-                                onPressed: () {
-                                  context.logOut();
-                                },
-                                icon: const Icon(Icons.logout),
-                                label: const Text('Log out'),
-                                style: ElevatedButton.styleFrom(
-                                  backgroundColor: Colors.redAccent,
-                                  foregroundColor: Colors.white,
-                                  padding:
-                                      const EdgeInsets.symmetric(vertical: 16),
-                                  shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(12),
-                                  ),
-                                ),
-                              ),
-                            ),
-                            const SizedBox(height: 32),
-                          ],
+                              const SizedBox(height: 32),
+                            ],
+                          ),
                         ),
                       ),
                     ),
                   ),
-                ),
-              );
-            },
-          ),
-        );
+                );
+              },
+            ),
+          );
+        }
+
+
+
       },
     );
   }
