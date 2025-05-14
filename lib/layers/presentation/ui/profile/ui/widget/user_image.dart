@@ -14,6 +14,8 @@ class UserImage extends StatelessWidget {
 
   const UserImage.large(this.users, {super.key}) : size = 200;
 
+  const UserImage.size(this.users, this.size, {super.key});
+
   final List<UserImageDto> users;
   final double size;
 
