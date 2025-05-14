@@ -2,8 +2,6 @@
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
-	<key>com.apple.security.network.server</key>
-	<true/>
 	<key>CFBundleDevelopmentRegion</key>
 	<string>$(DEVELOPMENT_LANGUAGE)</string>
 	<key>CFBundleExecutable</key>
@@ -23,11 +21,11 @@
 	<key>CFBundleURLTypes</key>
 	<array>
 		<dict>
-			<key>CFBundleTypeRole</key>
-			<string>Editor</string>
+			<key>CFBundleURLName</key>
+			<string>https://huawei.nswebdevelopment.com/</string>
 			<key>CFBundleURLSchemes</key>
 			<array>
-				<string>com.googleusercontent.apps.86369065781-3ujc3l6agsn7ri36cc8faskj1vtj1de1</string>
+				<string>cinteraction</string>
 			</array>
 		</dict>
 	</array>
@@ -47,19 +45,7 @@
 	<string>Required</string>
 	<key>NSPrincipalClass</key>
 	<string>NSApplication</string>
-
-
-	<key>CFBundleURLTypes</key>
-    <array>
-      <dict>
-        <key>CFBundleURLName</key>
-        <string>https://huawei.nswebdevelopment.com/</string>
-        <key>CFBundleURLSchemes</key>
-        <array>
-          <string>cinteraction</string>
-        </array>
-      </dict>
-    </array>
-
+	<key>com.apple.security.network.server</key>
+	<true/>
 </dict>
 </plist>
