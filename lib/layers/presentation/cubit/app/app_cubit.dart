@@ -41,14 +41,9 @@ class AppCubit extends Cubit<AppState> {
       password: password,
       passwordConfirmation: passwordConfirmation,
     );
-    final currentUser = state.user;
+
     final updatedUser = await api.getUserDetails();
-    getIt.get<LocalStorage>().saveLoggedUser(
-        user: UserDto(
-            id: currentUser!.id,
-            name: currentUser.name,
-            email: currentUser.email,
-            imageUrl: currentUser.imageUrl));
+    getIt.get<LocalStorage>().saveLoggedUser(user: updatedUser.response!);
     emit(state.copyWith(user: updatedUser.response));
   }
 
@@ -57,12 +52,7 @@ class AppCubit extends Cubit<AppState> {
     if (currentUser == null) return;
     await api.changeProfileImage(file: file, user: currentUser);
     final updatedUser = await api.getUserDetails();
-    getIt.get<LocalStorage>().saveLoggedUser(
-        user: UserDto(
-            id: currentUser.id,
-            name: currentUser.name,
-            email: currentUser.email,
-            imageUrl: currentUser.imageUrl));
+    getIt.get<LocalStorage>().saveLoggedUser(user: updatedUser.response!);
     emit(state.copyWith(user: updatedUser.response));
   }
 
