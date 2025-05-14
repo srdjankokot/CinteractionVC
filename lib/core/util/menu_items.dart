@@ -1,4 +1,5 @@
 import 'package:cinteraction_vc/core/extension/context.dart';
+import 'package:cinteraction_vc/layers/presentation/cubit/app/app_cubit.dart';
 import 'package:cinteraction_vc/layers/presentation/cubit/dashboard/dashboard_cubit.dart';
 import 'package:cinteraction_vc/layers/presentation/ui/chat/chat_room.dart';
 import 'package:flutter/cupertino.dart';
@@ -45,7 +46,8 @@ final desktopMenu = <MenuItem>[
   buildChatMenuItem(),
   dashboard,
   meetings,
-profile,
+  profile,
+
   // insights,
   // users,
   // groups,
@@ -93,8 +95,15 @@ final home = MenuItem(
     route: AppRoute.home,
     label: 'Home',
     assetName: 'menu_home',
-    body: BlocProvider(
-      create: (context) => getIt.get<HomeCubit>(),
+    body: MultiBlocProvider(
+      providers: [
+        BlocProvider(
+          create: (context) => getIt.get<HomeCubit>(),
+        ),
+        BlocProvider(
+          create: (context) => getIt.get<AppCubit>(),
+        ),
+      ],
       child: const HomeTab(),
     ));
 final dashboard = MenuItem(
@@ -123,7 +132,10 @@ final profile = MenuItem(
   route: null,
   label: 'Profile',
   assetName: 'menu_profile',
-  body: const ProfileTab(),
+  body: BlocProvider<AppCubit>(
+    create: (context) => getIt.get<AppCubit>(),
+    child: const ProfileTab(),
+  ),
 );
 final users = UsersScreen(id: '');
 final groups = MenuItem(
@@ -195,3 +207,22 @@ MenuItem buildChatMenuItem() {
     ),
   );
 }
+
+final chat = MenuItem(
+    route: null,
+    label: 'Chat',
+    assetName: 'menu_chat',
+    body: MultiBlocProvider(
+      providers: [
+        BlocProvider<HomeCubit>(
+          create: (context) => getIt.get<HomeCubit>(),
+        ),
+        BlocProvider<ChatCubit>.value(
+          value: getIt.get<ChatCubit>(),
+        ),
+      ],
+      child: const ChatRoomPage(),
+    )
+
+    // body:   ChatRoomPage(),
+    );

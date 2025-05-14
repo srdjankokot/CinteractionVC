@@ -37,7 +37,7 @@ class UserDto extends User {
     String? email,
     String? imageUrl,
     int? chatId,
-    bool? online, // Dodato
+    bool? online,
   }) {
     return UserDto(
       id: id ?? this.id,
@@ -49,19 +49,11 @@ class UserDto extends User {
     );
   }
 
-
-  UserImageDto getUserImageDTO()
-  {
-    return UserImageDto(
-         id: int.parse(id),
-        name: name,
-        imageUrl: imageUrl
-    );
+  @override
+  UserImageDto getUserImageDTO() {
+    return UserImageDto(id: int.parse(id), name: name, imageUrl: imageUrl);
   }
 }
-
-
-
 
 class UserListResponse {
   final List<UserDto> users;

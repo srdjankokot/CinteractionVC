@@ -143,19 +143,18 @@ class ChatCubit extends Cubit<ChatState> with BlocLoggy {
 
       if (existingIndex != -1) {
         updatedChats[existingIndex] = updatedChats[existingIndex].copyWith(
-          lastMessage: chat.lastMessage,
-          isOnline: chat.isOnline,
-          haveUnread: chat.haveUnread,
-          userStatus: chat.userStatus
-        );
+            lastMessage: chat.lastMessage,
+            isOnline: chat.isOnline,
+            haveUnread: chat.haveUnread,
+            userStatus: chat.userStatus);
       } else {
         updatedChats.add(chat);
       }
 
-
       if (state.currentChat?.id == chat.id) {
         emit(state.copyWith(
-          currentChat: state.currentChat!.copyWith(isOnline: chat.isOnline, userStatus: chat.userStatus),
+          currentChat: state.currentChat!
+              .copyWith(isOnline: chat.isOnline, userStatus: chat.userStatus),
         ));
       }
 
@@ -435,9 +434,7 @@ class ChatCubit extends Cubit<ChatState> with BlocLoggy {
     emit(state.copyWith(listType: listType));
   }
 
-
-  Future<void>setUserStatus(String status) async
-  {
+  Future<void> setUserStatus(String status) async {
     print("call setUserStatus from chat cubit");
     chatUseCases.setUserStatus(status);
   }

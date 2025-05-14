@@ -3,9 +3,11 @@ import 'dart:math';
 import 'package:cinteraction_vc/core/app/injector.dart';
 import 'package:cinteraction_vc/core/extension/context_user.dart';
 import 'package:cinteraction_vc/core/navigation/route.dart';
+import 'package:cinteraction_vc/core/util/menu_items.dart';
 import 'package:cinteraction_vc/layers/domain/usecases/call/call_use_cases.dart';
 import 'package:cinteraction_vc/layers/domain/usecases/chat/chat_usecases.dart';
 import 'package:cinteraction_vc/layers/domain/usecases/conference/conference_usecases.dart';
+import 'package:cinteraction_vc/layers/presentation/cubit/app/app_cubit.dart';
 import 'package:cinteraction_vc/layers/presentation/cubit/chat/chat_cubit.dart';
 import 'package:cinteraction_vc/layers/presentation/cubit/home/home_cubit.dart';
 import 'package:cinteraction_vc/layers/presentation/ui/auth/reset_pass_enter_new.dart';
@@ -26,7 +28,6 @@ import '../../layers/presentation/ui/auth/splash_page.dart';
 import '../../layers/presentation/ui/conference/video_room.dart';
 import '../../layers/presentation/ui/echotest/EchoTestWidget.dart';
 import '../../layers/presentation/ui/landing/ui/page/home_page.dart';
-import '../util/menu_items.dart';
 import '../util/platform/platform.dart';
 
 final GoRouter router = GoRouter(
@@ -111,8 +112,15 @@ final GoRouter router = GoRouter(
         //   child: const HomePage(),
         // );
 
-        return BlocProvider<ChatCubit>.value(
-          value: getIt.get<ChatCubit>(),
+        return MultiBlocProvider(
+          providers: [
+            BlocProvider<ChatCubit>.value(
+              value: getIt.get<ChatCubit>(),
+            ),
+            BlocProvider<AppCubit>.value(
+              value: getIt.get<AppCubit>(),
+            )
+          ],
           child: const HomePage(),
         );
       },
@@ -141,8 +149,6 @@ final GoRouter router = GoRouter(
         final display = state.extra ?? 'displayName';
         final roomId =
             state.pathParameters['roomId'] ?? Random().nextInt(999999);
-
-
 
         return MultiBlocProvider(providers: [
           BlocProvider<ConferenceCubit>(

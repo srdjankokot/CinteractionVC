@@ -15,6 +15,7 @@ import 'package:cinteraction_vc/layers/domain/usecases/call/call_use_cases.dart'
 import 'package:cinteraction_vc/layers/domain/usecases/chat/chat_usecases.dart';
 import 'package:cinteraction_vc/layers/domain/usecases/dashboard/dashboard_usecases.dart';
 import 'package:cinteraction_vc/layers/domain/usecases/home/home_use_cases.dart';
+import 'package:cinteraction_vc/layers/presentation/cubit/app/app_cubit.dart';
 import 'package:cinteraction_vc/layers/presentation/cubit/chat/chat_cubit.dart';
 import 'package:cinteraction_vc/main.dart';
 import 'package:dio/dio.dart';
@@ -171,7 +172,8 @@ Future<void> initializeGetIt() async {
   getIt.registerFactory<DashboardCubit>(
       () => DashboardCubit(dashboardUseCases: getIt()));
 
-  getIt.registerLazySingleton<ChatCubit>(() => ChatCubit(chatUseCases: getIt(), callUseCases: getIt(), isInCallChat: false));
+  getIt.registerLazySingleton<ChatCubit>(() => ChatCubit(
+      chatUseCases: getIt(), callUseCases: getIt(), isInCallChat: false));
 
   getIt
       .registerFactory<JanusTransport>(() => WebSocketJanusTransport(url: url));
@@ -186,6 +188,8 @@ Future<void> initializeGetIt() async {
   getIt.registerFactoryAsync<JanusSession>(() async {
     return await getIt.get<JanusClient>().createSession();
   });
+
+  getIt.registerLazySingleton<AppCubit>(() => AppCubit());
 
   Map<String, dynamic>? getHeader() {
     return {

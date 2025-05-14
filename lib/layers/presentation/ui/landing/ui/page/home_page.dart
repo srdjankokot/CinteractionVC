@@ -3,6 +3,8 @@ import 'package:cinteraction_vc/core/extension/context.dart';
 import 'package:cinteraction_vc/core/extension/context_user.dart';
 import 'package:cinteraction_vc/core/extension/image.dart';
 import 'package:cinteraction_vc/core/extension/string.dart';
+import 'package:cinteraction_vc/layers/presentation/cubit/app/app_cubit.dart';
+import 'package:cinteraction_vc/layers/presentation/cubit/app/app_state.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
@@ -71,8 +73,7 @@ class _HomePageState extends State<HomePage> {
                   for (final (index, item) in tabs.indexed)
                     Container(
                       color: _selectedIndex == index
-                          ? ColorConstants.kPrimaryColor
-                          .withOpacity(0.05)
+                          ? ColorConstants.kPrimaryColor.withOpacity(0.05)
                           : Colors.white,
                       child: Padding(
                         padding: const EdgeInsets.only(top: 8.0, bottom: 8.0),
@@ -94,7 +95,8 @@ class _HomePageState extends State<HomePage> {
                                               ? imageSVGAsset(item.assetName)
                                                   ?.copyWith(
                                                       colorFilter:
-                                                          const ColorFilter.mode(
+                                                          const ColorFilter
+                                                              .mode(
                                                               ColorConstants
                                                                   .kPrimaryColor,
                                                               BlendMode.srcIn))
@@ -106,7 +108,8 @@ class _HomePageState extends State<HomePage> {
                                             item.label,
                                             style: context.textTheme.labelSmall
                                                 ?.copyWith(
-                                                    color: _selectedIndex == index
+                                                    color: _selectedIndex ==
+                                                            index
                                                         ? ColorConstants
                                                             .kPrimaryColor
                                                         : Colors.black45),
@@ -147,81 +150,88 @@ class _HomePageState extends State<HomePage> {
       );
     }
 
-    return Scaffold(
-      appBar: context.isWide
-          ? PreferredSize(
-              preferredSize: const Size.fromHeight(97),
-              child: Container(
-                height: 97,
-                padding: const EdgeInsets.only(left: 30, right: 30),
-                decoration: const BoxDecoration(
-                  color: Colors.white,
-                  boxShadow: [
-                    BoxShadow(
-                      color: Color(0x14000000),
-                      blurRadius: 8,
-                      offset: Offset(0, 4),
-                      spreadRadius: 0,
-                    )
-                  ],
-                ),
-                child: Row(
-                  children: [
-                    MouseRegion(
-                      cursor: SystemMouseCursors.click,
-                      child: GestureDetector(
-                          onTap: () => {
-                                setState(() {
-                                  _selectedIndex = 0;
-                                }),
-                              },
-                          child: imageSVGAsset('original_long_logo') as Widget),
+    return BlocBuilder<AppCubit, AppState>(
+      builder: (context, state) {
+        final currentUser = state.user;
+        return Scaffold(
+          appBar: context.isWide
+              ? PreferredSize(
+                  preferredSize: const Size.fromHeight(97),
+                  child: Container(
+                    height: 97,
+                    padding: const EdgeInsets.only(left: 30, right: 30),
+                    decoration: const BoxDecoration(
+                      color: Colors.white,
+                      boxShadow: [
+                        BoxShadow(
+                          color: Color(0x14000000),
+                          blurRadius: 8,
+                          offset: Offset(0, 4),
+                          spreadRadius: 0,
+                        )
+                      ],
                     ),
-                    const Spacer(),
-                    if (user != null)
-                      Row(
-                        children: [
-                          Visibility(
-                              visible: false, child: Text("NEXT MEETING")),
-                          const SizedBox(width: 15),
-                          UserImage.medium([user.getUserImageDTO()]),
-                          const SizedBox(width: 15),
-                          Column(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            crossAxisAlignment: CrossAxisAlignment.start,
+                    child: Row(
+                      children: [
+                        MouseRegion(
+                          cursor: SystemMouseCursors.click,
+                          child: GestureDetector(
+                              onTap: () => {
+                                    setState(() {
+                                      _selectedIndex = 0;
+                                    }),
+                                  },
+                              child: imageSVGAsset('original_long_logo')
+                                  as Widget),
+                        ),
+                        const Spacer(),
+                        if (currentUser != null)
+                          Row(
                             children: [
-                              Text(
-                                user.name,
-                                textAlign: TextAlign.center,
-                                style: context.textTheme.titleSmall,
+                              const Visibility(
+                                  visible: false, child: Text("NEXT MEETING")),
+                              const SizedBox(width: 15),
+                              UserImage.medium([currentUser.getUserImageDTO()]),
+                              const SizedBox(width: 15),
+                              Column(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    currentUser.name,
+                                    textAlign: TextAlign.center,
+                                    style: context.textTheme.titleSmall,
+                                  ),
+                                  // Text(
+                                  //   'Participant',
+                                  //   textAlign: TextAlign.center,
+                                  //   style: context.textTheme.labelSmall,
+                                  // ),
+                                ],
                               ),
-                              // Text(
-                              //   'Participant',
-                              //   textAlign: TextAlign.center,
-                              //   style: context.textTheme.labelSmall,
-                              // ),
+                              const SizedBox(width: 15),
+                              Tooltip(
+                                message: 'LogOut',
+                                child: IconButton(
+                                  icon: const Icon(Icons.logout),
+                                  onPressed: () =>
+                                      handleClick(context, 'LogOut'),
+                                ),
+                              )
                             ],
                           ),
-                          const SizedBox(width: 15),
-                          Tooltip(
-                            message: 'LogOut',
-                            child: IconButton(
-                              icon: const Icon(Icons.logout),
-                              onPressed: () => handleClick(context, 'LogOut'),
-                            ),
-                          )
-                        ],
-                      ),
-                  ],
-                ),
-              ),
-            )
-          : null,
-      body: BlocProvider.value(
-        value: context.read<ChatCubit>(), // Keep using the same ChatCubit
-        child: body,
-      ),
-      bottomNavigationBar: bottomNavigationBar,
+                      ],
+                    ),
+                  ),
+                )
+              : null,
+          body: BlocProvider.value(
+            value: context.read<ChatCubit>(), // Keep using the same ChatCubit
+            child: body,
+          ),
+          bottomNavigationBar: bottomNavigationBar,
+        );
+      },
     );
     //   },
     //   listener: (BuildContext context, ChatState state) {

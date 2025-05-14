@@ -3,6 +3,7 @@ import 'dart:typed_data';
 
 import 'package:cinteraction_vc/layers/data/dto/meetings/meeting_dto.dart';
 import 'package:cinteraction_vc/layers/domain/entities/dashboard/dashboard_response.dart';
+import 'package:cinteraction_vc/layers/domain/entities/user.dart';
 import 'package:file_picker/file_picker.dart';
 
 import '../../../core/io/network/models/login_response.dart';
@@ -85,5 +86,15 @@ abstract class Api {
     required List<int> participantIds,
     List<PlatformFile>? uploadedFiles,
     Function(double progress)? onProgress,
+  });
+  Future<ApiResponse> changeProfileImage(
+      {required PlatformFile file, required User user});
+  Future<ApiResponse> updateUserProfile({
+    PlatformFile? file,
+    required User user,
+    String? name,
+    String? email,
+    String? password,
+    String? passwordConfirmation,
   });
 }

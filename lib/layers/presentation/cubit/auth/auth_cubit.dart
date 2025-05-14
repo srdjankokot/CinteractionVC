@@ -29,6 +29,7 @@ class AuthCubit extends Cubit<AuthState> with BlocLoggy {
     if (accessToken != null) {
       print('access token: $accessToken');
       var response = await _authUseCases.getUserDetails();
+
       _successLogin(response);
     }
   }

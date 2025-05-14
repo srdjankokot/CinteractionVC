@@ -198,13 +198,11 @@ class ChatRepoImpl extends ChatRepo {
   _setup() async {
     await textRoom.setup();
     textRoom.onData?.listen((event) async {
-
       if (RTCDataChannelState.RTCDataChannelOpen == event) {
         _checkRoom(room);
         _setListener();
       }
     });
-
   }
 
   bool _haveUnread(List<MessageDto> messages) {
@@ -251,7 +249,6 @@ class ChatRepoImpl extends ChatRepo {
 
   _setListener() {
     textRoom.data?.listen((event) {
-
       // print("print event: ${event.text}");
       dynamic data = parse(event.text);
 
@@ -272,16 +269,15 @@ class ChatRepoImpl extends ChatRepo {
             var command = DataChannelCommand.fromJson(result);
             _renderCommand(command);
             return;
-          }  catch (e) {
+          } catch (e) {
             print(e.toString()); // Log raw message
           }
 
-            String messageParsed = parsed['message'];
-            if (messageParsed == '!@checkList') {
-              loadChats(1, 20);
-              return;
-            }
-
+          String messageParsed = parsed['message'];
+          if (messageParsed == '!@checkList') {
+            loadChats(1, 20);
+            return;
+          }
 
           List<ChatParticipantDto> chatParticipants =
               chatDetailsDto.chatParticipants;
@@ -910,8 +906,10 @@ class ChatRepoImpl extends ChatRepo {
   _renderCommand(DataChannelCommand command) {
     if (command.command == DataChannelCmd.userStatus) {
       chats = chats.map((chat) {
-        if (chat.chatParticipants!.any((p) => p.id == int.parse(command.id)) && !chat.chatGroup) {
-          return chat.copyWith(userStatus: command.data["userStatus"] as String);
+        if (chat.chatParticipants!.any((p) => p.id == int.parse(command.id)) &&
+            !chat.chatGroup) {
+          return chat.copyWith(
+              userStatus: command.data["userStatus"] as String);
         } else {
           return chat;
         }
@@ -921,14 +919,13 @@ class ChatRepoImpl extends ChatRepo {
   }
 
   @override
-  Future<void> setUserStatus(String status) async{
+  Future<void> setUserStatus(String status) async {
     userStatus = status;
     _sendUserStatus();
   }
 
-  _sendUserStatus() async
-  {
-    if(!isInCallChat){
+  _sendUserStatus() async {
+    if (!isInCallChat) {
       var data = {'userStatus': userStatus};
       var json = DataChannelCommand(
           command: DataChannelCmd.userStatus,
@@ -937,6 +934,5 @@ class ChatRepoImpl extends ChatRepo {
 
       await textRoom.sendMessage(room, jsonEncode(json.toJson()));
     }
-
   }
 }
