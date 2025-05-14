@@ -1,24 +1,59 @@
-import 'package:cinteraction_vc/layers/presentation/cubit/app/app_state.dart';
-
+import 'package:cinteraction_vc/core/io/network/models/data_channel_command.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import '../../../../core/io/network/models/data_channel_command.dart';
-import '../../../../core/logger/loggy_types.dart';
+import 'package:cinteraction_vc/core/app/injector.dart';
+import 'package:cinteraction_vc/layers/data/source/local/local_storage.dart';
+import 'package:cinteraction_vc/layers/domain/source/api.dart';
+import 'package:cinteraction_vc/layers/domain/entities/user.dart';
+import 'package:cinteraction_vc/layers/presentation/cubit/app/app_state.dart';
+import 'package:file_picker/file_picker.dart';
 
-class AppCubit extends Cubit<AppState> with BlocLoggy {
-
+class AppCubit extends Cubit<AppState> {
   AppCubit() : super(const AppState.initial()) {
+    loadUser();
     load();
   }
 
+  void load() {}
 
-  void load()
-  {
-
+  void loadUser() {
+    final user = getIt.get<LocalStorage>().loadLoggedUser();
+    if (user != null) {
+      emit(state.copyWith(user: user));
+    }
   }
 
-  Future<void> changeUserStatus(UserStatus status)
-  async {
+  final api = getIt.get<Api>();
+
+  Future<void> updateUser({
+    PlatformFile? file,
+    required User user,
+    String? name,
+    String? email,
+    String? password,
+    String? passwordConfirmation,
+  }) async {
+    await api.updateUserProfile(
+      file: file,
+      user: user,
+      name: name,
+      email: email,
+      password: password,
+      passwordConfirmation: passwordConfirmation,
+    );
+
+    final updatedUser = await api.getUserDetails();
+    emit(state.copyWith(user: updatedUser.response));
+  }
+
+  Future<void> updateUserAfterImageChange(PlatformFile file) async {
+    final currentUser = state.user;
+    if (currentUser == null) return;
+    await api.changeProfileImage(file: file, user: currentUser);
+    final updatedUser = await api.getUserDetails();
+    emit(state.copyWith(user: updatedUser.response));
+  }
+
+  Future<void> changeUserStatus(UserStatus status) async {
     emit(state.copyWith(userStatus: status));
   }
-
 }

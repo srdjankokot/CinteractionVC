@@ -19,8 +19,6 @@ class HomeTab extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-
-
     Future<void> displayJoinRoomPopup(BuildContext context) async {
       return showDialog(
         context: context,
@@ -31,24 +29,24 @@ class HomeTab extends StatelessWidget {
     }
 
     Future<void> displayAddScheduleMeetingPopup(BuildContext ctx) async {
-
       return showDialog(
         context: ctx,
         builder: (context) {
-          return  SchedulePopup(context: ctx,);
+          return SchedulePopup(
+            context: ctx,
+          );
         },
       );
     }
 
-    Widget startMeetingWidget()
-    {
+    Widget startMeetingWidget() {
       return HomeTabItem.getHomeTabItem(
         context: context,
         image: const Image(
-        image: ImageAsset('stand.png'),
-        fit: BoxFit.fill,
-      ),
-           onClickAction:  () {
+          image: ImageAsset('stand.png'),
+          fit: BoxFit.fill,
+        ),
+        onClickAction: () {
           context.pushNamed('meeting',
               pathParameters: {
                 'roomId': Random().nextInt(999999).toString(),
@@ -56,78 +54,70 @@ class HomeTab extends StatelessWidget {
               extra: context.getCurrentUser?.name);
         },
         label: 'Start Meeting',
-         textStyle:  context.textTheme.labelMedium,
-
+        textStyle: context.textTheme.labelMedium,
       );
     }
 
-    Widget addUserWidget()
-    {
-          return SizedBox(
-        height: (context.isWide? 124: 52 )+ 40,
+    Widget addUserWidget() {
+      return SizedBox(
+        height: (context.isWide ? 124 : 52) + 40,
         width: 50,
       );
 
-
       return HomeTabItem.getHomeTabItem(
-            context: context,
-            image: const Image(
-              image: ImageAsset('user-square.png'),
-            ),
-            bgColor: ColorConstants.kStateWarning.withAlpha(255),
-            onClickAction: null,
-            label: 'Add User',
-            textStyle: context.textTheme.labelMedium);
-
+          context: context,
+          image: const Image(
+            image: ImageAsset('user-square.png'),
+          ),
+          bgColor: ColorConstants.kStateWarning.withAlpha(255),
+          onClickAction: null,
+          label: 'Add User',
+          textStyle: context.textTheme.labelMedium);
     }
 
-    Widget scheduleMeetingWidget()
-    {
+    Widget scheduleMeetingWidget() {
       return HomeTabItem.getHomeTabItem(
-        context: context,
+          context: context,
           image: const Image(
             image: ImageAsset('calendar-date.png'),
           ),
           bgColor: ColorConstants.kStateInfo,
-          onClickAction: () async  {
+          onClickAction: () async {
             displayAddScheduleMeetingPopup(context);
           },
           label: 'Schedule',
           textStyle: context.textTheme.labelMedium);
     }
 
-    Widget joinMeetingWidget()
-    {
+    Widget joinMeetingWidget() {
       return HomeTabItem.getHomeTabItem(
-        context: context,
+          context: context,
           image: const Image(
             image: ImageAsset('add_user.png'),
           ),
           bgColor: ColorConstants.kStateSuccess,
           onClickAction: () => {
-            // AppRoute.meeting.push(context)
-            displayJoinRoomPopup(context)
-          },
+                // AppRoute.meeting.push(context)
+                displayJoinRoomPopup(context)
+              },
           label: 'Join',
           textStyle: context.textTheme.labelMedium);
     }
 
-
     return BlocConsumer<HomeCubit, HomeState>(
-        listener: (context, state){},
-        builder: (context, state)
-    {
-      if (context.isWide) {
-        return LoadingOverlay(
-          loading: state.loading,
-          child: Center(
-              child: Column(
+        listener: (context, state) {},
+        builder: (context, state) {
+          if (context.isWide) {
+            return LoadingOverlay(
+              loading: state.loading,
+              child: Center(
+                  child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                   const Text(
+                  const Text(
                     'WELCOME TO',
                     textAlign: TextAlign.center,
-                    style:  TextStyle(
+                    style: TextStyle(
                       fontSize: 32,
                       fontWeight: FontWeight.w400,
                     ),
@@ -169,14 +159,18 @@ class HomeTab extends StatelessWidget {
                             )
                           ],
                         ),
-
-                         Visibility(
-                          visible: state.nextMeeting!=null,
+                        Visibility(
+                          visible: state.nextMeeting != null,
                           child: const Spacer(),
                         ),
-                         Visibility(
-                          visible: state.nextMeeting!=null,
-                          child: state.nextMeeting==null? Container():NextMeetingWidget(meeting: state.nextMeeting!, banner: false,),
+                        Visibility(
+                          visible: state.nextMeeting != null,
+                          child: state.nextMeeting == null
+                              ? Container()
+                              : NextMeetingWidget(
+                                  meeting: state.nextMeeting!,
+                                  banner: false,
+                                ),
                         ),
                         const Spacer(),
                       ],
@@ -184,83 +178,77 @@ class HomeTab extends StatelessWidget {
                   ),
                 ],
               )),
-        );
-      } else {
-        return LoadingOverlay(
-          loading: state.loading,
-          child: Container(
-            margin: const EdgeInsets.only(right: 20, left: 20),
-            child: ListView(
-              children: [
-                const SizedBox(height: 20),
-                imageSVGAsset('original_long_logo') as Widget,
-                const SizedBox(height: 50),
-                Text(
-                  'WELCOME TO',
-                  textAlign: TextAlign.center,
-                  style: context.titleTheme.titleSmall
-                      ?.copyWith(fontWeight: FontWeight.normal),
-                ),
-                Text(
-                  'Virtual Classroom of the Future',
-                  textAlign: TextAlign.center,
-                  style: context.titleTheme.titleMedium,
-                ),
-
-                Container(
-                  margin: const EdgeInsets.only(top: 50),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Expanded(
-                          flex: 1,
-                          child: startMeetingWidget()
+            );
+          } else {
+            return LoadingOverlay(
+              loading: state.loading,
+              child: Container(
+                margin: const EdgeInsets.only(right: 20, left: 20),
+                child: ListView(
+                  children: [
+                    const SizedBox(height: 20),
+                    imageSVGAsset('original_long_logo') as Widget,
+                    const SizedBox(height: 50),
+                    Text(
+                      'WELCOME TO',
+                      textAlign: TextAlign.center,
+                      style: context.titleTheme.titleSmall
+                          ?.copyWith(fontWeight: FontWeight.normal),
+                    ),
+                    Text(
+                      'Virtual Classroom of the Future',
+                      textAlign: TextAlign.center,
+                      style: context.titleTheme.titleMedium,
+                    ),
+                    Container(
+                      margin: const EdgeInsets.only(top: 50),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Expanded(flex: 1, child: startMeetingWidget()),
+                          Expanded(flex: 1, child: joinMeetingWidget()),
+                          Expanded(flex: 1, child: scheduleMeetingWidget()),
+                          Expanded(flex: 1, child: addUserWidget())
+                        ],
                       ),
-                      Expanded(
-                          flex: 1,
-                          child: joinMeetingWidget()),
-                      Expanded(
-                          flex: 1,
-                          child: scheduleMeetingWidget()),
-                      Expanded(
-                          flex: 1,
-                          child: addUserWidget())
-                    ],
-                  ),
-                ),
+                    ),
+                    const SizedBox(
+                      height: 30,
+                    ),
+                    const Divider(),
+                    const SizedBox(
+                      height: 30,
+                    ),
+                    Visibility(
+                        visible: state.nextMeeting != null,
+                        child: Column(
+                          children: [
+                            Text(
+                              'Upcoming Meetings',
+                              textAlign: TextAlign.center,
+                              style: context.titleTheme.titleSmall,
+                            ),
+                            const SizedBox(
+                              height: 30,
+                            ),
+                            state.nextMeeting == null
+                                ? Container()
+                                : NextMeetingWidget(
+                                    meeting: state.nextMeeting!,
+                                    banner: false,
+                                  )
 
-                const SizedBox(
-                  height: 30,
+                            // Container(
+                            //     margin: const EdgeInsets.only(right: 20, left: 20),
+                            //     child:  NextMeetingWidget(meeting: state.nextMeeting!)),
+                          ],
+                        )),
+                    const SizedBox(height: 20),
+                  ],
                 ),
-                const Divider(),
-                const SizedBox(
-                  height: 30,
-                ),
-                Visibility(
-                    visible: state.nextMeeting!=null,
-                    child: Column(
-                      children: [
-                        Text(
-                          'Upcoming Meetings',
-                          textAlign: TextAlign.center,
-                          style: context.titleTheme.titleSmall,
-                        ),
-                        const SizedBox(
-                          height: 30,
-                        ),
-                        state.nextMeeting==null? Container():NextMeetingWidget(meeting: state.nextMeeting!, banner: false,)
-
-                        // Container(
-                        //     margin: const EdgeInsets.only(right: 20, left: 20),
-                        //     child:  NextMeetingWidget(meeting: state.nextMeeting!)),
-                      ],
-                    )),
-                const SizedBox(height: 20),
-              ],
-            ),
-          ),
-        );
-      }
-    });
+              ),
+            );
+          }
+        });
   }
 }

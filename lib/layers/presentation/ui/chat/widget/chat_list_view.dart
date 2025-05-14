@@ -43,7 +43,6 @@ class _ChatsListViewState extends State<ChatsListView> {
         context.read<ChatCubit>().setCurrentChat(widget.state.chats![0]);
       }
     });
-
   }
 
   @override
@@ -73,7 +72,9 @@ class _ChatsListViewState extends State<ChatsListView> {
       // });
 
       WidgetsBinding.instance.addPostFrameCallback((_) {
-        context.read<ChatCubit>().getChatDetails(widget.state.currentChat?.id, 1);
+        context
+            .read<ChatCubit>()
+            .getChatDetails(widget.state.currentChat?.id, 1);
       });
     } else {
       // setState(() {

@@ -5,7 +5,9 @@ import 'package:cinteraction_vc/core/io/network/models/login_response.dart';
 import 'package:cinteraction_vc/layers/data/dto/api_error_dto.dart';
 import 'package:cinteraction_vc/layers/data/dto/chat/chat_detail_dto.dart';
 import 'package:cinteraction_vc/layers/data/dto/user_dto.dart';
+import 'package:cinteraction_vc/layers/domain/entities/user.dart';
 import 'package:cinteraction_vc/layers/domain/source/api.dart';
+import 'package:cinteraction_vc/layers/presentation/ui/profile/ui/widget/user_image.dart';
 import 'package:dio/dio.dart';
 import 'package:file_picker/file_picker.dart';
 import 'dart:typed_data';
@@ -552,6 +554,155 @@ class ApiImpl extends Api {
       );
       var chatDetails = ChatDetailsDto.fromJson(response.data);
       return ApiResponse(response: chatDetails);
+    } on DioException catch (e) {
+      return ApiResponse(error: ApiErrorDto.fromDioException(e));
+    }
+  }
+
+  @override
+  Future<ApiResponse<UserDto>> changeProfileImage({
+    required PlatformFile file,
+    required User user,
+  }) async {
+    Dio dio = await getIt.getAsync<Dio>();
+
+    final formData = FormData();
+
+    if (file.bytes != null) {
+      formData.files.add(
+        MapEntry(
+          'image',
+          MultipartFile.fromBytes(
+            file.bytes!,
+            filename: file.name,
+          ),
+        ),
+      );
+    } else if (file.path != null) {
+      formData.files.add(
+        MapEntry(
+          'image',
+          await MultipartFile.fromFile(
+            file.path!,
+            filename: file.name,
+          ),
+        ),
+      );
+    } else {
+      return ApiResponse(
+        error: ApiErrorDto(errorCode: 400, errorMessage: 'There is error'),
+      );
+    }
+
+    try {
+      final response = await dio.post(
+        'https://huawei.nswebdevelopment.com/api/users/image',
+        data: formData,
+        options: Options(headers: {
+          Headers.contentTypeHeader: 'multipart/form-data',
+        }),
+      );
+
+      if (response.statusCode == 200 && response.data is Map<String, dynamic>) {
+        final String imageUrl = response.data['url'] ?? '';
+
+        final userDetailsResponse = await getUserDetails();
+
+        if (userDetailsResponse.response != null) {
+          final updatedUser = userDetailsResponse.response!;
+          // final newUser = updatedUser.copyWith(imageUrl: imageUrl);
+          return ApiResponse(
+              response: UserDto(
+                  id: user.id,
+                  name: user.name,
+                  email: user.id,
+                  imageUrl: imageUrl));
+        } else {
+          return ApiResponse(
+            error: ApiErrorDto(errorMessage: 'Not works', errorCode: 400),
+          );
+        }
+      } else {
+        return ApiResponse(
+          error:
+              ApiErrorDto(errorMessage: 'Unexpected response', errorCode: 400),
+        );
+      }
+    } on DioException catch (e) {
+      return ApiResponse(error: ApiErrorDto.fromDioException(e));
+    }
+  }
+
+  @override
+  Future<ApiResponse<UserDto>> updateUserProfile({
+    PlatformFile? file,
+    required User user,
+    String? name,
+    String? email,
+    String? password,
+    String? passwordConfirmation,
+  }) async {
+    final Dio dio = await getIt.getAsync<Dio>();
+
+    final formData = FormData.fromMap({
+      'name': name,
+      'email': email,
+      '_method': 'PUT',
+      if (password != null && password.isNotEmpty) ...{
+        'password': password,
+        'password_confirmation': password,
+      }
+    });
+
+    if (file?.bytes != null) {
+      formData.files.add(
+        MapEntry(
+          'image',
+          MultipartFile.fromBytes(
+            file!.bytes!,
+            filename: file.name,
+          ),
+        ),
+      );
+    } else if (file?.path != null) {
+      formData.files.add(
+        MapEntry(
+          'image',
+          await MultipartFile.fromFile(
+            file!.path!,
+            filename: file.name,
+          ),
+        ),
+      );
+    }
+
+    try {
+      final response = await dio.post(
+        'https://huawei.nswebdevelopment.com/api/users/update/${user.id}',
+        data: formData,
+        options: Options(
+          headers: {
+            Headers.contentTypeHeader: 'multipart/form-data',
+          },
+        ),
+      );
+
+      if (response.statusCode == 200 && response.data is Map<String, dynamic>) {
+        final userDetailsResponse = await getUserDetails();
+
+        if (userDetailsResponse.response != null) {
+          return ApiResponse(response: userDetailsResponse.response!);
+        } else {
+          return ApiResponse(
+            error:
+                ApiErrorDto(errorMessage: 'Here is the error', errorCode: 400),
+          );
+        }
+      } else {
+        return ApiResponse(
+          error: ApiErrorDto(errorMessage: 'Here is the error', errorCode: 400),
+        );
+      }
     } on DioException catch (e) {
       return ApiResponse(error: ApiErrorDto.fromDioException(e));
     }

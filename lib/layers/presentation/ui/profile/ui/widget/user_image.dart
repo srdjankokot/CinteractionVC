@@ -48,9 +48,6 @@ class MultiUserAvatar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-
-
-
     final displayUsers = users.take(4).toList();
     final numberOfCol = displayUsers.length > 1 ? 2 : 1;
     final numberOfRow = displayUsers.length > 2 ? 2 : 1;
@@ -64,8 +61,7 @@ class MultiUserAvatar extends StatelessWidget {
           children: List.generate(displayUsers.length, (i) {
             final user = displayUsers[i];
 
-            if(user.id == 7)
-            {
+            if (user.id == 7) {
               print("Image for ${user.name} is ${user.imageUrl}");
             }
 
@@ -82,37 +78,37 @@ class MultiUserAvatar extends StatelessWidget {
                   child: Stack(
                 children: [
                   Center(
-                                          child:
-                  //
-                  //                   Padding(
-                    //                   //   padding: const EdgeInsets.all(4),
-                    //                   //   child:
-                    //                   //   AutoSizeText(
-                    //                   //     user.name.getInitials(),
-                    //                   //     style: const TextStyle(
-                    //                   //         fontSize: 100,
-                    //                   //         color: Colors.white,
-                    //                   //         fontWeight: FontWeight.bold),
-                    //                   //     maxLines: 1,
-                    //                   //     minFontSize: 10,
-                    //                   //     overflow: TextOverflow.ellipsis,
-                    //                   //   ),
-                    //                   // )
+                    child:
+                        //
+                        //                   Padding(
+                        //                   //   padding: const EdgeInsets.all(4),
+                        //                   //   child:
+                        //                   //   AutoSizeText(
+                        //                   //     user.name.getInitials(),
+                        //                   //     style: const TextStyle(
+                        //                   //         fontSize: 100,
+                        //                   //         color: Colors.white,
+                        //                   //         fontWeight: FontWeight.bold),
+                        //                   //     maxLines: 1,
+                        //                   //     minFontSize: 10,
+                        //                   //     overflow: TextOverflow.ellipsis,
+                        //                   //   ),
+                        //                   // )
 
-                      Text(
-                        user.name.getInitials(),
-                        style: TextStyle(
-                          fontSize: displayUsers.length == 1 ? null : 10,
-                          color: Colors.white,
-                          fontWeight: FontWeight.bold,
-                        ),
+                        Text(
+                      user.name.getInitials(),
+                      style: TextStyle(
+                        fontSize: displayUsers.length == 1 ? null : 10,
+                        color: Colors.white,
+                        fontWeight: FontWeight.bold,
                       ),
-
-                      ),
+                    ),
+                  ),
                   if (user.imageUrl != '' &&
                       !user.imageUrl.contains('ui-avatars'))
                     Center(
                       child: UrlImage.square(
+                        // fit: BoxFit.fill,
                         url: user.imageUrl,
                         size: max(height, width),
                       ),

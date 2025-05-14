@@ -36,15 +36,22 @@ class User {
   final bool onboarded = Random().nextInt(2) == 1;
   late final bool checked = Random().nextInt(2) == 1;
 
-
-
-
-  UserImageDto getUserImageDTO()
-  {
-    return UserImageDto(
-      id: int.parse(id),
-        name: name,
-        imageUrl: imageUrl
+  factory User.fromJson(Map<String, dynamic> json) {
+    return User(
+      id: json['id'].toString(),
+      name: json['name'] ?? '',
+      email: json['email'] ?? '',
+      imageUrl: json['url'] ?? '',
+      createdAt: json['created_at'] != null
+          ? DateTime.parse(json['created_at'])
+          : null,
+      emailVerifiedAt: json['email_verified_at'] != null
+          ? DateTime.tryParse(json['email_verified_at'])
+          : null,
     );
+  }
+
+  UserImageDto getUserImageDTO() {
+    return UserImageDto(id: int.parse(id), name: name, imageUrl: imageUrl);
   }
 }
