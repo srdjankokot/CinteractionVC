@@ -132,8 +132,8 @@ final profile = MenuItem(
   route: null,
   label: 'Profile',
   assetName: 'menu_profile',
-  body: BlocProvider<AppCubit>(
-    create: (context) => getIt.get<AppCubit>(),
+  body: BlocProvider<AppCubit>.value(
+    value: getIt.get<AppCubit>(),
     child: const ProfileTab(),
   ),
 );
