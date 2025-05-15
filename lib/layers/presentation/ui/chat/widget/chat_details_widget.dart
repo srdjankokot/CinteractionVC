@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'dart:io';
+import 'dart:io' as io;
 
 import 'package:cinteraction_vc/assets/colors/Colors.dart';
 import 'package:cinteraction_vc/core/extension/context.dart';
@@ -23,6 +24,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_dropzone/flutter_dropzone.dart';
 import 'package:flutter_linkify/flutter_linkify.dart';
 import 'package:intl/intl.dart';
+import 'package:path_provider/path_provider.dart';
 import 'package:universal_html/html.dart' as html;
 import 'package:url_launcher/url_launcher.dart';
 import 'package:visibility_detector/visibility_detector.dart';
@@ -235,26 +237,36 @@ class _ChatDetailsWidgetState extends State<ChatDetailsWidget> {
 
   Future<void> _downloadImage(String url) async {
     try {
-      Response response = await Dio()
-          .get(url, options: Options(responseType: ResponseType.bytes));
+      final response = await Dio().get(
+        url,
+        options: Options(responseType: ResponseType.bytes),
+      );
 
       if (response.statusCode == 200) {
-        final blob = html.Blob([response.data]);
-        final url = html.Url.createObjectUrlFromBlob(blob);
-        final anchor = html.AnchorElement(href: url)
-          ..target = 'blank'
-          ..download = 'downloaded_image.jpg';
-
-        anchor.click();
-        html.Url.revokeObjectUrl(url);
-
-        print("Image downloaded successfully!");
+        if (kIsWeb) {
+          // ✅ Web platform
+          final blob = html.Blob([response.data]);
+          final downloadUrl = html.Url.createObjectUrlFromBlob(blob);
+          final anchor = html.AnchorElement(href: downloadUrl)
+            ..target = 'blank'
+            ..download = 'downloaded_image.jpg';
+          anchor.click();
+          html.Url.revokeObjectUrl(downloadUrl);
+        } else {
+          // ✅ Android, iOS, Windows, macOS, Linux
+          final dir = await getApplicationDocumentsDirectory();
+          final filePath = '${dir.path}/downloaded_image.jpg';
+          final file = io.File(filePath);
+          await file.writeAsBytes(response.data);
+          context.showSnackBarMessage(
+            'Image saved at: $filePath',
+          );
+        }
       } else {
-        throw Exception(
-            "Error while downloading image: ${response.statusCode}");
+        throw Exception("Download failed with status ${response.statusCode}");
       }
     } catch (e) {
-      print("Error while downloading: $e");
+      print("Error while downloading image: $e");
     }
   }
 
