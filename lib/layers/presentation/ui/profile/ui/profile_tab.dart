@@ -37,6 +37,7 @@ class _ProfileTabState extends State<ProfileTab> {
   final _confirmPasswordController = TextEditingController();
   final _formKey = GlobalKey<FormState>();
   bool _isFormValid = false;
+  final cubit = getIt.get<AppCubit>();
 
   Future<void> _pickAndSendFile(BuildContext context) async {
     FilePickerResult? result =
@@ -98,6 +99,7 @@ class _ProfileTabState extends State<ProfileTab> {
   @override
   Widget build(BuildContext context) {
     return BlocBuilder<AppCubit, AppState>(
+      bloc: cubit,
       builder: (context, state) {
         final currentUser = state.user;
         void submit() async {

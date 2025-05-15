@@ -132,10 +132,7 @@ final profile = MenuItem(
   route: null,
   label: 'Profile',
   assetName: 'menu_profile',
-  body: BlocProvider<AppCubit>.value(
-    value: getIt.get<AppCubit>(),
-    child: const ProfileTab(),
-  ),
+  body: const ProfileTab(),
 );
 final users = UsersScreen(id: '');
 final groups = MenuItem(
