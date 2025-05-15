@@ -136,10 +136,23 @@ class _ChatDetailsWidgetState extends State<ChatDetailsWidget> {
   }
 
   bool _isImage(String url) {
-    return url.toLowerCase().endsWith('.png') ||
-        url.toLowerCase().endsWith('.jpg') ||
-        url.toLowerCase().endsWith('.jpeg') ||
-        url.toLowerCase().endsWith('.gif');
+    final imageExtensions = [
+      '.png',
+      '.jpg',
+      '.jpeg',
+      '.gif',
+      '.bmp',
+      '.webp',
+      '.tiff',
+      '.tif',
+      '.svg',
+      '.ico',
+      '.heic',
+      '.avif'
+    ];
+
+    final lowerUrl = url.toLowerCase();
+    return imageExtensions.any((ext) => lowerUrl.endsWith(ext));
   }
 
   bool _isPdf(String url) {
@@ -183,22 +196,37 @@ class _ChatDetailsWidgetState extends State<ChatDetailsWidget> {
     showDialog(
       context: context,
       builder: (context) {
+        final screenWidth = MediaQuery.of(context).size.width;
+        final screenHeight = MediaQuery.of(context).size.height;
+
         return AlertDialog(
           contentPadding: EdgeInsets.zero,
-          content: Stack(
-            children: [
-              Image.network(imagePath, fit: BoxFit.cover),
-              Positioned(
-                top: 10,
-                right: 10,
-                child: IconButton(
-                  icon: const Icon(Icons.download, color: Colors.red),
-                  onPressed: () async {
-                    await _downloadImage(imagePath);
-                  },
+          shape:
+              RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+          content: SizedBox(
+            width: screenWidth * 0.5,
+            height: screenHeight * 0.5,
+            child: Stack(
+              children: [
+                Positioned.fill(
+                  child: Image.network(
+                    imagePath,
+                    fit: BoxFit.fill,
+                  ),
                 ),
-              ),
-            ],
+                Positioned(
+                  top: 10,
+                  right: 10,
+                  child: IconButton(
+                    icon: const Icon(Icons.download,
+                        color: ColorConstants.kPrimaryColor),
+                    onPressed: () async {
+                      await _downloadImage(imagePath);
+                    },
+                  ),
+                ),
+              ],
+            ),
           ),
         );
       },
@@ -435,8 +463,6 @@ class _ChatDetailsWidgetState extends State<ChatDetailsWidget> {
                                                             user.name
                                                                 .split(" ")
                                                                 .first,
-
-
                                                             style:
                                                                 const TextStyle(
                                                               color:
@@ -621,15 +647,26 @@ class _ChatDetailsWidgetState extends State<ChatDetailsWidget> {
                                                                     )
                                                                   else
                                                                     SelectableLinkify(
-                                                                      onOpen: (link) async {
-                                                                        final uri = Uri.parse(link.url);
-                                                                        if (await canLaunchUrl(uri)) {
+                                                                      onOpen:
+                                                                          (link) async {
+                                                                        final uri =
+                                                                            Uri.parse(link.url);
+                                                                        if (await canLaunchUrl(
+                                                                            uri)) {
                                                                           await launchUrl(
                                                                               uri,
                                                                               mode: LaunchMode.externalApplication);
                                                                         }
                                                                       },
-                                                                      text: message.message!, style: const TextStyle(color: Colors.black, fontSize: 15, fontFamily: 'Roboto'),
+                                                                      text: message
+                                                                          .message!,
+                                                                      style: const TextStyle(
+                                                                          color: Colors
+                                                                              .black,
+                                                                          fontSize:
+                                                                              15,
+                                                                          fontFamily:
+                                                                              'Roboto'),
                                                                     ),
                                                               ],
                                                             ),
