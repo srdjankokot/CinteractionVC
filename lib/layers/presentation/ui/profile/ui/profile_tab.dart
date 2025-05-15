@@ -230,7 +230,7 @@ class _ProfileTabState extends State<ProfileTab> {
                                           }
 
                                           if (_passwordController.text !=
-                                              confirmPassword) {
+                                              _confirmPasswordController.text) {
                                             return 'Password doesn\'t match';
                                           }
                                         },
@@ -263,7 +263,12 @@ class _ProfileTabState extends State<ProfileTab> {
                                           const SizedBox(width: 16),
                                           Expanded(
                                             child: OutlinedButton.icon(
-                                              onPressed: () {},
+                                              onPressed: () {
+                                                _nameController.clear();
+                                                _passwordController.clear();
+                                                _confirmPasswordController
+                                                    .clear();
+                                              },
                                               icon: const Icon(Icons.cancel),
                                               label: const Text('Cancel'),
                                               style: OutlinedButton.styleFrom(
@@ -423,7 +428,8 @@ class _ProfileTabState extends State<ProfileTab> {
 
                                                   if (_passwordController
                                                           .text !=
-                                                      confirmPassword) {
+                                                      _confirmPasswordController
+                                                          .text) {
                                                     return 'Password doesn\'t match';
                                                   }
                                                 },
@@ -435,47 +441,40 @@ class _ProfileTabState extends State<ProfileTab> {
                                                 children: [
                                                   Expanded(
                                                     child: ElevatedButton.icon(
-                                                      onPressed: () async {
-                                                        if (_formKey
-                                                            .currentState!
-                                                            .validate()) {
-                                                          submit();
-                                                        }
-                                                      },
+                                                      onPressed: _isFormValid
+                                                          ? () => submit()
+                                                          : null,
                                                       icon: const Icon(
                                                           Icons.save),
                                                       label: const Text('Save'),
                                                       style: ElevatedButton
                                                           .styleFrom(
-                                                              padding:
-                                                                  const EdgeInsets
-                                                                      .symmetric(
-                                                                      vertical:
-                                                                          14),
-                                                              shape:
-                                                                  RoundedRectangleBorder(
-                                                                borderRadius:
-                                                                    BorderRadius
-                                                                        .circular(
-                                                                            10),
-                                                              ),
-                                                              backgroundColor: _formKey
-                                                                          .currentState
-                                                                          ?.validate() ??
-                                                                      false
-                                                                  ? ColorConstants
-                                                                      .kStateSuccess
-                                                                  : ColorConstants
-                                                                      .kStateSuccess
-                                                                      .withValues(
-                                                                          alpha:
-                                                                              0.4)),
+                                                        padding:
+                                                            const EdgeInsets
+                                                                .symmetric(
+                                                                vertical: 14),
+                                                        shape:
+                                                            RoundedRectangleBorder(
+                                                          borderRadius:
+                                                              BorderRadius
+                                                                  .circular(10),
+                                                        ),
+                                                        backgroundColor:
+                                                            ColorConstants
+                                                                .kStateSuccess,
+                                                      ),
                                                     ),
                                                   ),
                                                   const SizedBox(width: 16),
                                                   Expanded(
                                                     child: OutlinedButton.icon(
-                                                      onPressed: () {},
+                                                      onPressed: () {
+                                                        _nameController.clear();
+                                                        _passwordController
+                                                            .clear();
+                                                        _confirmPasswordController
+                                                            .clear();
+                                                      },
                                                       icon: const Icon(
                                                           Icons.cancel),
                                                       label:
