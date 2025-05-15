@@ -113,6 +113,7 @@ class _ProfileTabState extends State<ProfileTab> {
                 name: _nameController.text.trim(),
                 email: context.getCurrentUser!.email,
                 user: context.getCurrentUser!,
+                context: context,
               );
         }
 

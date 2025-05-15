@@ -1,3 +1,4 @@
+import 'package:cinteraction_vc/assets/colors/Colors.dart';
 import 'package:cinteraction_vc/core/app/style.dart';
 import 'package:cinteraction_vc/core/extension/router.dart';
 import 'package:cinteraction_vc/core/io/network/urls.dart';
@@ -43,7 +44,7 @@ extension Context on BuildContext {
     ScaffoldMessenger.of(this)
         .showSnackBar(
           SnackBar(
-            backgroundColor: backgroundColor,
+            backgroundColor: ColorConstants.kStateSuccess,
             content: Text(
               message,
               style: TextStyle(color: foregroundColor),
