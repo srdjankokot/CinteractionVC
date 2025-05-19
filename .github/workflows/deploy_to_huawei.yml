@@ -18,29 +18,47 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v4
-    # Include the flutter action
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+#      - name: Set up Node.js
+#        uses: actions/setup-node@v4
+#        with:
+#          node-version: '22.2.0'
+#
+#      - name: Install node dependencies
+#        run: npm install
+#        working-directory: web/addin/  # Change this to the correct folder
+#
+#      - name: Build outlook addin
+#        run: npm run build
+#        working-directory: web/addin/  # Change this to the correct folder
+
+
+      # Include the flutter action
       - uses: subosito/flutter-action@v1
         with:
-          flutter-version: 3.24.5
+          flutter-version: 3.29.3
           channel: 'stable'
-          
-      - name: Install dependencies
+      - name: Install flutter dependencies
         run: flutter pub get
-      - name: Build Web Release   
+      - name: Build Web Release
         run: flutter build web --release
-      - name: Flutter version
-        run: flutter --version
+#      - name: Flutter version
+#        run: flutter --version
 
 
-      - name: Deploy to Huawei Server
+      - name: FTP Deploy
         uses: wlixcc/SFTP-Deploy-Action@v1.2.5
         with:
-          username: ${{ secrets.FTP_HUAWEI_USERNAME }}
+          # ftp server
           server: ${{ secrets.FTP_HUAWEI_SERVER }}
-          port: 22
-          local_path: build/web/
-          remote_path: var/www/cinteraction/front/
-          sftp_only: true
+          # ftp username
+          username:  ${{ secrets.FTP_HUAWEI_USERNAME }}
+          # ftp password
           password: ${{ secrets.FTP_HUAWEI_PASSWORD }}
-          rsyncArgs: --exclude=index.html --exclude=.htaccess
+          port: 22
+          local_path: build/web/*
+          remote_path: /var/www/cinteraction/front
+          sftp_only: true
+          rsyncArgs: '--exclude=index.html --exclude=.htaccess --exclude=/addin/node_modules/'

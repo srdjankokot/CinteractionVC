@@ -1,5 +1,6 @@
 import 'dart:convert';
 
+import 'package:cinteraction_vc/core/app/injector.dart';
 import 'package:cinteraction_vc/layers/presentation/cubit/home/home_cubit.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -21,12 +22,12 @@ class SchedulePopup extends StatelessWidget {
     final formKey = GlobalKey<FormState>();
 
     return BlocProvider.value(
-      value: context.watch<HomeCubit>(),
+      value: getIt.get<HomeCubit>(),
       child: BlocConsumer<HomeCubit, HomeState>(
         listener: (c, s) {
           print('state');
         },
-        builder: (context, state) => AlertDialog(
+        builder: (innerContext, state) => AlertDialog(
           content: AlertDialog(
             title: const Text('Schedule a meeting'),
             content: Form(
@@ -76,7 +77,8 @@ class SchedulePopup extends StatelessWidget {
                                   lastDate: DateTime.now()
                                       .add(const Duration(days: 90)),
                                 ).then((selectedDate) {
-                                  context
+                                  print('selectedDatee: $selectedDate');
+                                  innerContext
                                       .read<HomeCubit>()
                                       .setScheduleDate(selectedDate!);
                                 });
@@ -103,7 +105,7 @@ class SchedulePopup extends StatelessWidget {
                                         initialTime: TimeOfDay.fromDateTime(
                                             state.scheduleStartDateTime!))
                                     .then((selectedTime) {
-                                  context
+                                  innerContext
                                       .read<HomeCubit>()
                                       .setScheduleTime(selectedTime);
                                 });
@@ -132,7 +134,7 @@ class SchedulePopup extends StatelessWidget {
                   }
                   Navigator.pop(context);
 
-                  var response = await context
+                  var response = await innerContext
                       .read<HomeCubit>()
                       .scheduleMeeting(
                           nameFieldController.value.text,
@@ -165,13 +167,11 @@ class SchedulePopup extends StatelessWidget {
                   //     "https://cinteractionvc.web.app/home/meeting/$roomIdFromLink");
 
                   try {
-                    var link = response.response??'';
+                    var link = response.response ?? '';
                     // await launchUrl(Uri.parse('https://calendar.google.com/calendar/u/0/r/eventedit?dates=$startDateTimeFormated/$endDateTimeFormated&ctz=UTC&location&text=${nameFieldController.text}&details=$url\nPlease click on the above link to join a video call.'));
-                   if(link.isNotEmpty){
-                     await launchUrl(Uri.parse(link));
-                   }
-
-
+                    if (link.isNotEmpty) {
+                      await launchUrl(Uri.parse(link));
+                    }
                   } on Exception catch (e) {
                     print(e.toString());
                   }

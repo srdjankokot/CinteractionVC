@@ -1,5 +1,6 @@
 import 'package:cinteraction_vc/core/extension/context.dart';
 import 'package:cinteraction_vc/core/ui/images/image.dart';
+import 'package:cinteraction_vc/layers/presentation/ui/auth/sign_in_button/mobile.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -67,7 +68,7 @@ class AuthPage extends StatelessWidget {
         _emailController.clear();
 
         context.showSnackBarMessage(
-          'You successfully registered account',
+          state.message ?? 'You successfully registered account',
           isError: false,
         );
 
@@ -77,6 +78,7 @@ class AuthPage extends StatelessWidget {
       if (state.loginSuccess) {
         // if (state.user != null) {
           AppRoute.home.go(context);
+          // AppRoute.chat.go(context);
           return;
         // }
       }
@@ -266,49 +268,58 @@ class AuthPage extends StatelessWidget {
                                   const SizedBox(height: 16),
                                   // const Spacer(),
 
-                                  Row(
-                                    children: [
-                                      const Expanded(child: Divider()),
-                                      Container(
-                                        margin: const EdgeInsets.only(
-                                            left: 5, right: 5),
-                                        child: const Text('Or login with'),
-                                      ),
-                                      const Expanded(child: Divider()),
-                                    ],
-                                  ),
+                                  // Row(
+                                  //   children: [
+                                  //     const Expanded(child: Divider()),
+                                  //     Container(
+                                  //       margin: const EdgeInsets.only(
+                                  //           left: 5, right: 5),
+                                  //       child: const Text('Or login with'),
+                                  //     ),
+                                  //     const Expanded(child: Divider()),
+                                  //   ],
+                                  // ),
+                                  //
+                                  // const SizedBox(height: 8),
 
-                                  const SizedBox(height: 8),
 
 
+                                  // Row(
+                                  //   mainAxisAlignment: MainAxisAlignment.center,
+                                  //   children: [
+                                  //
+                                  //     buildSignInButton(
+                                  //      onPressed: () async {
+                                  //         await context
+                                  //            .read<AuthCubit>()
+                                  //            .signInWithGoogle();
+                                  //      }
+                                  //     ),
 
-                                  Row(
-                                    mainAxisAlignment: MainAxisAlignment.center,
-                                    children: [
-                                      SizedBox(
-                                        width: 70,
-                                        height: 60,
-                                        child: OutlinedButton(
-                                            onPressed: () => {
-                                                  context
-                                                      .read<AuthCubit>()
-                                                      .signInWithGoogle()
-                                                },
-                                            style: OutlinedButton.styleFrom(
-                                              side: const BorderSide(
-                                                  width: 1,
-                                                  color: Color(0xFFBDBDBD)),
-                                              shape: RoundedRectangleBorder(
-                                                side: const BorderSide(
-                                                    width: 1,
-                                                    color: Color(0xFFBDBDBD)),
-                                                borderRadius:
-                                                    BorderRadius.circular(18),
-                                              ),
-                                            ),
-                                            child:
-                                                imageSVGAsset('google_logo')),
-                                      ),
+                                      // SizedBox(
+                                      //   width: 70,
+                                      //   height: 60,
+                                      //   child: OutlinedButton(
+                                      //       onPressed: () => {
+                                      //             context
+                                      //                 .read<AuthCubit>()
+                                      //                 .signInWithGoogle()
+                                      //           },
+                                      //       style: OutlinedButton.styleFrom(
+                                      //         side: const BorderSide(
+                                      //             width: 1,
+                                      //             color: Color(0xFFBDBDBD)),
+                                      //         shape: RoundedRectangleBorder(
+                                      //           side: const BorderSide(
+                                      //               width: 1,
+                                      //               color: Color(0xFFBDBDBD)),
+                                      //           borderRadius:
+                                      //               BorderRadius.circular(18),
+                                      //         ),
+                                      //       ),
+                                      //       child:
+                                      //           imageSVGAsset('google_logo')),
+                                      // ),
                                       // const SizedBox(width: 34),
                                       // SizedBox(
                                       //   width: 70,
@@ -333,8 +344,10 @@ class AuthPage extends StatelessWidget {
                                       //       ),
                                       //       child: imageSVGAsset('fb_logo')),
                                       // )
-                                    ],
-                                  ),
+
+
+                                    // ],
+                                  // ),
 
                                   const SizedBox(height: 8),
                                   LabeledTextButton(

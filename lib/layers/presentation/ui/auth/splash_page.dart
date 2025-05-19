@@ -25,7 +25,7 @@ class _SplashPageState extends State<SplashPage> {
   Widget build(BuildContext context) {
 
     return  Container(
-      decoration:  BoxDecoration(color: Colors.white),
+      decoration:  const BoxDecoration(color: Colors.white),
       child: Center(child: imageSVGAsset('original_long_logo') as Widget)
     );
 

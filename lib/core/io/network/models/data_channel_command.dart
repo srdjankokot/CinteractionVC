@@ -5,9 +5,23 @@ enum DataChannelCmd {
   publish('publish'),
   unPublish('unPublish'),
   engagement('engagement'),
-  message('message');
+  message('message'),
+  muteById('muteById'),
+  // trackStatus('trackStatus'),
+  // askForTrackStatus('askForTrackStatus')
+  userStatus('userStatus');
 
   const DataChannelCmd(this.value);
+  final String value;
+}
+
+
+enum UserStatus {
+  online('online'),
+  offline('offline'),
+  inTheCall('inTheCall');
+
+  const UserStatus(this.value);
   final String value;
 }
 

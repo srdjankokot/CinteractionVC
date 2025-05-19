@@ -1,9 +1,10 @@
 import 'package:cinteraction_vc/core/extension/context.dart';
-import 'package:cinteraction_vc/layers/domain/usecases/meeting/meeting_use_cases.dart';
+import 'package:cinteraction_vc/layers/presentation/cubit/app/app_cubit.dart';
 import 'package:cinteraction_vc/layers/presentation/cubit/dashboard/dashboard_cubit.dart';
-import 'package:cinteraction_vc/layers/presentation/ui/landing/ui/page/home_page.dart';
+import 'package:cinteraction_vc/layers/presentation/ui/chat/chat_room.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import '../../layers/presentation/cubit/chat/chat_cubit.dart';
 import '../../layers/presentation/cubit/groups/groups_cubit.dart';
 import '../../layers/presentation/cubit/home/home_cubit.dart';
 import '../../layers/presentation/cubit/meetings/meetings_cubit.dart';
@@ -24,9 +25,10 @@ import '../app/injector.dart';
 import '../navigation/route.dart';
 
 final mobileBottomMenu = <MenuItem>[
-  home,
+  buildChatMenuItem(),
   dashboard,
   meetings,
+
   // insights,
   profile
 ];
@@ -40,9 +42,12 @@ final mobileProfileMenu = <MenuItem>[
   // settings
 ];
 final desktopMenu = <MenuItem>[
-  home,
+  // home,
+  buildChatMenuItem(),
   dashboard,
   meetings,
+  profile,
+
   // insights,
   // users,
   // groups,
@@ -52,65 +57,71 @@ final desktopMenu = <MenuItem>[
   // settings
 ];
 
-
 class MenuItem {
-   MenuItem({
+  MenuItem({
     required this.label,
     required this.assetName,
     required this.body,
     this.route,
-  }
-  );
+  });
 
   final String label;
   final String assetName;
   final Widget body;
 
   late WidgetBuilder builder = (context) => DefaultTextStyle(
-  style: context.textTheme.bodySmall!.copyWith(),
-  child: body);
+      style: context.textTheme.bodySmall!.copyWith(), child: body);
 
   final AppRoute? route;
 }
-class UsersScreen extends MenuItem{
 
-  UsersScreen({required this.id}) : super(label: 'Users', assetName: 'menu_profile', body: BlocProvider(
-    create: (context) => UsersCubit(usersRepository: getIt.get<UsersRepository>(), groupRepository: getIt.get<GroupsRepository>(),),
-    child: UsersPage(groupId: id),
-  ));
+class UsersScreen extends MenuItem {
+  UsersScreen({required this.id})
+      : super(
+            label: 'Users',
+            assetName: 'menu_profile',
+            body: BlocProvider(
+              create: (context) => UsersCubit(
+                usersRepository: getIt.get<UsersRepository>(),
+                groupRepository: getIt.get<GroupsRepository>(),
+              ),
+              child: UsersPage(groupId: id),
+            ));
 
   final String id;
 }
 
 final home = MenuItem(
-  route: AppRoute.home,
-  label: 'Home',
-  assetName: 'menu_home',
-  body:
-  BlocProvider(
-    create: (context) => getIt.get<HomeCubit>(),
-    child: const HomeTab(),
-  )
-);
+    route: AppRoute.home,
+    label: 'Home',
+    assetName: 'menu_home',
+    body: MultiBlocProvider(
+      providers: [
+        BlocProvider(
+          create: (context) => getIt.get<HomeCubit>(),
+        ),
+        BlocProvider(
+          create: (context) => getIt.get<AppCubit>(),
+        ),
+      ],
+      child: const HomeTab(),
+    ));
 final dashboard = MenuItem(
-  route: null,
-  label: 'Dashboard',
-  assetName: 'menu_dashboard',
-  body:
-  BlocProvider(
-    create: (context) => getIt.get<DashboardCubit>(),
-    child: const DashboardScreen(),
-  )
-);
+    route: null,
+    label: 'Dashboard',
+    assetName: 'menu_dashboard',
+    body: BlocProvider(
+      create: (context) => getIt.get<DashboardCubit>(),
+      child: const DashboardScreen(),
+    ));
 final meetings = MenuItem(
-  route: null,
-  label: 'Meetings',
-  assetName: 'menu_meetings',
-  body: BlocProvider(
-    create: (context) => getIt.get<MeetingCubit>(),
-    child: const MeetingsPage(),
-  )
-);
+    route: null,
+    label: 'Meetings',
+    assetName: 'menu_meetings',
+    body: BlocProvider(
+      create: (context) => getIt.get<MeetingCubit>(),
+      child: const MeetingsPage(),
+    ));
 final insights = MenuItem(
   route: null,
   label: 'Insights',
@@ -121,7 +132,10 @@ final profile = MenuItem(
   route: null,
   label: 'Profile',
   assetName: 'menu_profile',
-  body: const ProfileTab(),
+  body: BlocProvider<AppCubit>(
+    create: (context) => getIt.get<AppCubit>(),
+    child: const ProfileTab(),
+  ),
 );
 final users = UsersScreen(id: '');
 final groups = MenuItem(
@@ -156,19 +170,59 @@ final permissions = MenuItem(
   route: null,
   label: 'Permissions',
   assetName: 'menu_permissions',
-  body:  const Center(child: Text('Permissions')),
+  body: const Center(child: Text('Permissions')),
 );
 final settings = MenuItem(
   route: null,
   label: 'Settings',
   assetName: 'menu_settings',
-  body:  const Center(child: Text('Settings')),
+  body: const Center(child: Text('Settings')),
 );
 final notifications = MenuItem(
   route: null,
   label: 'Notifications',
   assetName: 'menu_notifications',
-  body:  const Center(child: Text('Notifications')),
+  body: const Center(child: Text('Notifications')),
 );
 
+MenuItem buildChatMenuItem() {
+  return MenuItem(
+    route: null,
+    label: 'Chat',
+    assetName: 'menu_chat',
+    body: MultiBlocProvider(
+      providers: [
+        BlocProvider<HomeCubit>(
+          create: (context) => getIt.get<HomeCubit>(),
+        ),
+        BlocProvider<ChatCubit>(
+          create: (context) => ChatCubit(
+            chatUseCases: getIt.get(),
+            callUseCases: getIt.get(),
+            isInCallChat: false,
+          ),
+        ),
+      ],
+      child: const ChatRoomPage(),
+    ),
+  );
+}
 
+final chat = MenuItem(
+    route: null,
+    label: 'Chat',
+    assetName: 'menu_chat',
+    body: MultiBlocProvider(
+      providers: [
+        BlocProvider<HomeCubit>(
+          create: (context) => getIt.get<HomeCubit>(),
+        ),
+        BlocProvider<ChatCubit>.value(
+          value: getIt.get<ChatCubit>(),
+        ),
+      ],
+      child: const ChatRoomPage(),
+    )
+
+    // body:   ChatRoomPage(),
+    );

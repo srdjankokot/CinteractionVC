@@ -145,8 +145,8 @@ class GetBarChart extends StatelessWidget {
 
     return Row(
       children: [
-        const UserImage.small(
-            'https://images.unsplash.com/photo-1528892952291-009c663ce843?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=200&q=80'),
+         UserImage.small(
+          [UserImageDto(id: 0, name: '', imageUrl: 'https://images.unsplash.com/photo-1528892952291-009c663ce843?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=200&q=80')]),
         const SizedBox(
           width: 10,
         ),

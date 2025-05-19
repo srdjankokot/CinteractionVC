@@ -9,7 +9,7 @@ import '../../../../domain/entities/user.dart';
 List<User> _mockUsers =
     [
       User(
-        id: 23,
+        id: "23",
         name: 'John Doe',
         email: 'john@test.com',
         imageUrl:
@@ -21,7 +21,7 @@ List<User> _mockUsers =
 
 User get _mockUser =>
     User(
-        id: 24,
+        id: "24",
         name: 'John Doe',
         email: 'john@test.com',
         imageUrl:
