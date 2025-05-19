@@ -1,4 +1,3 @@
-import 'package:janus_client/janus_client.dart';
 
 import '../../entities/chat_message.dart';
 import '../../repos/conference_repo.dart';

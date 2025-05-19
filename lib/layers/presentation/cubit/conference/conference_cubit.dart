@@ -4,10 +4,13 @@ import 'dart:math';
 import 'package:cinteraction_vc/core/io/network/models/participant.dart';
 import 'package:cinteraction_vc/core/util/util.dart';
 import 'package:cinteraction_vc/layers/domain/usecases/conference/conference_usecases.dart';
+import 'package:file_picker/file_picker.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:janus_client/janus_client.dart';
+// import 'package:flutter_screen_recording/flutter_screen_recording.dart';
 import 'package:webrtc_interface/webrtc_interface.dart';
 
+import '../../../../core/janus/janus_client.dart';
 import '../../../../core/logger/loggy_types.dart';
 import '../../../domain/entities/chat_message.dart';
 import 'conference_state.dart';
@@ -28,8 +31,9 @@ class ConferenceCubit extends Cubit<ConferenceState> with BlocLoggy {
   StreamSubscription<Map<dynamic, StreamRenderer>>? _conferenceSubscription;
   StreamSubscription<String>? _conferenceEndedStream;
   StreamSubscription<List<ChatMessage>>? _conferenceMessageStream;
-  StreamSubscription<List<Participant>>? _subscribersStream;
+  StreamSubscription<Map<dynamic, StreamRenderer>>? _subscribersStream;
   StreamSubscription<int>? _avgEngagementStream;
+  StreamSubscription<String>? _toastMessageStream;
 
   void _load() async {
     await conferenceUseCases.conferenceInitialize(
@@ -48,11 +52,16 @@ class ConferenceCubit extends Cubit<ConferenceState> with BlocLoggy {
         .getAvgEngagementStream()
         .listen(_onEngagementChanged);
 
-    var startCall = await conferenceUseCases.startCall();
+    _toastMessageStream =
+        conferenceUseCases.getToastMessageStream().listen(_onToastMessage);
 
-    if (startCall.error != null) {
-      emit(ConferenceState.error(error: startCall.error!.errorMessage));
+    var meet = await conferenceUseCases.startCall();
+
+    if (meet == null) {
+      emit(const ConferenceState.error(error: "Something went wrong"));
       return;
+    } else {
+      emit(state.copyWith(isCallStarted: true, chatId: meet.chatId));
     }
   }
 
@@ -61,7 +70,7 @@ class ConferenceCubit extends Cubit<ConferenceState> with BlocLoggy {
     _conferenceSubscription?.cancel();
     _conferenceEndedStream?.cancel();
     _subscribersStream?.cancel();
-
+    _toastMessageStream?.cancel();
     return super.close();
   }
 
@@ -71,16 +80,26 @@ class ConferenceCubit extends Cubit<ConferenceState> with BlocLoggy {
     conferenceUseCases.finishCall();
   }
 
-  Future<void> toggleChatWindow()
-  async {
-    emit(state.copyWith(showingChat: !state.showingChat));
+  Future<void> toggleChatWindow() async {
+    emit(state.copyWith(
+        showingChat: !state.showingChat, showingParticipants: false));
   }
 
-  Future<void> chatMessageSeen(int index)
-  async {
+  Future<void> toggleParticipantsWindow() async {
+    emit(state.copyWith(
+        showingParticipants: !state.showingParticipants, showingChat: false));
+  }
 
+  void clearToast() {
+    emit(state.copyWith(toastMessage: null));
+  }
+
+  Future<void> chatMessageSeen(int index) async {
     state.messages![index].seen = true;
-    emit(state.copyWith(unreadMessages: state.messages!.where((element) => !(element.seen?? true)).length));
+    emit(state.copyWith(
+        unreadMessages: state.messages!
+            .where((element) => !(element.seen ?? true))
+            .length));
   }
 
   // bool audioMuted = false;
@@ -98,10 +117,20 @@ class ConferenceCubit extends Cubit<ConferenceState> with BlocLoggy {
     emit(state.copyWith(videoMuted: !muted));
   }
 
+  Future<void> handUp() async {
+    var handUp = state.handUp;
+    await conferenceUseCases.handUpU(!handUp);
+    emit(state.copyWith(handUp: !handUp));
+  }
+
   Future<void> toggleEngagement() async {
     var enabled = state.engagementEnabled;
     await conferenceUseCases.toggleEngagement(!enabled);
     emit(state.copyWith(engagementEnabled: !enabled));
+  }
+
+  void _onToastMessage(String message) {
+    emit(state.copyWith(toastMessage: message));
   }
 
   //Listening streams methods
@@ -117,15 +146,22 @@ class ConferenceCubit extends Cubit<ConferenceState> with BlocLoggy {
     emit(const ConferenceState.ended());
   }
 
-  void _onSubscribers(List<Participant> subscribers) {
+  void _onSubscribers(Map<dynamic, StreamRenderer> subscribers) {
+    var local = subscribers['local'];
     emit(state.copyWith(
+        audioMuted: local?.isAudioMuted,
+        handUp: local?.isHandUp,
         isInitial: false,
         streamSubscribers: subscribers,
         numberOfStreams: Random().nextInt(10000)));
   }
 
   void _onMessageReceived(List<ChatMessage> chat) {
-    emit(state.copyWith(messages: chat, numberOfStreams: Random().nextInt(10000), unreadMessages: chat.where((element) => !(element.seen?? true)).length));
+    emit(state.copyWith(
+        messages: chat,
+        numberOfStreams: Random().nextInt(10000),
+        unreadMessages:
+            chat.where((element) => !(element.seen ?? true)).length));
   }
 
   void _onEngagementChanged(int avgEngagement) {
@@ -186,16 +222,42 @@ class ConferenceCubit extends Cubit<ConferenceState> with BlocLoggy {
     conferenceUseCases.unPublishById(id);
   }
 
+  Future<void> muteByID(String id) async {
+    conferenceUseCases.muteById(id);
+  }
+
+  Future<void> mute(String id) async {
+    conferenceUseCases.unPublishById(id);
+  }
+
   Future<void> publishById(String id) async {
     conferenceUseCases.publishById(id);
   }
 
-  Future<void> changeSubStream(ConfigureStreamQuality quality, StreamRenderer remoteStream) async {
+  Future<void> changeSubStream(
+      ConfigureStreamQuality quality, StreamRenderer remoteStream) async {
     conferenceUseCases.changeSubStream(quality, remoteStream);
   }
 
+  Future<void> sendMessage(String msg,
+      {List<PlatformFile>? uploadedFiles}) async {
+    await conferenceUseCases.sendMessage(msg, uploadedFiles);
+  }
 
-  Future<void> sendMessage(String msg) async {
-    conferenceUseCases.sendMessage(msg);
+  Future<void> recordingMeet() async {
+    if (state.recording == RecordingStatus.notRecording) {
+      // bool recording = await FlutterScreenRecording.startRecordScreenAndAudio("videoName");
+      emit(state.copyWith(recording: RecordingStatus.loading));
+      var recordingStarted = await conferenceUseCases.startRecording();
+      emit(state.copyWith(
+          recording: recordingStarted
+              ? RecordingStatus.recording
+              : RecordingStatus.notRecording));
+    } else {
+      // FlutterScreenRecording.stopRecordScreen;
+      conferenceUseCases.stopRecording();
+
+      emit(state.copyWith(recording: RecordingStatus.notRecording));
+    }
   }
 }

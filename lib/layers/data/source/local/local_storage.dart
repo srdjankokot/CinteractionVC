@@ -14,27 +14,34 @@ abstract class LocalStorage {
   Future<void> clearRoomId();
 }
 
-class LocalStorageImpl extends LocalStorage{
-
+class LocalStorageImpl extends LocalStorage {
   LocalStorageImpl({
     required SharedPreferences sharedPreferences,
   }) : _sharedPref = sharedPreferences;
 
   final SharedPreferences _sharedPref;
 
-
   @override
   User? loadLoggedUser() {
     final jsonString = _sharedPref.getString('user');
-    if(jsonString!=null){
+    if (jsonString != null) {
       var userMap = json.decode(jsonString);
-      return UserDto.fromJson(userMap);
+      try{
+        var user = UserDto.fromJson(userMap);
+        return user;
+      }
+      catch(e){
+        return null;
+      }
+
     }
     return null;
   }
 
   @override
   Future<bool> saveLoggedUser({required UserDto user}) {
+    print("==============");
+    // print(user.id.substring(5));
     return _sharedPref.setString('user', json.encode(user.toJson()));
   }
 
@@ -42,7 +49,6 @@ class LocalStorageImpl extends LocalStorage{
   Future<void> clearUser() async {
     _sharedPref.remove('user');
   }
-
 
   @override
   String? getRoomId() {
@@ -58,5 +64,4 @@ class LocalStorageImpl extends LocalStorage{
   Future<void> clearRoomId() async {
     _sharedPref.remove('roomId');
   }
-
 }

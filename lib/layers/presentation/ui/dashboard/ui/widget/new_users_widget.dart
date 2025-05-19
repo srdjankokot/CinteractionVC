@@ -1,6 +1,7 @@
 import 'dart:math';
 
 import 'package:cinteraction_vc/core/extension/context.dart';
+import 'package:cinteraction_vc/core/extension/string.dart';
 import 'package:cinteraction_vc/core/ui/images/image.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -13,7 +14,7 @@ import '../../../profile/ui/widget/user_image.dart';
 
 List<User> get users => [
   User(
-    id: 23,
+    id: "23",
     name: 'John Doe 1',
     email: 'john@test.com',
     imageUrl:
@@ -21,7 +22,7 @@ List<User> get users => [
     createdAt: DateTime.now(),
   ),
   User(
-    id: 24,
+    id: "24",
     name: 'John Doe 2',
     email: 'john@test.com',
     imageUrl:
@@ -29,7 +30,7 @@ List<User> get users => [
     createdAt: DateTime.now(),
   ),
   User(
-    id: 25,
+    id: "25",
     name: 'John Doe 3',
     email: 'john@test.com',
     imageUrl:
@@ -37,7 +38,7 @@ List<User> get users => [
     createdAt: DateTime.now(),
   ),
   User(
-    id: 26,
+    id: "26",
     name: 'John Doe 4',
     email: 'john@test.com',
     imageUrl:
@@ -45,7 +46,7 @@ List<User> get users => [
     createdAt: DateTime.now(),
   ),
   User(
-    id: 27,
+    id: "27",
     name: 'John Doe 5',
     email: 'john@test.com',
     imageUrl:
@@ -53,7 +54,7 @@ List<User> get users => [
     createdAt: DateTime.now(),
   ),
   User(
-    id: 38,
+    id: "38",
     name: 'John Doe 6',
     email: 'john@test.com',
     imageUrl:
@@ -61,7 +62,7 @@ List<User> get users => [
     createdAt: DateTime.now(),
   ),
   User(
-    id: 39,
+    id: "39",
     name: 'John Doe 7',
     email: 'john@test.com',
     imageUrl:
@@ -69,7 +70,7 @@ List<User> get users => [
     createdAt: DateTime.now(),
   ),
   User(
-    id: 30,
+    id: "30",
     name: 'John Doe 8',
     email: 'john@test.com',
     imageUrl:
@@ -129,7 +130,7 @@ class NewUsersWidgetState extends State<NewUsersWidget> {
                           width: constraints.maxWidth / 2,
                           child: Row(
                             children: [
-                              UserImage.medium(user.imageUrl),
+                              UserImage.medium([user.getUserImageDTO()]),
                               const SizedBox(
                                 width: 10,
                               ),

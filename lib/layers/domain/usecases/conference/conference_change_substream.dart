@@ -1,5 +1,5 @@
-import 'package:janus_client/janus_client.dart';
 
+import '../../../../core/janus/janus_client.dart';
 import '../../../../core/util/util.dart';
 import '../../repos/conference_repo.dart';
 
