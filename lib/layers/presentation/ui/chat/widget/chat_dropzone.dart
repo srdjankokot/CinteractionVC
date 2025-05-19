@@ -3,6 +3,10 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_dropzone/flutter_dropzone.dart';
 
+import '../../../../../assets/colors/Colors.dart';
+import '../../../../../core/app/style.dart';
+import '../../../../../core/extension/color.dart';
+
 class ChatDropzone extends StatefulWidget {
   final Widget child;
   final Future<void> Function({List<PlatformFile>? uploadedFiles}) sendFile;
@@ -53,25 +57,25 @@ class _ChatDropzoneState extends State<ChatDropzone> {
             child: Container(
               decoration: BoxDecoration(
                 border: Border.all(
-                  color: Colors.blue,
+                  color: ColorUtil.getColor(context)!.kBlue,
                   width: 2,
                   style: BorderStyle.solid,
                 ),
                 borderRadius: BorderRadius.circular(12),
-                color: Colors.blue.withOpacity(0.1),
+                color: ColorUtil.getColor(context)!.kBlue.withOpacity(0.1),
               ),
-              child: const Center(
+              child:  Center(
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    Icon(Icons.cloud_upload, size: 50, color: Colors.blue),
+                    Icon(Icons.cloud_upload, size: 50, color: ColorUtil.getColor(context)!.kBlue),
                     SizedBox(height: 8),
                     Text(
                       "Drop files to send",
                       style: TextStyle(
                         fontSize: 16,
                         fontWeight: FontWeight.bold,
-                        color: Colors.blue,
+                        color: ColorUtil.getColor(context)!.kBlue,
                       ),
                     ),
                   ],

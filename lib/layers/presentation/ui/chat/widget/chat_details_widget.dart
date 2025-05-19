@@ -28,6 +28,8 @@ import 'package:url_launcher/url_launcher.dart';
 import 'package:visibility_detector/visibility_detector.dart';
 import 'package:flutter/foundation.dart' as foundation;
 
+import '../../../../../core/app/style.dart';
+import '../../../../../core/extension/color.dart';
 import '../../../../../core/ui/images/image.dart';
 import 'chat_dropzone.dart';
 
@@ -192,7 +194,7 @@ class _ChatDetailsWidgetState extends State<ChatDetailsWidget> {
                 top: 10,
                 right: 10,
                 child: IconButton(
-                  icon: const Icon(Icons.download, color: Colors.red),
+                  icon:   Icon(Icons.download, color: ColorUtil.getColorScheme(context).error),
                   onPressed: () async {
                     await _downloadImage(imagePath);
                   },
@@ -273,12 +275,12 @@ class _ChatDetailsWidgetState extends State<ChatDetailsWidget> {
                 children: [
                   Positioned.fill(
                     child: sortedMessages.isEmpty
-                        ? const Center(
+                        ?  Center(
                             child: Text(
                               "No messages available.",
                               style: TextStyle(
                                 fontSize: 16,
-                                color: Colors.grey,
+                                color: ColorUtil.getColor(context)!.kGrey,
                               ),
                             ),
                           )
@@ -393,7 +395,8 @@ class _ChatDetailsWidgetState extends State<ChatDetailsWidget> {
                                                   }
                                                 });
                                               },
-                                              child: const Icon(Icons.more_vert,
+                                              child:  Icon(Icons.more_vert,
+                                                  color: ColorUtil.getColorScheme(context).outlineVariant,
                                                   size: 20),
                                             ),
                                           ),
@@ -438,9 +441,9 @@ class _ChatDetailsWidgetState extends State<ChatDetailsWidget> {
 
 
                                                             style:
-                                                                const TextStyle(
+                                                                 TextStyle(
                                                               color:
-                                                                  Colors.grey,
+                                                                  ColorUtil.getColor(context)!.kGrey,
                                                               fontSize: 10,
                                                               fontFamily:
                                                                   'Roboto',
@@ -455,9 +458,9 @@ class _ChatDetailsWidgetState extends State<ChatDetailsWidget> {
                                                                     .parse(message
                                                                         .createdAt)),
                                                             style:
-                                                                const TextStyle(
+                                                                 TextStyle(
                                                               color:
-                                                                  Colors.grey,
+                                                                  ColorUtil.getColor(context)!.kGrey,
                                                               fontSize: 10,
                                                               fontFamily:
                                                                   'Roboto',
@@ -481,9 +484,8 @@ class _ChatDetailsWidgetState extends State<ChatDetailsWidget> {
                                                             decoration:
                                                                 BoxDecoration(
                                                               color: isSentByUser
-                                                                  ? Colors
-                                                                      .blue[100]
-                                                                  : Colors.grey[
+                                                                  ? ColorUtil.getColor(context)!.kBlue[100]
+                                                                  : ColorUtil.getColor(context)!.kGrey[
                                                                       200],
                                                               borderRadius:
                                                                   BorderRadius
@@ -557,7 +559,7 @@ class _ChatDetailsWidgetState extends State<ChatDetailsWidget> {
                                                                                           width: 200,
                                                                                           height: 200,
                                                                                           fit: BoxFit.cover,
-                                                                                          errorBuilder: (context, error, stackTrace) => const Icon(Icons.image_not_supported, color: Colors.red),
+                                                                                          errorBuilder: (context, error, stackTrace) =>  Icon(Icons.image_not_supported, color: ColorUtil.getColorScheme(context).error),
                                                                                         ),
                                                                                 ),
                                                                               ),
@@ -629,7 +631,7 @@ class _ChatDetailsWidgetState extends State<ChatDetailsWidget> {
                                                                               mode: LaunchMode.externalApplication);
                                                                         }
                                                                       },
-                                                                      text: message.message!, style: const TextStyle(color: Colors.black, fontSize: 15, fontFamily: 'Roboto'),
+                                                                      text: message.message!, style:  TextStyle(color: ColorUtil.getColorScheme(context).outlineVariant, fontSize: 15, fontFamily: 'Roboto'),
                                                                     ),
                                                               ],
                                                             ),
@@ -671,8 +673,8 @@ class _ChatDetailsWidgetState extends State<ChatDetailsWidget> {
                             fontSize: 14,
                             fontWeight: FontWeight.w500,
                             color: state.uploadProgress == 1.0
-                                ? Colors.green
-                                : Colors.blueGrey,
+                                ? ColorConstants.kGreen
+                                : ColorUtil.getColor(context)!.kBlue,
                           ),
                         ),
                       ),
@@ -814,13 +816,13 @@ class _ChatDetailsWidgetState extends State<ChatDetailsWidget> {
         },
         child: Row(
           children: [
-            Icon(icon, color: Colors.blue),
+            Icon(icon, color: ColorUtil.getColor(context)!.kBlue),
             const SizedBox(width: 8),
             Expanded(
               child: Text(
                 _getFileNameFromUrl(fileUrl),
-                style: const TextStyle(
-                  color: Colors.blue,
+                style:  TextStyle(
+                  color: ColorUtil.getColor(context)!.kBlue,
                   fontSize: 16,
                   decoration: TextDecoration.underline,
                 ),

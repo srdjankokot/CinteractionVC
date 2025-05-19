@@ -1,3 +1,4 @@
+import 'package:cinteraction_vc/core/extension/color.dart';
 import 'package:cinteraction_vc/core/extension/context.dart';
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
@@ -12,7 +13,7 @@ class LineChartWidget extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
         decoration: ShapeDecoration(
-          color: Colors.white,
+          color: ColorUtil.getColorScheme(context).surface,
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(10),
           ),
@@ -46,7 +47,7 @@ class LineChartWidget extends StatelessWidget {
               SizedBox(
                 height: 240,
                 child: LineChart(
-                  data,
+                  getData(context),
                   duration: const Duration(milliseconds: 1000),
                   curve: Curves.linear,
                 ),
@@ -56,18 +57,24 @@ class LineChartWidget extends StatelessWidget {
         ));
   }
 
-  LineChartData get data =>
-      LineChartData(
-        lineTouchData: lineTouchData,
-        gridData: gridData,
-        titlesData: titlesData,
-        borderData: borderData,
-        lineBarsData: lineBarsData,
-        minX: 0,
-        maxX: 13,
-        maxY: 110,
-        minY: 0,
-      );
+  // LineChartData get data =>
+
+
+  LineChartData getData(BuildContext context){
+    return  LineChartData(
+      lineTouchData: lineTouchData,
+      gridData: gridData(context),
+      titlesData: titlesData,
+      borderData: borderData,
+      lineBarsData: getLineBarsData(context),
+      minX: 0,
+      maxX: 13,
+      maxY: 110,
+      minY: 0,
+    );
+  }
+  
+  
 
   LineTouchData get lineTouchData =>
       const LineTouchData(
@@ -90,11 +97,19 @@ class LineChartWidget extends StatelessWidget {
         ),
       );
 
-  List<LineChartBarData> get lineBarsData =>
-      [
-        lineChartBarData,
-      ];
+  // List<LineChartBarData> get lineBarsData =>
+  //     [
+  //       lineChartBarData,
+  //     ];
 
+
+
+  List<LineChartBarData> getLineBarsData(BuildContext context)
+  {
+    return [getLineChartBarData(context)];
+  }
+
+  
   Widget leftTitleWidgets(double value, TitleMeta meta) {
     const style = TextStyle(fontWeight: FontWeight.w400, fontSize: 12);
     String text;
@@ -192,22 +207,24 @@ class LineChartWidget extends StatelessWidget {
         getTitlesWidget: bottomTitleWidgets,
       );
 
-  FlLine gridLine(double value) {
-    return const FlLine(
-      color: ColorConstants.kSecondaryColor,
+  FlLine gridLine(BuildContext context) {
+    return  FlLine(
+      color: ColorUtil.getColorScheme(context).secondary,
       strokeWidth: 0.3,
       dashArray: [1, 0],
     );
   }
 
-  FlGridData get gridData =>
-      FlGridData(
-        getDrawingHorizontalLine: gridLine,
-        show: true,
-        drawHorizontalLine: true,
-        drawVerticalLine: false,
-        horizontalInterval: 20,
-      );
+  FlGridData gridData(BuildContext context){
+   return  FlGridData(
+      getDrawingHorizontalLine: gridLine(context) as GetDrawingGridLine,
+      show: true,
+      drawHorizontalLine: true,
+      drawVerticalLine: false,
+      horizontalInterval: 20,
+    );
+  }
+
 
   FlBorderData get borderData =>
       FlBorderData(
@@ -220,30 +237,60 @@ class LineChartWidget extends StatelessWidget {
         ),
       );
 
-  LineChartBarData get lineChartBarData =>
-      LineChartBarData(
-        isCurved: true,
-        curveSmoothness: 0,
-        color: ColorConstants.kPrimaryColor.withOpacity(0.5),
-        barWidth: 2,
-        isStrokeCapRound: true,
-        dotData: const FlDotData(show: false),
-        belowBarData: BarAreaData(show: false),
-        spots: const [
-          FlSpot(0, 12),
-          FlSpot(1, 20),
-          FlSpot(2, 60),
-          FlSpot(3, 80),
-          FlSpot(4, 30),
-          FlSpot(5, 45),
-          FlSpot(6, 50),
-          FlSpot(7, 28),
-          FlSpot(8, 17),
-          FlSpot(9, 30),
-          FlSpot(9.4, 66),
-          FlSpot(10, 78),
-          FlSpot(11, 90),
-          FlSpot(12, 72),
-        ],
-      );
+
+  LineChartBarData getLineChartBarData(BuildContext context) {
+    return LineChartBarData(
+      isCurved: true,
+      curveSmoothness: 0,
+      color: ColorUtil.getColorScheme(context).primary.withOpacitySafe(0.5),
+      barWidth: 2,
+      isStrokeCapRound: true,
+      dotData: const FlDotData(show: false),
+      belowBarData: BarAreaData(show: false),
+      spots: const [
+        FlSpot(0, 12),
+        FlSpot(1, 20),
+        FlSpot(2, 60),
+        FlSpot(3, 80),
+        FlSpot(4, 30),
+        FlSpot(5, 45),
+        FlSpot(6, 50),
+        FlSpot(7, 28),
+        FlSpot(8, 17),
+        FlSpot(9, 30),
+        FlSpot(9.4, 66),
+        FlSpot(10, 78),
+        FlSpot(11, 90),
+        FlSpot(12, 72),
+      ],
+    );
+  }
+  
+  
+  // LineChartBarData get lineChartBarData =>
+  //     LineChartBarData(
+  //       isCurved: true,
+  //       curveSmoothness: 0,
+  //       color: ColorUtil.getColorScheme(context).primary.withOpacitySafe(0.5),
+  //       barWidth: 2,
+  //       isStrokeCapRound: true,
+  //       dotData: const FlDotData(show: false),
+  //       belowBarData: BarAreaData(show: false),
+  //       spots: const [
+  //         FlSpot(0, 12),
+  //         FlSpot(1, 20),
+  //         FlSpot(2, 60),
+  //         FlSpot(3, 80),
+  //         FlSpot(4, 30),
+  //         FlSpot(5, 45),
+  //         FlSpot(6, 50),
+  //         FlSpot(7, 28),
+  //         FlSpot(8, 17),
+  //         FlSpot(9, 30),
+  //         FlSpot(9.4, 66),
+  //         FlSpot(10, 78),
+  //         FlSpot(11, 90),
+  //         FlSpot(12, 72),
+  //       ],
+  //     );
 }

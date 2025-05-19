@@ -1,6 +1,9 @@
 
 import 'package:flutter/material.dart';
 
+import '../../../assets/colors/Colors.dart';
+import '../../extension/color.dart';
+
 class FadingListView extends StatefulWidget {
   const FadingListView({required this.child, super.key});
 
@@ -38,11 +41,11 @@ class _FadingListViewState extends State<FadingListView> {
             end: widget.child.scrollDirection == Axis.horizontal
                 ? Alignment.centerRight
                 : Alignment.bottomCenter,
-            colors: const [
-              Colors.black,
+            colors: [
+              ColorUtil.getColorScheme(context).outlineVariant,
               Colors.transparent,
               Colors.transparent,
-              Colors.black
+              ColorUtil.getColorScheme(context).outlineVariant
             ],
             stops: widget.child.reverse
                 ? [0.0, 0.05 * _stopEnd, 1 - 0.05 * _stopStart, 1.0]

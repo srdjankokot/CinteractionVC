@@ -16,6 +16,8 @@ import '../../../../../core/ui/widget/responsive.dart';
 
 import 'package:http/http.dart' as http;
 
+import '../../../../assets/colors/Colors.dart';
+import '../../../../core/extension/color.dart';
 import '../../cubit/auth/auth_cubit.dart';
 
 class AuthPage extends StatelessWidget {
@@ -563,7 +565,7 @@ class AuthPage extends StatelessWidget {
           body: LoadingOverlay(
               loading: state.loading?? false,
               child: Container(
-                color: Colors.white,
+                color: ColorUtil.getColorScheme(context).surface,
                 child: SizedBox(
                   height: MediaQuery.of(context).size.height,
                   width: MediaQuery.of(context).size.width,

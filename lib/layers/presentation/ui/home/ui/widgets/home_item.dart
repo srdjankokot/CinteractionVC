@@ -16,7 +16,7 @@ class HomeTabItem extends StatelessWidget {
       {super.key,
       required this.image,
       required this.onClickAction,
-      this.bgColor = ColorConstants.kPrimaryColor,
+        required this.bgColor,
       required this.label,
       this.size = 124,
       this.textStyle});
@@ -25,7 +25,7 @@ class HomeTabItem extends StatelessWidget {
       {super.key,
       required this.image,
       required this.onClickAction,
-      this.bgColor = ColorConstants.kPrimaryColor,
+      required this.bgColor,
       required this.label,
       this.size = 52,
       this.textStyle});
@@ -34,7 +34,7 @@ class HomeTabItem extends StatelessWidget {
     required BuildContext context,
     required Image image,
     VoidCallback? onClickAction,
-    Color? bgColor = ColorConstants.kPrimaryColor,
+    required Color bgColor,
     required String label,
     TextStyle? textStyle
 }

@@ -5,6 +5,7 @@ import 'package:audioplayers/audioplayers.dart';
 import 'package:auto_size_text/auto_size_text.dart';
 import 'package:cinteraction_vc/core/app/injector.dart';
 import 'package:cinteraction_vc/core/app/style.dart';
+import 'package:cinteraction_vc/core/extension/color.dart';
 import 'package:cinteraction_vc/core/extension/context.dart';
 import 'package:cinteraction_vc/core/extension/context_user.dart';
 import 'package:cinteraction_vc/core/io/network/models/data_channel_command.dart';
@@ -214,11 +215,7 @@ class ChatRoomPage extends StatelessWidget {
                                   () => {displayAddScheduleMeetingPopup()},
                                   () => {displayCreateGroupPopup(context, state)}),
 
-                          const VerticalDivider(
-                            color: Colors.grey, // Color of the divider
-                            thickness: 1, // Thickness of the divider
-                            width: 20, // Width of the space taken by the divider
-                          ),
+                          const VerticalDivider(thickness: 1, width: 1),
                           Expanded(
                             flex: 2,
                             child: getChatDetailsView(context, state, user,
@@ -277,7 +274,7 @@ Widget getLeftSide(BuildContext context, ChatState state, double? width,
                         extra: context.getCurrentUser?.name);
                   },
                   label: 'Start Meeting',
-                  textStyle: context.textTheme.labelMedium,
+                  textStyle: context.textTheme.labelMedium, bgColor: ColorUtil.getColorScheme(context).primary,
                 ),
               ),
               Expanded(
@@ -332,8 +329,7 @@ Widget getLeftSide(BuildContext context, ChatState state, double? width,
                               Icons.group_add,
                               size: 24.0,
                               color: state.listType == option
-                                  ? ColorConstants.kPrimaryColor
-                                  : Colors.grey,
+                                  ? ColorUtil.getColorScheme(context).primary  : ColorUtil.getColor(context)!.kGrey,
                             ),
                             onPressed: () {
                               // await displayCreateGroupPopup(context, state);
@@ -345,16 +341,14 @@ Widget getLeftSide(BuildContext context, ChatState state, double? width,
                                 Icons.contacts,
                                 size: 24.0,
                                 color: state.listType == option
-                                    ? ColorConstants.kPrimaryColor
-                                    : Colors.grey,
+                                    ? ColorUtil.getColorScheme(context).primary: ColorUtil.getColor(context)!.kGrey,
                               )
                             : option == ListType.Chats
                                 ? Icon(
                                     Icons.chat,
                                     size: 24.0,
                                     color: state.listType == option
-                                        ? ColorConstants.kPrimaryColor
-                                        : Colors.grey,
+                                        ? ColorUtil.getColorScheme(context).primary                                        : ColorUtil.getColor(context)!.kGrey,
                                   )
                                 : Text(
                                     option.name,
@@ -365,7 +359,7 @@ Widget getLeftSide(BuildContext context, ChatState state, double? width,
                     context.read<ChatCubit>().changeListType(option);
                   },
                   selected: state.listType == option,
-                  selectedColor: ColorConstants.kPrimaryColor,
+                  selectedColor: ColorUtil.getColorScheme(context).primary,
                 ),
               );
             }).toList(),
@@ -423,8 +417,8 @@ Widget userStatusWidget(ChatState state)
               : state.currentParticipant
               ?.online ==
               true)
-              ? Colors.green
-              : Colors.amber,
+              ? ColorConstants.kGreen
+              : ColorConstants.kAmber,
           shape: BoxShape.circle,
         ),
       ),
@@ -442,7 +436,7 @@ Widget getChatDetailsView(
   return Container(
     width: double.maxFinite,
     height: double.maxFinite,
-    color: Colors.white,
+    color: ColorUtil.getColorScheme(context).surface,
     child: Padding(
       padding: const EdgeInsets.all(10.0),
       child: () {
@@ -488,14 +482,13 @@ Widget getChatDetailsView(
                       CallButtonShape(
                           image:
                               imageSVGAsset('icon_arrow_square_up') as Widget,
-                          bgColor: true
-                              ? ColorConstants.kPrimaryColor
-                              : ColorConstants.kWhite30,
+                          bgColor:  ColorUtil.getColorScheme(context).primary,
+
                           onClickAction: () async {}),
                       const SizedBox(width: 20),
                       CallButtonShape(
                         image: imageSVGAsset('icon_phone') as Widget,
-                        bgColor: ColorConstants.kPrimaryColor,
+                        bgColor: ColorUtil.getColorScheme(context).primary,
                         onClickAction: () async {
                           await context.read<ChatCubit>().rejectCall();
                         },
@@ -557,9 +550,7 @@ Widget getChatDetailsView(
                         CallButtonShape(
                             image:
                                 imageSVGAsset('icon_arrow_square_up') as Widget,
-                            bgColor: true
-                                ? ColorConstants.kPrimaryColor
-                                : ColorConstants.kWhite30,
+                            bgColor: ColorUtil.getColorScheme(context).primary,
                             onClickAction: () async {}),
 
                         // const SizedBox(width: 20),
@@ -568,8 +559,7 @@ Widget getChatDetailsView(
                         //   CallButtonShape(
                         //     image: imageSVGAsset('icon_message')
                         //     as Widget,
-                        //     bgColor: ColorConstants.kPrimaryColor
-                        //         .withOpacity(0.4),
+                        //     bgColor: ColorUtil.getColorScheme(context).primary                        //         .withOpacity(0.4),
                         //     onClickAction: () async {
                         //       await context
                         //           .read<ConferenceCubit>()
@@ -591,7 +581,7 @@ Widget getChatDetailsView(
                         //         width: 12,
                         //         height: 12,
                         //         decoration: const ShapeDecoration(
-                        //           color: Colors.white,
+                        //           color: ColorUtil.getColorScheme(context).surface,
                         //           shape: OvalBorder(),
                         //         ),
                         //         // child: Text(
@@ -618,7 +608,7 @@ Widget getChatDetailsView(
                         // const SizedBox(width: 20),
                         CallButtonShape(
                           image: imageSVGAsset('icon_phone') as Widget,
-                          bgColor: ColorConstants.kPrimaryColor,
+                          bgColor: ColorUtil.getColorScheme(context).primary,
                           onClickAction: () async {
                             await context.read<ChatCubit>().rejectCall();
                           },
@@ -653,7 +643,7 @@ Widget getChatDetailsView(
                   children: [
                     if (!context.isWide)
                       Container(
-                        color: Colors.white,
+                        color: ColorUtil.getColorScheme(context).surface,
                         child: IconButton(
                             onPressed: () =>
                                 {context.read<ChatCubit>().clearCurrentChat()},
@@ -669,7 +659,7 @@ Widget getChatDetailsView(
                               state.listType == ListType.Chats
                                   ? (state.currentChat?.getChatName() ?? "")
                                   : state.currentParticipant?.name ?? "",
-                              style: titleThemeStyle.textTheme.titleLarge,
+                              style: context.titleTheme.titleLarge,
 
                               maxLines: 1,
                               overflow: TextOverflow.ellipsis,
@@ -712,7 +702,7 @@ Widget getChatDetailsView(
                                 : state.currentParticipant?.online == true,
                             child: CallButtonShape(
                               image: imageSVGAsset('icon_phone') as Widget,
-                              bgColor: ColorConstants.kGray600,
+                              bgColor: ColorUtil.getColor(context)!.kGrey[600] ?? Colors.grey,
                               onClickAction: () async {
                                 await context.read<ChatCubit>().makeCall(
                                     (state.listType == ListType.Chats
@@ -725,8 +715,8 @@ Widget getChatDetailsView(
                               },
                             )),
                         IconButton(
-                          icon: const Icon(Icons.person_add,
-                              color: ColorConstants.kSecondaryColor),
+                          icon:  Icon(Icons.person_add,
+                              color: ColorUtil.getColorScheme(context).secondary),
                           onPressed: () async {
                             final currentParticipants = state
                                 .chatDetails!.chatParticipants

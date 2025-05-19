@@ -5,6 +5,7 @@ import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 
 import '../../../../../../assets/colors/Colors.dart';
+import '../../../../../../core/extension/color.dart';
 import '../../../profile/ui/widget/user_image.dart';
 import 'graph_filter.dart';
 
@@ -24,7 +25,7 @@ class GetBarChart extends StatelessWidget {
         numberOfItems = numberOfItems < 3 ? 3 : numberOfItems;
         return Container(
           decoration: ShapeDecoration(
-            color: Colors.white,
+            color: ColorUtil.getColorScheme(context).surface,
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(10),
             ),
@@ -101,7 +102,7 @@ class GetBarChart extends StatelessWidget {
                           value % 10 == 0,
                           getDrawingHorizontalLine: (value) =>
                               FlLine(
-                                color: ColorConstants.kSecondaryColor
+                                color: ColorUtil.getColorScheme(context).secondary
                                     .withOpacity(0.1),
                                 strokeWidth: 1,
                               ),

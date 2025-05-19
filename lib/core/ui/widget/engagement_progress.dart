@@ -2,6 +2,7 @@ import 'package:cinteraction_vc/core/extension/context.dart';
 import 'package:flutter/material.dart';
 
 import '../../../assets/colors/Colors.dart';
+import '../../extension/color.dart';
 
 class EngagementProgress extends StatelessWidget {
   final int engagement;
@@ -19,7 +20,6 @@ class EngagementProgress extends StatelessWidget {
     var engagementText = getEngagementText(context, engagement);
     var isVisible = engagement > 25;
 
-
     return Stack(
       children: [
         Container(
@@ -28,12 +28,12 @@ class EngagementProgress extends StatelessWidget {
           height: height,
           alignment: Alignment.centerLeft,
           decoration: ShapeDecoration(
-            color: Colors.white,
+            color: ColorUtil.getColorScheme(context).surface,
             shape: RoundedRectangleBorder(
-              side: const BorderSide(
+              side: BorderSide(
                 width: 1,
                 strokeAlign: BorderSide.strokeAlignOutside,
-                color: ColorConstants.kGray5,
+                color: ColorUtil.getColorScheme(context).outline,
               ),
               borderRadius: BorderRadius.circular(28),
             ),
@@ -51,7 +51,7 @@ class EngagementProgress extends StatelessWidget {
                     return Container(
                       width: value,
                       height: double.maxFinite,
-                      color: getProgressColor(engagement),
+                      color: getProgressColor( context, engagement),
                       alignment: Alignment.centerRight,
                       padding: const EdgeInsets.only(left: 3, right: 3),
                       child: Visibility(
@@ -81,7 +81,7 @@ class EngagementProgress extends StatelessWidget {
   }
 }
 
-Color getProgressColor(int engagement) {
+Color getProgressColor(BuildContext context, int engagement) {
   if (engagement > 65) {
     return ColorConstants.kStateSuccess;
   }
@@ -89,7 +89,7 @@ Color getProgressColor(int engagement) {
   if (engagement > 40) {
     return ColorConstants.kEngProgress65;
   } else {
-    return ColorConstants.kEngProgress30;
+    return ColorUtil.getColorScheme(context).primaryFixed;
   }
 }
 
@@ -98,6 +98,6 @@ Text getEngagementText(BuildContext context, int engagement) {
     ((engagement / 100)).toStringAsFixed(2),
     maxLines: 1,
     textAlign: TextAlign.center,
-    style: context.textTheme.labelMedium?.copyWith(color: Colors.white),
+    style: context.textTheme.labelMedium?.copyWith(color: ColorUtil.getColorScheme(context).surface),
   );
 }

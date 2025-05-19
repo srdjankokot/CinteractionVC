@@ -2,6 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:dio/dio.dart';
 import 'package:universal_html/html.dart' as html;
 
+import '../../assets/colors/Colors.dart';
+import '../extension/color.dart';
+
 void openTextFile(BuildContext context, String fileUrl) async {
   try {
     Dio dio = Dio();
@@ -22,11 +25,11 @@ void openTextFile(BuildContext context, String fileUrl) async {
             children: [
               Text(
                 fileName,
-                style: const TextStyle(color: Colors.red),
+                style:   TextStyle(color: ColorUtil.getColorScheme(context).error),
               ),
               IconButton(
                 icon: const Icon(Icons.download),
-                color: Colors.red,
+                color: ColorUtil.getColorScheme(context).error,
                 onPressed: () => downloadTextFile(context, fileUrl),
               ),
             ],

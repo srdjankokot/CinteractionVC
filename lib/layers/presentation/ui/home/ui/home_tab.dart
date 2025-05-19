@@ -12,6 +12,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import '../../../../../assets/colors/Colors.dart';
+import '../../../../../core/extension/color.dart';
 import '../../../../../core/ui/images/image.dart';
 
 class HomeTab extends StatelessWidget {
@@ -55,6 +56,7 @@ class HomeTab extends StatelessWidget {
         },
         label: 'Start Meeting',
         textStyle: context.textTheme.labelMedium,
+        bgColor: ColorUtil.getColorScheme(context).error,
       );
     }
 

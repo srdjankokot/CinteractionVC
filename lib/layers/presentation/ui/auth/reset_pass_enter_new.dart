@@ -4,6 +4,8 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../../../../core/ui/images/image.dart';
 import '../../../../../core/ui/widget/responsive.dart';
+import '../../../../assets/colors/Colors.dart';
+import '../../../../core/extension/color.dart';
 import '../../../../core/navigation/route.dart';
 import '../../../../core/ui/input/input_field.dart';
 import '../../../../core/ui/widget/loading_overlay.dart';
@@ -204,7 +206,7 @@ class EnterNewPassword extends StatelessWidget{
         builder: (context, state) {
              return Scaffold(
         body:  Container(
-          color: Colors.white,
+          color: ColorUtil.getColorScheme(context).surface,
           child: SizedBox(
             height: MediaQuery.of(context).size.height,
             width: MediaQuery.of(context).size.width,

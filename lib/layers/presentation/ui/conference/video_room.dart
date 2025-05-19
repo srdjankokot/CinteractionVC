@@ -1,6 +1,7 @@
 import 'dart:math';
 
 import 'package:cinteraction_vc/assets/colors/Colors.dart';
+import 'package:cinteraction_vc/core/extension/color.dart';
 import 'package:cinteraction_vc/core/extension/context.dart';
 import 'package:cinteraction_vc/core/ui/widget/call_button_shape.dart';
 import 'package:cinteraction_vc/layers/presentation/cubit/chat/chat_cubit.dart';
@@ -28,17 +29,17 @@ class VideoRoomPage extends StatelessWidget {
   OverlayEntry? _overlayEntry;
   final List<String> _messages = [];
 
-  Widget _buildToast(String message) {
+  Widget _buildToast(BuildContext context, String message) {
     return Container(
       margin: const EdgeInsets.symmetric(vertical: 3),
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
       decoration: BoxDecoration(
-        color: Colors.black26,
+        color: ColorUtil.getColorScheme(context).outlineVariant.withOpacitySafe(0.26),
         borderRadius: BorderRadius.circular(8),
       ),
       child: Text(
         message,
-        style: const TextStyle(color: Colors.white),
+        style:  TextStyle(color: ColorUtil.getColorScheme(context).surface),
         textAlign: TextAlign.center,
       ),
     );
@@ -57,7 +58,7 @@ class VideoRoomPage extends StatelessWidget {
               color: Colors.transparent,
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.end,
-                children: _messages.map((msg) => _buildToast(msg)).toList(),
+                children: _messages.map((msg) => _buildToast(context, msg)).toList(),
               ),
             ),
           );
@@ -171,9 +172,9 @@ class VideoRoomPage extends StatelessWidget {
                     height: double.maxFinite,
                     // color: ColorConstants.kBlack3,
                     decoration: BoxDecoration(
-                      color: ColorConstants.kBlack3, // Background color
+                      color: ColorConstants.conferenceBackground, // Background color
                       border: Border.all(
-                        color: ColorConstants.kPrimaryColor, // Border color
+                        color: ColorUtil.getColorScheme(context).primary, // Border color
                         width: borderWidth, // Border width
                       ), // Rounded corners
                     ),
@@ -217,7 +218,7 @@ class VideoRoomPage extends StatelessWidget {
                                     ),
                                     Container(
                                         height: 80,
-                                        color: ColorConstants.kBlack3,
+                                        color: ColorConstants.conferenceBackground,
                                         child: Row(
                                           children: [
                                             Expanded(
@@ -273,10 +274,9 @@ class VideoRoomPage extends StatelessWidget {
                                                         as Widget,
                                                         bgColor: state
                                                             .screenShared
-                                                            ? ColorConstants
-                                                            .kPrimaryColor
-                                                            : ColorConstants
-                                                            .kWhite30,
+                                                            ?
+                                                            ColorUtil.getColorScheme(context).primary
+                                                            : ColorUtil.getColorScheme(context).surface.withOpacitySafe( 0.3),
                                                         onClickAction:
                                                             () async {
                                                           if (state
@@ -307,10 +307,9 @@ class VideoRoomPage extends StatelessWidget {
                                                               .waving_hand_outlined
                                                               : Icons
                                                               .front_hand_outlined,
-                                                          color: Colors.white,
+                                                          color: ColorUtil.getColorScheme(context).surface,
                                                         ),
-                                                        bgColor: ColorConstants
-                                                            .kWhite30,
+                                                        bgColor: ColorUtil.getColorScheme(context).surface.withOpacitySafe( 0.3)!,
                                                         onClickAction:
                                                             () async {
                                                           await context
@@ -320,15 +319,15 @@ class VideoRoomPage extends StatelessWidget {
                                                         }),
                                                     const SizedBox(width: 20),
                                                     CallButtonShape(
-                                                      // image: state.recording ? const Icon(Icons.stop, size: 30, color: Colors.red): const  Icon(Icons.fiber_manual_record, size: 30, color: Colors.red),
+                                                      // image: state.recording ? const Icon(Icons.stop, size: 30, color: ColorUtil.getColorScheme(context).error): const  Icon(Icons.fiber_manual_record, size: 30, color: ColorUtil.getColorScheme(context).error),
                                                       image: state.recording ==
                                                           RecordingStatus
                                                               .notRecording
-                                                          ? const Icon(
+                                                          ?  Icon(
                                                           Icons
                                                               .fiber_manual_record,
                                                           size: 30,
-                                                          color: Colors.red)
+                                                          color: ColorUtil.getColorScheme(context).error)
                                                           : state.recording ==
                                                           RecordingStatus
                                                               .loading
@@ -355,8 +354,8 @@ class VideoRoomPage extends StatelessWidget {
                                                       image: imageSVGAsset(
                                                           'icon_phone')
                                                       as Widget,
-                                                      bgColor: ColorConstants
-                                                          .kPrimaryColor,
+                                                      bgColor:
+                                                          ColorUtil.getColorScheme(context).primary,
                                                       onClickAction: () async {
                                                         await context
                                                             .read<
@@ -380,13 +379,13 @@ class VideoRoomPage extends StatelessWidget {
                                                     children: [
                                                       Stack(children: [
                                                         CallButtonShape(
-                                                          image: const Icon(
+                                                          image:  Icon(
                                                             Icons.group,
-                                                            color: Colors.white,
+                                                            color: ColorUtil.getColorScheme(context).surface,
                                                           ),
                                                           bgColor:
-                                                          ColorConstants
-                                                              .kPrimaryColor
+
+                                                              ColorUtil.getColorScheme(context).primary
                                                               .withOpacity(
                                                               0.4),
                                                           onClickAction:
@@ -461,8 +460,8 @@ class VideoRoomPage extends StatelessWidget {
                                                               'icon_message')
                                                           as Widget,
                                                           bgColor:
-                                                          ColorConstants
-                                                              .kPrimaryColor
+
+                                                              ColorUtil.getColorScheme(context).primary
                                                               .withOpacity(
                                                               0.4),
                                                           onClickAction:
@@ -585,7 +584,7 @@ class VideoRoomPage extends StatelessWidget {
                                                 image: imageSVGAsset('icon_phone')
                                                 as Widget,
                                                 bgColor:
-                                                ColorConstants.kPrimaryColor,
+                                                ColorUtil.getColorScheme(context).primary,
                                                 onClickAction: () async {
                                                   await context
                                                       .read<ConferenceCubit>()
@@ -646,7 +645,7 @@ class VideoRoomPage extends StatelessWidget {
 
                                                   return Stack(children: [
                                                     PopupMenuButton<String>(
-                                                      iconColor: Colors.white,
+                                                      iconColor: ColorUtil.getColorScheme(context).surface,
                                                       icon: const Icon(Icons.more_vert),
                                                       onSelected: (e) async {
                                                         switch (e) {
@@ -754,8 +753,8 @@ class VideoRoomPage extends StatelessWidget {
                                                         Container(
                                                           width: 10,
                                                           height: 10,
-                                                          decoration: const BoxDecoration(
-                                                            color: ColorConstants.kPrimaryColor,
+                                                          decoration:  BoxDecoration(
+                                                            color: ColorUtil.getColorScheme(context).primary,
                                                             shape: BoxShape.circle,
                                                           ),
                                                         ),
@@ -954,7 +953,7 @@ class VideoRoomPage extends StatelessWidget {
                   //       margin: const EdgeInsets.all(3),
                   //       decoration: ShapeDecoration(
                   //         shape: RoundedRectangleBorder(
-                  //           side: const BorderSide(width: 2, color: Colors.white),
+                  //           side: const BorderSide(width: 2, color: ColorUtil.getColorScheme(context).surface),
                   //           borderRadius: BorderRadius.circular(6),
                   //         ),
                   //       ),
@@ -1000,7 +999,7 @@ Widget getChatView(BuildContext context, double width)
   return Container(
     width: width,
     height: double.maxFinite,
-    color: Colors.white,
+    color: ColorUtil.getColorScheme(context).surface,
     child: Padding(
       padding:
       const EdgeInsets.all(23.0),
@@ -1052,7 +1051,7 @@ Widget getParticipantsView(BuildContext context, double width, List<StreamRender
   return Container(
     width: width,
     height: double.maxFinite,
-    color: Colors.white,
+    color: ColorUtil.getColorScheme(context).surface,
     child: Padding(
       padding:
       const EdgeInsets.all(23.0),
@@ -1204,8 +1203,8 @@ Widget getParticipantsView(BuildContext context, double width, List<StreamRender
                             bgColor: !contributor.isAudioMuted!
                                 ? ColorConstants
                                 .kStateSuccess
-                                : ColorConstants
-                                .kPrimaryColor,
+                                :
+                                ColorUtil.getColorScheme(context).primary,
                             image: !contributor
                                 .isAudioMuted!
                                 ? imageSVGAsset(

@@ -6,6 +6,8 @@ import 'package:cinteraction_vc/layers/presentation/cubit/chat/chat_state.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
+import '../../../../../../core/app/style.dart';
+import '../../../../../../core/extension/color.dart';
 import '../../../../../data/dto/chat/chat_detail_dto.dart';
 import '../../../profile/ui/widget/user_image.dart';
 import 'add_participiant_dialog.dart';
@@ -121,19 +123,19 @@ class EditGroupDialog extends StatelessWidget {
                       ),
                     );
                   },
-                  child: const MouseRegion(
+                  child:  MouseRegion(
                     cursor: SystemMouseCursors.click,
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        Icon(Icons.add, color: Colors.blue),
+                        Icon(Icons.add, color: ColorUtil.getColor(context)!.kBlue),
                         SizedBox(width: 8.0),
                         Text(
                           "Add participants",
                           style: TextStyle(
                             fontSize: 16,
                             fontWeight: FontWeight.bold,
-                            color: Colors.blue,
+                            color: ColorUtil.getColor(context)!.kBlue,
                           ),
                         ),
                       ],
@@ -147,9 +149,9 @@ class EditGroupDialog extends StatelessWidget {
             top: 0,
             right: 0,
             child: IconButton(
-              icon: const Icon(
+              icon:  Icon(
                 Icons.close,
-                color: Colors.grey,
+                color: ColorUtil.getColor(context)!.kGrey,
                 size: 24,
               ),
               onPressed: () => Navigator.of(context).pop(),
@@ -180,7 +182,7 @@ class EditGroupDialog extends StatelessWidget {
             ),
             ElevatedButton(
               style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.red,
+                backgroundColor: ColorUtil.getColorScheme(context).error,
               ),
               onPressed: () async {
                 await getIt
@@ -232,9 +234,9 @@ class _HoverParticipantTileState extends State<HoverParticipantTile> {
         trailing: (_isHovered && !widget.isAuthUser)
             ? TextButton(
                 onPressed: widget.onRemove,
-                child: const Text(
+                child:  Text(
                   "Remove",
-                  style: TextStyle(color: ColorConstants.kPrimaryColor),
+                  style: TextStyle(color: ColorUtil.getColorScheme(context).primary),
                 ),
               )
             : null,

@@ -22,7 +22,10 @@ import 'package:cinteraction_vc/layers/presentation/ui/profile/ui/widget/user_im
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart'; // Import Bloc
+import 'package:flutter_bloc/flutter_bloc.dart';
+
+import '../../../../../core/app/style.dart';
+import '../../../../../core/extension/color.dart'; // Import Bloc
 
 class ProfileTab extends StatefulWidget {
   const ProfileTab({super.key});
@@ -150,10 +153,10 @@ class _ProfileTabState extends State<ProfileTab> {
                                       child: CircleAvatar(
                                         radius: 20,
                                         backgroundColor:
-                                            ColorConstants.kPrimaryColor,
+                                            ColorUtil.getColorScheme(context).primary,
                                         child: IconButton(
-                                          icon: const Icon(Icons.edit,
-                                              size: 16, color: Colors.white),
+                                          icon:  Icon(Icons.edit,
+                                              size: 16, color: ColorUtil.getColorScheme(context).surface),
                                           padding: EdgeInsets.zero,
                                           onPressed: () =>
                                               _pickAndSendFile(context),
@@ -171,7 +174,7 @@ class _ProfileTabState extends State<ProfileTab> {
                                         decoration: InputDecoration(
                                           labelText: currentUser.name,
                                           filled: true,
-                                          fillColor: Colors.grey[100],
+                                          fillColor: ColorUtil.getColor(context)!.kGrey[100],
                                           border: OutlineInputBorder(
                                             borderRadius:
                                                 BorderRadius.circular(12),
@@ -188,7 +191,7 @@ class _ProfileTabState extends State<ProfileTab> {
                                       //   decoration: InputDecoration(
                                       //     labelText: 'Email',
                                       //     filled: true,
-                                      //     fillColor: Colors.grey[100],
+                                      //     fillColor: ColorUtil.getColor(context)!.kGrey[100],
                                       //     border: OutlineInputBorder(
                                       //       borderRadius:
                                       //           BorderRadius.circular(12),
@@ -299,8 +302,8 @@ class _ProfileTabState extends State<ProfileTab> {
                                 icon: const Icon(Icons.logout),
                                 label: const Text('Log out'),
                                 style: ElevatedButton.styleFrom(
-                                  backgroundColor: ColorConstants.kPrimaryColor,
-                                  foregroundColor: Colors.white,
+                                  backgroundColor: ColorUtil.getColorScheme(context).primary,
+                                  foregroundColor: ColorUtil.getColorScheme(context).surface,
                                   padding:
                                       const EdgeInsets.symmetric(vertical: 16),
                                   shape: RoundedRectangleBorder(
@@ -344,7 +347,7 @@ class _ProfileTabState extends State<ProfileTab> {
                                       shape: RoundedRectangleBorder(
                                         borderRadius: BorderRadius.circular(20),
                                       ),
-                                      color: Colors.white,
+                                      color: ColorUtil.getColorScheme(context).surface,
                                       child: Padding(
                                         padding: const EdgeInsets.symmetric(
                                             horizontal: 24, vertical: 32),
@@ -361,7 +364,7 @@ class _ProfileTabState extends State<ProfileTab> {
                                                 decoration: InputDecoration(
                                                   labelText: currentUser?.name,
                                                   filled: true,
-                                                  fillColor: Colors.grey[100],
+                                                  fillColor: ColorUtil.getColor(context)!.kGrey[100],
                                                   border: OutlineInputBorder(
                                                     borderRadius:
                                                         BorderRadius.circular(
@@ -381,7 +384,7 @@ class _ProfileTabState extends State<ProfileTab> {
                                               //   decoration: InputDecoration(
                                               //     labelText: 'Email',
                                               //     filled: true,
-                                              //     fillColor: Colors.grey[100],
+                                              //     fillColor: ColorUtil.getColor(context)!.kGrey[100],
                                               //     border: OutlineInputBorder(
                                               //       borderRadius:
                                               //           BorderRadius.circular(12),
@@ -520,11 +523,11 @@ class _ProfileTabState extends State<ProfileTab> {
                                           child: CircleAvatar(
                                             radius: 20,
                                             backgroundColor:
-                                                ColorConstants.kPrimaryColor,
+                                                ColorUtil.getColorScheme(context).primary,
                                             child: IconButton(
-                                              icon: const Icon(Icons.edit,
+                                              icon:  Icon(Icons.edit,
                                                   size: 16,
-                                                  color: Colors.white),
+                                                  color: ColorUtil.getColorScheme(context).surface),
                                               padding: EdgeInsets.zero,
                                               onPressed: () =>
                                                   _pickAndSendFile(context),
@@ -547,8 +550,8 @@ class _ProfileTabState extends State<ProfileTab> {
                                   label: const Text('Log out'),
                                   style: ElevatedButton.styleFrom(
                                     backgroundColor:
-                                        ColorConstants.kPrimaryColor,
-                                    foregroundColor: Colors.white,
+                                        ColorUtil.getColorScheme(context).primary,
+                                    foregroundColor: ColorUtil.getColorScheme(context).surface,
                                     padding: const EdgeInsets.symmetric(
                                         vertical: 16),
                                     shape: RoundedRectangleBorder(

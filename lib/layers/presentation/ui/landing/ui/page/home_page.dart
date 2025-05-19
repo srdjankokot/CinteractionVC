@@ -1,4 +1,5 @@
 import 'package:cinteraction_vc/assets/colors/Colors.dart';
+import 'package:cinteraction_vc/core/extension/color.dart';
 import 'package:cinteraction_vc/core/extension/context.dart';
 import 'package:cinteraction_vc/core/extension/context_user.dart';
 import 'package:cinteraction_vc/core/extension/image.dart';
@@ -12,6 +13,7 @@ import '../../../../../../core/app/injector.dart';
 import '../../../../../../core/ui/images/image.dart';
 import '../../../../../../core/util/menu_items.dart';
 
+import '../../../../../../main.dart';
 import '../../../../cubit/chat/chat_cubit.dart';
 import '../../../../cubit/chat/chat_state.dart';
 import '../../../profile/ui/widget/user_image.dart';
@@ -36,6 +38,9 @@ class _HomePageState extends State<HomePage> {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = context.watch<AppCubit>().state.isDarkMode;
+
+    print("home page is Dark Mode on: ${isDark}");
     final tabs = context.isWide ? desktopMenu : mobileBottomMenu;
 
     final user = context.getCurrentUser;
@@ -73,8 +78,8 @@ class _HomePageState extends State<HomePage> {
                   for (final (index, item) in tabs.indexed)
                     Container(
                       color: _selectedIndex == index
-                          ? ColorConstants.kPrimaryColor.withOpacity(0.05)
-                          : Colors.white,
+                          ? ColorUtil.getColorScheme(context).primary.withOpacity(0.05)
+                          : ColorUtil.getColorScheme(context).surface,
                       child: Padding(
                         padding: const EdgeInsets.only(top: 8.0, bottom: 8.0),
                         child: Column(
@@ -91,17 +96,8 @@ class _HomePageState extends State<HomePage> {
                                       width: double.maxFinite,
                                       child: Column(
                                         children: [
-                                          (_selectedIndex == index
-                                              ? imageSVGAsset(item.assetName)
-                                                  ?.copyWith(
-                                                      colorFilter:
-                                                          const ColorFilter
-                                                              .mode(
-                                                              ColorConstants
-                                                                  .kPrimaryColor,
-                                                              BlendMode.srcIn))
-                                              : imageSVGAsset(
-                                                  item.assetName)) as Widget,
+                                          imageSVGAsset(item.assetName)?.copyWith(colorFilter:  ColorFilter.mode(
+                                              _selectedIndex == index ? ColorUtil.getColorScheme(context).primary : ColorUtil.getColorScheme(context).outlineVariant.withOpacitySafe(0.87), BlendMode.srcIn)) as Widget,
                                           // ),
 
                                           Text(
@@ -110,9 +106,8 @@ class _HomePageState extends State<HomePage> {
                                                 ?.copyWith(
                                                     color: _selectedIndex ==
                                                             index
-                                                        ? ColorConstants
-                                                            .kPrimaryColor
-                                                        : Colors.black45),
+                                                        ? ColorUtil.getColorScheme(context).primary
+                                                        : ColorUtil.getColorScheme(context).outlineVariant.withOpacitySafe(0.87)),
                                           ),
                                         ],
                                       )),
@@ -143,8 +138,8 @@ class _HomePageState extends State<HomePage> {
               label: tab.label,
               icon: imageSVGAsset(tab.assetName) as Widget,
               activeIcon: imageSVGAsset(tab.assetName)?.copyWith(
-                  colorFilter: const ColorFilter.mode(
-                      ColorConstants.kPrimaryColor, BlendMode.srcIn)) as Widget,
+                  colorFilter:  ColorFilter.mode(
+                      ColorUtil.getColorScheme(context).primary, BlendMode.srcIn)) as Widget,
             ),
         ],
       );
@@ -160,8 +155,8 @@ class _HomePageState extends State<HomePage> {
                   child: Container(
                     height: 97,
                     padding: const EdgeInsets.only(left: 30, right: 30),
-                    decoration: const BoxDecoration(
-                      color: Colors.white,
+                    decoration:  BoxDecoration(
+                      color: ColorUtil.getColorScheme(context).surface,
                       boxShadow: [
                         BoxShadow(
                           color: Color(0x14000000),
@@ -217,7 +212,13 @@ class _HomePageState extends State<HomePage> {
                                   onPressed: () =>
                                       handleClick(context, 'LogOut'),
                                 ),
-                              )
+                              ),
+
+                              Switch(
+                                  value: isDark,
+                                  onChanged: (value){
+                                    context.read<AppCubit>().toggleDarkMode();
+                                  })
                             ],
                           ),
                       ],

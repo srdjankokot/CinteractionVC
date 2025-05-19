@@ -1,3 +1,4 @@
+import 'package:cinteraction_vc/core/extension/context.dart';
 import 'package:cinteraction_vc/core/extension/context_user.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -23,7 +24,7 @@ class JoinPopup extends StatelessWidget {
     }
 
         return AlertDialog(
-          title: const Text('Enter room ID'),
+          title:  Text('Enter room ID', style: context.titleTheme.titleMedium,),
           content: TextField(
             autofocus: true,
             controller: textFieldController,

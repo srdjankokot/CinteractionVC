@@ -1,4 +1,5 @@
 import 'package:cinteraction_vc/core/app/injector.dart';
+import 'package:cinteraction_vc/core/extension/context.dart';
 import 'package:cinteraction_vc/core/navigation/route.dart';
 import 'package:cinteraction_vc/layers/domain/entities/user.dart';
 import 'package:cinteraction_vc/layers/presentation/cubit/chat/chat_cubit.dart';
@@ -37,7 +38,7 @@ class CreateGroupDialog extends StatelessWidget {
     }
 
     return AlertDialog(
-      title: const Text("Create New Group"),
+      title:  Text("Create New Group", style: context.titleTheme.titleLarge,),
       content: SingleChildScrollView(
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,

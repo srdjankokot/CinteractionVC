@@ -1,3 +1,4 @@
+import 'package:cinteraction_vc/core/extension/context.dart';
 import 'package:cinteraction_vc/layers/data/dto/user_dto.dart';
 import 'package:flutter/material.dart';
 
@@ -43,9 +44,8 @@ class _AddParticipantsDialogState extends State<AddParticipantsDialog> {
       title: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          const Text(
-            "Add to Group",
-            style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+           Text(
+            "Add to Group", style: innerContext.titleTheme.titleLarge,
           ),
           IconButton(
             icon: const Icon(Icons.close),

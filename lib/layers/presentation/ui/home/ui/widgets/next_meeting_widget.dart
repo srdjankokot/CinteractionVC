@@ -10,6 +10,8 @@ import 'package:one_clock/one_clock.dart';
 // import 'package:slide_digital_clock/slide_digital_clock.dart';
 
 import '../../../../../../assets/colors/Colors.dart';
+import '../../../../../../core/app/style.dart';
+import '../../../../../../core/extension/color.dart';
 import '../../../../../../core/ui/images/image.dart';
 import '../../../../../data/dto/user_dto.dart';
 import '../../../../../domain/entities/meetings/meeting.dart';
@@ -48,7 +50,7 @@ class NextMeetingWidget extends StatelessWidget {
                         const SizedBox(height: 4),
                         Text(
                           '${DateFormat('HH:mm').format(meeting.meetingStart)} - ${DateFormat('HH:mm').format(meeting.meetingEnd!)}',
-                          style: Theme.of(context).textTheme.bodyMedium?.copyWith(color: Colors.grey[600]),
+                          style: Theme.of(context).textTheme.bodyMedium?.copyWith(color: ColorUtil.getColor(context)!.kGrey[600]),
                         ),
                       ],
                     ),
@@ -98,16 +100,16 @@ class NextMeetingWidget extends StatelessWidget {
                       children: [
                         Container(
                             margin: const EdgeInsets.only(bottom: 20),
-                            child: const DigitalClock(
+                            child:  DigitalClock(
                               showSeconds: false,
                               textScaleFactor: 1.3,
                               isLive: true,
-                              digitalClockTextColor: Colors.white,
+                              digitalClockTextColor: ColorUtil.getColorScheme(context).surface,
                             )),
                         Text(
                           currentDate,
                           style: context.textTheme.bodyLarge
-                              ?.copyWith(color: Colors.white),
+                              ?.copyWith(color: ColorUtil.getColorScheme(context).surface),
                         ),
                       ],
                     ),
@@ -160,7 +162,7 @@ class NextMeetingWidget extends StatelessWidget {
                             child: Text(
                               'Join Meeting',
                               style: context.textTheme.labelLarge
-                                  ?.copyWith(color: Colors.white),
+                                  ?.copyWith(color: ColorUtil.getColorScheme(context).surface),
                             )),
                       ),
                     ],

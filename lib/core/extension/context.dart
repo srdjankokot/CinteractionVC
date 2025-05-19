@@ -1,25 +1,21 @@
 import 'package:cinteraction_vc/core/app/style.dart';
 import 'package:cinteraction_vc/core/extension/router.dart';
 import 'package:cinteraction_vc/core/io/network/urls.dart';
-import 'package:cinteraction_vc/layers/data/repos/auth_repo_impl.dart';
-import 'package:cinteraction_vc/layers/data/repos/chat_repo_impl.dart';
-import 'package:cinteraction_vc/layers/data/source/network/api_impl.dart';
-import 'package:cinteraction_vc/layers/domain/repos/chat_repo.dart';
 import 'package:cinteraction_vc/layers/presentation/cubit/chat/chat_cubit.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../assets/colors/Colors.dart';
 import '../../layers/data/source/local/local_storage.dart';
 import '../app/injector.dart';
 import '../ui/widget/responsive.dart';
-import 'package:flutter/foundation.dart';
 
 import '../util/secure_local_storage.dart';
 
 extension Context on BuildContext {
   TextTheme get textTheme => Theme.of(this).textTheme;
-  TextTheme get titleTheme => titleThemeStyle.textTheme;
+  TextTheme get titleTheme =>  getTitleTheme(Theme.of(this).colorScheme).textTheme;
   TextTheme get primaryTextTheme => Theme.of(this).primaryTextTheme;
   ColorScheme get colorScheme => Theme.of(this).colorScheme;
 
@@ -36,7 +32,7 @@ extension Context on BuildContext {
       foregroundColor = theme.colorScheme.onError;
       backgroundColor = theme.colorScheme.error;
     } else {
-      foregroundColor = Colors.white;
+      foregroundColor = Theme.of(this).colorScheme.surface;
       backgroundColor = null;
     }
 

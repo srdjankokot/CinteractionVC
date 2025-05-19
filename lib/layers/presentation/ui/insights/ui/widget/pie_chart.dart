@@ -4,6 +4,7 @@ import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 
 import '../../../../../../assets/colors/Colors.dart';
+import '../../../../../../core/extension/color.dart';
 import 'graph_filter.dart';
 
 class PieChartStats extends StatelessWidget {
@@ -15,14 +16,7 @@ class PieChartStats extends StatelessWidget {
       {super.key,
       required this.values,
       required this.title,
-      this.colors = const [
-        ColorConstants.kStateInfo,
-        ColorConstants.kStateError,
-        ColorConstants.kStateSuccess,
-        ColorConstants.kStateWarning,
-        ColorConstants.kEngProgress30,
-        ColorConstants.kEngProgress65,
-      ]});
+      required this.colors});
 
   @override
   Widget build(BuildContext context) {
@@ -41,7 +35,7 @@ class PieChartStats extends StatelessWidget {
 
     return Container(
       decoration: ShapeDecoration(
-        color: Colors.white,
+        color: ColorUtil.getColorScheme(context).surface,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(10),
         ),
@@ -121,9 +115,7 @@ class PieChartStats extends StatelessWidget {
                                       Expanded(
                                         child: Text(
                                           '${((item.value / sum) * 100).toInt()}%(${item.value}) ${item.name}',
-                                          style: context.textTheme.bodySmall
-                                              ?.copyWith(
-                                                  color: ColorConstants.kGray2),
+                                          style: context.titleTheme.bodySmall,
                                           overflow: TextOverflow.clip,
                                         ),
                                       )
@@ -161,9 +153,7 @@ class PieChartStats extends StatelessWidget {
                                     ),
                                     Text(
                                       '${sum / item.value * 100}%(${item.value}) ${item.name}',
-                                      style: context.textTheme.bodySmall
-                                          ?.copyWith(
-                                              color: ColorConstants.kGray2),
+                                      style: context.titleTheme.bodySmall,
                                     )
                                   ],
                                 ),

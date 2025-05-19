@@ -7,6 +7,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../../../../assets/colors/Colors.dart';
+import '../../../../../core/app/style.dart';
+import '../../../../../core/extension/color.dart';
 import '../../insights/ui/widget/bar_chart.dart';
 import '../../insights/ui/widget/pie_chart.dart';
 
@@ -21,7 +23,7 @@ class DashboardScreen extends StatelessWidget {
         },
         builder: (context, state) {
             return Scaffold(
-          backgroundColor: ColorConstants.kGrey100,
+          backgroundColor: ColorUtil.getColor(context)!.kGrey[100],
           body: Padding(
               padding: const EdgeInsets.only(left: 20.0, right: 20.0),
               child: ListView(
@@ -101,9 +103,9 @@ class DashboardScreen extends StatelessWidget {
                           child:  PieChartStats(
                             values: [NameValueClass(name: 'Realized meetings', value: state.realizedMeetings??0), NameValueClass(name: 'Missed', value: state.missedMeetings??0)],
                             title: 'My realized meetings',
-                            colors: const [
+                            colors:  [
                               ColorConstants.kStateSuccess,
-                              ColorConstants.kGrey100
+                              ColorUtil.getColor(context)!.kGrey[100]?? Colors.grey
                             ],
                           ),
                         ),
@@ -115,7 +117,7 @@ class DashboardScreen extends StatelessWidget {
                         //       title: 'Realized meetings by users',
                         //       colors: [
                         //         ColorConstants.kStateInfo,
-                        //         ColorConstants.kGrey100
+                        //         ColorUtil.getColor(context)!.kGrey100
                         //       ]),
                         // ),
                       ],
@@ -143,7 +145,7 @@ class DashboardScreen extends StatelessWidget {
                   //         height: 350,
                   //         width: containerWidth,
                   //         decoration: ShapeDecoration(
-                  //           color: Colors.white,
+                  //           color: ColorUtil.getColorScheme(context).surface,
                   //           shape: RoundedRectangleBorder(
                   //             borderRadius: BorderRadius.circular(10),
                   //           ),
@@ -157,7 +159,7 @@ class DashboardScreen extends StatelessWidget {
                   //         height: 350,
                   //         width: containerWidth,
                   //         decoration: ShapeDecoration(
-                  //           color: Colors.white,
+                  //           color: ColorUtil.getColorScheme(context).surface,
                   //           shape: RoundedRectangleBorder(
                   //             borderRadius: BorderRadius.circular(10),
                   //           ),

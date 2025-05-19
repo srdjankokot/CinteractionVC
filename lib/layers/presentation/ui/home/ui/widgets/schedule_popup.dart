@@ -1,6 +1,7 @@
 import 'dart:convert';
 
 import 'package:cinteraction_vc/core/app/injector.dart';
+import 'package:cinteraction_vc/core/extension/context.dart';
 import 'package:cinteraction_vc/layers/presentation/cubit/home/home_cubit.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -29,7 +30,7 @@ class SchedulePopup extends StatelessWidget {
         },
         builder: (innerContext, state) => AlertDialog(
           content: AlertDialog(
-            title: const Text('Schedule a meeting'),
+            title:  Text('Schedule a meeting', style: context.primaryTextTheme.titleMedium,),
             content: Form(
               key: formKey,
               child: Wrap(
