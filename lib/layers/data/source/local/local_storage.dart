@@ -12,6 +12,8 @@ abstract class LocalStorage {
   Future<bool> saveRoomId({required String roomId});
   String? getRoomId();
   Future<void> clearRoomId();
+  Future<bool> setThemeToDark({required bool isDark});
+  bool? isDarkMode();
 }
 
 class LocalStorageImpl extends LocalStorage {
@@ -63,5 +65,15 @@ class LocalStorageImpl extends LocalStorage {
   @override
   Future<void> clearRoomId() async {
     _sharedPref.remove('roomId');
+  }
+
+  @override
+  bool? isDarkMode() {
+    return _sharedPref.getBool('isDarkMode');
+  }
+
+  @override
+  Future<bool> setThemeToDark({required bool isDark}) async {
+    return _sharedPref.setBool('isDarkMode', isDark);
   }
 }

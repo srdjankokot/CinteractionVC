@@ -5,6 +5,8 @@ import 'package:cinteraction_vc/assets/colors/Colors.dart';
 import 'package:cinteraction_vc/core/extension/string.dart';
 import 'package:flutter/material.dart';
 
+import '../../../../../../core/app/style.dart';
+import '../../../../../../core/extension/color.dart';
 import '../../../../../../core/ui/widget/url_image.dart';
 
 class UserImage extends StatelessWidget {
@@ -25,7 +27,7 @@ class UserImage extends StatelessWidget {
       return MultiUserAvatar(users: users, size: size);
     } else {
       return CircleAvatar(
-        backgroundColor: ColorConstants.kPrimaryColor,
+        backgroundColor: ColorUtil.getColorScheme(context).primary,
         radius: size / 2,
         child: const Text(""),
       );
@@ -58,7 +60,7 @@ class MultiUserAvatar extends StatelessWidget {
       child: Container(
         width: size,
         height: size,
-        color: Colors.grey.shade200,
+        color: ColorUtil.getColor(context)!.kGrey[200],
         child: Wrap(
           children: List.generate(displayUsers.length, (i) {
             final user = displayUsers[i];
@@ -89,7 +91,7 @@ class MultiUserAvatar extends StatelessWidget {
                         //                   //     user.name.getInitials(),
                         //                   //     style: const TextStyle(
                         //                   //         fontSize: 100,
-                        //                   //         color: Colors.white,
+                        //                   //         color: ColorUtil.getColorScheme(context).surface,
                         //                   //         fontWeight: FontWeight.bold),
                         //                   //     maxLines: 1,
                         //                   //     minFontSize: 10,
@@ -101,7 +103,7 @@ class MultiUserAvatar extends StatelessWidget {
                       user.name.getInitials(),
                       style: TextStyle(
                         fontSize: displayUsers.length == 1 ? null : 10,
-                        color: Colors.white,
+                        color: ColorUtil.getColorScheme(context).surface,
                         fontWeight: FontWeight.bold,
                       ),
                     ),

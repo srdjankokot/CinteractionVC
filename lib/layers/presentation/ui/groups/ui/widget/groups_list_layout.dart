@@ -1,4 +1,5 @@
 import 'package:cinteraction_vc/assets/colors/Colors.dart';
+import 'package:cinteraction_vc/core/extension/color.dart';
 import 'package:cinteraction_vc/core/extension/context.dart';
 import 'package:cinteraction_vc/core/navigation/route.dart';
 import 'package:cinteraction_vc/core/ui/images/image.dart';
@@ -66,7 +67,7 @@ class GroupListLayout extends StatelessWidget {
                                     const EdgeInsets.only(top: 20, bottom: 20),
                                 padding: const EdgeInsets.all(20),
                                 decoration: ShapeDecoration(
-                                  color: ColorConstants.kWhite40,
+                                  color: ColorUtil.getColorScheme(context).surface.withOpacitySafe(0.4),
                                   shape: RoundedRectangleBorder(
                                     borderRadius: BorderRadius.circular(11),
                                   ),
@@ -118,7 +119,7 @@ class GroupListLayout extends StatelessWidget {
                                             //                       width: 2,
                                             //                       strokeAlign: BorderSide
                                             //                           .strokeAlignOutside,
-                                            //                       color: Colors.white,
+                                            //                       color: ColorUtil.getColorScheme(context).surface,
                                             //                     ),
                                             //                     borderRadius:
                                             //                         BorderRadius

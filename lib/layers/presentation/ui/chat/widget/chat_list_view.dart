@@ -1,6 +1,7 @@
 // ignore_for_file: prefer_const_constructors
 
 import 'package:audioplayers/audioplayers.dart';
+import 'package:cinteraction_vc/core/extension/color.dart';
 import 'package:cinteraction_vc/core/extension/context.dart';
 import 'package:cinteraction_vc/core/extension/string.dart';
 import 'package:cinteraction_vc/core/util/conf.dart';
@@ -11,6 +12,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
 
 import '../../../../../assets/colors/Colors.dart';
+import '../../../../../core/app/style.dart';
 import '../../../cubit/chat/chat_cubit.dart';
 import '../../../cubit/chat/chat_state.dart';
 import '../../profile/ui/widget/user_image.dart';
@@ -151,7 +153,7 @@ class _ChatsListViewState extends State<ChatsListView> {
             child: Text(
               'You still don\'t have any chats',
               style:
-                  context.textTheme.titleMedium?.copyWith(color: Colors.grey),
+                  context.textTheme.titleMedium?.copyWith(color: ColorUtil.getColor(context)!.kGrey),
             ),
           )
         : BlocBuilder<ChatCubit, ChatState>(
@@ -213,8 +215,8 @@ class _ChatsListViewState extends State<ChatsListView> {
                                     _showRemoveDialog(
                                         chat.id, context, _deleteChat);
                                   },
-                                  backgroundColor: ColorConstants.kPrimaryColor,
-                                  foregroundColor: Colors.white,
+                                  backgroundColor: ColorUtil.getColorScheme(context).primary,
+                                  foregroundColor: ColorUtil.getColorScheme(context).surface,
                                   icon: Icons.delete,
                                   label: 'Delete',
                                 ),
@@ -224,9 +226,9 @@ class _ChatsListViewState extends State<ChatsListView> {
 
                             child: Container(
                               decoration: BoxDecoration(
-                                color: isSelected ? Colors.blue[100] : Colors.white,
+                                color: isSelected ? ColorUtil.getColor(context)!.kBlue[100] : ColorUtil.getColorScheme(context).surface,
                                 border: Border(
-                                  bottom: BorderSide(color: Colors.grey.shade300),
+                                  bottom: BorderSide(color: ColorUtil.getColor(context)!.kGrey.shade300),
                                 ),
                               ),
                               padding: const EdgeInsets.symmetric(
@@ -245,11 +247,11 @@ class _ChatsListViewState extends State<ChatsListView> {
                                           children: [
                                             Text(
                                               chat.getChatName(),
-                                              style: const TextStyle(
+                                              style:  TextStyle(
                                                 fontFamily: 'Montserrat',
                                                 fontSize: 16,
                                                 fontWeight: FontWeight.w500,
-                                                color: Colors.black87,
+                                                color: ColorUtil.getColorScheme(context).outlineVariant.withOpacitySafe(0.87),
                                               ),
                                               overflow: TextOverflow.ellipsis,
                                               maxLines: 1,
@@ -269,8 +271,8 @@ class _ChatsListViewState extends State<ChatsListView> {
                                               style: TextStyle(
                                                 fontSize: 14,
                                                 color: chat.haveUnread == true
-                                                    ? Colors.black87
-                                                    : Colors.black54,
+                                                    ? ColorUtil.getColorScheme(context).outlineVariant.withOpacitySafe(0.87)
+                                                    : ColorUtil.getColorScheme(context).outlineVariant.withOpacitySafe(0.54),
                                                 fontWeight: chat.haveUnread == true
                                                     ? FontWeight.bold
                                                     : FontWeight.normal,
@@ -285,16 +287,16 @@ class _ChatsListViewState extends State<ChatsListView> {
                                         children: [
                                           Text(
                                             formatTime(chat.lastMessage?.createdAt!.toIso8601String()),
-                                            style: const TextStyle(
+                                            style:  TextStyle(
                                                 fontSize: 12,
-                                                color: Colors.black45),
+                                                color: ColorUtil.getColorScheme(context).outlineVariant.withOpacitySafe(0.45)),
                                           ),
                                           if (isSelected)
 
                                             IconButton(
                                               icon: Icon(
                                                 Icons.delete,
-                                                color: ColorConstants.kPrimaryColor,
+                                                color: ColorUtil.getColorScheme(context).primary,
                                                 size: 18,
                                               ),
                                               onPressed: () => _showRemoveDialog(
@@ -303,7 +305,7 @@ class _ChatsListViewState extends State<ChatsListView> {
                                           if (chat.haveUnread)
                                             Icon(
                                               Icons.mark_chat_unread,
-                                              color: Colors.redAccent,
+                                              color: ColorUtil.getColorScheme(context).error,
                                               size: 18,
                                             ),
                                         ],
@@ -318,7 +320,7 @@ class _ChatsListViewState extends State<ChatsListView> {
                                         child: Container(
                                           width: 10.0,
                                           height: 10.0,
-                                          color: Colors.green,
+                                          color: ColorConstants.kGreen,
                                         ),
                                       ),
                                     ),
@@ -373,7 +375,7 @@ void _showRemoveDialog(int chatId, context, Function(int) deleteChat) {
             child: const Text("Cancel"),
           ),
           ElevatedButton(
-            style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
+            style: ElevatedButton.styleFrom(backgroundColor: ColorUtil.getColorScheme(context).error),
             onPressed: () async {
               deleteChat(chatId);
               Navigator.of(context).pop();

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
-import '../../../assets/strings/Strings.dart';
+import '../../../assets/colors/Colors.dart';
+import '../../extension/color.dart';
 
 class ButtonRounded extends StatelessWidget {
 
@@ -26,8 +27,8 @@ class ButtonRounded extends StatelessWidget {
           child:  Text(
             textbutton,
             textAlign: TextAlign.center,
-            style: const TextStyle(
-              color: Colors.white,
+            style:   TextStyle(
+              color: ColorUtil.getColorScheme(context).surface,
               fontSize: 24,
               fontFamily: 'Montserrat',
               fontWeight: FontWeight.w500,
@@ -47,11 +48,11 @@ class ButtonRounded extends StatelessWidget {
                 RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(71.0),
             ))),
-        child: const Text(
+        child:  Text(
           'Log in',
           textAlign: TextAlign.center,
           style: TextStyle(
-            color: Colors.white,
+            color: ColorUtil.getColorScheme(context).surface,
             fontSize: 24,
             fontFamily: 'Montserrat',
             fontWeight: FontWeight.w500,
@@ -78,14 +79,14 @@ class ButtonRounded extends StatelessWidget {
               ),
             ),
           ),
-          const SizedBox(
+           SizedBox(
             width: double.infinity,
             height: 68,
             child: Text(
               'Log in',
               textAlign: TextAlign.center,
               style: TextStyle(
-                color: Colors.white,
+                color: ColorUtil.getColorScheme(context).surface,
                 fontSize: 24,
                 fontFamily: 'Montserrat',
                 fontWeight: FontWeight.w500,

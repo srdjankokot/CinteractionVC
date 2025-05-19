@@ -3,6 +3,9 @@ import 'package:cinteraction_vc/core/extension/context.dart';
 import 'package:cinteraction_vc/core/ui/images/image.dart';
 import 'package:flutter/material.dart';
 
+import '../../../../../../core/app/style.dart';
+import '../../../../../../core/extension/color.dart';
+
 
 const List<String> list = <String>['Jan', 'Feb', 'Mar', 'Apr'];
 const List<String> listUsers = <String>['All Users', 'Olivia Rhyw', 'Ana Wright', 'Alisa Hester'];
@@ -58,7 +61,7 @@ class GraphFilterState extends State<GraphFilter> {
           padding: const EdgeInsets.only( right: 5),
           decoration: ShapeDecoration(
             shape: RoundedRectangleBorder(
-              side: const BorderSide(width: 1, color: ColorConstants.kGray5),
+              side:  BorderSide(width: 1, color: ColorUtil.getColorScheme(context).outline),
               borderRadius: BorderRadius.circular(5),
             ),
           ),
@@ -73,15 +76,14 @@ class GraphFilterState extends State<GraphFilter> {
                     Container(
                       width: 1,
                       margin: const EdgeInsets.only(right: 8, top: 6, bottom: 6),
-                      color: ColorConstants.kGray5,
+                      color: ColorUtil.getColorScheme(context).outline,
                     ),
                     DropdownButton<String>(
                       value: dropdownValue,
                       icon: imageSVGAsset('drop_down_arrow'),
                       elevation: 0,
                       style: context.textTheme.displaySmall?.copyWith(
-                          color: ColorConstants.kPrimaryColor
-                      ),
+                          color: ColorUtil.getColorScheme(context).primary                      ),
                       underline: const SizedBox(),
                       onChanged: (String? newValue) {
                         setState(() {
@@ -116,19 +118,19 @@ class GraphFilterState extends State<GraphFilter> {
               horizontal: 12,
             ),
             decoration: BoxDecoration(
-              color: Colors.blue.withOpacity(.1),
-              border: const Border(
+              color: ColorUtil.getColor(context)!.kBlue.withOpacity(.1),
+              border:  Border(
                 left: BorderSide(
-                  color: Colors.blue,
+                  color: ColorUtil.getColor(context)!.kBlue,
                   width: 8,
                 ),
               ),
             ),
             child: DropdownButton<String>(
               value: dropdownValue,
-              icon: const Icon(Icons.arrow_forward_ios, size: 12),
+              icon:  Icon(Icons.arrow_forward_ios, size: 12),
               elevation: 0,
-              style: const TextStyle(color: Colors.blue),
+              style:  TextStyle(color: ColorUtil.getColor(context)!.kBlue),
               underline: const SizedBox(),
               onChanged: (String? newValue) {},
 

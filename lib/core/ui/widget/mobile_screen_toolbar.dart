@@ -2,6 +2,9 @@ import 'package:cinteraction_vc/core/extension/context.dart';
 import 'package:cinteraction_vc/core/ui/images/image.dart';
 import 'package:flutter/material.dart';
 
+import '../../../assets/colors/Colors.dart';
+import '../../extension/color.dart';
+
 class MobileToolbarScreen extends StatelessWidget {
   final Widget body;
   final String title;
@@ -21,7 +24,7 @@ class MobileToolbarScreen extends StatelessWidget {
           ),
           title: Text(title),
           titleTextStyle:
-              context.textTheme.bodySmall?.copyWith(color: Colors.white)),
+              context.textTheme.bodySmall?.copyWith(color: ColorUtil.getColorScheme(context).surface)),
       body: SafeArea(child: body),
     );
   }

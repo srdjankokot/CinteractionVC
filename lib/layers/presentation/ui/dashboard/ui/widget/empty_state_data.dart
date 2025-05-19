@@ -1,5 +1,9 @@
 import 'package:flutter/material.dart';
 
+import '../../../../../../assets/colors/Colors.dart';
+import '../../../../../../core/app/style.dart';
+import '../../../../../../core/extension/color.dart';
+
 class EmptyStateWidget extends StatelessWidget {
   final String message;
   final IconData icon;
@@ -18,11 +22,11 @@ class EmptyStateWidget extends StatelessWidget {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(icon, size: 64, color: Colors.grey),
+          Icon(icon, size: 64, color: ColorUtil.getColor(context)!.kGrey),
           const SizedBox(height: 16),
           Text(
             message,
-            style: const TextStyle(fontSize: 16, color: Colors.grey),
+            style:  TextStyle(fontSize: 16, color: ColorUtil.getColor(context)!.kGrey),
           ),
           if (onRetry != null) ...[
             const SizedBox(height: 16),

@@ -4,6 +4,7 @@ import 'package:cinteraction_vc/core/ui/images/image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
+import '../../../../../../core/extension/color.dart';
 import '../../../../../../core/ui/widget/content_layout_web.dart';
 import '../../../../../../core/ui/widget/mobile_screen_toolbar.dart';
 import '../../../../cubit/roles/roles_cubit.dart';
@@ -94,10 +95,10 @@ class RolesListLayout extends StatelessWidget {
                   child: SingleChildScrollView(
                     scrollDirection: Axis.vertical,
                     child: Table(
-                      border: const TableBorder(
+                      border:  TableBorder(
                           horizontalInside: BorderSide(
                               width: 0.5,
-                              color: ColorConstants.kGray5,
+                              color: ColorUtil.getColorScheme(context).outline,
                               style: BorderStyle.solid)),
                       columnWidths: const {
                         0: FixedColumnWidth(50),

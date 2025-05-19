@@ -1,4 +1,5 @@
 import 'package:cinteraction_vc/assets/colors/Colors.dart';
+import 'package:cinteraction_vc/core/extension/color.dart';
 import 'package:cinteraction_vc/core/extension/context.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -13,7 +14,7 @@ class AuthorityLevel extends StatelessWidget{
   Widget build(BuildContext context) {
 
     var label = level == 3? 'HIGH': level == 2? 'MEDIUM': 'LOW';
-    var color = level == 3? ColorConstants.kStateSuccess: level == 2? ColorConstants.kEngProgress30: ColorConstants.kPrimaryColor;
+    var color = level == 3? ColorConstants.kStateSuccess: level == 2? ColorUtil.getColorScheme(context).primaryFixed: ColorUtil.getColorScheme(context).primary;
 
     return SizedBox(
         height: 23,
@@ -28,7 +29,7 @@ class AuthorityLevel extends StatelessWidget{
                   Container(
                     height: 12,
                     width: 8,
-                    color: ColorConstants.kWhite50,
+                    color: ColorUtil.getColorScheme(context).surface.withOpacitySafe( 0.5),
                   ),
 
                   Container(
@@ -48,7 +49,7 @@ class AuthorityLevel extends StatelessWidget{
                   Container(
                     height: 12,
                     width: 8,
-                    color: ColorConstants.kWhite50,
+                    color: ColorUtil.getColorScheme(context).surface.withOpacitySafe( 0.5),
                   ),
 
                   Visibility(
@@ -71,7 +72,7 @@ class AuthorityLevel extends StatelessWidget{
                   Container(
                     height: 12,
                     width: 8,
-                    color: ColorConstants.kWhite50,
+                    color: ColorUtil.getColorScheme(context).surface.withOpacitySafe( 0.5),
                   ),
                   Visibility(
                     visible: level>=3,

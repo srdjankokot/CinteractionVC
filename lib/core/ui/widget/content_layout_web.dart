@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import '../../../assets/colors/Colors.dart';
+import '../../extension/color.dart';
 
 class ContentLayoutWeb extends StatelessWidget{
 
@@ -14,7 +14,7 @@ class ContentLayoutWeb extends StatelessWidget{
 
     return Expanded(
         child: Container(
-          color: ColorConstants.kGrey100,
+          color: ColorUtil.getColor(context)!.kGrey[100],
           child: Stack(
               children: [
                 Positioned(
@@ -24,7 +24,7 @@ class ContentLayoutWeb extends StatelessWidget{
                     bottom: 20,
                     child: Container(
                         decoration: BoxDecoration(
-                            color: Colors.white,
+                            color: ColorUtil.getColorScheme(context).surface,
                             borderRadius: BorderRadius.circular(10)
                         ),
                         child: Padding(

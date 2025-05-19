@@ -3,6 +3,10 @@ import 'package:flutter/material.dart';
 import 'package:universal_html/html.dart' as html;
 import 'package:file_picker/file_picker.dart';
 
+import '../../../../../assets/colors/Colors.dart';
+import '../../../../../core/app/style.dart';
+import '../../../../../core/extension/color.dart';
+
 void openLocalFile(BuildContext context, PlatformFile file) async {
   try {
     Uint8List? fileBytes = file.bytes;
@@ -74,7 +78,7 @@ void _showFileDialog(BuildContext context, String fileName, String content,
             ),
           ),
           IconButton(
-            icon: Icon(Icons.download, color: Colors.blue),
+            icon: Icon(Icons.download, color: ColorUtil.getColor(context)!.kBlue),
             onPressed: () {
               _downloadFile(fileName, content, isImage);
             },

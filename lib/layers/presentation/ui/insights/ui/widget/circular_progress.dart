@@ -1,5 +1,6 @@
 import 'dart:math';
 
+import 'package:cinteraction_vc/core/extension/color.dart';
 import 'package:cinteraction_vc/core/extension/context.dart';
 import 'package:cinteraction_vc/layers/presentation/ui/insights/ui/widget/pie_chart.dart';
 import 'package:flutter/material.dart';
@@ -25,15 +26,15 @@ class CircularProgress extends StatelessWidget {
       required this.centerTitle,
       required this.centerSubtitle,
       required this.bigProgressBar,
-      this.bigProgressBarColor = ColorConstants.kStateInfo,
+      required this.bigProgressBarColor,
       required this.smallProgressBar,
-      this.smallProgressBarColor = ColorConstants.kStateSuccess});
+      required this.smallProgressBarColor });
 
   @override
   Widget build(BuildContext context) {
     return Container(
       decoration: ShapeDecoration(
-        color: Colors.white,
+        color: ColorUtil.getColorScheme(context).surface,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(10),
         ),
@@ -81,7 +82,7 @@ class CircularProgress extends StatelessWidget {
                                     percent: bigProgressBar.value / 100,
                                     circularStrokeCap: CircularStrokeCap.round,
                                     progressColor: bigProgressBarColor,
-                                    backgroundColor: ColorConstants.kWhite50,
+                                    backgroundColor: ColorUtil.getColorScheme(context).surface.withOpacitySafe( 0.5),
                                   ),
                                   CircularPercentIndicator(
                                     radius: [
@@ -122,7 +123,7 @@ class CircularProgress extends StatelessWidget {
                                     ),
                                     circularStrokeCap: CircularStrokeCap.round,
                                     progressColor: smallProgressBarColor,
-                                    backgroundColor: ColorConstants.kWhite50,
+                                    backgroundColor: ColorUtil.getColorScheme(context).surface.withOpacitySafe( 0.5),
                                   ),
                                 ],
                               );
@@ -152,9 +153,7 @@ class CircularProgress extends StatelessWidget {
                                     Expanded(
                                       child: Text(
                                         '${bigProgressBar.value}% ${bigProgressBar.name}',
-                                        style: context.textTheme.bodySmall
-                                            ?.copyWith(
-                                                color: ColorConstants.kGray2),
+                                        style: context.titleTheme.bodySmall,
                                       ),
                                     )
                                   ],
@@ -178,9 +177,7 @@ class CircularProgress extends StatelessWidget {
                                     Expanded(
                                       child: Text(
                                         '${smallProgressBar.value}% ${smallProgressBar.name}',
-                                        style: context.textTheme.bodySmall
-                                            ?.copyWith(
-                                                color: ColorConstants.kGray2),
+                                        style: context.titleTheme.bodySmall,
                                       ),
                                     )
                                   ],
@@ -215,8 +212,7 @@ class CircularProgress extends StatelessWidget {
                                   ),
                                   Text(
                                     '${bigProgressBar.value}% ${bigProgressBar.name}',
-                                    style: context.textTheme.bodySmall
-                                        ?.copyWith(color: ColorConstants.kGray2),
+                                    style: context.titleTheme.bodySmall,
                                   )
                                 ],
                               ),
@@ -238,8 +234,7 @@ class CircularProgress extends StatelessWidget {
                                   ),
                                   Text(
                                     '${smallProgressBar.value}% ${smallProgressBar.name}',
-                                    style: context.textTheme.bodySmall
-                                        ?.copyWith(color: ColorConstants.kGray2),
+                                    style: context.titleTheme.bodySmall,
                                   )
                                 ],
                               ),
@@ -265,7 +260,7 @@ class CircularProgress extends StatelessWidget {
                                     percent: bigProgressBar.value / 100,
                                     circularStrokeCap: CircularStrokeCap.round,
                                     progressColor: bigProgressBarColor,
-                                    backgroundColor: ColorConstants.kWhite50,
+                                    backgroundColor: ColorUtil.getColorScheme(context).surface.withOpacitySafe( 0.5),
                                   ),
                                   CircularPercentIndicator(
                                     radius: [
@@ -305,7 +300,7 @@ class CircularProgress extends StatelessWidget {
                                     ),
                                     circularStrokeCap: CircularStrokeCap.round,
                                     progressColor: smallProgressBarColor,
-                                    backgroundColor: ColorConstants.kWhite50,
+                                    backgroundColor: ColorUtil.getColorScheme(context).surface.withOpacitySafe( 0.5),
                                   ),
                                 ],
                               );

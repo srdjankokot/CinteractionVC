@@ -12,7 +12,7 @@ class CallButtonShape extends StatelessWidget {
       {super.key,
       required this.image,
       required this.onClickAction,
-      this.bgColor = ColorConstants.kWhite30,
+      this.bgColor = const Color(0x4DFFFFFF),
       this.size = 53
       });
 

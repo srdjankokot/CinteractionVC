@@ -4,6 +4,8 @@ import 'package:cinteraction_vc/core/extension/string.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
+import '../../../../../core/app/style.dart';
+import '../../../../../core/extension/color.dart';
 import '../../../cubit/chat/chat_cubit.dart';
 import '../../../cubit/chat/chat_state.dart';
 import '../../profile/ui/widget/user_image.dart';
@@ -99,7 +101,7 @@ class _UsersListViewState extends State<UsersListView> {
             child: Text(
               'No users found',
               style:
-                  context.textTheme.titleMedium?.copyWith(color: Colors.grey),
+                  context.textTheme.titleMedium?.copyWith(color: ColorUtil.getColor(context)!.kGrey),
             ),
           )
         : ListView.builder(
@@ -130,7 +132,7 @@ class _UsersListViewState extends State<UsersListView> {
                       print('userEmail: ${user.email}');
                     },
                     child: Container(
-                      color: isSelected ? Colors.blue[100] : Colors.white,
+                      color: isSelected ? ColorUtil.getColor(context)!.kBlue[100] : ColorUtil.getColorScheme(context).surface,
                       child: Padding(
                         padding: const EdgeInsets.all(4.0),
                         child: Row(
@@ -150,7 +152,7 @@ class _UsersListViewState extends State<UsersListView> {
                                       child: Container(
                                         width: 10.0,
                                         height: 10.0,
-                                        color: Colors.green,
+                                        color: ColorConstants.kGreen,
                                       ),
                                     ),
                                   ),

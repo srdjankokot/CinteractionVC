@@ -5,24 +5,23 @@ import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 
 import '../../../../../../assets/colors/Colors.dart';
+import '../../../../../../core/extension/color.dart';
 import 'graph_filter.dart';
 
 class GetAudiBarChart extends StatelessWidget {
-  final Color red = ColorConstants.kStateError;
-  final Color green = ColorConstants.kStateSuccess;
-  final Color blue = ColorConstants.kStateInfo;
 
   final String title;
 
-  const GetAudiBarChart({super.key, required this.title});
+   GetAudiBarChart({super.key, required this.title});
 
   final numberOfItems = 12;
 
   @override
   Widget build(BuildContext context) {
+
     return Container(
         decoration: ShapeDecoration(
-          color: Colors.white,
+          color: ColorUtil.getColorScheme(context).surface,
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(10),
           ),
@@ -87,7 +86,7 @@ class GetAudiBarChart extends StatelessWidget {
                             value % 10 == 0,
                             getDrawingHorizontalLine: (value) =>
                                 FlLine(
-                                  color: ColorConstants.kSecondaryColor
+                                  color: ColorUtil.getColorScheme(context).secondary
                                       .withOpacity(0.1),
                                   strokeWidth: 1,
                                 ),
@@ -97,7 +96,7 @@ class GetAudiBarChart extends StatelessWidget {
                             show: false,
                           ),
                           groupsSpace: barsSpace,
-                          barGroups: getData(barsWidth, barsSpace),
+                          barGroups: getData(context, barsWidth, barsSpace),
                           minY: 0,
                           maxY: 1),
                     );
@@ -196,7 +195,13 @@ class GetAudiBarChart extends StatelessWidget {
     );
   }
 
-  List<BarChartGroupData> getData(double barsWidth, double barsSpace) {
+  List<BarChartGroupData> getData(BuildContext context, double barsWidth, double barsSpace) {
+
+    final Color red = ColorUtil.getColorScheme(context).error;
+    final Color green = ColorConstants.kStateSuccess;
+    final Color blue = ColorConstants.kStateInfo;
+
+
     List<BarChartGroupData> list = [];
 
     for (int i = 1; i <= numberOfItems; i++) {

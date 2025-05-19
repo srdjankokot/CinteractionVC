@@ -1,6 +1,8 @@
 import 'package:cinteraction_vc/core/extension/string.dart';
 import 'package:flutter/material.dart';
 
+import '../../../../../../assets/colors/Colors.dart';
+import '../../../../../../core/extension/color.dart';
 import '../../../../../domain/entities/user.dart';
 import '../../../profile/ui/widget/user_image.dart';
 
@@ -34,10 +36,10 @@ class MembersWidget extends StatelessWidget {
                       decoration: ShapeDecoration(
                         color: const Color(0xFFF2F3F6),
                         shape: RoundedRectangleBorder(
-                          side: const BorderSide(
+                          side:  BorderSide(
                             width: 2,
                             strokeAlign: BorderSide.strokeAlignOutside,
-                            color: Colors.white,
+                            color: ColorUtil.getColorScheme(context).surface,
                           ),
                           borderRadius: BorderRadius.circular(200),
                         ),

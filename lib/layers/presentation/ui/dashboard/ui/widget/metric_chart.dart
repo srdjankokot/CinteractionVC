@@ -8,6 +8,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
 import '../../../../../../assets/colors/Colors.dart';
+import '../../../../../../core/extension/color.dart';
 import '../../../../../../core/ui/images/image.dart';
 
 class MetricGraph extends StatelessWidget {
@@ -29,11 +30,11 @@ class MetricGraph extends StatelessWidget {
 
     var statusColor = values.first < values.last
         ? ColorConstants.kStateSuccess
-        : ColorConstants.kStateError;
+        : ColorUtil.getColorScheme(context).error;
 
     return Container(
         decoration: ShapeDecoration(
-          color: Colors.white,
+          color: ColorUtil.getColorScheme(context).surface,
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(10),
           ),

@@ -4,6 +4,8 @@ import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import '../../../../assets/colors/Colors.dart';
+import '../../../../core/app/style.dart';
+import '../../../../core/extension/color.dart';
 import '../../../../core/ui/images/image.dart';
 
 class LinkText extends StatelessWidget {
@@ -97,7 +99,7 @@ class LinkText extends StatelessWidget {
                           Text(
                             "${fileData['fileName']}",
                             style: context.primaryTextTheme.bodySmall
-                                ?.copyWith(color: ColorConstants.kGray600),
+                                ?.copyWith(color: ColorUtil.getColor(context)!.kGrey[600]),
                             softWrap: true,
                           )
                         ],
@@ -116,7 +118,7 @@ class LinkText extends StatelessWidget {
                     Text(
                       fullUrl,
                       style: context.primaryTextTheme.bodySmall
-                          ?.copyWith(color: ColorConstants.kGray600),
+                          ?.copyWith(color: ColorUtil.getColor(context)!.kGrey[600]),
                       softWrap: true,
                     )
                   ],
@@ -127,7 +129,7 @@ class LinkText extends StatelessWidget {
       return Text(
         text,
         style: context.primaryTextTheme.bodySmall
-            ?.copyWith(color: ColorConstants.kGray600),
+            ?.copyWith(color: ColorUtil.getColor(context)!.kGrey[600]),
         softWrap: true,
       );
     }
@@ -153,8 +155,8 @@ class LinkText extends StatelessWidget {
       spans.add(
         TextSpan(
           text: url,
-          style: const TextStyle(
-              color: Colors.blue, decoration: TextDecoration.underline),
+          style:  TextStyle(
+              color: ColorUtil.getColor(context)!.kBlue, decoration: TextDecoration.underline),
           recognizer: TapGestureRecognizer()
             ..onTap = () async {
               print("on tap url");
@@ -179,7 +181,7 @@ class LinkText extends StatelessWidget {
 
     return TextSpan(
       style: context.primaryTextTheme.bodySmall
-          ?.copyWith(color: ColorConstants.kGray600),
+          ?.copyWith(color: ColorUtil.getColor(context)!.kGrey[600]),
       children: spans,
     );
   }

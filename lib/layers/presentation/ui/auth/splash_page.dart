@@ -4,6 +4,8 @@ import 'package:cinteraction_vc/core/ui/images/image.dart';
 import 'package:flutter/material.dart';
 
 import '../../../../../core/navigation/route.dart';
+import '../../../../assets/colors/Colors.dart';
+import '../../../../core/extension/color.dart';
 
 class SplashPage extends StatefulWidget {
   const SplashPage({super.key});
@@ -25,7 +27,7 @@ class _SplashPageState extends State<SplashPage> {
   Widget build(BuildContext context) {
 
     return  Container(
-      decoration:  const BoxDecoration(color: Colors.white),
+      decoration:   BoxDecoration(color: ColorUtil.getColorScheme(context).surface),
       child: Center(child: imageSVGAsset('original_long_logo') as Widget)
     );
 

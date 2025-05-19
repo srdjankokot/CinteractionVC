@@ -1,4 +1,5 @@
 import 'package:cinteraction_vc/assets/colors/Colors.dart';
+import 'package:cinteraction_vc/core/extension/color.dart';
 import 'package:cinteraction_vc/core/extension/context.dart';
 import 'package:cinteraction_vc/core/ui/widget/loading_overlay.dart';
 import 'package:flutter/material.dart';
@@ -93,14 +94,14 @@ class _MeetingListLayoutState extends State<MeetingListLayout> {
                                               Expanded(
                                                 flex: 1,
                                                 child: Container(
-                                                    color: ColorConstants
-                                                        .kPrimaryColor
-                                                        .withOpacity(0.05)),
+                                                    color:
+                                                        ColorUtil.getColorScheme(context).primary
+                                                        .withOpacitySafe(0.05)),
                                               ),
                                               Container(
                                                   height: 2,
-                                                  color: ColorConstants
-                                                      .kPrimaryColor),
+                                                  color:
+                                                      ColorUtil.getColorScheme(context).primary),
                                             ],
                                           ),
                                         ),
@@ -110,15 +111,7 @@ class _MeetingListLayoutState extends State<MeetingListLayout> {
                                         width: 200,
                                         child: Center(
                                           child: Text('Past Meetings',
-                                              style: context
-                                                  .textTheme.displaySmall
-                                                  ?.copyWith(
-                                                color:
-                                                    state.isShowingPastMeetings
-                                                        ? ColorConstants
-                                                            .kPrimaryColor
-                                                        : ColorConstants.kGray2,
-                                              )),
+                                              style: context.titleTheme.displaySmall?.copyWith(color: state.isShowingPastMeetings ? ColorUtil.getColorScheme(context).primary : null,)),
                                         ),
                                       ),
                                     ],
@@ -142,14 +135,14 @@ class _MeetingListLayoutState extends State<MeetingListLayout> {
                                               Expanded(
                                                 flex: 1,
                                                 child: Container(
-                                                    color: ColorConstants
-                                                        .kPrimaryColor
-                                                        .withOpacity(0.05)),
+                                                    color:
+                                                        ColorUtil.getColorScheme(context).primary
+                                                        .withOpacitySafe(0.05)),
                                               ),
                                               Container(
                                                   height: 2,
-                                                  color: ColorConstants
-                                                      .kPrimaryColor),
+                                                  color:
+                                                      ColorUtil.getColorScheme(context).primary),
                                             ],
                                           ),
                                         ),
@@ -160,13 +153,13 @@ class _MeetingListLayoutState extends State<MeetingListLayout> {
                                         child: Center(
                                           child: Text('Schedule Meeting',
                                               style: context
-                                                  .textTheme.displaySmall
+                                                  .titleTheme.displaySmall
                                                   ?.copyWith(
                                                 color:
                                                     !state.isShowingPastMeetings
-                                                        ? ColorConstants
-                                                            .kPrimaryColor
-                                                        : ColorConstants.kGray2,
+                                                        ?
+                                                            ColorUtil.getColorScheme(context).primary
+                                                        : null,
                                               )),
                                         ),
                                       ),
@@ -194,7 +187,7 @@ class _MeetingListLayoutState extends State<MeetingListLayout> {
                   }, children: [
                     TableRow(
                         decoration:
-                            const BoxDecoration(color: Color(0xFFF0F0F0)),
+                              BoxDecoration(color: ColorUtil.getColorScheme(context).surface.withOpacitySafe( 0.4)),
                         children: [
                           const TableCell(
                               verticalAlignment:
@@ -256,10 +249,10 @@ class _MeetingListLayoutState extends State<MeetingListLayout> {
                       controller: _controller,
                       scrollDirection: Axis.vertical,
                       child: Table(
-                        border: const TableBorder(
+                        border:  TableBorder(
                             horizontalInside: BorderSide(
                                 width: 0.5,
-                                color: ColorConstants.kGray5,
+                                color: ColorUtil.getColorScheme(context).outline,
                                 style: BorderStyle.solid)),
                         columnWidths: const {
                           1: FixedColumnWidth(200),
@@ -404,12 +397,11 @@ class _MeetingListLayoutState extends State<MeetingListLayout> {
                                         Expanded(
                                           flex: 1,
                                           child: Container(
-                                              color: ColorConstants.kPrimaryColor
-                                                  .withOpacity(0.05)),
+                                              color: ColorUtil.getColorScheme(context).primary                                                  .withOpacity(0.05)),
                                         ),
                                         Container(
                                             height: 2,
-                                            color: ColorConstants.kPrimaryColor),
+                                            color: ColorUtil.getColorScheme(context).primary),
                                       ],
                                     ),
                                   ),
@@ -418,11 +410,10 @@ class _MeetingListLayoutState extends State<MeetingListLayout> {
                                   height: 52,
                                   child: Center(
                                     child: Text('Past Meetings',
-                                        style: context.textTheme.labelMedium
+                                        style: context.titleTheme.labelMedium
                                             ?.copyWith(
                                           color: state.isShowingPastMeetings
-                                              ? ColorConstants.kPrimaryColor
-                                              : ColorConstants.kGray2,
+                                              ? ColorUtil.getColorScheme(context).primary  : null,
                                         )),
                                   ),
                                 ),
@@ -445,12 +436,11 @@ class _MeetingListLayoutState extends State<MeetingListLayout> {
                                         Expanded(
                                           flex: 1,
                                           child: Container(
-                                              color: ColorConstants.kPrimaryColor
-                                                  .withOpacity(0.05)),
+                                              color: ColorUtil.getColorScheme(context).primary                                                  .withOpacity(0.05)),
                                         ),
                                         Container(
                                             height: 2,
-                                            color: ColorConstants.kPrimaryColor),
+                                            color: ColorUtil.getColorScheme(context).primary),
                                       ],
                                     ),
                                   ),
@@ -459,11 +449,10 @@ class _MeetingListLayoutState extends State<MeetingListLayout> {
                                   height: 52,
                                   child: Center(
                                     child: Text('Schedule Meeting',
-                                        style: context.textTheme.labelMedium
+                                        style: context.titleTheme.labelMedium
                                             ?.copyWith(
                                           color: !state.isShowingPastMeetings
-                                              ? ColorConstants.kPrimaryColor
-                                              : ColorConstants.kGray2,
+                                              ? ColorUtil.getColorScheme(context).primary  : null,
                                         )),
                                   ),
                                 ),

@@ -7,6 +7,8 @@ import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
+import '../../../../../core/app/style.dart';
+import '../../../../../core/extension/color.dart';
 import '../../chat/link_text.dart';
 import '../../profile/ui/widget/user_image.dart';
 
@@ -54,7 +56,7 @@ class ChatMessageWidget extends StatelessWidget {
                     Text(
                       DateFormat('hh:mm a').format(message.time),
                       style: context.primaryTextTheme.bodySmall
-                          ?.copyWith(color: ColorConstants.kGray600),
+                          ?.copyWith(color: ColorUtil.getColor(context)!.kGrey[600]),
                     ),
                   ],
                 ),
@@ -90,13 +92,13 @@ class ChatMessageWidget extends StatelessWidget {
                                     ? MainAxisAlignment.end
                                     : MainAxisAlignment.start,
                                 children: [
-                                  const Icon(Icons.insert_drive_file,
-                                      size: 24, color: Colors.blue),
+                                   Icon(Icons.insert_drive_file,
+                                      size: 24, color: ColorUtil.getColor(context)!.kBlue),
                                   const SizedBox(width: 8),
                                   Text(
                                     file.name,
                                     style: context.primaryTextTheme.bodyMedium
-                                        ?.copyWith(color: Colors.blue),
+                                        ?.copyWith(color: ColorUtil.getColor(context)!.kBlue),
                                   ),
                                 ],
                               ),

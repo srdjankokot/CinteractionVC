@@ -1,4 +1,7 @@
+import 'package:cinteraction_vc/core/extension/color.dart';
 import 'package:flutter/material.dart';
+
+import '../../../assets/colors/Colors.dart';
 
 class LoadingOverlay extends StatelessWidget {
   const LoadingOverlay({
@@ -19,9 +22,9 @@ class LoadingOverlay extends StatelessWidget {
     return Stack(
       children: [
         child,
-        const ColoredBox(
-          color: Colors.black54,
-          child: Center(
+        ColoredBox(
+          color: ColorUtil.getColorScheme(context).outlineVariant.withOpacitySafe(0.38),
+          child:  const Center(
             child: CircularProgressIndicator(),
           ),
         ),

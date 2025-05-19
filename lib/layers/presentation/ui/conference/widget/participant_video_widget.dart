@@ -10,6 +10,7 @@ import 'package:flutter/material.dart';
 import 'package:webrtc_interface/webrtc_interface.dart';
 
 import '../../../../../assets/colors/Colors.dart';
+import '../../../../../core/extension/color.dart';
 import '../../../../../core/ui/images/image.dart';
 import '../../../../../core/ui/widget/engagement_progress.dart';
 import '../../../../../core/util/util.dart';
@@ -63,8 +64,7 @@ class ParticipantVideoWidget extends StatelessWidget {
                     placeholderBuilder: (context) {
                       return Center(
                           child: CircleAvatar(
-                            backgroundColor:
-                            ([...ColorConstants.kStateColors]..shuffle()).first,
+                            backgroundColor: ColorUtil.getColorScheme(context).primaryFixed,
                             radius: [width, height].reduce(min) / 4,
                             child: Text(remoteStream.publisherName.getInitials(),
                                 style: context.primaryTextTheme.titleLarge?.copyWith(
@@ -73,7 +73,7 @@ class ParticipantVideoWidget extends StatelessWidget {
                           )
 
                         // Text("Video Paused By ${remoteStream.publisherName!}",
-                        //     style: const TextStyle(color: Colors.white)),
+                        //     style: const TextStyle(color: ColorUtil.getColorScheme(context).surface)),
                       );
                     },
                     filterQuality: FilterQuality.none,
@@ -90,7 +90,7 @@ class ParticipantVideoWidget extends StatelessWidget {
                     duration: const Duration(milliseconds: 100),
                     decoration: BoxDecoration(
                       border: Border.all(
-                        color: remoteStream.isTalking == true? Colors.red : Colors.transparent,
+                        color: remoteStream.isTalking == true? ColorUtil.getColorScheme(context).error : Colors.transparent,
                         width: 4,
                       ),
                     ),
@@ -149,7 +149,7 @@ class ParticipantVideoWidget extends StatelessWidget {
             Positioned(
                 left: 10,
                 top: 10,
-                child: Text('${remoteStream.publisherName}', style: context.textTheme.displayLarge?.copyWith(color: Colors.white),)),
+                child: Text('${remoteStream.publisherName}', style: context.textTheme.displayLarge?.copyWith(color: ColorUtil.getColorScheme(context).surface),)),
 
 
             Positioned(
@@ -169,7 +169,7 @@ class ParticipantVideoWidget extends StatelessWidget {
 
                        Visibility(
                         visible: remoteStream.isHandUp == true,
-                            child: const Icon(Icons.waving_hand_outlined, color: Colors.white),
+                            child:  Icon(Icons.waving_hand_outlined, color: ColorUtil.getColorScheme(context).surface),
                        )
                   ],
                 )
@@ -198,7 +198,7 @@ class ParticipantVideoWidget extends StatelessWidget {
       child: Container(
         decoration: ShapeDecoration(
           shape: RoundedRectangleBorder(
-            side: const BorderSide(width: 2, color: Colors.white),
+            side:  BorderSide(width: 2, color: ColorUtil.getColorScheme(context).surface),
             borderRadius: BorderRadius.circular(6),
           ),
         ),
@@ -257,7 +257,7 @@ class ParticipantVideoWidget extends StatelessWidget {
             Positioned(
                 left: 10,
                 top: 10,
-                child: Text('${remoteStream.publisherName}', style: context.textTheme.displayLarge?.copyWith(color: Colors.white),)),
+                child: Text('${remoteStream.publisherName}', style: context.textTheme.displayLarge?.copyWith(color: ColorUtil.getColorScheme(context).surface),)),
 
 
             Positioned(
@@ -277,7 +277,7 @@ class ParticipantVideoWidget extends StatelessWidget {
 
                     Visibility(
                       visible: remoteStream.isHandUp == true,
-                      child: const Icon(Icons.waving_hand_outlined, color: Colors.white),
+                      child:  Icon(Icons.waving_hand_outlined, color: ColorUtil.getColorScheme(context).surface),
                     )
                   ],
                 )
