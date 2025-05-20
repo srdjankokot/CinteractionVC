@@ -16,6 +16,12 @@
       "region":"europe-west1"
     }
   },
+
+  "appdistribution": {
+    "app": "1:86369065781:android:a8fcc67f4fbfce4d9d8a7c",
+    "groups": ["Tester"]
+  },
+
   "flutter":{
     "platforms":{
       "android":{

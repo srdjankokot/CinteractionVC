@@ -1,6 +1,4 @@
 import 'package:flutter/services.dart';
-import 'package:go_router/go_router.dart';
-
 class DeepLinkHandler {
   static const _channel = MethodChannel('app.channel.uri');
 

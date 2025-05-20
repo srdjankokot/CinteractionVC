@@ -2,6 +2,7 @@ import 'dart:math';
 
 import 'package:cinteraction_vc/core/extension/context.dart';
 import 'package:cinteraction_vc/core/extension/string.dart';
+import 'package:cinteraction_vc/core/util/platform/platform.dart';
 import 'package:cinteraction_vc/layers/presentation/ui/profile/ui/widget/user_image.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -9,11 +10,9 @@ import 'package:flutter_webrtc/flutter_webrtc.dart';
 import 'package:flutter/material.dart';
 import 'package:webrtc_interface/webrtc_interface.dart';
 
-import '../../../../../assets/colors/Colors.dart';
 import '../../../../../core/ui/images/image.dart';
 import '../../../../../core/ui/widget/engagement_progress.dart';
 import '../../../../../core/util/util.dart';
-import '../../../cubit/conference/conference_cubit.dart';
 
 class ParticipantVideoWidget extends StatelessWidget {
   const ParticipantVideoWidget(
@@ -58,30 +57,47 @@ class ParticipantVideoWidget extends StatelessWidget {
                   // )
 
                   ,
-                  child: RTCVideoView(
-                    remoteStream.videoRenderer,
-                    placeholderBuilder: (context) {
-                      return Center(
-                          child: CircleAvatar(
-                            backgroundColor:
-                            ([...ColorConstants.kStateColors]..shuffle()).first,
-                            radius: [width, height].reduce(min) / 4,
-                            child: Text(remoteStream.publisherName.getInitials(),
-                                style: context.primaryTextTheme.titleLarge?.copyWith(
-                                    fontSize: [width, height].reduce(min) / 8,
-                                    fontWeight: FontWeight.bold)),
-                          )
+                  child:
 
-                        // Text("Video Paused By ${remoteStream.publisherName!}",
-                        //     style: const TextStyle(color: Colors.white)),
-                      );
-                    },
-                    filterQuality: FilterQuality.none,
-                    objectFit: screenShare
-                        ? RTCVideoViewObjectFit.RTCVideoViewObjectFitContain
-                        : RTCVideoViewObjectFit.RTCVideoViewObjectFitCover,
-                    mirror: !screenShare,
-                  ),
+                      getVideoView(context, remoteStream.videoRenderer, screenShare, width, height, remoteStream.id, remoteStream.publisherName)
+
+                  // CrossPlatformVideoView(
+                  //   remoteStream.videoRenderer,
+                  //   width: width,
+                  //   height: height,
+                  //   id: remoteStream.id,
+                  //   publisherName: remoteStream.publisherName,
+                  //   mirror: screenShare,
+                  //
+                  //
+                  // )
+
+
+
+                  // RTCVideoView(
+                  //   remoteStream.videoRenderer,
+                  //   placeholderBuilder: (context) {
+                  //     return Center(
+                  //         child: CircleAvatar(
+                  //           backgroundColor:
+                  //           ([...ColorConstants.kStateColors]..shuffle()).first,
+                  //           radius: [width, height].reduce(min) / 4,
+                  //           child: Text(remoteStream.publisherName.getInitials(),
+                  //               style: context.primaryTextTheme.titleLarge?.copyWith(
+                  //                   fontSize: [width, height].reduce(min) / 8,
+                  //                   fontWeight: FontWeight.bold)),
+                  //         )
+                  //
+                  //       // Text("Video Paused By ${remoteStream.publisherName!}",
+                  //       //     style: const TextStyle(color: Colors.white)),
+                  //     );
+                  //   },
+                  //   filterQuality: FilterQuality.none,
+                  //   objectFit: screenShare
+                  //       ? RTCVideoViewObjectFit.RTCVideoViewObjectFitContain
+                  //       : RTCVideoViewObjectFit.RTCVideoViewObjectFitCover,
+                  //   mirror: !screenShare,
+                  // ),
                 ),
 
                 // Border overlay (doesn't affect video size)
@@ -100,51 +116,51 @@ class ParticipantVideoWidget extends StatelessWidget {
               ],
             ),
             // Text('${remoteStream.videoRenderer.videoWidth}:${remoteStream.videoRenderer.videoHeight}'),
-            // Positioned(
-            //     top: 20,
-            //     right: 24,
-            //     child: Row(
-            //       children: [
-            //         Visibility(
-            //           visible: width > 200,
-            //           child: EngagementProgress(
-            //               engagement: remoteStream.engagement ?? 0),
-            //         ),
-            //       ],
-            //     )),
-
-
             Positioned(
-                right: 0,
+                top: 20,
+                right: 24,
                 child: Row(
                   children: [
-                    // EngagementProgress(
-                    //     engagement: remoteStream.engagement ?? 0),
-                    PopupMenuButton<String>(
-                      onSelected: (e) async {
-                        switch (e) {
-                          case 'Mute/UnMute':
-                            context.read<ConferenceCubit>().muteByID(remoteStream.id);
-                            break;
-                          case 'Kick':
-                            context.read<ConferenceCubit>().kick(remoteStream.id);
-                            break;
-                          case 'UnPublish':
-                            context.read<ConferenceCubit>().unPublishById(remoteStream.id);
-                            break;
-                        }
-                      },
-                      itemBuilder: (BuildContext context) {
-                        return {'Mute/UnMute','Kick'}.map((String choice) {
-                          return PopupMenuItem<String>(
-                            value: choice,
-                            child: Text(choice),
-                          );
-                        }).toList();
-                      },
+                    Visibility(
+                      visible: width > 200,
+                      child: EngagementProgress(
+                          engagement: remoteStream.engagement ?? 0),
                     ),
                   ],
                 )),
+
+
+            // Positioned(
+            //     right: 0,
+            //     child: Row(
+            //       children: [
+            //         // EngagementProgress(
+            //         //     engagement: remoteStream.engagement ?? 0),
+            //         PopupMenuButton<String>(
+            //           onSelected: (e) async {
+            //             switch (e) {
+            //               case 'Mute/UnMute':
+            //                 context.read<ConferenceCubit>().muteByID(remoteStream.id);
+            //                 break;
+            //               case 'Kick':
+            //                 context.read<ConferenceCubit>().kick(remoteStream.id);
+            //                 break;
+            //               case 'UnPublish':
+            //                 context.read<ConferenceCubit>().unPublishById(remoteStream.id);
+            //                 break;
+            //             }
+            //           },
+            //           itemBuilder: (BuildContext context) {
+            //             return {'Mute/UnMute','Kick'}.map((String choice) {
+            //               return PopupMenuItem<String>(
+            //                 value: choice,
+            //                 child: Text(choice),
+            //               );
+            //             }).toList();
+            //           },
+            //         ),
+            //       ],
+            //     )),
 
             Positioned(
                 left: 10,
@@ -209,9 +225,9 @@ class ParticipantVideoWidget extends StatelessWidget {
               child: Visibility(
                 visible: remoteStream.isVideoMuted == false,
                 replacement:
-                Center(child: UserImage.large([remoteStream.getUserImageDTO()]))
-                ,
-                child: RTCVideoView(
+                Center(child: UserImage.large([remoteStream.getUserImageDTO()])), child:
+
+                RTCVideoView(
                   remoteStream.videoRenderer,
                   placeholderBuilder: (context) {
                     return Text('data');
