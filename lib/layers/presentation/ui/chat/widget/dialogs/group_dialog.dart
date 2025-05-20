@@ -119,6 +119,7 @@ class CreateGroupDialog extends StatelessWidget {
             // await Future.delayed(const Duration(seconds: 2));
 
             getIt.get<ChatCubit>().changeListType(ListType.Chats);
+            Navigator.of(context).pop();
           },
           child: const Text("Create"),
         ),
