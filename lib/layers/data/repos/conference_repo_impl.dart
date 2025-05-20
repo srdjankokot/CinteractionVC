@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:convert';
+import 'dart:typed_data';
 
 import 'package:cinteraction_vc/core/io/network/models/participant.dart';
 import 'package:cinteraction_vc/core/util/util.dart';
@@ -14,6 +15,7 @@ import 'package:file_picker/file_picker.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_webrtc/flutter_webrtc.dart';
 import 'package:logging/logging.dart';
+import 'package:universal_html/html.dart' as html;
 
 import 'package:webrtc_interface/webrtc_interface.dart';
 
@@ -24,6 +26,7 @@ import '../../../core/janus/janus_client.dart';
 import '../../../core/util/conf.dart';
 
 import '../../../core/util/debouncer.dart';
+import '../../../core/util/platform/platform.dart';
 import '../../domain/entities/user.dart';
 import '../../domain/source/api.dart';
 
@@ -1455,7 +1458,7 @@ class ConferenceRepoImpl extends ConferenceRepo {
   }
 
   _getEngagement() async {
-    return;
+    // return;
 
     if (engagementIsRunning || (localVideoRenderer.isVideoMuted ?? false))
       return;
@@ -1463,18 +1466,15 @@ class ConferenceRepoImpl extends ConferenceRepo {
     engagementIsRunning = true;
 
     try {
-      var image = await localVideoRenderer.mediaStream
-          ?.getVideoTracks()
-          .first
-          .captureFrame();
+      // var image = await localVideoRenderer.mediaStream
+      //     ?.getVideoTracks()
+      //     .first
+      //     .captureFrame();
+
+      var image = await captureFrameFromVideo(localVideoRenderer);
+
 
       var img = base64Encode(image!.asUint8List().toList()).toString();
-
-      //make image 256x256
-      // final decoded = decodePng(image!.asUint8List());
-      // final resized = copyResizeCropSquare(decoded!,  256);
-      // final resizedByteData = encodePng(resized);
-      // var img = base64Encode(resizedByteData);
 
       final engagement = await _api.getEngagement(
           averageAttention: 0,

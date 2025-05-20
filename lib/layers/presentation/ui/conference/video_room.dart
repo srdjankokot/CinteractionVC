@@ -15,6 +15,7 @@ import 'package:flutter_webrtc/flutter_webrtc.dart';
 import '../../../../core/io/network/models/data_channel_command.dart';
 import '../../../../core/navigation/route.dart';
 import '../../../../core/ui/images/image.dart';
+import '../../../../core/ui/widget/engagement_progress.dart';
 import '../../../../core/util/util.dart';
 import '../../cubit/app/app_cubit.dart';
 import '../../cubit/app/app_state.dart';
@@ -192,6 +193,31 @@ class VideoRoomPage extends StatelessWidget {
                                             child: LayoutBuilder(
                                               builder: (context, constraints) {
                                                 double expandedHeight = constraints.maxHeight;
+
+
+                                                return Stack(
+                                                  children: [
+                                                    getLayout(
+                                                        context,
+                                                        items,
+                                                        state.isGridLayout,
+                                                        borderWidth,
+                                                        expandedHeight,
+                                                        state.showingParticipants ||
+                                                            state.showingChat),
+
+                                                    Positioned(
+                                                      bottom: 20,
+                                                      right: 24,
+                                                      child: EngagementProgress(
+                                                        engagement: state.avgEngagement ?? 0,
+                                                        width: 266,
+                                                        height: 28,
+                                                      ),
+                                                    ),
+                                                  ],
+                                                );
+
                                                 return getLayout(
                                                     context,
                                                     items,
@@ -212,6 +238,7 @@ class VideoRoomPage extends StatelessWidget {
                                               visible: state.showingParticipants,
                                               child: getParticipantsView(context, chatContainedWidth, contributors, contributorsHandUp)
                                           ),
+
                                         ],
                                       ),
                                     ),

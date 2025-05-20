@@ -1,5 +1,14 @@
+import 'dart:convert';
 import 'dart:html' as html;
+import 'dart:typed_data';
 
+import 'package:flutter/cupertino.dart';
+
+import 'dart:ui_web' as ui; // Only works on web
+
+import 'package:flutter_webrtc/flutter_webrtc.dart';
+
+import '../util.dart';
 void redirectToDesktopApp() {
   var os = detectWebOS();
 
@@ -58,7 +67,6 @@ void startMeetOnDesktop(int roomId) {
   });
 }
 
-
 String detectWebOS() {
   final ua = html.window.navigator.userAgent.toLowerCase();
 
@@ -68,4 +76,76 @@ String detectWebOS() {
   if (ua.contains('android')) return 'Android';
   if (ua.contains('iphone') || ua.contains('ipad')) return 'iOS';
   return 'Unknown';
+}
+
+Widget getVideoView(BuildContext context, RTCVideoRenderer renderer, bool mirror, double width, double height, String id, String publisherName) {
+  ui.platformViewRegistry.registerViewFactory(id, (int _) {
+    final html.MediaStream nativeStream = getNativeMediaStream(renderer.srcObject!);
+
+    final video = html.VideoElement()
+      ..id = id
+      ..autoplay = true
+      ..muted = true
+      ..srcObject = nativeStream
+      ..style.objectFit = _boxFitToCss(
+                mirror
+                    ? BoxFit.contain
+                    : BoxFit.cover)
+      ..style.transform = mirror ? 'scaleX(-1)' : 'none'
+      ..style.width = '100%'
+      ..style.height = '100%';
+
+    return video;
+  });
+
+  return HtmlElementView(viewType: id);
+}
+
+String _boxFitToCss(BoxFit fit) {
+  switch (fit) {
+    case BoxFit.contain:
+      return 'contain';
+    case BoxFit.cover:
+      return 'cover';
+    case BoxFit.fill:
+      return 'fill';
+    case BoxFit.none:
+      return 'none';
+    default:
+      return 'cover';
+  }
+}
+
+html.MediaStream getNativeMediaStream(MediaStream stream) {
+  // This cast is valid only on Web, where MediaStreamWeb wraps html.MediaStream
+  final dynamic anyStream = stream;
+  final nativeStream = anyStream.jsStream; // This is safe on Web only
+  if (nativeStream is html.MediaStream) {
+    return nativeStream;
+  }
+  throw Exception("Could not extract native MediaStream");
+}
+
+Future<ByteBuffer?> captureFrameFromVideo(StreamRenderer renderer, {int width = 640, int height = 360}) async {
+  final video = html.document.getElementById(renderer.id) as html.VideoElement?;
+
+  if (video == null || video.videoWidth == 0 || video.videoHeight == 0) {
+    throw Exception("Video element not found or not ready (ID: ${renderer.id})");
+  }
+
+  final canvas = html.CanvasElement(width: width, height: height);
+  final ctx = canvas.context2D;
+
+  // Draw video onto scaled canvas (auto-resizes to 640x360)
+  ctx.drawImageScaled(video, 0, 0, width, height);
+
+  // Convert to compressed JPEG (quality = 0.7)
+  final blob = await canvas.toBlob('image/jpeg', 0.7);
+  final reader = html.FileReader();
+  reader.readAsDataUrl(blob!);
+  await reader.onLoad.first;
+
+  final base64 = (reader.result as String).split(',').last;
+  final bytes = base64Decode(base64);
+  return bytes.buffer;
 }
