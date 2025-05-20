@@ -72,9 +72,8 @@ class _ChatsListViewState extends State<ChatsListView> {
       // });
 
       WidgetsBinding.instance.addPostFrameCallback((_) {
-        context
-            .read<ChatCubit>()
-            .getChatDetails(widget.state.currentChat?.id, 1);
+        context.read<ChatCubit>().setCurrentChat(sortedChats.first);
+        context.read<ChatCubit>().getChatDetails(sortedChats.first.id, 1);
       });
     } else {
       // setState(() {
@@ -146,6 +145,16 @@ class _ChatsListViewState extends State<ChatsListView> {
 
   @override
   Widget build(BuildContext context) {
+    List<ChatDto> sortedChats = List.from(widget.state.chats ?? [])
+      ..sort((a, b) {
+        if (a.haveUnread && !b.haveUnread) return -1;
+        if (!a.haveUnread && b.haveUnread) return 1;
+
+        DateTime? aTime = a.lastMessage?.createdAt ?? a.createdAt;
+        DateTime? bTime = b.lastMessage?.createdAt ?? b.createdAt;
+
+        return (bTime ?? DateTime(0)).compareTo(aTime ?? DateTime(0));
+      });
     return widget.state.chats == null || widget.state.chats!.isEmpty
         ? Center(
             child: Text(
@@ -154,195 +163,174 @@ class _ChatsListViewState extends State<ChatsListView> {
                   context.textTheme.titleMedium?.copyWith(color: Colors.grey),
             ),
           )
-        : BlocBuilder<ChatCubit, ChatState>(
-            builder: (context, state) {
-              List<ChatDto> sortedChats = List.from(state.chats ?? [])
-                ..sort((a, b) {
-                  if (a.haveUnread && !b.haveUnread) return -1;
-                  if (!a.haveUnread && b.haveUnread) return 1;
+        : ListView.builder(
+            controller: _scrollController,
+            itemCount: sortedChats.length +
+                ((isLoading && widget.state.pagination?.nextPageUrl != null)
+                    ? 1
+                    : 0),
+            itemBuilder: (context, index) {
+              if (index < sortedChats.length) {
+                var chat = sortedChats[index];
+                bool isSelected = chat.id == widget.state.currentChat?.id;
 
-                  DateTime? aTime = a.lastMessage?.createdAt ?? a.createdAt;
-                  DateTime? bTime = b.lastMessage?.createdAt ?? b.createdAt;
+                final allParticipants = [
+                  ...?chat.chatParticipants,
+                  if (chat.chatGroup && widget.state.chatDetails != null)
+                    widget.state.chatDetails!.authUser,
+                ];
+                List<UserImageDto> userImages =
+                    allParticipants.map((a) => a.getUserImageDTO()).toList();
 
-                  return (bTime ?? DateTime(0)).compareTo(aTime ?? DateTime(0));
-                });
-
-              return ListView.builder(
-                controller: _scrollController,
-                itemCount: sortedChats.length +
-                    ((isLoading && widget.state.pagination?.nextPageUrl != null)
-                        ? 1
-                        : 0),
-                itemBuilder: (context, index) {
-                  if (index < sortedChats.length) {
-                    var chat = sortedChats[index];
-                    bool isSelected = chat.id == widget.state.currentChat?.id;
-
-                    final allParticipants = [
-                      ...?chat.chatParticipants,
-                      if (chat.chatGroup && state.chatDetails != null)
-                        state.chatDetails!.authUser,
-                    ];
-                    List<UserImageDto> userImages = allParticipants
-                        .map((a) => a.getUserImageDTO())
-                        .toList();
-
-                    return MouseRegion(
-                      cursor: SystemMouseCursors.click,
-                      child: GestureDetector(
-                        onTap: () async {
-                          // setState(() {
-                          //   selectedChat = chat.id;
-                          // });
-                          await context.read<ChatCubit>().chatSeen(chat.id);
-                          await context
-                              .read<ChatCubit>()
-                              .getChatDetails(chat.id, 1);
-                          await context.read<ChatCubit>().setCurrentChat(chat);
-                        },
-                        child: 
-                        Slidable(
-                            key: Key(chat.id.toString()),
-                            endActionPane: ActionPane(
-                              motion: const ScrollMotion(),
-                              dismissible: DismissiblePane(onDismissed: () {}),
-                              dragDismissible: false,
-                              children: [
-                                SlidableAction(
-                                  onPressed: (context) {
-                                    _showRemoveDialog(
-                                        chat.id, context, _deleteChat);
-                                  },
-                                  backgroundColor: ColorConstants.kPrimaryColor,
-                                  foregroundColor: Colors.white,
-                                  icon: Icons.delete,
-                                  label: 'Delete',
-                                ),
-
-                              ],
+                return MouseRegion(
+                  cursor: SystemMouseCursors.click,
+                  child: GestureDetector(
+                    onTap: () async {
+                      // setState(() {
+                      //   selectedChat = chat.id;
+                      // });
+                      await context.read<ChatCubit>().chatSeen(chat.id);
+                      await context
+                          .read<ChatCubit>()
+                          .getChatDetails(chat.id, 1);
+                      await context.read<ChatCubit>().setCurrentChat(chat);
+                    },
+                    child: Slidable(
+                        key: Key(chat.id.toString()),
+                        endActionPane: ActionPane(
+                          motion: const ScrollMotion(),
+                          dismissible: DismissiblePane(onDismissed: () {}),
+                          dragDismissible: false,
+                          children: [
+                            SlidableAction(
+                              onPressed: (context) {
+                                _showRemoveDialog(
+                                    chat.id, context, _deleteChat);
+                              },
+                              backgroundColor: ColorConstants.kPrimaryColor,
+                              foregroundColor: Colors.white,
+                              icon: Icons.delete,
+                              label: 'Delete',
                             ),
-
-                            child: Container(
-                              decoration: BoxDecoration(
-                                color: isSelected ? Colors.blue[100] : Colors.white,
-                                border: Border(
-                                  bottom: BorderSide(color: Colors.grey.shade300),
-                                ),
-                              ),
-                              padding: const EdgeInsets.symmetric(
-                                  vertical: 10, horizontal: 12),
-                              child: Stack(
+                          ],
+                        ),
+                        child: Container(
+                          decoration: BoxDecoration(
+                            color: isSelected ? Colors.blue[100] : Colors.white,
+                            border: Border(
+                              bottom: BorderSide(color: Colors.grey.shade300),
+                            ),
+                          ),
+                          padding: const EdgeInsets.symmetric(
+                              vertical: 10, horizontal: 12),
+                          child: Stack(
+                            children: [
+                              Row(
+                                crossAxisAlignment: CrossAxisAlignment.center,
                                 children: [
-                                  Row(
-                                    crossAxisAlignment: CrossAxisAlignment.center,
-                                    children: [
-                                      UserImage.medium(userImages),
-                                      const SizedBox(width: 12),
-                                      Expanded(
-                                        child: Column(
-                                          crossAxisAlignment:
+                                  UserImage.medium(userImages),
+                                  const SizedBox(width: 12),
+                                  Expanded(
+                                    child: Column(
+                                      crossAxisAlignment:
                                           CrossAxisAlignment.start,
-                                          children: [
-                                            Text(
-                                              chat.getChatName(),
-                                              style: const TextStyle(
-                                                fontFamily: 'Montserrat',
-                                                fontSize: 16,
-                                                fontWeight: FontWeight.w500,
-                                                color: Colors.black87,
-                                              ),
-                                              overflow: TextOverflow.ellipsis,
-                                              maxLines: 1,
-                                            ),
-                                            const SizedBox(height: 3),
-                                            Text(
-                                              chat.lastMessage?.message
-                                                  ?.isNotEmpty ==
+                                      children: [
+                                        Text(
+                                          chat.getChatName(),
+                                          style: const TextStyle(
+                                            fontFamily: 'Montserrat',
+                                            fontSize: 16,
+                                            fontWeight: FontWeight.w500,
+                                            color: Colors.black87,
+                                          ),
+                                          overflow: TextOverflow.ellipsis,
+                                          maxLines: 1,
+                                        ),
+                                        const SizedBox(height: 3),
+                                        Text(
+                                          chat.lastMessage?.message
+                                                      ?.isNotEmpty ==
                                                   true
-                                                  ? chat.lastMessage!.message!
-                                                  : (chat.lastMessage?.filePath !=
-                                                  null &&
-                                                  chat.lastMessage!
-                                                      .filePath!.isNotEmpty
+                                              ? chat.lastMessage!.message!
+                                              : (chat.lastMessage?.filePath !=
+                                                          null &&
+                                                      chat.lastMessage!
+                                                          .filePath!.isNotEmpty
                                                   ? "File"
                                                   : "No messages"),
-                                              style: TextStyle(
-                                                fontSize: 14,
-                                                color: chat.haveUnread == true
-                                                    ? Colors.black87
-                                                    : Colors.black54,
-                                                fontWeight: chat.haveUnread == true
-                                                    ? FontWeight.bold
-                                                    : FontWeight.normal,
-                                              ),
-                                              maxLines: 1,
-                                              overflow: TextOverflow.ellipsis,
-                                            ),
-                                          ],
-                                        ),
-                                      ),
-                                      Column(
-                                        children: [
-                                          Text(
-                                            formatTime(chat.lastMessage?.createdAt!.toIso8601String()),
-                                            style: const TextStyle(
-                                                fontSize: 12,
-                                                color: Colors.black45),
+                                          style: TextStyle(
+                                            fontSize: 14,
+                                            color: chat.haveUnread == true
+                                                ? Colors.black87
+                                                : Colors.black54,
+                                            fontWeight: chat.haveUnread == true
+                                                ? FontWeight.bold
+                                                : FontWeight.normal,
                                           ),
-                                          if (isSelected)
-
-                                            IconButton(
-                                              icon: Icon(
-                                                Icons.delete,
-                                                color: ColorConstants.kPrimaryColor,
-                                                size: 18,
-                                              ),
-                                              onPressed: () => _showRemoveDialog(
-                                                  chat.id, context, _deleteChat),
-                                            ),
-                                          if (chat.haveUnread)
-                                            Icon(
-                                              Icons.mark_chat_unread,
-                                              color: Colors.redAccent,
-                                              size: 18,
-                                            ),
-                                        ],
+                                          maxLines: 1,
+                                          overflow: TextOverflow.ellipsis,
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                  Column(
+                                    children: [
+                                      Text(
+                                        formatTime(chat.lastMessage?.createdAt!
+                                            .toIso8601String()),
+                                        style: const TextStyle(
+                                            fontSize: 12,
+                                            color: Colors.black45),
                                       ),
+                                      if (isSelected)
+                                        IconButton(
+                                          icon: Icon(
+                                            Icons.delete,
+                                            color: ColorConstants.kPrimaryColor,
+                                            size: 18,
+                                          ),
+                                          onPressed: () => _showRemoveDialog(
+                                              chat.id, context, _deleteChat),
+                                        ),
+                                      if (chat.haveUnread)
+                                        Icon(
+                                          Icons.mark_chat_unread,
+                                          color: Colors.redAccent,
+                                          size: 18,
+                                        ),
                                     ],
                                   ),
-                                  if (chat.isOnline && !chat.chatGroup)
-                                    Positioned(
-                                      left: 35,
-                                      top: 35,
-                                      child: ClipOval(
-                                        child: Container(
-                                          width: 10.0,
-                                          height: 10.0,
-                                          color: Colors.green,
-                                        ),
-                                      ),
-                                    ),
                                 ],
                               ),
-                            ))
-                       
-                        ,
-                      ),
-                    );
-                  } else {
-                    return Padding(
-                      padding: const EdgeInsets.symmetric(vertical: 16.0),
-                      child: Center(
-                        child: SizedBox(
-                          width: 50,
-                          height: 50,
-                          child: CircularProgressIndicator(),
-                        ),
-                      ),
-                    );
-                  }
-                },
-              );
+                              if (chat.isOnline && !chat.chatGroup)
+                                Positioned(
+                                  left: 35,
+                                  top: 35,
+                                  child: ClipOval(
+                                    child: Container(
+                                      width: 10.0,
+                                      height: 10.0,
+                                      color: Colors.green,
+                                    ),
+                                  ),
+                                ),
+                            ],
+                          ),
+                        )),
+                  ),
+                );
+              } else {
+                return Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 16.0),
+                  child: Center(
+                    child: SizedBox(
+                      width: 50,
+                      height: 50,
+                      child: CircularProgressIndicator(),
+                    ),
+                  ),
+                );
+              }
             },
           );
   }
