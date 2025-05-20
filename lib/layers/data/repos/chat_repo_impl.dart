@@ -391,7 +391,7 @@ class ChatRepoImpl extends ChatRepo {
           // getChatMessages(chatDetailsDto.chatId!);
           _participantsStream.add(subscribers);
           _matchParticipantWithUser();
-          _matchParticipantWithChat();
+          // _matchParticipantWithChat();
         }
 
         if (data['textroom'] == 'join') {
@@ -426,10 +426,10 @@ class ChatRepoImpl extends ChatRepo {
               }
             }
           }
-          getChatMessages(chatDetailsDto.chatId!);
+          // getChatMessages(chatDetailsDto.chatId!);
           _participantsStream.add(subscribers);
           _matchParticipantWithUser();
-          _matchParticipantWithChat();
+          // _matchParticipantWithChat();
 
           _sendUserStatus();
         }
@@ -609,8 +609,11 @@ class ChatRepoImpl extends ChatRepo {
     var response = await _api.deleteChat(id: id);
     if (response.error == null) {
       List<ChatDto> chats = response.response ?? [];
-      // _matchParticipiantWithChat();
 
+      // _matchParticipiantWithChat();
+      var command = DataChannelCommand.fromJson(
+          response.response as Map<String, dynamic>);
+      _renderCommand(command);
       _chatStream.add(chats);
     } else {
       print('Error: ${response.error}');
@@ -911,7 +914,8 @@ class ChatRepoImpl extends ChatRepo {
           return chat.copyWith(
               userStatus: command.data["userStatus"] as String);
         } else {
-          return chat;
+          //Changed because of bug with update chat list of participiant after delete some of the chat
+          return chats[1];
         }
       }).toList();
       _chatStream.add(chats);

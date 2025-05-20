@@ -192,13 +192,6 @@ MenuItem buildChatMenuItem() {
         BlocProvider<HomeCubit>(
           create: (context) => getIt.get<HomeCubit>(),
         ),
-        BlocProvider<ChatCubit>(
-          create: (context) => ChatCubit(
-            chatUseCases: getIt.get(),
-            callUseCases: getIt.get(),
-            isInCallChat: false,
-          ),
-        ),
       ],
       child: const ChatRoomPage(),
     ),
