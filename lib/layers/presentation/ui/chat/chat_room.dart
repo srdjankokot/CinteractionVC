@@ -173,7 +173,8 @@ class ChatRoomPage extends StatelessWidget {
         child: BlocConsumer<ChatCubit, ChatState>(
             listenWhen: (previous, current) =>
                 previous.incomingCall != current.incomingCall ||
-                previous.calling != current.calling,
+                previous.calling != current.calling ||
+                previous.chats != current.chats,
             listener: (context, state) async {
               if (state.incomingCall ?? false) {
                 // String callerName = "Caller Name"; // Replace with actual caller name

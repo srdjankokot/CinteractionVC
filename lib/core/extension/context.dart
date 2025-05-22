@@ -107,6 +107,7 @@ extension Context on BuildContext {
   Future<void> handleLogout() async {
     await saveAccessToken(null);
     getIt.get<ChatCubit>().chatUseCases.leaveRoom();
+    getIt.get<ChatCubit>().chatUseCases.setUserStatus('offline');
     getIt.get<LocalStorage>().clearUser();
     resetAndReinitialize();
     GoRouter.of(this).clearStackAndNavigate('/auth');
