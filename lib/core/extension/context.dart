@@ -44,7 +44,9 @@ extension Context on BuildContext {
     ScaffoldMessenger.of(this)
         .showSnackBar(
           SnackBar(
-            backgroundColor: ColorConstants.kStateSuccess,
+            backgroundColor: isError
+                ? ColorConstants.kStateError
+                : ColorConstants.kStateSuccess,
             content: Text(
               message,
               style: TextStyle(color: foregroundColor),
