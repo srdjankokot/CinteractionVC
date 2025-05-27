@@ -265,6 +265,8 @@ class _ChatDetailsWidgetState extends State<ChatDetailsWidget> {
   String? _editingMessageId;
   String _editingText = "";
 
+  html.EventListener? _pasteListener;
+
   @override
   void initState() {
     super.initState();
@@ -272,6 +274,30 @@ class _ChatDetailsWidgetState extends State<ChatDetailsWidget> {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       context.read<ChatCubit>().showEmoji(false);
     });
+
+    if (kIsWeb) {
+      _pasteListener = (event) async {
+        final customEvent = event as html.CustomEvent;
+        final detail = customEvent.detail;
+
+        if (detail is Map) {
+          final Uint8List bytes =
+              Uint8List.fromList(detail['data'].cast<int>());
+          final String name = detail['name'];
+
+          final pastedFile = fp.PlatformFile(
+            name: name,
+            size: bytes.length,
+            bytes: bytes,
+          );
+          await sendMessage(uploadedFiles: [pastedFile]);
+        } else {
+          print('Details is not a map');
+        }
+      };
+
+      html.window.addEventListener('pasted-file', _pasteListener!);
+    }
   }
 
   @override
@@ -815,6 +841,9 @@ class _ChatDetailsWidgetState extends State<ChatDetailsWidget> {
   void dispose() {
     _scrollController.dispose();
     _scrollController.removeListener(_scrollListener);
+    if (kIsWeb && _pasteListener != null) {
+      html.window.removeEventListener('pasted-file', _pasteListener!);
+    }
     super.dispose();
   }
 

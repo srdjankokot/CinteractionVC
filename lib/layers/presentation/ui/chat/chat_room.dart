@@ -176,21 +176,32 @@ class ChatRoomPage extends StatelessWidget {
                 previous.calling != current.calling ||
                 previous.chats != current.chats,
             listener: (context, state) async {
+              final previousState = context.read<ChatCubit>().state;
+
+              //  INCOMING CALL STARTED
               if (state.incomingCall ?? false) {
-                // String callerName = "Caller Name"; // Replace with actual caller name
                 await showIncomingCallDialog(context, state.caller!);
                 return;
-              } else {
+              }
+
+              //  INCOMING CALL ENDED
+              if ((previousState.incomingCall ?? false) &&
+                  !(state.incomingCall ?? false)) {
                 if (Navigator.canPop(context)) {
                   Navigator.of(context).pop(incomingDialog);
                   stopIncomingCallSound();
                 }
               }
 
+              //  OUTGOING CALL STARTED
               if (state.calling ?? false) {
                 await makeCallDialog();
                 return;
-              } else {
+              }
+
+              //  OUTGOING CALL ENDED
+              if ((previousState.calling ?? false) &&
+                  !(state.calling ?? false)) {
                 if (Navigator.canPop(context)) {
                   Navigator.of(context).pop(incomingDialog);
                 }
