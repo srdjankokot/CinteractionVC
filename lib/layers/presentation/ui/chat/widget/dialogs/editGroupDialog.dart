@@ -27,7 +27,8 @@ class EditGroupDialog extends StatelessWidget {
       state.chatDetails!.authUser,
     ];
 
-    List<UserImageDto> userImages = allParticipants.map((a) => a.getUserImageDTO()).toList();
+    List<UserImageDto> userImages =
+        allParticipants.map((a) => a.getUserImageDTO()).toList();
 
     return AlertDialog(
       contentPadding: const EdgeInsets.all(16.0),
@@ -187,7 +188,9 @@ class EditGroupDialog extends StatelessWidget {
                     .get<ChatCubit>()
                     .chatUseCases
                     .removeUserFromGroup(chatId, userId);
-                Navigator.of(context).pop();
+                // I used this for double close
+                int count = 0;
+                Navigator.of(context).popUntil((_) => count++ >= 2);
               },
               child: const Text("Remove"),
             ),
@@ -224,7 +227,7 @@ class _HoverParticipantTileState extends State<HoverParticipantTile> {
       onExit: (_) => setState(() => _isHovered = false),
       child: ListTile(
         contentPadding: const EdgeInsets.all(2),
-        leading: UserImage.medium([widget.participant.getUserImageDTO()] ),
+        leading: UserImage.medium([widget.participant.getUserImageDTO()]),
         title: Text(
           widget.participant.name,
           style: const TextStyle(fontSize: 16),

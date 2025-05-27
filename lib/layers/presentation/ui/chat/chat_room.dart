@@ -161,93 +161,92 @@ class ChatRoomPage extends StatelessWidget {
           });
     }
 
-
     return BlocListener<AppCubit, AppState>(
       listenWhen: (previous, current) =>
-      previous.userStatus != current.userStatus,
+          previous.userStatus != current.userStatus,
       listener: (context, state) {
-       print(state.userStatus.value);
-       context.read<ChatCubit>().setUserStatus(state.userStatus.value);
+        print(state.userStatus.value);
+        context.read<ChatCubit>().setUserStatus(state.userStatus.value);
       },
-      child: BlocConsumer<ChatCubit, ChatState>(
-          listenWhen: (previous, current) =>
-          previous.incomingCall != current.incomingCall ||
-              previous.calling != current.calling,
-          listener: (context, state) async {
-            if (state.incomingCall ?? false) {
-              // String callerName = "Caller Name"; // Replace with actual caller name
-              await showIncomingCallDialog(context, state.caller!);
-              return;
-            } else {
-              if (Navigator.canPop(context)) {
-                Navigator.of(context).pop(incomingDialog);
-                stopIncomingCallSound();
+      child: BlocProvider<ChatCubit>.value(
+        value: getIt.get<ChatCubit>(),
+        child: BlocConsumer<ChatCubit, ChatState>(
+            listenWhen: (previous, current) =>
+                previous.incomingCall != current.incomingCall ||
+                previous.calling != current.calling ||
+                previous.chats != current.chats,
+            listener: (context, state) async {
+              if (state.incomingCall ?? false) {
+                // String callerName = "Caller Name"; // Replace with actual caller name
+                await showIncomingCallDialog(context, state.caller!);
+                return;
+              } else {
+                if (Navigator.canPop(context)) {
+                  Navigator.of(context).pop(incomingDialog);
+                  stopIncomingCallSound();
+                }
               }
-            }
 
-            if (state.calling ?? false) {
-              await makeCallDialog();
-              return;
-            } else {
-              if (Navigator.canPop(context)) {
-                Navigator.of(context).pop(incomingDialog);
+              if (state.calling ?? false) {
+                await makeCallDialog();
+                return;
+              } else {
+                if (Navigator.canPop(context)) {
+                  Navigator.of(context).pop(incomingDialog);
+                }
               }
-            }
-          },
-          builder: (context, state) {
+            },
+            builder: (context, state) {
+              return Scaffold(
+                  body: Stack(
+                children: [
+                  if (context.isWide)
+                    Row(
+                      children: [
+                        // First column
+                        getLeftSide(
+                            context,
+                            state,
+                            300,
+                            () => {displayJoinRoomPopup(context)},
+                            () => {displayAddScheduleMeetingPopup()},
+                            () => {displayCreateGroupPopup(context, state)}),
 
+                        const VerticalDivider(
+                          color: Colors.grey, // Color of the divider
+                          thickness: 1, // Thickness of the divider
+                          width: 20, // Width of the space taken by the divider
+                        ),
+                        Expanded(
+                          flex: 2,
+                          child: getChatDetailsView(context, state, user,
+                              () => {displayEditGroupPopup(context, state)}),
+                        ),
+                      ],
+                    )
+                  else
+                    Stack(
+                      children: [
+                        getLeftSide(
+                            context,
+                            state,
+                            double.maxFinite,
+                            () => {displayJoinRoomPopup(context)},
+                            () => {displayAddScheduleMeetingPopup()},
+                            () => {displayCreateGroupPopup(context, state)}),
+                        Visibility(
+                            visible: state.currentChat != null ||
+                                state.currentParticipant != null,
+                            // visible: false,
 
-
-
-            return Scaffold(
-                body: Stack(
-                  children: [
-                    if (context.isWide)
-                      Row(
-                        children: [
-                          // First column
-                          getLeftSide(
-                              context,
-                              state,
-                              300,
-                                  () => {displayJoinRoomPopup(context)},
-                                  () => {displayAddScheduleMeetingPopup()},
-                                  () => {displayCreateGroupPopup(context, state)}),
-
-                          const VerticalDivider(
-                            color: Colors.grey, // Color of the divider
-                            thickness: 1, // Thickness of the divider
-                            width: 20, // Width of the space taken by the divider
-                          ),
-                          Expanded(
-                            flex: 2,
                             child: getChatDetailsView(context, state, user,
-                                    () => {displayEditGroupPopup(context, state)}),
-                          ),
-                        ],
-                      )
-                    else
-                      Stack(
-                        children: [
-                          getLeftSide(
-                              context,
-                              state,
-                              double.maxFinite,
-                                  () => {displayJoinRoomPopup(context)},
-                                  () => {displayAddScheduleMeetingPopup()},
-                                  () => {displayCreateGroupPopup(context, state)}),
-                          Visibility(
-                              visible: state.currentChat != null ||
-                                  state.currentParticipant != null,
-                              // visible: false,
-
-                              child: getChatDetailsView(context, state, user,
-                                      () => {displayEditGroupPopup(context, state)}))
-                        ],
-                      )
-                  ],
-                ));
-          }), // The rest of your UI
+                                () => {displayEditGroupPopup(context, state)}))
+                      ],
+                    )
+                ],
+              ));
+            }),
+      ), // The rest of your UI
     );
   }
 }
@@ -399,15 +398,17 @@ Widget getLeftSide(BuildContext context, ChatState state, double? width,
   );
 }
 
-
-String getUserStatus(bool isOnline, String userStatus){
-  return isOnline ?  userStatus == UserStatus.inTheCall.value ? "In The Call" : "Available" : "Unavailable";
+String getUserStatus(bool isOnline, String userStatus) {
+  return isOnline
+      ? userStatus == UserStatus.inTheCall.value
+          ? "In The Call"
+          : "Available"
+      : "Unavailable";
 }
 
-
-Widget userStatusWidget(ChatState state)
-{
-  String currentUserState =  getUserStatus(state.currentChat?.isOnline ?? false, state.currentChat?.userStatus ?? UserStatus.online.value);
+Widget userStatusWidget(ChatState state) {
+  String currentUserState = getUserStatus(state.currentChat?.isOnline ?? false,
+      state.currentChat?.userStatus ?? UserStatus.online.value);
 
   return Row(
     children: [
@@ -418,11 +419,8 @@ Widget userStatusWidget(ChatState state)
         // Adjust the height as needed
         decoration: BoxDecoration(
           color: (state.listType == ListType.Chats
-              ? state.currentChat?.isOnline ==
-              true
-              : state.currentParticipant
-              ?.online ==
-              true)
+                  ? state.currentChat?.isOnline == true
+                  : state.currentParticipant?.online == true)
               ? Colors.green
               : Colors.amber,
           shape: BoxShape.circle,
@@ -432,13 +430,10 @@ Widget userStatusWidget(ChatState state)
       Text(currentUserState),
     ],
   );
-
 }
 
 Widget getChatDetailsView(
     BuildContext context, ChatState state, User? user, Function editGroup) {
-
-
   return Container(
     width: double.maxFinite,
     height: double.maxFinite,
@@ -659,48 +654,45 @@ Widget getChatDetailsView(
                                 {context.read<ChatCubit>().clearCurrentChat()},
                             icon: const Icon(Icons.arrow_back)),
                       ),
-
                     Expanded(
-                        child:
-                        Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              state.listType == ListType.Chats
-                                  ? (state.currentChat?.getChatName() ?? "")
-                                  : state.currentParticipant?.name ?? "",
-                              style: titleThemeStyle.textTheme.titleLarge,
-
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
-                            ),
-                            state.listType == ListType.Chats &&
+                        child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          state.listType == ListType.Chats
+                              ? (state.currentChat?.getChatName() ?? "")
+                              : state.currentParticipant?.name ?? "",
+                          style: titleThemeStyle.textTheme.titleLarge,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                        state.listType == ListType.Chats &&
                                 state.chatDetails!.isGroup
-                                ? Row(
-                              children: [
-                                GestureDetector(
-                                  onTap: () async {
-                                    // await displayEditGroupPopup(
-                                    //     context, state);
-                                    editGroup();
-                                  },
-                                  child: MouseRegion(
-                                    cursor: SystemMouseCursors.click,
-                                    child: Row(children: [
-                                      Text((state.chatDetails!
-                                          .chatParticipants.length +
-                                          1)
-                                          .toString()),
-                                      const SizedBox(width: 3.0),
-                                      const Text('participants'),
-                                    ]),
+                            ? Row(
+                                children: [
+                                  GestureDetector(
+                                    onTap: () async {
+                                      // await displayEditGroupPopup(
+                                      //     context, state);
+                                      editGroup();
+                                    },
+                                    child: MouseRegion(
+                                      cursor: SystemMouseCursors.click,
+                                      child: Row(children: [
+                                        Text((state.chatDetails!
+                                                    .chatParticipants.length +
+                                                1)
+                                            .toString()),
+                                        const SizedBox(width: 3.0),
+                                        const Text('participants'),
+                                      ]),
+                                    ),
                                   ),
-                                ),
-                              ],
-                            )
-                                : userStatusWidget(state)
-                          ],
-                        )),
+                                ],
+                              )
+                            : userStatusWidget(state)
+                      ],
+                    )),
                     const SizedBox(
                       width: 5,
                     ),
@@ -716,9 +708,9 @@ Widget getChatDetailsView(
                               onClickAction: () async {
                                 await context.read<ChatCubit>().makeCall(
                                     (state.listType == ListType.Chats
-                                        ? state
-                                        .currentChat?.chatParticipants?.first.id
-                                        .toString()
+                                        ? state.currentChat?.chatParticipants
+                                            ?.first.id
+                                            .toString()
                                         : state.currentParticipant?.id)!);
 
                                 // await context.read<ChatCubit>().rejectCall();
@@ -735,57 +727,53 @@ Widget getChatDetailsView(
 
                             final availableUsers = state.users!
                                 .where((user) => !currentParticipants
-                                .contains(user.id.toString()))
+                                    .contains(user.id.toString()))
                                 .toList();
                             showDialog(
                               context: context,
                               builder: (BuildContext context) =>
                                   AddParticipantsDialog(
-                                    users: availableUsers,
-                                    onAddParticipants: (selectedUsers) async {
-                                      final participantIds = selectedUsers
-                                          .map((user) => int.parse(user.id))
-                                          .toList();
+                                users: availableUsers,
+                                onAddParticipants: (selectedUsers) async {
+                                  final participantIds = selectedUsers
+                                      .map((user) => int.parse(user.id))
+                                      .toList();
 
-                                      if (!state.chatDetails!.isGroup) {
-                                        participantIds.add(
-                                            state.chatDetails!.chatParticipants[0].id);
-                                      }
+                                  if (!state.chatDetails!.isGroup) {
+                                    participantIds.add(state
+                                        .chatDetails!.chatParticipants[0].id);
+                                  }
 
-                                      state.chatDetails!.isGroup
-                                          ? await getIt
+                                  state.chatDetails!.isGroup
+                                      ? await getIt
                                           .get<ChatCubit>()
                                           .chatUseCases
                                           .addUserToGroup(
-                                          state.chatDetails!.chatId!,
-                                          state.chatDetails!.authUser.id,
-                                          participantIds)
-                                          : await getIt
+                                              state.chatDetails!.chatId!,
+                                              state.chatDetails!.authUser.id,
+                                              participantIds)
+                                      : await getIt
                                           .get<ChatCubit>()
                                           .chatUseCases
                                           .sendMessageToChatStream(
-                                          senderId:
-                                          state.chatDetails!.authUser.id,
-                                          participantIds: participantIds);
-                                    },
-                                    context: context,
-                                  ),
+                                              senderId: state
+                                                  .chatDetails!.authUser.id,
+                                              participantIds: participantIds);
+                                },
+                                context: context,
+                              ),
                             );
                           },
                         ),
                       ],
                     ),
-
                   ],
                 ),
               ),
               const Divider(),
               Expanded(child: ChatDetailsWidget(state)),
             ],
-          )
-
-
-          ;
+          );
         }
         return Row(
             crossAxisAlignment: CrossAxisAlignment.center,

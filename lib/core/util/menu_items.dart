@@ -132,10 +132,7 @@ final profile = MenuItem(
   route: null,
   label: 'Profile',
   assetName: 'menu_profile',
-  body: BlocProvider<AppCubit>(
-    create: (context) => getIt.get<AppCubit>(),
-    child: const ProfileTab(),
-  ),
+  body: const ProfileTab(),
 );
 final users = UsersScreen(id: '');
 final groups = MenuItem(
@@ -194,13 +191,6 @@ MenuItem buildChatMenuItem() {
       providers: [
         BlocProvider<HomeCubit>(
           create: (context) => getIt.get<HomeCubit>(),
-        ),
-        BlocProvider<ChatCubit>(
-          create: (context) => ChatCubit(
-            chatUseCases: getIt.get(),
-            callUseCases: getIt.get(),
-            isInCallChat: false,
-          ),
         ),
       ],
       child: const ChatRoomPage(),

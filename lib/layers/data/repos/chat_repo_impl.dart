@@ -228,22 +228,22 @@ class ChatRepoImpl extends ChatRepo {
     _usersStream.add(users);
   }
 
-  void _matchParticipantWithChat() {
-    chats = chats.map((chat) => chat.copyWith(isOnline: false)).toList();
+  void _matchParticipantWithChat(List<ChatDto> currentChats) {
+    var updatedChats =
+        currentChats.map((chat) => chat.copyWith(isOnline: false)).toList();
 
     for (var subscriber in subscribers) {
-      for (var i = 0; i < chats.length; i++) {
-        bool isParticipantOnline = chats[i].chatParticipants?.any(
+      for (var i = 0; i < updatedChats.length; i++) {
+        bool isParticipantOnline = updatedChats[i].chatParticipants?.any(
                 (data) => data.id == subscriber.id && subscriber.isOnline) ??
             false;
-
         if (isParticipantOnline) {
-          chats[i] = chats[i].copyWith(isOnline: true);
+          updatedChats[i] = updatedChats[i].copyWith(isOnline: true);
         }
-        // print(' ListSub ${subscribers[i].deviceId}');
       }
     }
 
+    chats = updatedChats;
     _chatStream.add(chats);
   }
 
@@ -364,7 +364,6 @@ class ChatRepoImpl extends ChatRepo {
           getChatMessages(chatIdParsed!);
           _participantsStream.add(subscribers);
           _matchParticipantWithUser();
-          _matchParticipantWithChat();
           // _matchParticipiantWithChat();
         }
         if (data['textroom'] == 'leave') {
@@ -391,7 +390,7 @@ class ChatRepoImpl extends ChatRepo {
           // getChatMessages(chatDetailsDto.chatId!);
           _participantsStream.add(subscribers);
           _matchParticipantWithUser();
-          _matchParticipantWithChat();
+          _matchParticipantWithChat(chats);
         }
 
         if (data['textroom'] == 'join') {
@@ -426,10 +425,10 @@ class ChatRepoImpl extends ChatRepo {
               }
             }
           }
-          getChatMessages(chatDetailsDto.chatId!);
+          // getChatMessages(chatDetailsDto.chatId!);
           _participantsStream.add(subscribers);
           _matchParticipantWithUser();
-          _matchParticipantWithChat();
+          _matchParticipantWithChat(chats);
 
           _sendUserStatus();
         }
@@ -458,7 +457,7 @@ class ChatRepoImpl extends ChatRepo {
 
           _participantsStream.add(subscribers);
           _matchParticipantWithUser();
-          _matchParticipantWithChat();
+          _matchParticipantWithChat(chats);
         }
       }
     });
@@ -598,7 +597,7 @@ class ChatRepoImpl extends ChatRepo {
       chats = pagination.chats;
       _chatStream.add(List.from(chats));
       _paginationStream.add(pagination);
-      _matchParticipantWithChat();
+      _matchParticipantWithChat(chats);
     } else {
       print('Error: ${response.error}');
     }
@@ -608,10 +607,9 @@ class ChatRepoImpl extends ChatRepo {
   deleteChat(int id) async {
     var response = await _api.deleteChat(id: id);
     if (response.error == null) {
-      List<ChatDto> chats = response.response ?? [];
-      // _matchParticipiantWithChat();
-
+      chats = response.response!;
       _chatStream.add(chats);
+      _matchParticipantWithChat(chats);
     } else {
       print('Error: ${response.error}');
     }
@@ -911,6 +909,7 @@ class ChatRepoImpl extends ChatRepo {
           return chat.copyWith(
               userStatus: command.data["userStatus"] as String);
         } else {
+          //Changed because of bug with update chat list of participiant after delete some of the chat
           return chat;
         }
       }).toList();
@@ -925,6 +924,7 @@ class ChatRepoImpl extends ChatRepo {
   }
 
   _sendUserStatus() async {
+    print('userStatusRepo $userStatus');
     if (!isInCallChat) {
       var data = {'userStatus': userStatus};
       var json = DataChannelCommand(
