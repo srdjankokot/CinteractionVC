@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'dart:io';
+import 'dart:io' as io;
 
 import 'package:cinteraction_vc/assets/colors/Colors.dart';
 import 'package:cinteraction_vc/core/extension/context.dart';
@@ -11,11 +12,13 @@ import 'package:cinteraction_vc/layers/domain/entities/user.dart';
 import 'package:cinteraction_vc/layers/presentation/cubit/chat/chat_cubit.dart';
 import 'package:cinteraction_vc/layers/presentation/cubit/chat/chat_state.dart';
 import 'package:cinteraction_vc/layers/presentation/cubit/conference/conference_cubit.dart';
+import 'package:cinteraction_vc/layers/presentation/ui/chat/widget/helper/file_type_generator.dart';
+import 'package:cinteraction_vc/layers/presentation/ui/chat/widget/helper/icon_generator.dart';
 import 'package:cinteraction_vc/layers/presentation/ui/chat/widget/pdf_viewer_screen.dart';
 import 'package:cinteraction_vc/layers/presentation/ui/profile/ui/widget/user_image.dart';
 import 'package:dio/dio.dart';
 import 'package:emoji_picker_flutter/emoji_picker_flutter.dart';
-import 'package:file_picker/file_picker.dart';
+import 'package:file_picker/file_picker.dart' as fp;
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -23,6 +26,8 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_dropzone/flutter_dropzone.dart';
 import 'package:flutter_linkify/flutter_linkify.dart';
 import 'package:intl/intl.dart';
+import 'package:open_file/open_file.dart';
+import 'package:path_provider/path_provider.dart';
 import 'package:universal_html/html.dart' as html;
 import 'package:url_launcher/url_launcher.dart';
 import 'package:visibility_detector/visibility_detector.dart';
@@ -70,12 +75,12 @@ class _ChatDetailsWidgetState extends State<ChatDetailsWidget> {
   }
 
   Future<void> pickAndSendFile() async {
-    FilePickerResult? result = await FilePicker.platform.pickFiles(
+    fp.FilePickerResult? result = await fp.FilePicker.platform.pickFiles(
       withData: kIsWeb,
     );
 
     if (result != null) {
-      PlatformFile file = result.files.first;
+      fp.PlatformFile file = result.files.first;
 
       Uint8List? fileBytes;
 
@@ -89,7 +94,7 @@ class _ChatDetailsWidgetState extends State<ChatDetailsWidget> {
       }
 
       if (fileBytes != null) {
-        PlatformFile fileWithBytes = PlatformFile(
+        fp.PlatformFile fileWithBytes = fp.PlatformFile(
           name: file.name,
           size: fileBytes.length,
           bytes: fileBytes,
@@ -136,21 +141,23 @@ class _ChatDetailsWidgetState extends State<ChatDetailsWidget> {
   }
 
   bool _isImage(String url) {
-    return url.toLowerCase().endsWith('.png') ||
-        url.toLowerCase().endsWith('.jpg') ||
-        url.toLowerCase().endsWith('.jpeg') ||
-        url.toLowerCase().endsWith('.gif');
-  }
+    final imageExtensions = [
+      '.png',
+      '.jpg',
+      '.jpeg',
+      '.gif',
+      '.bmp',
+      '.webp',
+      '.tiff',
+      '.tif',
+      '.svg',
+      '.ico',
+      '.heic',
+      '.avif'
+    ];
 
-  bool _isPdf(String url) {
-    print("Checking if PDF: $url");
-    return url.toLowerCase().endsWith('.pdf');
-  }
-
-  bool _isTextFile(String url) {
-    return url.toLowerCase().endsWith('.txt') ||
-        url.toLowerCase().endsWith('.csv') ||
-        url.toLowerCase().endsWith('.json');
+    final lowerUrl = url.toLowerCase();
+    return imageExtensions.any((ext) => lowerUrl.endsWith(ext));
   }
 
   String _getFileNameFromUrl(String url) {
@@ -169,7 +176,7 @@ class _ChatDetailsWidgetState extends State<ChatDetailsWidget> {
 
   TextEditingController messageFieldController = TextEditingController();
 
-  Future<void> sendMessage({List<PlatformFile>? uploadedFiles}) async {
+  Future<void> sendMessage({List<fp.PlatformFile>? uploadedFiles}) async {
     await context.read<ChatCubit>().sendChatMessage(
           messageContent: messageFieldController.text,
           uploadedFiles: uploadedFiles,
@@ -183,22 +190,37 @@ class _ChatDetailsWidgetState extends State<ChatDetailsWidget> {
     showDialog(
       context: context,
       builder: (context) {
+        final screenWidth = MediaQuery.of(context).size.width;
+        final screenHeight = MediaQuery.of(context).size.height;
+
         return AlertDialog(
           contentPadding: EdgeInsets.zero,
-          content: Stack(
-            children: [
-              Image.network(imagePath, fit: BoxFit.cover),
-              Positioned(
-                top: 10,
-                right: 10,
-                child: IconButton(
-                  icon: const Icon(Icons.download, color: Colors.red),
-                  onPressed: () async {
-                    await _downloadImage(imagePath);
-                  },
+          shape:
+              RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+          content: SizedBox(
+            width: screenWidth * 0.5,
+            height: screenHeight * 0.5,
+            child: Stack(
+              children: [
+                Positioned.fill(
+                  child: Image.network(
+                    imagePath,
+                    fit: BoxFit.fill,
+                  ),
                 ),
-              ),
-            ],
+                Positioned(
+                  top: 10,
+                  right: 10,
+                  child: IconButton(
+                    icon: const Icon(Icons.download,
+                        color: ColorConstants.kPrimaryColor),
+                    onPressed: () async {
+                      await _downloadImage(imagePath);
+                    },
+                  ),
+                ),
+              ],
+            ),
           ),
         );
       },
@@ -207,26 +229,36 @@ class _ChatDetailsWidgetState extends State<ChatDetailsWidget> {
 
   Future<void> _downloadImage(String url) async {
     try {
-      Response response = await Dio()
-          .get(url, options: Options(responseType: ResponseType.bytes));
+      final response = await Dio().get(
+        url,
+        options: Options(responseType: ResponseType.bytes),
+      );
 
       if (response.statusCode == 200) {
-        final blob = html.Blob([response.data]);
-        final url = html.Url.createObjectUrlFromBlob(blob);
-        final anchor = html.AnchorElement(href: url)
-          ..target = 'blank'
-          ..download = 'downloaded_image.jpg';
-
-        anchor.click();
-        html.Url.revokeObjectUrl(url);
-
-        print("Image downloaded successfully!");
+        if (kIsWeb) {
+          // ✅ Web platform
+          final blob = html.Blob([response.data]);
+          final downloadUrl = html.Url.createObjectUrlFromBlob(blob);
+          final anchor = html.AnchorElement(href: downloadUrl)
+            ..target = 'blank'
+            ..download = 'downloaded_image.jpg';
+          anchor.click();
+          html.Url.revokeObjectUrl(downloadUrl);
+        } else {
+          // ✅ Android, iOS, Windows, macOS, Linux
+          final dir = await getApplicationDocumentsDirectory();
+          final filePath = '${dir.path}/downloaded_image.jpg';
+          final file = io.File(filePath);
+          await file.writeAsBytes(response.data);
+          context.showSnackBarMessage(
+            'Image saved at: $filePath',
+          );
+        }
       } else {
-        throw Exception(
-            "Error while downloading image: ${response.statusCode}");
+        throw Exception("Download failed with status ${response.statusCode}");
       }
     } catch (e) {
-      print("Error while downloading: $e");
+      print("Error while downloading image: $e");
     }
   }
 
@@ -435,8 +467,6 @@ class _ChatDetailsWidgetState extends State<ChatDetailsWidget> {
                                                             user.name
                                                                 .split(" ")
                                                                 .first,
-
-
                                                             style:
                                                                 const TextStyle(
                                                               color:
@@ -533,8 +563,8 @@ class _ChatDetailsWidgetState extends State<ChatDetailsWidget> {
                                                                     child: Column(
                                                                         crossAxisAlignment: CrossAxisAlignment.start,
                                                                         children: message.files!.map((file) {
-                                                                          if (_isImage(file
-                                                                              .path)) {
+                                                                          if (_isImage(
+                                                                              file.path)) {
                                                                             return GestureDetector(
                                                                               onTap: () async {
                                                                                 String updatedImagePath = file.path.replaceAll("cinteraction", "huawei");
@@ -562,20 +592,12 @@ class _ChatDetailsWidgetState extends State<ChatDetailsWidget> {
                                                                                 ),
                                                                               ),
                                                                             );
-                                                                          } else if (_isTextFile(
-                                                                              file.path)) {
-                                                                            return _buildFileButton(
-                                                                                context,
-                                                                                file.path,
-                                                                                Icons.description,
-                                                                                'Open TextFile');
-                                                                          } else {
-                                                                            return _buildFileButton(
-                                                                                context,
-                                                                                file.path,
-                                                                                Icons.picture_as_pdf,
-                                                                                'Open PDF file');
                                                                           }
+                                                                          return _buildFileButton(
+                                                                            context,
+                                                                            file.path,
+                                                                            'Open ${_getFileNameFromUrl(file.path)}',
+                                                                          );
                                                                         }).toList()),
                                                                   ),
                                                                 if (message.message !=
@@ -621,15 +643,26 @@ class _ChatDetailsWidgetState extends State<ChatDetailsWidget> {
                                                                     )
                                                                   else
                                                                     SelectableLinkify(
-                                                                      onOpen: (link) async {
-                                                                        final uri = Uri.parse(link.url);
-                                                                        if (await canLaunchUrl(uri)) {
+                                                                      onOpen:
+                                                                          (link) async {
+                                                                        final uri =
+                                                                            Uri.parse(link.url);
+                                                                        if (await canLaunchUrl(
+                                                                            uri)) {
                                                                           await launchUrl(
                                                                               uri,
                                                                               mode: LaunchMode.externalApplication);
                                                                         }
                                                                       },
-                                                                      text: message.message!, style: const TextStyle(color: Colors.black, fontSize: 15, fontFamily: 'Roboto'),
+                                                                      text: message
+                                                                          .message!,
+                                                                      style: const TextStyle(
+                                                                          color: Colors
+                                                                              .black,
+                                                                          fontSize:
+                                                                              15,
+                                                                          fontFamily:
+                                                                              'Roboto'),
                                                                     ),
                                                               ],
                                                             ),
@@ -799,26 +832,33 @@ class _ChatDetailsWidgetState extends State<ChatDetailsWidget> {
   }
 
   Widget _buildFileButton(
-      BuildContext context, String fileUrl, IconData icon, String buttonText) {
+      BuildContext context, String fileUrl, String buttonText) {
+    final fileType = getFileType(fileUrl);
+    final fileName = _getFileNameFromUrl(fileUrl);
+
     return Padding(
       padding: const EdgeInsets.only(top: 8.0),
       child: GestureDetector(
         onTap: () {
-          if (_isPdf(fileUrl)) {
-            showPdfDialog(context, fileUrl);
-          } else if (_isTextFile(fileUrl)) {
-            openTextFile(context, fileUrl);
-          } else {
-            print("Nepodržan format");
+          switch (fileType) {
+            case FileType.pdf:
+              showPdfDialog(context, fileUrl);
+              break;
+            case FileType.text:
+              openTextFile(context, fileUrl);
+              break;
+            default:
+              downloadFileUniversal(context, fileUrl, fileName);
+              break;
           }
         },
         child: Row(
           children: [
-            Icon(icon, color: Colors.blue),
+            Icon(getFileIcon(fileUrl), color: Colors.blue),
             const SizedBox(width: 8),
             Expanded(
               child: Text(
-                _getFileNameFromUrl(fileUrl),
+                fileName,
                 style: const TextStyle(
                   color: Colors.blue,
                   fontSize: 16,
@@ -831,5 +871,44 @@ class _ChatDetailsWidgetState extends State<ChatDetailsWidget> {
         ),
       ),
     );
+  }
+
+  Future<void> downloadFileUniversal(
+      BuildContext context, String fileUrl, String fileName) async {
+    try {
+      final response = await Dio()
+          .get(fileUrl, options: Options(responseType: ResponseType.bytes));
+
+      if (response.statusCode == 200) {
+        final Uint8List bytes = Uint8List.fromList(response.data);
+
+        if (kIsWeb) {
+          final blob = html.Blob([bytes]);
+          final url = html.Url.createObjectUrlFromBlob(blob);
+          final anchor = html.AnchorElement(href: url)
+            ..target = 'blank'
+            ..download = fileName
+            ..click();
+          html.Url.revokeObjectUrl(url);
+        } else {
+          final dir = await getApplicationDocumentsDirectory();
+          final filePath = '${dir.path}/$fileName';
+          final file = io.File(filePath);
+          await file.writeAsBytes(bytes);
+          // context.showSnackBarMessage('File saved at: $filePath');
+          final openResult = await OpenFile.open(filePath);
+          if (openResult.type != ResultType.done) {
+            context.showSnackBarMessage(
+              'There is error while opening file',
+              isError: true,
+            );
+          }
+        }
+      } else {
+        throw Exception("Download failed: ${response.statusCode}");
+      }
+    } catch (e) {
+      context.showSnackBarMessage('There is error: $e', isError: true);
+    }
   }
 }

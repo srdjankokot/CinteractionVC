@@ -1,5 +1,7 @@
+import 'package:cinteraction_vc/core/extension/context.dart';
 import 'package:cinteraction_vc/core/io/network/models/data_channel_command.dart';
 import 'package:cinteraction_vc/layers/data/dto/user_dto.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:cinteraction_vc/core/app/injector.dart';
 import 'package:cinteraction_vc/layers/data/source/local/local_storage.dart';
@@ -32,6 +34,7 @@ class AppCubit extends Cubit<AppState> {
     String? email,
     String? password,
     String? passwordConfirmation,
+    required BuildContext context,
   }) async {
     await api.updateUserProfile(
       file: file,
@@ -45,6 +48,7 @@ class AppCubit extends Cubit<AppState> {
     final updatedUser = await api.getUserDetails();
     getIt.get<LocalStorage>().saveLoggedUser(user: updatedUser.response!);
     emit(state.copyWith(user: updatedUser.response));
+    context.showSnackBarMessage('Your profile has been successfully updated.');
   }
 
   Future<void> updateUserAfterImageChange(PlatformFile file) async {
