@@ -39,15 +39,6 @@ class MultiUserAvatar extends StatelessWidget {
 
   const MultiUserAvatar({required this.users, this.size = 60, super.key});
 
-  Color getRandomColor(int id) {
-    final hash =
-        "${id * 256}".codeUnits.fold(0, (prev, elem) => prev * 31 + elem);
-    final r = 127 + (hash >> 16) % 120;
-    final g = 127 + (hash >> 8) % 120;
-    final b = 127 + hash % 120;
-    return Color.fromARGB(255, r, g, b);
-  }
-
   @override
   Widget build(BuildContext context) {
     final displayUsers = users.take(4).toList();
@@ -75,32 +66,16 @@ class MultiUserAvatar extends StatelessWidget {
             return Container(
               width: width,
               height: height,
-              color: getRandomColor(user.id),
+              color: ColorConstants.getRandomColor(user.id),
               child: Center(
                   child: Stack(
                 children: [
                   Center(
                     child:
-                        //
-                        //                   Padding(
-                        //                   //   padding: const EdgeInsets.all(4),
-                        //                   //   child:
-                        //                   //   AutoSizeText(
-                        //                   //     user.name.getInitials(),
-                        //                   //     style: const TextStyle(
-                        //                   //         fontSize: 100,
-                        //                   //         color: Colors.white,
-                        //                   //         fontWeight: FontWeight.bold),
-                        //                   //     maxLines: 1,
-                        //                   //     minFontSize: 10,
-                        //                   //     overflow: TextOverflow.ellipsis,
-                        //                   //   ),
-                        //                   // )
-
                         Text(
-                      user.name.getInitials(),
+                      user.name.getInitials().toUpperCase(),
                       style: TextStyle(
-                        fontSize: displayUsers.length == 1 ? null : 10,
+                        fontSize: displayUsers.length == 1 ? size/3 : 10,
                         color: Colors.white,
                         fontWeight: FontWeight.bold,
                       ),

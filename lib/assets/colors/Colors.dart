@@ -4,7 +4,7 @@ class ColorConstants {
   static const kPrimaryColor = Color(0xFFF1471C);
   static const kSecondaryColor = Color(0xFF403736);
 
-  static const kStateColors = [ kEngProgress30];
+  static const kStateColors = [kEngProgress30];
 
   static const kStateInfo = Color(0xFF56A0D6);
   static const kStateSuccess = Color(0xFF1CBC96);
@@ -25,8 +25,6 @@ class ColorConstants {
   static const kGray5 = Color(0xFFE0E0E0);
   static const kGray600 = Color(0xFF475466);
 
-
-
   static const kGrey100 = Color(0xFFF6F6F8);
 
   static const kEngProgress65 = Color(0xFFA9A31A);
@@ -34,5 +32,33 @@ class ColorConstants {
   static const kWhite40 = Color(0xFFF8F8F8);
 
   static const kWhite50 = Color(0xFFF1F1F1);
-}
 
+  static Color getRandomColor(int id) {
+    final hash =
+        "${id * 256}".codeUnits.fold(0, (prev, elem) => prev * 31 + elem);
+    final r = 127 + (hash >> 16) % 120;
+    final g = 127 + (hash >> 8) % 120;
+    final b = 127 + hash % 120;
+    return Color.fromARGB(255, r, g, b);
+  }
+
+  static Color getShadedColor(int id,
+      {double amount = 0.2, bool lighten = true}) {
+    Color color = getRandomColor(id);
+
+    assert(amount >= 0 && amount <= 1);
+
+    int adjust(int channel) {
+      return lighten
+          ? (channel + ((255 - channel) * amount)).round()
+          : (channel * (1 - amount)).round();
+    }
+
+    return Color.fromARGB(
+      (color.a * 255).toInt(),
+      adjust((color.r * 255).toInt()),
+      adjust((color.g * 255).toInt()),
+      adjust((color.b * 255).toInt()),
+    );
+  }
+}

@@ -10,6 +10,7 @@ import 'package:flutter_webrtc/flutter_webrtc.dart';
 import 'package:flutter/material.dart';
 import 'package:webrtc_interface/webrtc_interface.dart';
 
+import '../../../../../assets/colors/Colors.dart';
 import '../../../../../core/ui/images/image.dart';
 import '../../../../../core/ui/widget/engagement_progress.dart';
 import '../../../../../core/util/util.dart';
@@ -29,181 +30,119 @@ class ParticipantVideoWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    var screenShare =
-        remoteStream.publisherName.toLowerCase().contains('screenshare');
+    var screenShare = remoteStream.publisherName.toLowerCase().contains('screenshare');
     if (context.isWide) {
       return SizedBox(
         height: height,
         width: width,
-        child: Stack(
-          children: [
-            Stack(
-              children: [
-                Visibility(
-                  visible: remoteStream.isVideoMuted == false,
-                  replacement:
-                      Center(child: UserImage.large([remoteStream.getUserImageDTO()]))
+        child: LayoutBuilder(builder: (context, constraints) {
+          final halfHeight = min(constraints.maxHeight, constraints.maxWidth)  / 3;
 
-                  // Center(
-                  //     child: CircleAvatar(
-                  //       backgroundColor:
-                  //       ([...ColorConstants.kStateColors]..shuffle()).first,
-                  //       radius: [width, height].reduce(min) / 4,
-                  //       child: Text(remoteStream.publisherName.getInitials(),
-                  //           style: context.primaryTextTheme.titleLarge?.copyWith(
-                  //               fontSize: [width, height].reduce(min) / 8,
-                  //               fontWeight: FontWeight.bold)),
-                  //     )
-                  // )
+          int userId = remoteStream.getUserImageDTO().id;
+          
+          return Stack(
+            children: [
+              Container(
+                margin: const EdgeInsets.all(2),
+                child: Stack(
+                  children: [
+                    Visibility(
+                        visible: remoteStream.isVideoMuted == false,
+                        replacement: Container(
+                            decoration: BoxDecoration(
+                              borderRadius: BorderRadius.circular(16),
+                              gradient: RadialGradient(
+                                center: Alignment.center,
+                                radius: 0.6,
+                                colors: [
+                                  ColorConstants.getShadedColor(userId, amount: 0.6),
+                                  ColorConstants.getRandomColor(userId),
+                                ],
+                              ),
 
-                  ,
-                  child:
+                              border: Border.all(
+                                color: remoteStream.isTalking == true
+                                    ? ColorConstants.kPrimaryColor
+                                    : Colors.white, // Border color
+                                width: 2.0, // Border thickness
+                              ),
+                            ),
+                            child: Center(
+                                child: UserImage.size([remoteStream.getUserImageDTO()], halfHeight))),
+                        child: Container(
+                            decoration: BoxDecoration(
+                              borderRadius: BorderRadius.circular(16),
+                              gradient: RadialGradient(
+                                center: Alignment.center,
+                                radius: 0.6,
+                                colors: [
+                                  ColorConstants.getShadedColor(userId, amount: 0.6),
+                                  ColorConstants.getRandomColor(userId),
+                                ],
+                              ),
 
-                      getVideoView(context, remoteStream.videoRenderer, screenShare, width, height, remoteStream.id, remoteStream.publisherName)
-
-                  // CrossPlatformVideoView(
-                  //   remoteStream.videoRenderer,
-                  //   width: width,
-                  //   height: height,
-                  //   id: remoteStream.id,
-                  //   publisherName: remoteStream.publisherName,
-                  //   mirror: screenShare,
-                  //
-                  //
-                  // )
-
-
-
-                  // RTCVideoView(
-                  //   remoteStream.videoRenderer,
-                  //   placeholderBuilder: (context) {
-                  //     return Center(
-                  //         child: CircleAvatar(
-                  //           backgroundColor:
-                  //           ([...ColorConstants.kStateColors]..shuffle()).first,
-                  //           radius: [width, height].reduce(min) / 4,
-                  //           child: Text(remoteStream.publisherName.getInitials(),
-                  //               style: context.primaryTextTheme.titleLarge?.copyWith(
-                  //                   fontSize: [width, height].reduce(min) / 8,
-                  //                   fontWeight: FontWeight.bold)),
-                  //         )
-                  //
-                  //       // Text("Video Paused By ${remoteStream.publisherName!}",
-                  //       //     style: const TextStyle(color: Colors.white)),
-                  //     );
-                  //   },
-                  //   filterQuality: FilterQuality.none,
-                  //   objectFit: screenShare
-                  //       ? RTCVideoViewObjectFit.RTCVideoViewObjectFitContain
-                  //       : RTCVideoViewObjectFit.RTCVideoViewObjectFitCover,
-                  //   mirror: !screenShare,
-                  // ),
+                              border: Border.all(
+                                color: remoteStream.isTalking == true
+                                    ? Colors.red
+                                    : Colors.white, // Border color
+                                width: 2.0, // Border thickness
+                              ),
+                            ),
+                            child: getVideoView(
+                                context,
+                                remoteStream.videoRenderer,
+                                screenShare,
+                                width,
+                                height,
+                                remoteStream.id,
+                                remoteStream.publisherName))),
+                  ],
                 ),
-
-                // Border overlay (doesn't affect video size)
-                Positioned.fill(
-                  child: AnimatedContainer(
-                    duration: const Duration(milliseconds: 100),
-                    decoration: BoxDecoration(
-                      border: Border.all(
-                        color: remoteStream.isTalking == true? Colors.red : Colors.transparent,
-                        width: 4,
+              ),
+              // Text('${remoteStream.videoRenderer.videoWidth}:${remoteStream.videoRenderer.videoHeight}'),
+              Positioned(
+                  top: 20,
+                  right: 24,
+                  child: Row(
+                    children: [
+                      Visibility(
+                        visible: width > 200,
+                        child: EngagementProgress(
+                            engagement: remoteStream.engagement ?? 0),
                       ),
-                    ),
-                  ),
-                ),
-
-              ],
-            ),
-            // Text('${remoteStream.videoRenderer.videoWidth}:${remoteStream.videoRenderer.videoHeight}'),
-            Positioned(
-                top: 20,
-                right: 24,
-                child: Row(
-                  children: [
-                    Visibility(
-                      visible: width > 200,
-                      child: EngagementProgress(
-                          engagement: remoteStream.engagement ?? 0),
-                    ),
-                  ],
-                )),
-
-
-            // Positioned(
-            //     right: 0,
-            //     child: Row(
-            //       children: [
-            //         // EngagementProgress(
-            //         //     engagement: remoteStream.engagement ?? 0),
-            //         PopupMenuButton<String>(
-            //           onSelected: (e) async {
-            //             switch (e) {
-            //               case 'Mute/UnMute':
-            //                 context.read<ConferenceCubit>().muteByID(remoteStream.id);
-            //                 break;
-            //               case 'Kick':
-            //                 context.read<ConferenceCubit>().kick(remoteStream.id);
-            //                 break;
-            //               case 'UnPublish':
-            //                 context.read<ConferenceCubit>().unPublishById(remoteStream.id);
-            //                 break;
-            //             }
-            //           },
-            //           itemBuilder: (BuildContext context) {
-            //             return {'Mute/UnMute','Kick'}.map((String choice) {
-            //               return PopupMenuItem<String>(
-            //                 value: choice,
-            //                 child: Text(choice),
-            //               );
-            //             }).toList();
-            //           },
-            //         ),
-            //       ],
-            //     )),
-
-            Positioned(
-                left: 10,
-                top: 10,
-                child: Text('${remoteStream.publisherName}', style: context.textTheme.displayLarge?.copyWith(color: Colors.white),)),
-
-
-            Positioned(
-                bottom: 16,
-                left: 16,
-                child: Row(
-                  children: [
-                    Visibility(
-                        visible: remoteStream.isAudioMuted == true,
-                            child:
-                            imageSVGAsset('icon_microphone_disabled') as Widget),
-
-                    Visibility(
-                        visible: remoteStream.isVideoMuted == true,
-                            child:
-                            imageSVGAsset('icon_video_recorder_disabled') as Widget),
-
-                       Visibility(
+                    ],
+                  )),
+              Positioned(
+                  left: 10,
+                  top: 10,
+                  child: Text(
+                    '${remoteStream.publisherName}',
+                    style: context.textTheme.displayLarge
+                        ?.copyWith(color: Colors.white),
+                  )),
+              Positioned(
+                  bottom: 16,
+                  left: 16,
+                  child: Row(
+                    children: [
+                      Visibility(
+                          visible: remoteStream.isAudioMuted == true,
+                          child: imageSVGAsset('icon_microphone_disabled')
+                              as Widget),
+                      Visibility(
+                          visible: remoteStream.isVideoMuted == true,
+                          child: imageSVGAsset('icon_video_recorder_disabled')
+                              as Widget),
+                      Visibility(
                         visible: remoteStream.isHandUp == true,
-                            child: const Icon(Icons.waving_hand_outlined, color: Colors.white),
-                       )
-                  ],
-                )
-            ),
-
-
-            // Visibility(
-            //     visible: width < 200,
-            //     child: Positioned.fill(
-            //       bottom: 20,
-            //       child: Align(
-            //           alignment: Alignment.bottomCenter,
-            //           child: EngagementProgress(
-            //               engagement: remoteStream.engagement ?? 0)),
-            //     )),
-
-          ],
-        ),
+                        child: const Icon(Icons.waving_hand_outlined,
+                            color: Colors.white),
+                      )
+                    ],
+                  )),
+            ],
+          );
+        }),
       );
     }
 
@@ -224,10 +163,9 @@ class ParticipantVideoWidget extends StatelessWidget {
               borderRadius: BorderRadius.circular(6),
               child: Visibility(
                 visible: remoteStream.isVideoMuted == false,
-                replacement:
-                Center(child: UserImage.large([remoteStream.getUserImageDTO()])), child:
-
-                RTCVideoView(
+                replacement: Center(
+                    child: UserImage.large([remoteStream.getUserImageDTO()])),
+                child: RTCVideoView(
                   remoteStream.videoRenderer,
                   placeholderBuilder: (context) {
                     return Text('data');
@@ -269,12 +207,14 @@ class ParticipantVideoWidget extends StatelessWidget {
             //       ],
             //     )),
 
-
             Positioned(
                 left: 10,
                 top: 10,
-                child: Text('${remoteStream.publisherName}', style: context.textTheme.displayLarge?.copyWith(color: Colors.white),)),
-
+                child: Text(
+                  '${remoteStream.publisherName}',
+                  style: context.textTheme.displayLarge
+                      ?.copyWith(color: Colors.white),
+                )),
 
             Positioned(
                 bottom: 16,
@@ -283,22 +223,19 @@ class ParticipantVideoWidget extends StatelessWidget {
                   children: [
                     Visibility(
                         visible: remoteStream.isAudioMuted == true,
-                        child:
-                        imageSVGAsset('icon_microphone_disabled') as Widget),
-
+                        child: imageSVGAsset('icon_microphone_disabled')
+                            as Widget),
                     Visibility(
                         visible: remoteStream.isVideoMuted == true,
-                        child:
-                        imageSVGAsset('icon_video_recorder_disabled') as Widget),
-
+                        child: imageSVGAsset('icon_video_recorder_disabled')
+                            as Widget),
                     Visibility(
                       visible: remoteStream.isHandUp == true,
-                      child: const Icon(Icons.waving_hand_outlined, color: Colors.white),
+                      child: const Icon(Icons.waving_hand_outlined,
+                          color: Colors.white),
                     )
                   ],
-                )
-            ),
-
+                )),
           ],
         ),
       ),

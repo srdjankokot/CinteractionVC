@@ -6,6 +6,8 @@ import 'package:cinteraction_vc/core/ui/widget/call_button_shape.dart';
 import 'package:cinteraction_vc/layers/presentation/cubit/chat/chat_cubit.dart';
 import 'package:cinteraction_vc/layers/presentation/cubit/chat/chat_state.dart';
 import 'package:cinteraction_vc/layers/presentation/ui/chat/widget/chat_details_widget.dart';
+import 'package:cinteraction_vc/layers/presentation/ui/conference/staggered_aspect_grid.dart';
+import 'package:cinteraction_vc/layers/presentation/ui/conference/staggered_layout_cubit.dart';
 import 'package:cinteraction_vc/layers/presentation/ui/conference/widget/participant_video_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
@@ -28,6 +30,7 @@ class VideoRoomPage extends StatelessWidget {
 
   OverlayEntry? _overlayEntry;
   final List<String> _messages = [];
+  final staggeredCubit = StaggeredCubit();
 
   Widget _buildToast(String message) {
     return Container(
@@ -159,10 +162,11 @@ class VideoRoomPage extends StatelessWidget {
               .map((e) => e.value)
               .toList());
 
-          var borderWidth =
-          state.recording == RecordingStatus.recording ? 3.0 : 0.0;
+          var isRecording = state.recording == RecordingStatus.recording;
 
           bool showingChat = state.showingChat;
+
+          staggeredCubit.setStreams(items);
 
           return Scaffold(
             body: Material(
@@ -174,8 +178,8 @@ class VideoRoomPage extends StatelessWidget {
                     decoration: BoxDecoration(
                       color: ColorConstants.kBlack3, // Background color
                       border: Border.all(
-                        color: ColorConstants.kPrimaryColor, // Border color
-                        width: borderWidth, // Border width
+                        color: isRecording ? ColorConstants.kPrimaryColor: ColorConstants.kBlack3, // Border color
+                        width: isRecording ? 3.0 : 0.0, // Border width
                       ), // Rounded corners
                     ),
                     child: Builder(
@@ -197,14 +201,25 @@ class VideoRoomPage extends StatelessWidget {
 
                                                 return Stack(
                                                   children: [
-                                                    getLayout(
-                                                        context,
-                                                        items,
-                                                        state.isGridLayout,
-                                                        borderWidth,
-                                                        expandedHeight,
-                                                        state.showingParticipants ||
-                                                            state.showingChat),
+
+                                                BlocProvider<StaggeredCubit>.value(
+                                                value: staggeredCubit,
+                                                  child: const StaggeredAspectGrid(),
+                                                ),
+
+                                                    // BlocProvider<StaggeredCubit>(
+                                                    //   create: (_) => StaggeredCubit(),
+                                                    //   child: const StaggeredAspectGrid(),
+                                                    // ),
+
+                                                    // getLayout(
+                                                    //     context,
+                                                    //     items,
+                                                    //     state.isGridLayout,
+                                                    //     borderWidth,
+                                                    //     expandedHeight,
+                                                    //     state.showingParticipants ||
+                                                    //         state.showingChat),
 
                                                     Positioned(
                                                       bottom: 20,
@@ -218,14 +233,6 @@ class VideoRoomPage extends StatelessWidget {
                                                   ],
                                                 );
 
-                                                return getLayout(
-                                                    context,
-                                                    items,
-                                                    state.isGridLayout,
-                                                    borderWidth,
-                                                    expandedHeight,
-                                                    state.showingParticipants ||
-                                                        state.showingChat);
                                               },
                                             ),
                                           ),
@@ -597,7 +604,7 @@ class VideoRoomPage extends StatelessWidget {
                                                   context,
                                                   items,
                                                   state.isGridLayout,
-                                                  borderWidth,
+                                                   3.0 ,
                                                   0,
                                                   false))),
                                       Padding(
