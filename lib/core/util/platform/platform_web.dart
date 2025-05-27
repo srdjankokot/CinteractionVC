@@ -1,13 +1,18 @@
 import 'dart:convert';
 import 'dart:html' as html;
+import 'dart:math';
 import 'dart:typed_data';
 
+import 'package:cinteraction_vc/core/extension/context.dart';
+import 'package:cinteraction_vc/core/extension/string.dart';
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/material.dart';
 
 import 'dart:ui_web' as ui; // Only works on web
 
 import 'package:flutter_webrtc/flutter_webrtc.dart';
 
+import '../../../assets/colors/Colors.dart';
 import '../util.dart';
 void redirectToDesktopApp() {
   var os = detectWebOS();
@@ -79,26 +84,57 @@ String detectWebOS() {
 }
 
 Widget getVideoView(BuildContext context, RTCVideoRenderer renderer, bool mirror, double width, double height, String id, String publisherName) {
-  ui.platformViewRegistry.registerViewFactory(id, (int _) {
-    final html.MediaStream nativeStream = getNativeMediaStream(renderer.srcObject!);
+  // ui.platformViewRegistry.registerViewFactory(id, (int _) {
+  //   final html.MediaStream nativeStream = getNativeMediaStream(renderer.srcObject!);
+  //
+  //   final video = html.VideoElement()
+  //     ..id = id
+  //     ..autoplay = true
+  //     ..muted = true
+  //     ..srcObject = nativeStream
+  //     ..style.objectFit = _boxFitToCss(
+  //               mirror
+  //                   ? BoxFit.contain
+  //                   : BoxFit.cover)
+  //     ..style.transform = mirror ? 'scaleX(-1)' : 'none'
+  //     ..style.width = '100%'
+  //     ..style.height = '100%';
+  //
+  //   return video;
+  // });
+  //
+  // return HtmlElementView(viewType: id);
 
-    final video = html.VideoElement()
-      ..id = id
-      ..autoplay = true
-      ..muted = true
-      ..srcObject = nativeStream
-      ..style.objectFit = _boxFitToCss(
-                mirror
-                    ? BoxFit.contain
-                    : BoxFit.cover)
-      ..style.transform = mirror ? 'scaleX(-1)' : 'none'
-      ..style.width = '100%'
-      ..style.height = '100%';
 
-    return video;
-  });
+  return ClipRRect(
+    borderRadius: BorderRadius.circular(17), // match this to parent’s radius
+    child: RTCVideoView(
+      renderer,
+      placeholderBuilder: (context) {
+        return Center(
+          child: CircleAvatar(
+            backgroundColor: ([...ColorConstants.kStateColors]..shuffle()).first,
+            radius: [width, height].reduce(min) / 4,
+            child: Text(
+              publisherName.getInitials(),
+              style: context.primaryTextTheme.titleLarge?.copyWith(
+                fontSize: [width, height].reduce(min) / 8,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+          ),
+        );
+      },
+      filterQuality: FilterQuality.none,
+      objectFit: mirror
+          ? RTCVideoViewObjectFit.RTCVideoViewObjectFitContain
+          : RTCVideoViewObjectFit.RTCVideoViewObjectFitCover,
+      mirror: !mirror,
+    ),
+  );
 
-  return HtmlElementView(viewType: id);
+
+
 }
 
 String _boxFitToCss(BoxFit fit) {
@@ -127,25 +163,32 @@ html.MediaStream getNativeMediaStream(MediaStream stream) {
 }
 
 Future<ByteBuffer?> captureFrameFromVideo(StreamRenderer renderer, {int width = 640, int height = 360}) async {
-  final video = html.document.getElementById(renderer.id) as html.VideoElement?;
+  // final video = html.document.getElementById(renderer.id) as html.VideoElement?;
+  //
+  // if (video == null || video.videoWidth == 0 || video.videoHeight == 0) {
+  //   throw Exception("Video element not found or not ready (ID: ${renderer.id})");
+  // }
+  //
+  // final canvas = html.CanvasElement(width: width, height: height);
+  // final ctx = canvas.context2D;
+  //
+  // // Draw video onto scaled canvas (auto-resizes to 640x360)
+  // ctx.drawImageScaled(video, 0, 0, width, height);
+  //
+  // // Convert to compressed JPEG (quality = 0.7)
+  // final blob = await canvas.toBlob('image/jpeg', 0.7);
+  // final reader = html.FileReader();
+  // reader.readAsDataUrl(blob!);
+  // await reader.onLoad.first;
+  //
+  // final base64 = (reader.result as String).split(',').last;
+  // final bytes = base64Decode(base64);
+  // return bytes.buffer;
 
-  if (video == null || video.videoWidth == 0 || video.videoHeight == 0) {
-    throw Exception("Video element not found or not ready (ID: ${renderer.id})");
-  }
+  var image = await renderer.mediaStream
+      ?.getVideoTracks()
+      .first
+      .captureFrame();
 
-  final canvas = html.CanvasElement(width: width, height: height);
-  final ctx = canvas.context2D;
-
-  // Draw video onto scaled canvas (auto-resizes to 640x360)
-  ctx.drawImageScaled(video, 0, 0, width, height);
-
-  // Convert to compressed JPEG (quality = 0.7)
-  final blob = await canvas.toBlob('image/jpeg', 0.7);
-  final reader = html.FileReader();
-  reader.readAsDataUrl(blob!);
-  await reader.onLoad.first;
-
-  final base64 = (reader.result as String).split(',').last;
-  final bytes = base64Decode(base64);
-  return bytes.buffer;
+  return image;
 }

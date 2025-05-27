@@ -12,7 +12,9 @@ import 'package:cinteraction_vc/layers/presentation/cubit/chat/chat_cubit.dart';
 import 'package:cinteraction_vc/layers/presentation/cubit/home/home_cubit.dart';
 import 'package:cinteraction_vc/layers/presentation/ui/auth/reset_pass_enter_new.dart';
 import 'package:cinteraction_vc/layers/presentation/ui/chat/chat_room.dart';
+import 'package:cinteraction_vc/layers/presentation/ui/conference/staggered_layout_cubit.dart';
 import 'package:flutter/foundation.dart';
+import 'package:flutter/material.dart';
 
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
@@ -28,7 +30,6 @@ import '../../layers/presentation/ui/auth/splash_page.dart';
 import '../../layers/presentation/ui/conference/video_room.dart';
 import '../../layers/presentation/ui/echotest/EchoTestWidget.dart';
 import '../../layers/presentation/ui/landing/ui/page/home_page.dart';
-import '../util/platform/platform.dart';
 
 final GoRouter router = GoRouter(
   initialLocation: AppRoute.splash.path,
@@ -37,6 +38,12 @@ final GoRouter router = GoRouter(
     GoRoute(
       path: AppRoute.splash.path,
       builder: (context, state) => const SplashPage(),
+      // builder: (context, state) {
+      //   return BlocProvider(
+      //     create: (context) => StaggeredCubit(),
+      //     child: const StaggeredAspectGrid(),
+      //   );
+      // }  ,
     ),
     // Auth
     GoRoute(
