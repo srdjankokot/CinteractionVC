@@ -13,6 +13,10 @@
       name="description"
       content="Flutter project for Cinteraction Virtual Classroom"
     />
+    <meta
+      http-equiv="Content-Security-Policy"
+      content="default-src * blob: data: 'unsafe-inline' 'unsafe-eval';"
+    />
 
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-status-bar-style" content="black" />
@@ -36,29 +40,36 @@
     <script src="concatenate_streams_normalize.js"></script>
   </head>
   <body>
-    <script src="flutter_bootstrap.js" async></script>
-    <!--<button onclick="mergeVideos()">Click me to greet!</button>-->
+    <!-- ✅ Paste image listener (safe & production-ready) -->
     <script>
-      window.addEventListener("paste", async (event) => {
-        const items = event.clipboardData.items;
-        for (let item of items) {
-          if (item.type.indexOf("image") === 0) {
-            const blob = item.getAsFile();
-            const arrayBuffer = await blob.arrayBuffer();
-            const byteArray = Array.from(new Uint8Array(arrayBuffer));
+      document.addEventListener("DOMContentLoaded", function () {
+        window.addEventListener("paste", async (event) => {
+          const items = event.clipboardData?.items;
+          if (!items) return;
 
-            const customEvent = new CustomEvent("pasted-file", {
-              detail: {
-                name: blob.name || "pasted_image.png",
-                data: byteArray,
-              },
-            });
+          for (let item of items) {
+            if (item.type.indexOf("image") === 0) {
+              const blob = item.getAsFile();
+              const arrayBuffer = await blob.arrayBuffer();
+              const byteArray = Array.from(new Uint8Array(arrayBuffer));
 
-            console.log("Dispatching 'pasted-file' event", customEvent.detail);
-            window.dispatchEvent(customEvent);
+              const customEvent = new CustomEvent("pasted-file", {
+                detail: {
+                  name: "pasted_image_" + Date.now() + ".png",
+                  data: byteArray,
+                },
+              });
+
+              console.log(
+                "Dispatching 'pasted-file' event",
+                customEvent.detail
+              );
+              window.dispatchEvent(customEvent);
+            }
           }
-        }
+        });
       });
     </script>
+    <script src="flutter_bootstrap.js" async></script>
   </body>
 </html>
