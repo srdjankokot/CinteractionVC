@@ -36,7 +36,6 @@ import 'package:flutter_webrtc/flutter_webrtc.dart' as flutterWebRTC;
 
 import 'package:url_launcher/url_launcher.dart';
 import 'package:http/http.dart' as http;
-// import 'dart:js' as js;
 
 class ConferenceRepoImpl extends ConferenceRepo {
   ConferenceRepoImpl({
@@ -68,15 +67,19 @@ class ConferenceRepoImpl extends ConferenceRepo {
   int room = 12344321;
   late JanusVideoRoom? roomDetails;
 
-  final _conferenceStream = StreamController<Map<dynamic, StreamRenderer>>.broadcast();
+  final _conferenceStream =
+      StreamController<Map<dynamic, StreamRenderer>>.broadcast();
+
   // final _contributorsStream = StreamController<Map<dynamic, StreamRenderer>>.broadcast();
 
   final _conferenceEndedStream = StreamController<String>.broadcast();
   final _conferenceChatStream = StreamController<List<ChatMessage>>.broadcast();
-  final _participantsStream = StreamController<Map<dynamic, StreamRenderer>>.broadcast();
+  final _participantsStream =
+      StreamController<Map<dynamic, StreamRenderer>>.broadcast();
   final _avgEngagementStream = StreamController<int>.broadcast();
   final _talkingIdStream = StreamController<int>.broadcast();
   final _conferenceToastMessageStream = StreamController<String>.broadcast();
+  final _userIsTalkingStream = StreamController<void>.broadcast();
 
   User? user = getIt.get<LocalStorage>().loadLoggedUser();
 
@@ -118,7 +121,7 @@ class ConferenceRepoImpl extends ConferenceRepo {
   }
 
   @override
-  Stream<Map<dynamic, StreamRenderer>>  getSubscribersStream() {
+  Stream<Map<dynamic, StreamRenderer>> getSubscribersStream() {
     return _participantsStream.stream;
   }
 
@@ -220,17 +223,16 @@ class ConferenceRepoImpl extends ConferenceRepo {
         stream['id'] = publisher['id'];
         stream['display'] = publisher['display'];
 
-        if(publisher.containsKey('metadata'))
-          {
-            var metadata = publisher['metadata'];
-            stream['metadataMuted'] = stream['type'] == 'audio'
-                ? metadata['isAudioMuted']
-                : stream['type'] == 'video'
-                ? metadata['isVideoMuted']
-                : null;
-            stream['isHandUp'] = metadata['isHandUp'];
-            stream['imageUrl'] = metadata['imageUrl'];
-          }
+        if (publisher.containsKey('metadata')) {
+          var metadata = publisher['metadata'];
+          stream['metadataMuted'] = stream['type'] == 'audio'
+              ? metadata['isAudioMuted']
+              : stream['type'] == 'video'
+                  ? metadata['isVideoMuted']
+                  : null;
+          stream['isHandUp'] = metadata['isHandUp'];
+          stream['imageUrl'] = metadata['imageUrl'];
+        }
 
         sources.add(stream);
       }
@@ -261,7 +263,7 @@ class ConferenceRepoImpl extends ConferenceRepo {
         participants.forEach((publisher) {
           var metadata = publisher['metadata'];
           if (metadata != null) {
-            var id =  publisher['id'];
+            var id = publisher['id'];
             _manageMetadata(id.toString(), metadata);
           }
         });
@@ -272,7 +274,6 @@ class ConferenceRepoImpl extends ConferenceRepo {
         var id = event.plugindata?.data['id'];
         _manageMetadata(id.toString(), metadata);
       }
-
 
       var kicked = event.plugindata?.data['kicked'];
       if (kicked != null) {
@@ -400,7 +401,7 @@ class ConferenceRepoImpl extends ConferenceRepo {
     });
   }
 
-  _manageMetadata(String id, Map<String, dynamic> metadata){
+  _manageMetadata(String id, Map<String, dynamic> metadata) {
     StreamRenderer? renderer = videoState.streamsToBeRendered[id];
 
     if (renderer == null) {
@@ -409,18 +410,16 @@ class ConferenceRepoImpl extends ConferenceRepo {
     _manageMuteUIEvents(renderer, 'audio', metadata['isAudioMuted']);
     _manageMuteUIEvents(renderer, 'video', metadata['isVideoMuted']);
     _manageHandUp(renderer, metadata['isHandUp']);
-    renderer.imageUrl =  metadata['imageUrl'];
+    renderer.imageUrl = metadata['imageUrl'];
 
     _refreshStreams();
   }
 
-  _manageHandUp(StreamRenderer renderer, bool handUp)
-  {
-    print("${renderer.publisherName}: ${renderer.isHandUp} new value: $handUp");
+  _manageHandUp(StreamRenderer renderer, bool handUp) {
     if (renderer.isHandUp != handUp && handUp) {
-      _conferenceToastMessageStream.add('${renderer.publisherName} raised hand!');
+      _conferenceToastMessageStream
+          .add('${renderer.publisherName} raised hand!');
     }
-
     renderer.isHandUp = handUp;
   }
 
@@ -437,8 +436,7 @@ class ConferenceRepoImpl extends ConferenceRepo {
         renderer.isTalking = false;
       }
       renderer.isAudioMuted = muted;
-
-    } else if (kind == 'video'){
+    } else if (kind == 'video') {
       if (renderer.isVideoMuted == muted) {
         return;
       }
@@ -483,13 +481,15 @@ class ConferenceRepoImpl extends ConferenceRepo {
             // 128 kbps
             active: true,
             scalabilityMode: 'L2T2',
-            scaleResolutionDownBy: 4, // 180pmaxFramerate: 24
+            scaleResolutionDownBy: 8, // 180pmaxFramerate: 24
           ),
         ], mediaConstraints: {
           'video': {'width': 640, 'height': 360},
           // 720p max for higher quality
           'audio': true,
         });
+
+        localVideoRenderer.isVideoMuted = false;
       } else {
         localVideoRenderer.isVideoMuted = true;
         print("System dont detect any camera.");
@@ -614,13 +614,28 @@ class ConferenceRepoImpl extends ConferenceRepo {
         //   'TrackMuted': event.track?.muted!,
         //   'TrackEnabled': event.track?.enabled
         // });
-        // print(event);
+        print(event);
 
         int? feedId = videoState.subStreamsToFeedIdMap[event.mid]?['feed_id'];
 
         Publisher? feed = videoState.feedIdToDisplayStreamsMap[feedId];
         if (feed == null) {
           return;
+        }
+
+        if (event.flowing == false) {
+
+          final feedKey = feedId.toString();
+          final isVideo = event.track?.kind == "video";
+          var renderer = videoState.streamsToBeRendered[feedKey];
+          if(renderer == null) return;
+          if (isVideo) {
+            print("try to set video flowing");
+            renderer.isVideoFlowing = event.flowing;
+
+            _checkVideoStreams();
+            _refreshStreams();
+          }
         }
 
         if (event.flowing == true) {
@@ -659,7 +674,7 @@ class ConferenceRepoImpl extends ConferenceRepo {
             renderer.videoRenderer.muted = false;
 
             final audioSource = sources.firstWhere(
-                  (item) => item['id'] == feedId && item['type'] == 'audio',
+              (item) => item['id'] == feedId && item['type'] == 'audio',
               orElse: () => <String, dynamic>{},
             );
 
@@ -670,15 +685,16 @@ class ConferenceRepoImpl extends ConferenceRepo {
             renderer.isHandUp = audioSource['isHandUp'];
             renderer.imageUrl = audioSource['imageUrl'];
 
-                renderer.audioMid = event.mid;
+            renderer.audioMid = event.mid;
           } else if (isVideo) {
+            renderer.isVideoFlowing = event.flowing;
             // Remove existing video tracks
             renderer.mediaStream?.getVideoTracks().forEach((track) {
               renderer?.mediaStream?.removeTrack(track);
             });
 
             // Add new video track
-            if (event.track != null) {
+            if (event.track != null )  {
               renderer.mediaStream?.addTrack(event.track!);
             }
 
@@ -689,14 +705,14 @@ class ConferenceRepoImpl extends ConferenceRepo {
             renderer.videoRenderer.onResize = () => _refreshStreams();
             renderer.videoRenderer.muted = false;
 
-
             final Map<dynamic, dynamic> videoSource = sources.firstWhere(
-                  (item) => item['id'] == feedId && item['type'] == 'video',
+              (item) => item['id'] == feedId && item['type'] == 'video',
               orElse: () => <String, dynamic>{},
             );
 
-            if (videoSource.isNotEmpty) {
+            if (videoSource.isNotEmpty &&  renderer.initialSet == false) {
               renderer.isVideoMuted = videoSource['metadataMuted'];
+              renderer.initialSet = true;
             }
 
             renderer.videoMid = event.mid;
@@ -909,6 +925,43 @@ class ConferenceRepoImpl extends ConferenceRepo {
     await videoPlugin?.send(data: payload);
   }
 
+
+  Timer? _audioLevelTimer;
+  bool _monitorPaused = false;
+
+  void startAudioLevelMonitor(MediaStreamTrack audioTrack) {
+    _audioLevelTimer?.cancel();
+
+    _audioLevelTimer = Timer.periodic(const Duration(seconds: 1), (_) async {
+      if (_monitorPaused) return;
+
+      var stats = await videoPlugin?.webRTCHandle?.peerConnection?.getStats(audioTrack);
+      for (var report in stats!) {
+        if (report.type == 'media-source') {
+          final level = report.values['audioLevel'];
+          print("audioLevel: $level");
+          if (level != null && level > 0.1 &&  localVideoRenderer.isAudioMuted!) {
+            print('User is speaking while muted!');
+            _pauseMonitoring(duration: const Duration(seconds: 5));
+            _userIsTalkingStream.add(_);
+          }
+        }
+      }
+    });
+  }
+
+  void stopAudioLevelMonitor() {
+    _audioLevelTimer?.cancel();
+    _audioLevelTimer = null;
+  }
+
+  void _pauseMonitoring({Duration duration = const Duration(seconds: 5)}) {
+    _monitorPaused = true;
+    Timer(duration, () {
+      _monitorPaused = false;
+    });
+  }
+
   @override
   Future<void> mute({required String kind, required bool muted}) async {
     var payload = {
@@ -919,14 +972,16 @@ class ConferenceRepoImpl extends ConferenceRepo {
       "mute": muted
     };
 
-    // await videoPlugin?.send(data: payload);
-    localVideoRenderer.mediaStream
-        ?.getTracks()
-        .where((element) => element.kind == kind)
-        .toList()
-        .forEach((element) {
-      element.enabled = !muted;
+    await videoPlugin?.send(data: payload);
+    localVideoRenderer.mediaStream?.getTracks().where((element) => element.kind == kind).toList().forEach((element) {
+      // element.enabled = !muted;
+      if(muted) {
+        startAudioLevelMonitor(element);
+      } else {
+        stopAudioLevelMonitor();
+      }
     });
+
 
     if (kind == 'audio') {
       localVideoRenderer.isAudioMuted = muted;
@@ -937,11 +992,11 @@ class ConferenceRepoImpl extends ConferenceRepo {
     await _changeMetaData();
     _refreshStreams();
     _getEngagement();
+
   }
 
-
   @override
-  Future<void> handUp({required bool handUp}) async{
+  Future<void> handUp({required bool handUp}) async {
     localVideoRenderer.isHandUp = handUp;
     await _changeMetaData();
   }
@@ -1166,7 +1221,8 @@ class ConferenceRepoImpl extends ConferenceRepo {
 
     _addOnEndedToTrack(audioTrack);
 
-    List<RTCRtpSender>? senders = await videoPlugin?.webRTCHandle?.peerConnection?.senders;
+    List<RTCRtpSender>? senders =
+        await videoPlugin?.webRTCHandle?.peerConnection?.senders;
     senders?.forEach((sender) async {
       if (sender.track?.kind == 'audio') {
         print('${sender.track?.label} track is replaced');
@@ -1182,19 +1238,19 @@ class ConferenceRepoImpl extends ConferenceRepo {
 
   @override
   Future<List<Participant>> getParticipants() async {
-  //   var payload = {"request": "listparticipants", "room": room};
-  //   Map participants = await videoPlugin?.send(data: payload);
-  //   JanusEvent event = JanusEvent.fromJson(participants);
-  //
-  //   List<Participant> subscribers = [];
-  //
-  //   for (var par in event.plugindata?.data['participants']) {
-  //     var participant = Participant.fromJson(par as Map<String, dynamic>);
-  //     subscribers.add(participant);
-  //   }
-  //   _participantsStream.add(subscribers);
-  //
-  //   return subscribers;
+    //   var payload = {"request": "listparticipants", "room": room};
+    //   Map participants = await videoPlugin?.send(data: payload);
+    //   JanusEvent event = JanusEvent.fromJson(participants);
+    //
+    //   List<Participant> subscribers = [];
+    //
+    //   for (var par in event.plugindata?.data['participants']) {
+    //     var participant = Participant.fromJson(par as Map<String, dynamic>);
+    //     subscribers.add(participant);
+    //   }
+    //   _participantsStream.add(subscribers);
+    //
+    //   return subscribers;
     return List.empty();
   }
 
@@ -1288,13 +1344,15 @@ class ConferenceRepoImpl extends ConferenceRepo {
     // print("_refreshStreams");
     // _checkVideoStreams();
     var screenshareKeys = videoState.streamsToBeRendered.keys
-        .where((key) => key.contains('_screenshare') || key.contains('ScreenShare'))
+        .where((key) =>
+            key.contains('_screenshare') || key.contains('ScreenShare'))
         .toList();
-    final List<String> list = [
-      "local",
-      ...currentTalkerIds,
-      ...screenshareKeys
-    ];
+
+    Iterable<String> currentTalkers = currentTalkerIds.cast<String>();
+    Iterable<String> screenshare = screenshareKeys.cast<String>();
+
+    final List<String> list = ["local", ...currentTalkers, ...screenshare];
+
     // print("_refreshStreams: $list" );
 
     _conferenceStream.add(Map.fromEntries(
@@ -1348,13 +1406,12 @@ class ConferenceRepoImpl extends ConferenceRepo {
       "isAudioMuted": localVideoRenderer.isAudioMuted,
       "isVideoMuted": localVideoRenderer.isVideoMuted,
       "isHandUp": localVideoRenderer.isHandUp,
-      "imageUrl": "https://www.shareicon.net/data/512x512/2016/07/26/802043_man_512x512.png"
+      "imageUrl":
+          "https://www.shareicon.net/data/512x512/2016/07/26/802043_man_512x512.png"
     };
 
     await videoPlugin?.joinPublisher(room,
-        displayName: displayName,
-        id: int.parse(myId),
-        metadata: metadata);
+        displayName: displayName, id: int.parse(myId), metadata: metadata);
   }
 
   Future<JanusVideoRoom?> _getRoomDetails(int roomId) async {
@@ -1472,7 +1529,6 @@ class ConferenceRepoImpl extends ConferenceRepo {
       //     .captureFrame();
 
       var image = await captureFrameFromVideo(localVideoRenderer);
-
 
       var img = base64Encode(image!.asUint8List().toList()).toString();
 
@@ -1742,5 +1798,10 @@ class ConferenceRepoImpl extends ConferenceRepo {
   @override
   Stream<String> getToastStream() {
     return _conferenceToastMessageStream.stream;
+  }
+
+  @override
+  Stream<void> getUserTalkingStream() {
+    return _userIsTalkingStream.stream;
   }
 }

@@ -25,19 +25,29 @@ import '../../cubit/conference/conference_cubit.dart';
 import '../../cubit/conference/conference_state.dart';
 import '../profile/ui/widget/user_image.dart';
 
-class VideoRoomPage extends StatelessWidget {
+class VideoRoomPage extends StatefulWidget {
   VideoRoomPage({super.key});
 
+  @override
+  State<VideoRoomPage> createState() => _VideoRoomPageState();
+}
+
+class _VideoRoomPageState extends State<VideoRoomPage> {
   OverlayEntry? _overlayEntry;
+  OverlayEntry? _overlayEntryMic;
+
   final List<String> _messages = [];
+
   final staggeredCubit = StaggeredCubit();
 
-  Widget _buildToast(String message) {
+  final GlobalKey _micTargetKey = GlobalKey();
+
+  Widget _buildToast(String message, {Color? background = Colors.black26}) {
     return Container(
       margin: const EdgeInsets.symmetric(vertical: 3),
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
       decoration: BoxDecoration(
-        color: Colors.black26,
+        color: background,
         borderRadius: BorderRadius.circular(8),
       ),
       child: Text(
@@ -47,6 +57,45 @@ class VideoRoomPage extends StatelessWidget {
       ),
     );
   }
+  void _showOverlay() {
+    final renderBox = _micTargetKey.currentContext
+        ?.findRenderObject() as RenderBox?;
+    if (renderBox == null) return;
+
+    final targetPosition = renderBox.localToGlobal(Offset.zero);
+    final targetSize = renderBox.size;
+    const double width = 300;
+
+    _overlayEntryMic?.remove();
+    _overlayEntryMic = null;
+
+    _overlayEntryMic = OverlayEntry(
+      builder: (context) =>
+          Positioned(
+            left: targetPosition.dx - width/ 2 + targetSize.width / 2,
+            top: targetPosition.dy - 40 - targetSize.height, // place above the widget
+            width: width,
+            child: Material(
+              color: Colors.transparent,
+              child: Container(
+                padding: const EdgeInsets.all(8),
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: _buildToast('Are you talking? Your mic is off. Click the mic to turn it on.', background: Colors.black54)
+              ),
+            ),
+          ),
+    );
+
+    Overlay.of(context).insert(_overlayEntryMic!);
+    // Optional: remove after delay
+    Future.delayed(const Duration(seconds: 3), () {
+      _overlayEntryMic?.remove();
+      _overlayEntryMic = null;
+    });
+  }
+
 
   void showTopOverlay(BuildContext context, String message) {
     _messages.add(message);
@@ -86,11 +135,13 @@ class VideoRoomPage extends StatelessWidget {
   }
 
   void _onConferenceState(BuildContext context, ConferenceState state) async {
+    if(!mounted) {
+      return;
+    }
+
     if (state.error != null) {
       context.showSnackBarMessage(state.error ?? 'Error', isError: true);
     }
-
-
     if (state.isEnded) {
       if (Navigator.of(context).canPop()) {
         Navigator.of(context).pop();
@@ -105,16 +156,18 @@ class VideoRoomPage extends StatelessWidget {
 
     if (state.isCallStarted && state.chatId != null) {
       context.read<ChatCubit>().load(true, state.chatId ?? 0);
-
       await context
           .read<
           AppCubit>()
           .changeUserStatus(UserStatus.inTheCall);
     }
-
     if (state.toastMessage != null) {
       showTopOverlay(context, state.toastMessage!);
       context.read<ConferenceCubit>().clearToast();
+    }
+
+    if (state.showingMicIsOff){
+      _showOverlay();
     }
   }
 
@@ -206,21 +259,6 @@ class VideoRoomPage extends StatelessWidget {
                                                 value: staggeredCubit,
                                                   child: const StaggeredAspectGrid(),
                                                 ),
-
-                                                    // BlocProvider<StaggeredCubit>(
-                                                    //   create: (_) => StaggeredCubit(),
-                                                    //   child: const StaggeredAspectGrid(),
-                                                    // ),
-
-                                                    // getLayout(
-                                                    //     context,
-                                                    //     items,
-                                                    //     state.isGridLayout,
-                                                    //     borderWidth,
-                                                    //     expandedHeight,
-                                                    //     state.showingParticipants ||
-                                                    //         state.showingChat),
-
                                                     Positioned(
                                                       bottom: 20,
                                                       right: 24,
@@ -249,6 +287,7 @@ class VideoRoomPage extends StatelessWidget {
                                         ],
                                       ),
                                     ),
+
                                     Container(
                                         height: 80,
                                         color: ColorConstants.kBlack3,
@@ -268,9 +307,12 @@ class VideoRoomPage extends StatelessWidget {
                                                   crossAxisAlignment:
                                                   CrossAxisAlignment.center,
                                                   children: [
+
+
                                                     CallButtonShape(
+                                                        key: _micTargetKey,
                                                         image: !state
-                                                            .audioMuted!
+                                                            .audioMuted
                                                             ? imageSVGAsset(
                                                             'icon_microphone')
                                                         as Widget
@@ -284,6 +326,8 @@ class VideoRoomPage extends StatelessWidget {
                                                               ConferenceCubit>()
                                                               .audioMute();
                                                         }),
+
+
                                                     const SizedBox(width: 20),
                                                     CallButtonShape(
                                                         image: !state.videoMuted

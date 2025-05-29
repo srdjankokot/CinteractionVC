@@ -144,7 +144,7 @@ class _ProfileTabState extends State<ProfileTab> {
                                         height: 300,
                                         child: UserImage.size(
                                             [currentUser!.getUserImageDTO()],
-                                            300),
+                                            300, 200),
                                       ),
                                     ),
                                     Positioned(
@@ -514,7 +514,7 @@ class _ProfileTabState extends State<ProfileTab> {
                                             height: 140,
                                             child: UserImage.size([
                                               currentUser!.getUserImageDTO()
-                                            ], 140),
+                                            ], 140, 200),
                                           ),
                                         ),
                                         Positioned(

@@ -24,6 +24,7 @@ class ConferenceState extends Equatable {
   final bool screenShared;
   final bool engagementEnabled;
   final bool showingChat;
+  final bool showingMicIsOff;
   final bool showingParticipants;
   final int? numberOfStreams;
   final int? avgEngagement;
@@ -49,6 +50,7 @@ class ConferenceState extends Equatable {
       required this.screenShared,
       required this.engagementEnabled,
       required this.showingChat,
+      required this.showingMicIsOff,
       required this.showingParticipants,
       this.numberOfStreams,
       this.avgEngagement,
@@ -91,6 +93,7 @@ class ConferenceState extends Equatable {
             avgEngagement: avgEngagement,
             screenShared: screenShared,
             showingChat: showingChat,
+            showingMicIsOff: false,
             showingParticipants: showingParticipants,
             recording: recording);
 
@@ -119,6 +122,7 @@ class ConferenceState extends Equatable {
             engagementEnabled: engagementEnabled,
             screenShared: screenShared,
             showingChat: showingChat,
+            showingMicIsOff: false,
             showingParticipants: showingParticipants,
             recording: recording);
 
@@ -142,9 +146,10 @@ class ConferenceState extends Equatable {
             isCallStarted: isCallStarted,
             audioMuted: audioMuted,
             videoMuted: videoMuted,
-      handUp: handUp,
+            handUp: handUp,
             numberOfStreamsCopy: 1,
             isGridLayout: true,
+            showingMicIsOff: false,
             engagementEnabled: engagementEnabled,
             screenShared: screenShared,
             error: error,
@@ -169,6 +174,7 @@ class ConferenceState extends Equatable {
     bool? screenShared,
     bool? engagementEnabled,
     bool? showingChat,
+    bool? showingMicIsOff,
     bool? showingParticipants,
     bool? isGridLayout,
     RecordingStatus? recording,
@@ -198,6 +204,7 @@ class ConferenceState extends Equatable {
         meetId: meetId ?? this.meetId,
         chatId: chatId ?? this.chatId,
         recording: recording ?? this.recording,
+        showingMicIsOff: showingMicIsOff ?? this.showingMicIsOff,
         toastMessage: toastMessage);
   }
 
@@ -224,6 +231,7 @@ class ConferenceState extends Equatable {
         chatId,
         recording,
         toastMessage,
-    handUp
+        handUp,
+        showingMicIsOff
       ];
 }
