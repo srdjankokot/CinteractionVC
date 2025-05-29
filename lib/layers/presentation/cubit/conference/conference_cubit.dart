@@ -34,6 +34,7 @@ class ConferenceCubit extends Cubit<ConferenceState> with BlocLoggy {
   StreamSubscription<Map<dynamic, StreamRenderer>>? _subscribersStream;
   StreamSubscription<int>? _avgEngagementStream;
   StreamSubscription<String>? _toastMessageStream;
+  StreamSubscription<void>? _userIsTalkingStream;
 
   void _load() async {
     await conferenceUseCases.conferenceInitialize(
@@ -52,8 +53,9 @@ class ConferenceCubit extends Cubit<ConferenceState> with BlocLoggy {
         .getAvgEngagementStream()
         .listen(_onEngagementChanged);
 
-    _toastMessageStream =
-        conferenceUseCases.getToastMessageStream().listen(_onToastMessage);
+    _toastMessageStream = conferenceUseCases.getToastMessageStream().listen(_onToastMessage);
+
+    _userIsTalkingStream = conferenceUseCases.userTalkingStream().listen(_showMicIsOff);
 
     var meet = await conferenceUseCases.startCall();
 
@@ -259,5 +261,14 @@ class ConferenceCubit extends Cubit<ConferenceState> with BlocLoggy {
 
       emit(state.copyWith(recording: RecordingStatus.notRecording));
     }
+  }
+
+
+  void _showMicIsOff(void event)
+  {
+    emit(state.copyWith(showingMicIsOff: true));
+    Future.delayed(const Duration(seconds: 2)).then((_) {
+      emit(state.copyWith(showingMicIsOff: false));
+    });
   }
 }

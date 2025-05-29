@@ -1,4 +1,8 @@
+import 'dart:math';
 import 'dart:ui';
+
+import 'package:flutter/cupertino.dart';
+import 'package:flutter/material.dart';
 
 class ColorConstants {
   static const kPrimaryColor = Color(0xFFF1471C);
@@ -33,14 +37,53 @@ class ColorConstants {
 
   static const kWhite50 = Color(0xFFF1F1F1);
 
-  static Color getRandomColor(int id) {
-    final hash =
-        "${id * 256}".codeUnits.fold(0, (prev, elem) => prev * 31 + elem);
-    final r = 127 + (hash >> 16) % 120;
-    final g = 127 + (hash >> 8) % 120;
-    final b = 127 + hash % 120;
-    return Color.fromARGB(255, r, g, b);
+
+
+  static final List<MaterialColor> _filteredColors = Colors.primaries.where((color) {
+    // Exclude pinks and light colors
+    return color != Colors.pink &&
+        color != Colors.pinkAccent &&
+        color != Colors.redAccent &&
+        color != Colors.deepOrangeAccent &&
+        color != Colors.purpleAccent &&
+        color != Colors.purple &&
+        color != Colors.yellowAccent &&
+        color != Colors.yellow &&
+        color != Colors.black &&
+        color != Colors.black54 &&
+        color != Colors.black87 &&
+        color != Colors.black38 &&
+        color != Colors.black45 &&
+        color != Colors.black26 &&
+        color != Colors.brown &&
+        color != Colors.cyanAccent &&
+        color != Colors.white &&
+        color != Colors.greenAccent &&
+        color != Colors.orange &&
+        color != Colors.orangeAccent &&
+        color != Colors.limeAccent
+
+    ;
+  }).toList();
+
+  static Color getRandomColor(int id, {int shade = 200}) {
+    // final hash = "${id * 256}".codeUnits.fold(0, (prev, elem) => prev * 31 + elem);
+    // final r = 127 + (hash >> 16) % 120;
+    // final g = 127 + (hash >> 8) % 120;
+    // final b = 127 + hash % 120;
+    // return Color.fromARGB(255, r, g, b);
+
+    final index = id % _filteredColors.length;
+    final color = _filteredColors[index];
+
+
+
+    // Choose a darker shade (like 700) to avoid light colors
+    return color[shade] ?? color;
+
+
   }
+
 
   static Color getShadedColor(int id,
       {double amount = 0.2, bool lighten = true}) {
