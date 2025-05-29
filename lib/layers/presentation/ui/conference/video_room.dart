@@ -9,6 +9,9 @@ import 'package:cinteraction_vc/layers/presentation/ui/chat/widget/chat_details_
 import 'package:cinteraction_vc/layers/presentation/ui/conference/staggered_aspect_grid.dart';
 import 'package:cinteraction_vc/layers/presentation/ui/conference/staggered_layout_cubit.dart';
 import 'package:cinteraction_vc/layers/presentation/ui/conference/widget/participant_video_widget.dart';
+import 'package:cinteraction_vc/layers/presentation/ui/conference/widget/video_widget/participant_video_widget_state.dart';
+import 'package:cinteraction_vc/layers/presentation/ui/conference/widget/video_widget/video_widget_cubit.dart';
+import 'package:cinteraction_vc/layers/presentation/ui/conference/widget/video_widget/video_widget_state.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -967,6 +970,8 @@ class _VideoRoomPageState extends State<VideoRoomPage> {
     var width = MediaQuery.of(context).size.width - (isSideWidowOpen ? 400 : 0);
     // final double itemHeight = (size.height - kToolbarHeight - 24) / row;
 
+
+
     if (context.isWide) {
       // if (isGrid) {
       if (screenshared == null) {
@@ -979,10 +984,12 @@ class _VideoRoomPageState extends State<VideoRoomPage> {
           spacing: 0,
           alignment: WrapAlignment.center,
           children: items
-              .map((e) => ParticipantVideoWidget(
-                  remoteStream: e, height: itemHeight, width: itemWidth))
+              .map((e) => ParticipantVideoWidget(remoteStream: e, height: itemHeight, width: itemWidth))
               .toList(),
         );
+
+
+
       } else {
         //desktop list layout
 
@@ -1023,27 +1030,6 @@ class _VideoRoomPageState extends State<VideoRoomPage> {
                         .toList(),
                   )
 
-                  // ListView.builder(
-                  //   shrinkWrap: true,
-                  //   itemCount: items.length,
-                  //   itemBuilder: (context, index) {
-                  //     return Container(
-                  //       clipBehavior: Clip.hardEdge,
-                  //       margin: const EdgeInsets.all(3),
-                  //       decoration: ShapeDecoration(
-                  //         shape: RoundedRectangleBorder(
-                  //           side: const BorderSide(width: 2, color: Colors.white),
-                  //           borderRadius: BorderRadius.circular(6),
-                  //         ),
-                  //       ),
-                  //       child: ParticipantVideoWidget(
-                  //         remoteStream: items[index],
-                  //         height: itemHeight,
-                  //         width: itemWidth,
-                  //       ),
-                  //     );
-                  //   },
-                  // ),
                   ),
             ),
           ],
