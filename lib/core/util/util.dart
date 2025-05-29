@@ -13,11 +13,13 @@ class StreamRenderer {
   int? engagement;
   String? audioMid;
   String? videoMid;
+  bool? initialSet;
   bool? isAudioMuted;
   bool? isHandUp;
   String? imageUrl;
   // List<bool> selectedQuality = [false, false, true];
   bool? isVideoMuted;
+  bool? isVideoFlowing;
   bool? mirrorVideo = false;
   ConfigureStreamQuality subStreamQuality = ConfigureStreamQuality.HIGH;
   // bool? isTalking;
@@ -82,6 +84,8 @@ class StreamRenderer {
     mediaStream = await createLocalMediaStream('mediaStream_$id');
     isAudioMuted = false;
     isVideoMuted = false;
+    initialSet = false;
+    isVideoFlowing = true;
     isTalking = false;
     isHandUp = false;
     videoRenderer = RTCVideoRenderer();

@@ -8,21 +8,22 @@ import 'package:flutter/material.dart';
 import '../../../../../../core/ui/widget/url_image.dart';
 
 class UserImage extends StatelessWidget {
-  const UserImage.small(this.users, {super.key}) : size = 32;
+  const UserImage.small(this.users, {super.key}) : size = 32, shade = 200;
 
-  const UserImage.medium(this.users, {super.key}) : size = 48;
+  const UserImage.medium(this.users, {super.key}) : size = 48, shade = 200;
 
-  const UserImage.large(this.users, {super.key}) : size = 200;
+  const UserImage.large(this.users, {super.key}) : size = 200, shade = 200;
 
-  const UserImage.size(this.users, this.size, {super.key});
+  const UserImage.size(this.users, this.size, this.shade, {super.key});
 
   final List<UserImageDto> users;
   final double size;
+  final int shade;
 
   @override
   Widget build(BuildContext context) {
     if (users.isNotEmpty) {
-      return MultiUserAvatar(users: users, size: size);
+      return MultiUserAvatar(users: users, size: size, shade: shade,);
     } else {
       return CircleAvatar(
         backgroundColor: ColorConstants.kPrimaryColor,
@@ -36,8 +37,9 @@ class UserImage extends StatelessWidget {
 class MultiUserAvatar extends StatelessWidget {
   final List<UserImageDto> users; // max 4
   final double size;
+  final int shade;
 
-  const MultiUserAvatar({required this.users, this.size = 60, super.key});
+  const MultiUserAvatar({required this.users, this.size = 60, required this.shade, super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -54,10 +56,6 @@ class MultiUserAvatar extends StatelessWidget {
           children: List.generate(displayUsers.length, (i) {
             final user = displayUsers[i];
 
-            if (user.id == 7) {
-              print("Image for ${user.name} is ${user.imageUrl}");
-            }
-
             final width = (i == 2 && displayUsers.length == 3)
                 ? size
                 : size / numberOfCol;
@@ -66,7 +64,7 @@ class MultiUserAvatar extends StatelessWidget {
             return Container(
               width: width,
               height: height,
-              color: ColorConstants.getRandomColor(user.id),
+              color: ColorConstants.getRandomColor(user.id, shade: shade),
               child: Center(
                   child: Stack(
                 children: [

@@ -18,6 +18,7 @@ abstract class ConferenceRepo {
   Stream<Map<dynamic, StreamRenderer>> getStreamRendererStream();
 
   Stream<String> getConferenceEndedStream();
+  Stream<void> getUserTalkingStream();
   Stream<List<ChatMessage>> getConferenceMessagesStream();
 
   Stream<Map<dynamic, StreamRenderer>>  getSubscribersStream();

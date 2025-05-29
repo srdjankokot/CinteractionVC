@@ -58,7 +58,7 @@ void resetAndReinitialize() async {
 Future<void> initializeGetIt() async {
   getIt.registerFactoryAsync<Dio>(() async {
     final accessToken = await getAccessToken();
-    print('ACCESS: $accessToken');
+    // print('ACCESS: $accessToken');
     final dio = Dio(BaseOptions(
       headers: {
         'Accept': 'application/json',
