@@ -362,7 +362,7 @@ class ChatRepoImpl extends ChatRepo {
           }
 
           getChatMessages(chatIdParsed!);
-          _participantsStream.add(subscribers);
+          _participantsStream.add((subscribers as List).cast<Participant>());
           _matchParticipantWithUser();
           // _matchParticipiantWithChat();
         }
@@ -388,7 +388,8 @@ class ChatRepoImpl extends ChatRepo {
             }
           }
           // getChatMessages(chatDetailsDto.chatId!);
-          _participantsStream.add(subscribers);
+          print("========= ${subscribers.length} ============");
+          _participantsStream.add((subscribers as List).cast<Participant>());
           _matchParticipantWithUser();
           _matchParticipantWithChat(chats);
         }
@@ -426,7 +427,8 @@ class ChatRepoImpl extends ChatRepo {
             }
           }
           // getChatMessages(chatDetailsDto.chatId!);
-          _participantsStream.add(subscribers);
+          _participantsStream.add((subscribers as List).cast<Participant>());
+
           _matchParticipantWithUser();
           _matchParticipantWithChat(chats);
 
@@ -455,7 +457,7 @@ class ChatRepoImpl extends ChatRepo {
             }
           }
 
-          _participantsStream.add(subscribers);
+          _participantsStream.add((subscribers as List).cast<Participant>());
           _matchParticipantWithUser();
           _matchParticipantWithChat(chats);
         }

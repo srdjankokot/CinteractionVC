@@ -1,11 +1,9 @@
 import 'dart:math';
 
 import 'package:cinteraction_vc/core/extension/context.dart';
-import 'package:cinteraction_vc/core/extension/string.dart';
 import 'package:cinteraction_vc/core/util/platform/platform.dart';
 import 'package:cinteraction_vc/layers/presentation/ui/profile/ui/widget/user_image.dart';
 import 'package:flutter/cupertino.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_webrtc/flutter_webrtc.dart';
 import 'package:flutter/material.dart';
 import 'package:webrtc_interface/webrtc_interface.dart';
@@ -32,6 +30,7 @@ class ParticipantVideoWidget extends StatelessWidget {
   Widget build(BuildContext context) {
     var screenShare = remoteStream.publisherName.toLowerCase().contains('screenshare');
     if (context.isWide) {
+
       return SizedBox(
         height: height,
         width: width,
@@ -39,15 +38,15 @@ class ParticipantVideoWidget extends StatelessWidget {
           final halfHeight = min(constraints.maxHeight, constraints.maxWidth)  / 3;
 
           int userId = remoteStream.getUserImageDTO().id;
-          
+          print("user: ${remoteStream.publisherName}, isVideoMuted: ${remoteStream.isVideoMuted}, isVideoFlowing: ${remoteStream.isVideoFlowing}");
           return Stack(
             children: [
               Container(
-                margin: const EdgeInsets.all(2),
+                margin: const EdgeInsets.all(4),
                 child: Stack(
                   children: [
                     Visibility(
-                        visible: remoteStream.isVideoMuted == false,
+                        visible: remoteStream.isVideoMuted == false && remoteStream.isVideoFlowing == true,
                         replacement: Container(
                             decoration: BoxDecoration(
                               borderRadius: BorderRadius.circular(16),
@@ -55,47 +54,85 @@ class ParticipantVideoWidget extends StatelessWidget {
                                 center: Alignment.center,
                                 radius: 0.6,
                                 colors: [
-                                  ColorConstants.getShadedColor(userId, amount: 0.6),
                                   ColorConstants.getRandomColor(userId),
+                                  ColorConstants.getRandomColor(userId, shade: 700),
                                 ],
                               ),
-
                               border: Border.all(
                                 color: remoteStream.isTalking == true
-                                    ? ColorConstants.kPrimaryColor
-                                    : Colors.white, // Border color
-                                width: 2.0, // Border thickness
+                                    ? Colors.white
+                                    : Colors.transparent,
+                                width: remoteStream.isTalking == true ? 2.0 : 0.0,
                               ),
                             ),
                             child: Center(
-                                child: UserImage.size([remoteStream.getUserImageDTO()], halfHeight))),
-                        child: Container(
-                            decoration: BoxDecoration(
-                              borderRadius: BorderRadius.circular(16),
-                              gradient: RadialGradient(
-                                center: Alignment.center,
-                                radius: 0.6,
-                                colors: [
-                                  ColorConstants.getShadedColor(userId, amount: 0.6),
-                                  ColorConstants.getRandomColor(userId),
-                                ],
-                              ),
+                                child: UserImage.size([remoteStream.getUserImageDTO()], halfHeight, 700))),
+                        child:
+                        
+                        Stack(
+                          children: [
+                            Container(
+                                decoration: BoxDecoration(
+                                  borderRadius: BorderRadius.circular(16),
+                                  color: Colors.white.withAlpha(20),
 
-                              border: Border.all(
-                                color: remoteStream.isTalking == true
-                                    ? Colors.red
-                                    : Colors.white, // Border color
-                                width: 2.0, // Border thickness
-                              ),
+                                ),
                             ),
-                            child: getVideoView(
+
+                            getVideoView(
                                 context,
                                 remoteStream.videoRenderer,
                                 screenShare,
                                 width,
                                 height,
                                 remoteStream.id,
-                                remoteStream.publisherName))),
+                                remoteStream.publisherName),
+                            
+                            Container(
+                              width: double.maxFinite,
+                                height: double.maxFinite,
+                                decoration: BoxDecoration(
+                                  borderRadius: BorderRadius.circular(16),
+                                  border: Border.all(
+                                    color: remoteStream.isTalking == true
+                                        ? Colors.white
+                                        : Colors.transparent, // Border color
+                                    width: remoteStream.isTalking == true ? 2.0 : 0.0, // Border thickness
+                                  ),
+                                  color: Colors.transparent,
+                                ))
+                          ],
+                        ),
+                        
+                        // Container(
+                        //     decoration: BoxDecoration(
+                        //       borderRadius: BorderRadius.circular(16),
+                        //       gradient: RadialGradient(
+                        //         center: Alignment.center,
+                        //         radius: 0.6,
+                        //         colors: [
+                        //           ColorConstants.getShadedColor(userId, amount: 0.6),
+                        //           ColorConstants.getRandomColor(userId),
+                        //         ],
+                        //       ),
+                        //
+                        //       border: Border.all(
+                        //         color: remoteStream.isTalking == true
+                        //             ? Colors.white
+                        //             : Colors.transparent, // Border color
+                        //         width: remoteStream.isTalking == true ? 3.0 : 0.0, // Border thickness
+                        //       ),
+                        //     ),
+                        //     child: getVideoView(
+                        //         context,
+                        //         remoteStream.videoRenderer,
+                        //         screenShare,
+                        //         width,
+                        //         height,
+                        //         remoteStream.id,
+                        //         remoteStream.publisherName))
+                    
+                    ),
                   ],
                 ),
               ),
@@ -113,16 +150,16 @@ class ParticipantVideoWidget extends StatelessWidget {
                     ],
                   )),
               Positioned(
-                  left: 10,
-                  top: 10,
+                  left: 24,
+                  top: 20,
                   child: Text(
                     '${remoteStream.publisherName}',
                     style: context.textTheme.displayLarge
                         ?.copyWith(color: Colors.white),
                   )),
               Positioned(
-                  bottom: 16,
-                  left: 16,
+                  bottom: 20,
+                  left: 24,
                   child: Row(
                     children: [
                       Visibility(

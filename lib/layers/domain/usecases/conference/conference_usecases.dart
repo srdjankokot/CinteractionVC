@@ -27,6 +27,7 @@ import 'conference_toast_message.dart';
 import 'conference_toggle_engagement.dart';
 import 'conference_unpublish.dart';
 import 'conference_unpublish_by_id.dart';
+import 'conference_user_talking_stream.dart';
 
 class ConferenceUseCases {
   ConferenceUseCases({required this.repo})
@@ -55,7 +56,8 @@ class ConferenceUseCases {
         muteById = ConferenceMuteById(repo: repo),
         stopRecording = ConferenceStopRecording(repo: repo),
         getToastMessageStream = ConferenceToastMessageStream(repo: repo),
-        handUpU = ConferenceHandUp(repo: repo);
+        handUpU = ConferenceHandUp(repo: repo),
+        userTalkingStream = GetUserTalkingStream(repo: repo);
 
   final ConferenceRepo repo;
 
@@ -85,4 +87,5 @@ class ConferenceUseCases {
   ConferenceMuteById muteById;
   ConferenceToastMessageStream getToastMessageStream;
   ConferenceHandUp handUpU;
+  GetUserTalkingStream userTalkingStream;
 }
