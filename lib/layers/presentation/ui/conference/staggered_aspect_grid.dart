@@ -1,6 +1,8 @@
 import 'package:cinteraction_vc/core/extension/context.dart';
 import 'package:cinteraction_vc/layers/presentation/ui/conference/staggered_layout_cubit.dart';
 import 'package:cinteraction_vc/layers/presentation/ui/conference/widget/participant_video_widget.dart';
+import 'package:cinteraction_vc/layers/presentation/ui/conference/widget/video_widget/participant_video_widget_state.dart';
+import 'package:cinteraction_vc/layers/presentation/ui/conference/widget/video_widget/video_widget_cubit.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
@@ -41,14 +43,37 @@ class StaggeredAspectGrid extends StatelessWidget {
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: row.map((itemSize) {
                       index++;
+
                       final maxWidthPerItem = screenWidth / itemsInRow;
                       final maxHeightPerItem = screenHeight / rowCount;
 
-                      final stretchedWidth =
-                          itemSize.width.clamp(0.0, maxWidthPerItem);
-                      final stretchedHeight =
-                          itemSize.height.clamp(0.0, maxHeightPerItem);
-                      return ParticipantVideoWidget(remoteStream: state.streams[index], height: stretchedHeight, width: stretchedWidth);
+                      final stretchedWidth = itemSize.width.clamp(0.0, maxWidthPerItem);
+                      final stretchedHeight = itemSize.height.clamp(0.0, maxHeightPerItem);
+
+
+                      return BlocProvider<VideoWidgetCubit>(
+                        key: ValueKey(state.streams[index].id), // optional: helps Flutter optimize rebuilds
+                        create: (_) => VideoWidgetCubit(stretchedWidth, stretchedHeight, state.streams[index]),
+                        child: const ParticipantVideoWidgetNew(),
+                      );
+
+
+                      // return ParticipantVideoWidget(remoteStream: state.streams[index], height: stretchedHeight, width: stretchedWidth);
+
+                      // return Wrap(
+                      //   runSpacing: 0,
+                      //   spacing: 0,
+                      //   alignment: WrapAlignment.center,
+                      //   children: items.map((e) {
+                      //     return BlocProvider<VideoWidgetCubit>(
+                      //       key: ValueKey(e.id), // optional: helps Flutter optimize rebuilds
+                      //       create: (_) => VideoWidgetCubit(itemWidth, itemHeight),
+                      //       child: const ParticipantVideoWidgetNew(),
+                      //     );
+                      //   }).toList(),
+                      // );
+
+
                     }).toList(),
 
                   );

@@ -31,6 +31,7 @@ class ParticipantVideoWidget extends StatelessWidget {
     var screenShare = remoteStream.publisherName.toLowerCase().contains('screenshare');
     if (context.isWide) {
 
+      print("rebuild widget for: ${remoteStream.publisherName}");
       return SizedBox(
         height: height,
         width: width,
@@ -103,35 +104,6 @@ class ParticipantVideoWidget extends StatelessWidget {
                                 ))
                           ],
                         ),
-                        
-                        // Container(
-                        //     decoration: BoxDecoration(
-                        //       borderRadius: BorderRadius.circular(16),
-                        //       gradient: RadialGradient(
-                        //         center: Alignment.center,
-                        //         radius: 0.6,
-                        //         colors: [
-                        //           ColorConstants.getShadedColor(userId, amount: 0.6),
-                        //           ColorConstants.getRandomColor(userId),
-                        //         ],
-                        //       ),
-                        //
-                        //       border: Border.all(
-                        //         color: remoteStream.isTalking == true
-                        //             ? Colors.white
-                        //             : Colors.transparent, // Border color
-                        //         width: remoteStream.isTalking == true ? 3.0 : 0.0, // Border thickness
-                        //       ),
-                        //     ),
-                        //     child: getVideoView(
-                        //         context,
-                        //         remoteStream.videoRenderer,
-                        //         screenShare,
-                        //         width,
-                        //         height,
-                        //         remoteStream.id,
-                        //         remoteStream.publisherName))
-                    
                     ),
                   ],
                 ),
