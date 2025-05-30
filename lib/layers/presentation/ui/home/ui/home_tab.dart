@@ -3,6 +3,8 @@ import 'dart:math';
 import 'package:cinteraction_vc/core/extension/context.dart';
 import 'package:cinteraction_vc/core/extension/context_user.dart';
 import 'package:cinteraction_vc/core/ui/widget/loading_overlay.dart';
+import 'package:cinteraction_vc/layers/presentation/cubit/chat/chat_cubit.dart';
+import 'package:cinteraction_vc/layers/presentation/cubit/chat/chat_state.dart';
 import 'package:cinteraction_vc/layers/presentation/cubit/home/home_cubit.dart';
 import 'package:cinteraction_vc/layers/presentation/ui/home/ui/widgets/home_item.dart';
 import 'package:cinteraction_vc/layers/presentation/ui/home/ui/widgets/join_popup.dart';
@@ -32,8 +34,13 @@ class HomeTab extends StatelessWidget {
       return showDialog(
         context: ctx,
         builder: (context) {
-          return SchedulePopup(
-            context: ctx,
+          return BlocBuilder<ChatCubit, ChatState>(
+            builder: (context, state) {
+              return SchedulePopup(
+                context: ctx,
+                state: state,
+              );
+            },
           );
         },
       );

@@ -44,13 +44,12 @@ class HomeCubit extends Cubit<HomeState> with BlocLoggy {
   }
 
   Future<ApiResponse<String>> scheduleMeeting(
-      String name, String desc, String tag) async {
+      String name, String desc, String tag, List<String> emails) async {
     emit(state.copyWith(loading: true));
     var response = await homeUseCases.scheduleMeetingUseCase(
-        name, desc, tag, state.scheduleStartDateTime!);
+        name, desc, tag, state.scheduleStartDateTime!, emails);
     emit(state.copyWith(loading: false));
     getNextMeeting();
-
     return response;
   }
 }

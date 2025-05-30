@@ -251,15 +251,17 @@ class ApiImpl extends Api {
       {required String name,
       required String description,
       required String tag,
-      required DateTime date}) async {
+      required DateTime date,
+      required List<String> emails}) async {
     Dio dio = await getIt.getAsync<Dio>();
 
     var formData = {
-      'name': name,
-      'description': description,
-      'tag': tag,
+      'event_name': name,
+      'event_description': description,
+      // 'tag': tag,
       'startDateTime': DateFormat('yyyy-MM-dd HH:mm').format(date),
-      'timezone': 'Europe/Belgrade'
+      'timezone': 'Europe/Belgrade',
+      'participants_emails': emails
     };
 
     print(DateFormat('yyyy-MM-dd HH:mm').format(date));

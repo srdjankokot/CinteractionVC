@@ -42,7 +42,8 @@ abstract class Api {
       {required String name,
       required String description,
       required String tag,
-      required DateTime date});
+      required DateTime date,
+      required List<String> emails});
 
   Future<ApiResponse<bool?>> sendMessage(
       {required String userId,
