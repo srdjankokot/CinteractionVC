@@ -67,8 +67,8 @@ class ConferenceRepoImpl extends ConferenceRepo {
   int room = 12344321;
   late JanusVideoRoom? roomDetails;
 
-  final _conferenceStream =
-      StreamController<Map<dynamic, StreamRenderer>>.broadcast();
+  final _conferenceStream = StreamController<Map<dynamic, StreamRenderer>>.broadcast();
+  final _conferenceScreenShareStream = StreamController<Map<dynamic, StreamRenderer>>.broadcast();
 
   // final _contributorsStream = StreamController<Map<dynamic, StreamRenderer>>.broadcast();
 
@@ -86,7 +86,7 @@ class ConferenceRepoImpl extends ConferenceRepo {
   late String myId = user?.id ?? "";
   late String displayName = user?.name ?? 'User $myId';
 
-  get screenShareId => int.parse(myId) * 774352;
+  get screenShareId => int.parse(myId) * 1000 + 999;
 
   int? callId;
 
@@ -121,6 +121,11 @@ class ConferenceRepoImpl extends ConferenceRepo {
   }
 
   @override
+  Stream<Map<dynamic, StreamRenderer>> getConferenceScreenShareStream() {
+    return _conferenceScreenShareStream.stream;
+  }
+
+  @override
   Stream<Map<dynamic, StreamRenderer>> getSubscribersStream() {
     return _participantsStream.stream;
   }
@@ -142,8 +147,7 @@ class ConferenceRepoImpl extends ConferenceRepo {
 
   _initLocalMediaRenderer() {
     print('initLocalMediaRenderer');
-    localScreenSharingRenderer =
-        StreamRenderer('localScreenShare', 'local_screenshare');
+    localScreenSharingRenderer = StreamRenderer('localScreenShare', 'local_screenshare');
     localVideoRenderer = StreamRenderer('local', 'local');
     localVideoRenderer.imageUrl = user?.imageUrl;
   }
@@ -199,12 +203,12 @@ class ConferenceRepoImpl extends ConferenceRepo {
 
     List<Map> sources = [];
     for (Map publisher in publishers) {
-      if ([myId, screenShareId.toString()].contains(publisher['id'])) {
+      if ([myId, screenShareId.toString()].contains(publisher['id'].toString())) {
         print('PUBLISHER CHANGE: publishers: its me');
         continue;
       }
 
-      if (currentTalkerIds.length < maxVisibleSlots) {
+      if (currentTalkerIds.length < maxVisibleSlots && !isScreenShare(publisher['id'].toString())) {
         currentTalkerIds.add(publisher['id'].toString());
       }
 
@@ -384,7 +388,7 @@ class ConferenceRepoImpl extends ConferenceRepo {
     _startRecord(renderer.mediaStream!);
     renderer.isTalking = talking;
 
-    if (!currentTalkerIds.contains(id) && talking && id != "local") {
+    if (!currentTalkerIds.contains(id) && talking && id != "local" && !isScreenShare(id)) {
       _changeTalker(id);
     } else {
       _refreshStreams();
@@ -1290,7 +1294,7 @@ class ConferenceRepoImpl extends ConferenceRepo {
 
   void updateTalkerSlots(Map<dynamic, StreamRenderer> publisherMap,
       List<String> currentTalkerIds, String newSpeakerId) {
-    if (newSpeakerId == 'local') {
+    if (newSpeakerId == 'local' || isScreenShare(newSpeakerId)) {
       return;
     }
     // Already visible → no update
@@ -1335,7 +1339,6 @@ class ConferenceRepoImpl extends ConferenceRepo {
           }
         }
       }
-
       lastLengthOnStreams = videoState.streamsToBeRendered.length;
     }
   }
@@ -1345,18 +1348,57 @@ class ConferenceRepoImpl extends ConferenceRepo {
     // _checkVideoStreams();
     var screenshareKeys = videoState.streamsToBeRendered.keys
         .where((key) =>
-            key.contains('_screenshare') || key.contains('ScreenShare'))
+           isScreenShare(key.toString()) || key == "localScreenShare")
         .toList();
 
     Iterable<String> currentTalkers = currentTalkerIds.cast<String>();
     Iterable<String> screenshare = screenshareKeys.cast<String>();
 
-    final List<String> list = ["local", ...currentTalkers, ...screenshare];
+    print("screenshare: $screenshare");
 
-    // print("_refreshStreams: $list" );
+    final List<String> list = ["local", ...currentTalkers];
+    final List<String> screenshareList = [ ...screenshare];
+
+    print("_refreshStreams: ${videoState.streamsToBeRendered.keys}" );
+
+
+
+    videoState.streamsToBeRendered.forEach((key, value) {
+      if(key == 'local' || key == 'localScreenShare') return;
+      if(!isScreenShare(key))
+        {
+          var checkKey = int.parse(value.publisherId!) * 1000 + 999;
+          value.isSharing = screenshareList.contains(checkKey.toString());
+        }
+    },);
+
+
+
+    // screenshareList.forEach((screenshareKey) {
+    //
+    //   if(videoState.streamsToBeRendered.containsKey(getUserIdFromScreenShareId(int.parse(screenshareKey)).toString()))
+    //     {
+    //
+    //       // var shareScreen = videoState.streamsToBeRendered[int.parse(screenshareKey)];
+    //       var renderer = videoState.streamsToBeRendered[getUserIdFromScreenShareId(int.parse(screenshareKey)).toString()];
+    //       if(renderer != null)
+    //         {
+    //           print("user ${renderer.publisherName} is sharing");
+    //           renderer.isSharing = true;
+    //         }
+    //     }
+    // });
+
+
 
     _conferenceStream.add(Map.fromEntries(
       list
+          .where((key) => videoState.streamsToBeRendered.containsKey(key))
+          .map((key) => MapEntry(key, videoState.streamsToBeRendered[key]!)),
+    ));
+
+    _conferenceScreenShareStream.add(Map.fromEntries(
+      screenshareList
           .where((key) => videoState.streamsToBeRendered.containsKey(key))
           .map((key) => MapEntry(key, videoState.streamsToBeRendered[key]!)),
     ));
@@ -1489,6 +1531,10 @@ class ConferenceRepoImpl extends ConferenceRepo {
       case DataChannelCmd.engagement:
         videoState.streamsToBeRendered[command.id]?.engagement =
             command.data['engagement'] as int;
+
+        videoState.streamsToBeRendered[command.id]?.drowsiness =
+        command.data['drowsiness'] as int;
+
         _refreshStreams();
         break;
 
@@ -1532,22 +1578,42 @@ class ConferenceRepoImpl extends ConferenceRepo {
 
       var img = base64Encode(image!.asUint8List().toList()).toString();
 
-      final engagement = await _api.getEngagement(
+      final results = await Future.wait([
+        _api.getEngagement(
           averageAttention: 0,
           callId: callId,
           image: img,
-          participantId: user?.id);
+          participantId: user?.id,
+        ),
+        _api.getDrowsiness(
+          averageAttention: 0,
+          callId: callId,
+          image: img,
+          participantId: user?.id,
+        ),
+      ]);
+
+      final engagement = results[0];
+      final drowsiness = results[1];
 
       // var engagement = Random().nextDouble() * (0.85 - 0.4) + 0.4;
 
-      if (engagement! > 0) {
-        var eng = ((engagement) * 100).toInt();
+
+        var eng = ((engagement!) * 100).toInt();
+        var drow = ((drowsiness!) * 100).toInt();
+
         videoState.streamsToBeRendered['local']?.engagement = eng;
+        videoState.streamsToBeRendered['local']?.drowsiness = drow;
+
         _refreshStreams();
         _calculateAverageEngagement();
-        _sendMyEngagementToOthers(eng);
+
+        _sendMyEngagementToOthers(eng, drow);
+
+
+
         await _sendMyEngagementToServer(engagement);
-      }
+
     } finally {
       engagementIsRunning = false;
       if (engagementEnabled) {
@@ -1588,8 +1654,8 @@ class ConferenceRepoImpl extends ConferenceRepo {
         engagement: engagement, userId: user!.id.toString(), callId: callId);
   }
 
-  _sendMyEngagementToOthers(int engagement) async {
-    var data = {'engagement': engagement};
+  _sendMyEngagementToOthers(int engagement, int drowsiness) async {
+    var data = {'engagement': engagement, 'drowsiness': drowsiness};
 
     await videoPlugin?.sendData(jsonEncode(DataChannelCommand(
             command: DataChannelCmd.engagement,
@@ -1804,4 +1870,17 @@ class ConferenceRepoImpl extends ConferenceRepo {
   Stream<void> getUserTalkingStream() {
     return _userIsTalkingStream.stream;
   }
+
+  bool isScreenShare(String id) {
+
+    var key = int.tryParse(id);
+    if(key == null) return false;
+
+    return key % 1000 == 999;
+  }
+
+  int getUserIdFromScreenShareId(int screenShareId) {
+    return screenShareId ~/ 1000;
+  }
+
 }
