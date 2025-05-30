@@ -11,6 +11,7 @@ class StreamRenderer {
   String? publisherId;
   String publisherName;
   int? engagement;
+  int? drowsiness;
   String? audioMid;
   String? videoMid;
   bool? initialSet;
@@ -19,6 +20,7 @@ class StreamRenderer {
   String? imageUrl;
   // List<bool> selectedQuality = [false, false, true];
   bool? isVideoMuted;
+  bool? isSharing;
   bool? isVideoFlowing;
   bool? mirrorVideo = false;
   ConfigureStreamQuality subStreamQuality = ConfigureStreamQuality.HIGH;
@@ -84,6 +86,7 @@ class StreamRenderer {
     mediaStream = await createLocalMediaStream('mediaStream_$id');
     isAudioMuted = false;
     isVideoMuted = false;
+    isSharing = false;
     initialSet = false;
     isVideoFlowing = true;
     isTalking = false;

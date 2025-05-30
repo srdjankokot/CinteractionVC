@@ -1,6 +1,6 @@
 import 'package:equatable/equatable.dart';
 
-import '../../../../../../core/util/util.dart';
+import '../../../../../../../core/util/util.dart';
 
 class VideoWidgetState extends Equatable {
   final double itemWidth;
@@ -29,18 +29,18 @@ class VideoWidgetState extends Equatable {
     required this.videoRenderer,
   });
 
-  const VideoWidgetState.initial(double itemWidth, double itemHeight, StreamRenderer videoRenderer, {
+  const VideoWidgetState.initial(StreamRenderer videoRenderer, {
     bool videoMuted = false,
-    bool isVideoFlowing = false,
+    bool isVideoFlowing = true,
     bool audioMuted = false,
     bool isSpeaking = false,
     bool handUp = false,
-    int engagement = 1,
-    int publisherId = 1,
+    int engagement = 0,
+    int publisherId = 0,
     String publisherName = "1",
   }) : this(
-    itemWidth: itemWidth,
-    itemHeight: itemHeight,
+    itemWidth: 0.0,
+    itemHeight: 0.0,
     videoMuted: videoMuted,
     isVideoFlowing: isVideoFlowing,
     audioMuted: audioMuted,
@@ -92,5 +92,6 @@ class VideoWidgetState extends Equatable {
     engagement,
     publisherId,
     publisherName,
+    videoRenderer
   ];
 }

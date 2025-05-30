@@ -4,14 +4,17 @@ import 'package:cinteraction_vc/core/extension/context.dart';
 import 'package:cinteraction_vc/core/util/platform/platform.dart';
 import 'package:cinteraction_vc/layers/presentation/ui/profile/ui/widget/user_image.dart';
 import 'package:flutter/cupertino.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_webrtc/flutter_webrtc.dart';
 import 'package:flutter/material.dart';
 import 'package:webrtc_interface/webrtc_interface.dart';
 
 import '../../../../../assets/colors/Colors.dart';
 import '../../../../../core/ui/images/image.dart';
+import '../../../../../core/ui/widget/call_button_shape.dart';
 import '../../../../../core/ui/widget/engagement_progress.dart';
 import '../../../../../core/util/util.dart';
+import '../../../cubit/conference/conference_cubit.dart';
 
 class ParticipantVideoWidget extends StatelessWidget {
   const ParticipantVideoWidget(
@@ -29,9 +32,8 @@ class ParticipantVideoWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     var screenShare = remoteStream.publisherName.toLowerCase().contains('screenshare');
-    if (context.isWide) {
 
-      print("rebuild widget for: ${remoteStream.publisherName}");
+    if (context.isWide) {
       return SizedBox(
         height: height,
         width: width,
@@ -39,7 +41,6 @@ class ParticipantVideoWidget extends StatelessWidget {
           final halfHeight = min(constraints.maxHeight, constraints.maxWidth)  / 3;
 
           int userId = remoteStream.getUserImageDTO().id;
-          print("user: ${remoteStream.publisherName}, isVideoMuted: ${remoteStream.isVideoMuted}, isVideoFlowing: ${remoteStream.isVideoFlowing}");
           return Stack(
             children: [
               Container(
@@ -47,7 +48,7 @@ class ParticipantVideoWidget extends StatelessWidget {
                 child: Stack(
                   children: [
                     Visibility(
-                        visible: remoteStream.isVideoMuted == false && remoteStream.isVideoFlowing == true,
+                        visible: (remoteStream.isVideoMuted == false && remoteStream.isVideoFlowing == true) || screenShare,
                         replacement: Container(
                             decoration: BoxDecoration(
                               borderRadius: BorderRadius.circular(16),
@@ -69,7 +70,7 @@ class ParticipantVideoWidget extends StatelessWidget {
                             child: Center(
                                 child: UserImage.size([remoteStream.getUserImageDTO()], halfHeight, 700))),
                         child:
-                        
+
                         Stack(
                           children: [
                             Container(
@@ -88,7 +89,7 @@ class ParticipantVideoWidget extends StatelessWidget {
                                 height,
                                 remoteStream.id,
                                 remoteStream.publisherName),
-                            
+
                             Container(
                               width: double.maxFinite,
                                 height: double.maxFinite,
@@ -115,12 +116,22 @@ class ParticipantVideoWidget extends StatelessWidget {
                   child: Row(
                     children: [
                       Visibility(
-                        visible: width > 200,
-                        child: EngagementProgress(
-                            engagement: remoteStream.engagement ?? 0),
+                        visible: width > 200 && showEngagement!,
+                        child:
+                        Column(
+                          spacing: 5,
+                          children: [
+                            EngagementProgress(
+                                engagement: remoteStream.engagement ?? 0),
+
+                            // EngagementProgress(
+                            //     engagement: remoteStream.drowsiness ?? 0)
+                          ],
+                        )
                       ),
                     ],
                   )),
+
               Positioned(
                   left: 24,
                   top: 20,
@@ -146,9 +157,27 @@ class ParticipantVideoWidget extends StatelessWidget {
                         visible: remoteStream.isHandUp == true,
                         child: const Icon(Icons.waving_hand_outlined,
                             color: Colors.white),
-                      )
+                      ),
+
                     ],
                   )),
+
+                Positioned(
+                    bottom: 20,
+                    right: 24,
+                    child:
+                Visibility(
+                  visible: remoteStream.isSharing == true,
+                  child:     CallButtonShape(
+                      image: const Icon(Icons.screen_share, color: Colors.white) as Widget,
+                      onClickAction: () async {
+                        await context
+                            .read<ConferenceCubit>().setShareScreenId(int.parse(remoteStream.publisherId!));
+                      }),
+
+                ))
+
+
             ],
           );
         }),
