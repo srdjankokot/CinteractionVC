@@ -128,12 +128,13 @@ class ChatRoomPage extends StatelessWidget {
       );
     }
 
-    Future<void> displayAddScheduleMeetingPopup() async {
+    Future<void> displayAddScheduleMeetingPopup(ChatState state) async {
       return showDialog(
         context: context,
         builder: (context) {
           return SchedulePopup(
             context: context,
+            state: state,
           );
         },
       );
@@ -220,7 +221,7 @@ class ChatRoomPage extends StatelessWidget {
                             state,
                             300,
                             () => {displayJoinRoomPopup(context)},
-                            () => {displayAddScheduleMeetingPopup()},
+                            () => {displayAddScheduleMeetingPopup(state)},
                             () => {displayCreateGroupPopup(context, state)}),
 
                         const VerticalDivider(
@@ -243,7 +244,7 @@ class ChatRoomPage extends StatelessWidget {
                             state,
                             double.maxFinite,
                             () => {displayJoinRoomPopup(context)},
-                            () => {displayAddScheduleMeetingPopup()},
+                            () => {displayAddScheduleMeetingPopup(state)},
                             () => {displayCreateGroupPopup(context, state)}),
                         Visibility(
                             visible: state.currentChat != null ||
@@ -394,6 +395,7 @@ Widget getLeftSide(BuildContext context, ChatState state, double? width,
         BlocBuilder<HomeCubit, HomeState>(
           builder: (context, state) {
             // return Text("NextMeeting containerw");
+
             return Visibility(
                 visible: state.nextMeeting != null,
                 child: state.nextMeeting == null
