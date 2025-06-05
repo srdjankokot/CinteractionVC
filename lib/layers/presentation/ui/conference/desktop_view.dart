@@ -164,6 +164,9 @@ Widget getDesktopView(
                                         .read<ConferenceCubit>()
                                         .shareScreen(null);
                                   } else {
+
+
+
                                     await context
                                         .read<ConferenceCubit>()
                                         .shareScreen(await navigator

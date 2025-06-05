@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'dart:html' as html;
+import 'dart:js_util' as js_util;
 import 'dart:math';
 import 'dart:typed_data';
 
@@ -15,6 +16,9 @@ import 'package:flutter_webrtc/flutter_webrtc.dart';
 
 import '../../../assets/colors/Colors.dart';
 import '../util.dart';
+import 'package:flutter_webrtc/flutter_webrtc.dart' as rtc;
+
+
 void redirectToDesktopApp() {
   var os = detectWebOS();
 
@@ -84,7 +88,7 @@ String detectWebOS() {
   return 'Unknown';
 }
 
-Widget getVideoView(BuildContext context, RTCVideoRenderer renderer, bool mirror, double width, double height, String id, String publisherName) {
+Widget getVideoView(BuildContext context, RTCVideoRenderer renderer, bool mirror, double width, double height, String id, String publisherName, Widget userAvatar) {
   // ui.platformViewRegistry.registerViewFactory(id, (int _) {
   //   final html.MediaStream nativeStream = getNativeMediaStream(renderer.srcObject!);
   //
@@ -108,7 +112,8 @@ Widget getVideoView(BuildContext context, RTCVideoRenderer renderer, bool mirror
 // print("video width: ${renderer.videoWidth} for ${renderer.textureId}");
 // print("video height: ${renderer.videoHeight} for ${renderer.textureId}");
 // print(renderer.videoWidth);
-  return rtcVideoWidget(context, renderer, mirror, width, height, id, publisherName);
+
+  return rtcVideoWidget(context, renderer, mirror, width, height, id, publisherName, userAvatar);
 }
 
 String _boxFitToCss(BoxFit fit) {

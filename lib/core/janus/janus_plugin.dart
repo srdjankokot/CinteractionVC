@@ -489,6 +489,8 @@ class JanusPlugin {
         }
         response = await ws.send(request, handleId: handleId);
       }
+
+      print(response);
       return response;
     } catch (e) {
       this._context._logger.fine(e);
