@@ -85,34 +85,10 @@ class ParticipantVideoWidget extends StatelessWidget {
                     ],
                   ),
 
-                  if ((remoteStream.isVideoMuted == true || remoteStream.isVideoFlowing == false) && !screenShare)
+                  if ((remoteStream.isVideoMuted == true) && !screenShare)
                     userAvatar,
-                    // Container(
-                    //     decoration: BoxDecoration(
-                    //       borderRadius: BorderRadius.circular(16),
-                    //       gradient: RadialGradient(
-                    //         center: Alignment.center,
-                    //         radius: 0.6,
-                    //         colors: [
-                    //           ColorConstants.getRandomColor(userId),
-                    //           ColorConstants.getRandomColor(userId, shade: 700),
-                    //         ],
-                    //       ),
-                    //       border: Border.all(
-                    //         color: remoteStream.isTalking == true
-                    //             ? Colors.white
-                    //             : Colors.transparent,
-                    //         width: remoteStream.isTalking == true ? 2.0 : 0.0,
-                    //       ),
-                    //     ),
-                    //     child: Center(
-                    //         child: UserImage.size(
-                    //             [remoteStream.getUserImageDTO()],
-                    //             halfHeight,
-                    //             700))),
 
-
-                  if (remoteStream.onResizeFrame == false &&
+                  if (remoteStream.bitrateIsOk == false &&
                       remoteStream.isVideoMuted == false &&
                       remoteStream.lastFrameBytes != null)
                     ClipRRect(

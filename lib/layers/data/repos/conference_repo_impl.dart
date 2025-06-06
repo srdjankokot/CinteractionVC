@@ -521,7 +521,6 @@ class ConferenceRepoImpl extends ConferenceRepo {
         if (isVideo) {
           print("try to set video flowing");
           renderer.setVideoFlowing = event.flowing;
-          renderer.onResizeFrame = false;
           _checkVideoStreams();
           _refreshStreams();
         }
@@ -593,8 +592,7 @@ class ConferenceRepoImpl extends ConferenceRepo {
           renderer.videoRenderer.srcObject = renderer.mediaStream;
           renderer.videoRenderer.onResize = ()
           {
-            renderer?.onResizeFrame = true;
-            _refreshStreams();
+              _refreshStreams();
           };
 
           renderer.videoRenderer.muted = false;
@@ -684,6 +682,8 @@ class ConferenceRepoImpl extends ConferenceRepo {
       print("join subscriber: $streams");
       await remotePlugin?.joinSubscriber(room, streams: streams, pin: "");
       _checkVideoStreams();
+
+      startBitrateMonitoring(peerConnection: remotePlugin!.webRTCHandle!.peerConnection!);
       return;
     }
 
@@ -938,7 +938,7 @@ class ConferenceRepoImpl extends ConferenceRepo {
 
     await videoPlugin?.send(data: payload);
     localVideoRenderer.mediaStream?.getTracks().where((element) => element.kind == kind).toList().forEach((element) {
-      // element.enabled = !muted;
+      element.enabled = !muted;
       if(muted) {
         startAudioLevelMonitor(element);
       } else {
@@ -1147,6 +1147,8 @@ class ConferenceRepoImpl extends ConferenceRepo {
     // session?.dispose();
 
     _conferenceEndedStream.add(reason);
+    stopBitrateMonitoring();
+    stopAudioLevelMonitor();
   }
 
   Future<bool> _endCall() async {
@@ -1445,6 +1447,8 @@ class ConferenceRepoImpl extends ConferenceRepo {
     print("join to room, metadata: $metadata");
     await videoPlugin?.joinPublisher(room,
         displayName: displayName, id: int.parse(myId), metadata: metadata);
+
+
   }
 
   Future<JanusVideoRoom?> _getRoomDetails(int roomId) async {
@@ -1874,4 +1878,64 @@ class ConferenceRepoImpl extends ConferenceRepo {
     return screenShareId ~/ 1000;
   }
 
+
+
+  Map<String, int> lastBytes = {};
+  Map<String, int> lastTimestamps = {};
+  Timer? statsTimer;
+
+  void startBitrateMonitoring({
+    required RTCPeerConnection peerConnection,
+  }) {
+
+    print("startBitrateMonitoring");
+    statsTimer = Timer.periodic(const Duration(seconds: 1), (_) async {
+      var stats = await peerConnection.getStats();
+      var needRefresh = false;
+      for (var report in stats) {
+        if (report.type == 'inbound-rtp' && report.values['kind'] == 'video') {
+
+          String? mid = report.values['mid'];
+          if (mid == null) continue;
+
+          int? bytesReceived = report.values['bytesReceived'];
+          int timestamp = (report.timestamp).toInt();
+
+          // Optionally find feedId
+          int? feedId = videoMids.entries.firstWhere(
+                (e) => e.value == mid,
+            orElse: () => MapEntry(-1, ''),
+          ).key;
+          if (feedId == -1) continue;
+
+          final key = '$feedId';
+
+          final prevBytes = lastBytes[key] ?? bytesReceived ?? 0;
+          final prevTs = lastTimestamps[key] ?? 0;
+
+          if (bytesReceived != null && timestamp != prevTs) {
+
+            final bitrateKbps = 8 * (bytesReceived - prevBytes) / (timestamp - prevTs);
+            print("Feed $feedId → ${bitrateKbps.toStringAsFixed(2)} kbps");
+
+            lastBytes[key] = bytesReceived;
+            lastTimestamps[key] = timestamp;
+
+            var stream = videoState.streamsToBeRendered[key];
+
+            needRefresh = !needRefresh && stream?.bitrateIsOk != bitrateKbps > 60;
+            stream?.bitrateIsOk = bitrateKbps > 60;
+
+          }
+        }
+      }
+
+      if(needRefresh) _refreshStreams();
+
+    });
+  }
+
+  void stopBitrateMonitoring() {
+    statsTimer?.cancel();
+  }
 }

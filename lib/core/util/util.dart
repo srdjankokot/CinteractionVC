@@ -36,7 +36,7 @@ class StreamRenderer {
   Timer? fallbackTimer;
 
   // bool? isVideoFlowing;
-  bool onResizeFrame = true;
+  bool bitrateIsOk = true;
   bool? _isVideoFlowing;
 
   bool? get isVideoFlowing => _isVideoFlowing!;
@@ -125,7 +125,7 @@ class StreamRenderer {
           try {
             var buffer = await captureFrameFromVideo(this);
             lastFrameBytes = Uint8List.view(buffer!);
-            print("${publisherName}, lastFrameBytes: ${lastFrameBytes?.lengthInBytes}");
+            // print("${publisherName}, lastFrameBytes: ${lastFrameBytes?.lengthInBytes}");
           } catch (e) {
             print("Failed to capture frame: $e");
           }
