@@ -1,14 +1,8 @@
-import 'dart:math';
 
-import 'package:cinteraction_vc/core/extension/context.dart';
-import 'package:cinteraction_vc/core/extension/string.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_webrtc/flutter_webrtc.dart';
-
-import '../../../../../assets/colors/Colors.dart';
-
-Widget rtcVideoWidget(BuildContext context, RTCVideoRenderer renderer, bool screenshare, double width, double height, String id, String publisherName)
+Widget rtcVideoWidget(BuildContext context, RTCVideoRenderer renderer, bool screenshare, double width, double height, String id, String publisherName, Widget userAvatar)
 {
   var isPortrait = renderer.videoHeight > renderer.videoWidth;
 
@@ -17,19 +11,7 @@ Widget rtcVideoWidget(BuildContext context, RTCVideoRenderer renderer, bool scre
     child: RTCVideoView(
       renderer,
       placeholderBuilder: (context) {
-        return Center(
-          child: CircleAvatar(
-            backgroundColor: ([...ColorConstants.kStateColors]..shuffle()).first,
-            radius: [width, height].reduce(min) / 4,
-            child: Text(
-              publisherName.getInitials(),
-              style: context.primaryTextTheme.titleLarge?.copyWith(
-                fontSize: [width, height].reduce(min) / 8,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-          ),
-        );
+        return  userAvatar;
       },
       filterQuality: FilterQuality.none,
       objectFit: (screenshare || isPortrait)

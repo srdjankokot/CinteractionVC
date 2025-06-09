@@ -27,6 +27,16 @@ abstract class Api {
       required callId,
       required image,
       required participantId});
+
+
+  Future<double?> getDrowsiness(
+      {required averageAttention,
+        required callId,
+        required image,
+        required participantId});
+
+
+
   Future<ApiResponse<bool>> sendEngagement(
       {required engagement, required userId, required callId});
 
