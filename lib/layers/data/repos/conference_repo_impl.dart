@@ -1921,7 +1921,7 @@ class ConferenceRepoImpl extends ConferenceRepo {
 
             lastBytes[key] = bytesReceived;
             lastTimestamps[key] = timestamp;
-ColorConstants
+
             var stream = videoState.streamsToBeRendered[key];
 
             needRefresh = !needRefresh && stream?.bitrateIsOk != bitrateKbps >= minBitrate;
