@@ -264,13 +264,13 @@ class ChatCubit extends Cubit<ChatState> with BlocLoggy {
     }
   }
 
-  Future<void> deleteChat(int id) async {
+  Future<void> deleteChat(int chatId, int userId) async {
     try {
       //Updated becasue of pagination on scroll//
       List<ChatDto> updatedChats = List.from(state.chats ?? []);
-      updatedChats.removeWhere((chat) => chat.id == id);
+      updatedChats.removeWhere((chat) => chat.id == chatId);
       emit(state.copyWith(chats: updatedChats));
-      await chatUseCases.deleteChat(id);
+      await chatUseCases.deleteChat(chatId, userId);
     } catch (e) {
       print("❌ Error delete chat: $e");
     }
@@ -369,6 +369,7 @@ class ChatCubit extends Cubit<ChatState> with BlocLoggy {
   Future<void> sendChatMessage(
       {required String messageContent,
       List<PlatformFile>? uploadedFiles}) async {
+    print('ChatId: ${state.chatDetails?.chatId}');
     var participiansList = !isInCallChat
         ? state.chatDetails!.chatParticipants.map((data) => data.id).toList()
         : state.participants!.map((data) => data.id).toList();

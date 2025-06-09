@@ -11,11 +11,16 @@ import '../../../../../../core/ui/input/input_field.dart';
 import 'package:cinteraction_vc/core/app/injector.dart';
 import 'package:cinteraction_vc/layers/presentation/cubit/home/home_cubit.dart';
 
-class SchedulePopup extends StatelessWidget {
+class SchedulePopup extends StatefulWidget {
   const SchedulePopup({super.key, required this.context, required this.state});
   final BuildContext context;
   final ChatState state;
 
+  @override
+  State<SchedulePopup> createState() => _SchedulePopupState();
+}
+
+class _SchedulePopupState extends State<SchedulePopup> {
   @override
   Widget build(BuildContext innerContext) {
     final nameController = TextEditingController();
@@ -25,10 +30,10 @@ class SchedulePopup extends StatelessWidget {
     late TextEditingController autocompleteController;
 
     final List<UserDto> selectedParticipants = [];
-    final List<UserDto>? allUsers = state.users;
+    final List<UserDto>? allUsers = widget.state.users;
 
     return BlocProvider.value(
-      value: getIt.get<HomeCubit>(),
+      value: widget.context.read<HomeCubit>(),
       child: BlocConsumer<HomeCubit, HomeState>(
         listener: (c, s) {},
         builder: (innerContext, state) => AlertDialog(
@@ -210,7 +215,7 @@ class SchedulePopup extends StatelessWidget {
                           ),
                           onPressed: () async {
                             final selectedDate = await showDatePicker(
-                              context: context,
+                              context: widget.context,
                               firstDate:
                                   DateTime.now().add(const Duration(hours: 1)),
                               lastDate:
@@ -249,7 +254,7 @@ class SchedulePopup extends StatelessWidget {
                           ),
                           onPressed: () async {
                             final selectedTime = await showTimePicker(
-                              context: context,
+                              context: widget.context,
                               initialTime: TimeOfDay.fromDateTime(
                                 state.scheduleStartDateTime ?? DateTime.now(),
                               ),
@@ -280,7 +285,7 @@ class SchedulePopup extends StatelessWidget {
           actionsAlignment: MainAxisAlignment.end,
           actions: [
             TextButton(
-              onPressed: () => Navigator.pop(context),
+              onPressed: () => Navigator.pop(widget.context),
               child: const Text(
                 'Cancel',
                 style: TextStyle(color: Colors.grey),
@@ -289,24 +294,26 @@ class SchedulePopup extends StatelessWidget {
             ElevatedButton(
               onPressed: () async {
                 if (!formKey.currentState!.validate()) return;
-                Navigator.pop(context);
 
                 List<String> emailList =
                     selectedParticipants.map((user) => user.email).toList();
                 print('Emails to send: $emailList');
 
-                final response = await innerContext
-                    .read<HomeCubit>()
-                    .scheduleMeeting(nameController.text, descController.text,
-                        tagController.text, emailList);
-                try {
-                  final link = response.response ?? '';
-                  if (link.isNotEmpty) {
-                    await launchUrl(Uri.parse(link));
-                  }
-                } catch (e) {
-                  print(e.toString());
-                }
+                await context.read<HomeCubit>().scheduleMeeting(
+                    nameController.text,
+                    descController.text,
+                    tagController.text,
+                    emailList);
+
+                // try {
+                //   final link = response.response?.scheduledAt ?? '';
+                //   if (DateTime.now() > response.response?.scheduledAt) {
+                //     context.read<HomeCubit>().getNextMeeting();
+                //   }
+                // } catch (e) {
+                //   print(e.toString());
+                // }
+                Navigator.pop(context);
               },
               style: ElevatedButton.styleFrom(
                 backgroundColor: ColorConstants.kPrimaryColor,

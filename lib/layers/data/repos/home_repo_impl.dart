@@ -12,7 +12,7 @@ class HomeRepoImpl extends HomeRepo {
   final Api _api;
 
   @override
-  Future<ApiResponse<String>> scheduleMeeting(
+  Future<ApiResponse<Meeting>> scheduleMeeting(
       {required String name,
       required String description,
       required String tag,
