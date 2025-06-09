@@ -263,7 +263,6 @@ class ChatRepoImpl extends ChatRepo {
           int? chatIdParsed = parsed['chatId'];
           int? msgIdParsed = parsed['msgId'];
           print('recevidedMsgId: $msgIdParsed');
-
           try {
             Map<String, dynamic> result = jsonDecode(receviedMessage);
             var command = DataChannelCommand.fromJson(result);
@@ -307,9 +306,11 @@ class ChatRepoImpl extends ChatRepo {
                         ),
                       );
                     }
+
                     getChatMessages(chatIdParsed!);
                     if (!isInCallChat) {
                       unreadMessageSound();
+                      _matchParticipantWithChat(chats);
                     }
                   }
                 }
@@ -606,8 +607,8 @@ class ChatRepoImpl extends ChatRepo {
   }
 
   @override
-  deleteChat(int id) async {
-    var response = await _api.deleteChat(id: id);
+  deleteChat(int chatId, int userId) async {
+    var response = await _api.deleteChat(chatId: chatId, userId: userId);
     if (response.error == null) {
       chats = response.response!;
       _chatStream.add(chats);
@@ -911,7 +912,6 @@ class ChatRepoImpl extends ChatRepo {
           return chat.copyWith(
               userStatus: command.data["userStatus"] as String);
         } else {
-          //Changed because of bug with update chat list of participiant after delete some of the chat
           return chat;
         }
       }).toList();

@@ -237,8 +237,8 @@ final GoRouter router = GoRouter(
         // final roomId = state.pathParameters['roomId'];
         return MultiBlocProvider(
           providers: [
-            BlocProvider<HomeCubit>(
-              create: (context) => getIt.get<HomeCubit>(),
+            BlocProvider<HomeCubit>.value(
+              value: getIt<HomeCubit>(),
             ),
             BlocProvider<ChatCubit>.value(
               value: getIt.get<ChatCubit>(),
