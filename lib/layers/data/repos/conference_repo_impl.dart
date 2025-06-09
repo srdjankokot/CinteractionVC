@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:typed_data';
 
+import 'package:cinteraction_vc/assets/colors/Colors.dart';
 import 'package:cinteraction_vc/core/io/network/models/participant.dart';
 import 'package:cinteraction_vc/core/util/util.dart';
 import 'package:cinteraction_vc/layers/data/dto/meetings/meeting_dto.dart';
@@ -1889,7 +1890,7 @@ class ConferenceRepoImpl extends ConferenceRepo {
   }) {
 
     print("startBitrateMonitoring");
-    statsTimer = Timer.periodic(const Duration(seconds: 1), (_) async {
+    statsTimer = Timer.periodic(const Duration(milliseconds: 300), (_) async {
       var stats = await peerConnection.getStats();
       var needRefresh = false;
       for (var report in stats) {
@@ -1920,11 +1921,11 @@ class ConferenceRepoImpl extends ConferenceRepo {
 
             lastBytes[key] = bytesReceived;
             lastTimestamps[key] = timestamp;
-
+ColorConstants
             var stream = videoState.streamsToBeRendered[key];
 
-            needRefresh = !needRefresh && stream?.bitrateIsOk != bitrateKbps > 60;
-            stream?.bitrateIsOk = bitrateKbps > 60;
+            needRefresh = !needRefresh && stream?.bitrateIsOk != bitrateKbps >= minBitrate;
+            stream?.bitrateIsOk = bitrateKbps >= minBitrate;
 
           }
         }
@@ -1938,4 +1939,6 @@ class ConferenceRepoImpl extends ConferenceRepo {
   void stopBitrateMonitoring() {
     statsTimer?.cancel();
   }
+
+  final int minBitrate = 10;
 }
