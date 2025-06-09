@@ -1,17 +1,18 @@
-import 'package:cinteraction_vc/core/extension/context.dart';
-import 'package:cinteraction_vc/layers/presentation/ui/conference/staggered_layout_cubit.dart';
 import 'package:cinteraction_vc/layers/presentation/ui/conference/widget/participant_video_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
-class StaggeredAspectGrid extends StatelessWidget {
-  const StaggeredAspectGrid({
+import 'cubit/dynamic_layout_cubit.dart';
+import 'cubit/dynamic_layout_state.dart';
+
+class DynamicLayoutGrid extends StatelessWidget {
+  const DynamicLayoutGrid({
     super.key,
   });
 
   @override
   Widget build(BuildContext context) {
-    return BlocConsumer<StaggeredCubit, StaggeredLayoutState>(
+    return BlocConsumer<DynamicLayoutCubit, DynamicLayoutState>(
       builder: (context, state) {
         return LayoutBuilder(builder: (context, constraints) {
           final screenWidth = constraints.maxWidth;
@@ -20,7 +21,7 @@ class StaggeredAspectGrid extends StatelessWidget {
           if (state.screenWidth != screenWidth ||
               state.screenHeight != screenHeight) {
             context
-                .read<StaggeredCubit>()
+                .read<DynamicLayoutCubit>()
                 .onScreenSizeChanged(screenWidth, screenHeight);
           }
 
@@ -45,9 +46,9 @@ class StaggeredAspectGrid extends StatelessWidget {
                       final maxHeightPerItem = screenHeight / rowCount;
 
                       final stretchedWidth =
-                          itemSize.width.clamp(0.0, maxWidthPerItem);
+                      itemSize.width.clamp(0.0, maxWidthPerItem);
                       final stretchedHeight =
-                          itemSize.height.clamp(0.0, maxHeightPerItem);
+                      itemSize.height.clamp(0.0, maxHeightPerItem);
                       return ParticipantVideoWidget(remoteStream: state.streams[index], height: stretchedHeight, width: stretchedWidth);
                     }).toList(),
 
@@ -63,7 +64,7 @@ class StaggeredAspectGrid extends StatelessWidget {
         if (previous.screenWidth != current.screenWidth) return true;
         return false;
       },
-      listener: (BuildContext context, StaggeredLayoutState state) {
+      listener: (BuildContext context, DynamicLayoutState state) {
         // print("state changed");
       },
     );

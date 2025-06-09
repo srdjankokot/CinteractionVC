@@ -16,6 +16,7 @@ abstract class ConferenceRepo {
   Future<void> initialize({required int roomId, required String displayName});
 
   Stream<Map<dynamic, StreamRenderer>> getStreamRendererStream();
+  Stream<Map<dynamic, StreamRenderer>> getConferenceScreenShareStream();
 
   Stream<String> getConferenceEndedStream();
   Stream<void> getUserTalkingStream();

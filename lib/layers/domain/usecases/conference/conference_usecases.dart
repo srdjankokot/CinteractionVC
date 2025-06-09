@@ -9,6 +9,7 @@ import 'conference_finish_call.dart';
 import 'conference_get_engagement_stream.dart';
 import 'conference_get_participants.dart';
 import 'conference_get_renderer_stream.dart';
+import 'conference_get_screenshare_stream.dart';
 import 'conference_hand_up.dart';
 import 'conference_initialize.dart';
 import 'conference_kick.dart';
@@ -57,6 +58,7 @@ class ConferenceUseCases {
         stopRecording = ConferenceStopRecording(repo: repo),
         getToastMessageStream = ConferenceToastMessageStream(repo: repo),
         handUpU = ConferenceHandUp(repo: repo),
+        getScreenShareStream = GetScreenShareStream(repo: repo),
         userTalkingStream = GetUserTalkingStream(repo: repo);
 
   final ConferenceRepo repo;
@@ -88,4 +90,5 @@ class ConferenceUseCases {
   ConferenceToastMessageStream getToastMessageStream;
   ConferenceHandUp handUpU;
   GetUserTalkingStream userTalkingStream;
+  GetScreenShareStream getScreenShareStream;
 }

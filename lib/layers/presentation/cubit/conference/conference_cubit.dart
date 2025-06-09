@@ -1,13 +1,10 @@
 import 'dart:async';
 import 'dart:math';
 
-import 'package:cinteraction_vc/core/io/network/models/participant.dart';
 import 'package:cinteraction_vc/core/util/util.dart';
 import 'package:cinteraction_vc/layers/domain/usecases/conference/conference_usecases.dart';
 import 'package:file_picker/file_picker.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-// import 'package:flutter_screen_recording/flutter_screen_recording.dart';
 import 'package:webrtc_interface/webrtc_interface.dart';
 
 import '../../../../core/janus/janus_client.dart';
@@ -29,6 +26,7 @@ class ConferenceCubit extends Cubit<ConferenceState> with BlocLoggy {
   final ConferenceUseCases conferenceUseCases;
 
   StreamSubscription<Map<dynamic, StreamRenderer>>? _conferenceSubscription;
+  StreamSubscription<Map<dynamic, StreamRenderer>>? _conferenceScreenShareSubscription;
   StreamSubscription<String>? _conferenceEndedStream;
   StreamSubscription<List<ChatMessage>>? _conferenceMessageStream;
   StreamSubscription<Map<dynamic, StreamRenderer>>? _subscribersStream;
@@ -39,8 +37,9 @@ class ConferenceCubit extends Cubit<ConferenceState> with BlocLoggy {
   void _load() async {
     await conferenceUseCases.conferenceInitialize(
         displayName: displayName, roomId: roomId);
-    _conferenceSubscription =
-        conferenceUseCases.getRendererStream().listen(_onConference);
+    _conferenceSubscription = conferenceUseCases.getRendererStream().listen(_onConference);
+    _conferenceScreenShareSubscription = conferenceUseCases.getScreenShareStream().listen(_onConferenceScreenShare);
+
     _conferenceEndedStream =
         conferenceUseCases.getEndStream().listen(_onConferenceEnded);
     _subscribersStream =
@@ -107,11 +106,17 @@ class ConferenceCubit extends Cubit<ConferenceState> with BlocLoggy {
   // bool audioMuted = false;
   // final Map<dynamic, StreamRenderer> streamRenderers = {};
 
+  Future<void> setShareScreenId(int userId) async {
+    emit(state.copyWith(screenShareId: userId * 1000 + 999));
+  }
+
   Future<void> audioMute() async {
     var mute = state.audioMuted;
     await conferenceUseCases.mute('audio', !mute);
     emit(state.copyWith(audioMuted: !mute));
   }
+
+
 
   Future<void> videoMute() async {
     var muted = state.videoMuted;
@@ -140,6 +145,24 @@ class ConferenceCubit extends Cubit<ConferenceState> with BlocLoggy {
     // loggy.info('list of streams: ${streams.length}');
     // Map<dynamic, StreamRenderer> s = streams;
     emit(state.copyWith(isInitial: false, streamRenderers: streams));
+    conferenceUseCases.getParticipants();
+  }
+
+  void _onConferenceScreenShare(Map<dynamic, StreamRenderer> screenShareStreams) {
+    // loggy.info('list of streams: ${streams.length}');
+    // Map<dynamic, StreamRenderer> s = streams;
+
+    var lastShare = screenShareStreams.values.lastOrNull;
+    emit(state.copyWith(isInitial: false, streamScreenShares: screenShareStreams));
+    if(lastShare != null && state.screenShareId == 0)
+      {
+        emit(state.copyWith( screenShareId: int.parse(lastShare.id)));
+      }
+
+    if(screenShareStreams.isEmpty)
+      {
+        emit(state.copyWith( screenShareId: 0));
+      }
     conferenceUseCases.getParticipants();
   }
 

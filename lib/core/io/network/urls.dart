@@ -27,6 +27,7 @@ class Urls {
       'Bearer 15|Jsoy8PjvLXRw3Y9ggJyYRr4ylHamlWecHNKDSOVk';
 
   static String engagement = '$baseIviUrl/engagement/rank';
+  static String drowsiness = '$baseIviUrl/engagement/rank';
   static String sendEngagement = '$baseUrl/api/meetings/update/attention/';
   static String dashboard = '$baseUrl/api/dashboards';
 
