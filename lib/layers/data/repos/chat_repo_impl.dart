@@ -4,6 +4,8 @@ import 'dart:convert';
 import 'package:audioplayers/audioplayers.dart';
 import 'package:cinteraction_vc/layers/data/dto/chat/chat_detail_dto.dart';
 import 'package:cinteraction_vc/layers/data/dto/chat/chat_dto.dart';
+import 'package:cinteraction_vc/layers/data/dto/chat/chat_event.dart';
+import 'package:cinteraction_vc/layers/data/dto/chat/user_event.dart';
 import 'package:cinteraction_vc/layers/data/dto/user_dto.dart';
 import 'package:cinteraction_vc/layers/domain/repos/chat_repo.dart';
 import 'package:file_picker/file_picker.dart';
@@ -43,9 +45,9 @@ class ChatRepoImpl extends ChatRepo {
 
   final _participantsStream = StreamController<List<Participant>>.broadcast();
 
-  final _usersStream = StreamController<List<UserDto>>.broadcast();
+  final _usersStream = StreamController<UserEvent>.broadcast();
 
-  final _chatStream = StreamController<List<ChatDto>>.broadcast();
+  final _chatStream = StreamController<ChatEvent>.broadcast();
 
   final _chatDetailsStream = StreamController<ChatDetailsDto>.broadcast();
 
@@ -100,12 +102,12 @@ class ChatRepoImpl extends ChatRepo {
   }
 
   @override
-  Stream<List<UserDto>> getUsersStream() {
+  Stream<UserEvent> getUsersStream() {
     return _usersStream.stream;
   }
 
   @override
-  Stream<List<ChatDto>> getChatsStream() {
+  Stream<ChatEvent> getChatsStream() {
     return _chatStream.stream.map((chats) {
       return chats;
     });
@@ -225,7 +227,10 @@ class ChatRepoImpl extends ChatRepo {
       }
     }
 
-    _usersStream.add(users);
+    _usersStream.add(UserEvent(
+      users: users,
+      isSearch: false,
+    ));
   }
 
   void _matchParticipantWithChat(List<ChatDto> currentChats) {
@@ -244,7 +249,7 @@ class ChatRepoImpl extends ChatRepo {
     }
 
     chats = updatedChats;
-    _chatStream.add(chats);
+    _chatStream.add(ChatEvent(chats: chats, isSearch: false));
   }
 
   _setListener() {
@@ -576,14 +581,30 @@ class ChatRepoImpl extends ChatRepo {
   //   _chatDetailsStream.add(updatedChatDetails);
   // }
   @override
-  loadUsers(int page, int paginate) async {
-    var response = await _api.getCompanyUsers(page, paginate);
+  loadUsers(int page, int paginate, [String? search]) async {
+    var response = await _api.getCompanyUsers(page, paginate, search);
 
     if (response.response != null) {
       var newUsers = response.response!.users
           .where((element) => element.id != myId)
           .toList();
-      users.addAll(newUsers);
+
+      if (search == null || search.isEmpty) {
+        if (page == 1) {
+          users.clear(); // ← očisti listu ako je prva stranica
+        }
+        users.addAll(newUsers);
+      } else {
+        // for search
+        users = newUsers;
+      }
+
+      print('newUsers: $newUsers');
+      _usersStream.add(UserEvent(
+        users: users,
+        isSearch: search != null && search.isNotEmpty,
+      ));
+
       _usersPaginationStream.add(response.response!);
       _matchParticipantWithUser();
     }
@@ -592,13 +613,28 @@ class ChatRepoImpl extends ChatRepo {
   /////////////CHAT API FUNCTIONS/////////////////
 
   @override
-  loadChats(int page, int paginate) async {
-    var response = await _api.getAllChats(page: page, paginate: paginate);
+  loadChats(int page, int paginate, [String? search]) async {
+    print('searchRepo: $search');
+    var response =
+        await _api.getAllChats(page: page, paginate: paginate, search: search);
 
     if (response.error == null) {
       ChatPagination pagination = response.response!;
-      chats = pagination.chats;
-      _chatStream.add(List.from(chats));
+      var newChats = pagination.chats;
+
+      if (search == null || search.isEmpty) {
+        if (page == 1) {
+          chats.clear();
+        }
+        chats.addAll(newChats);
+      } else {
+        chats = newChats;
+      }
+
+      _chatStream.add(ChatEvent(
+        chats: List.from(chats),
+        isSearch: search != null && search.isNotEmpty,
+      ));
       _paginationStream.add(pagination);
       _matchParticipantWithChat(chats);
     } else {
@@ -611,7 +647,7 @@ class ChatRepoImpl extends ChatRepo {
     var response = await _api.deleteChat(chatId: chatId, userId: userId);
     if (response.error == null) {
       chats = response.response!;
-      _chatStream.add(chats);
+      _chatStream.add(ChatEvent(chats: chats, isSearch: false));
       _matchParticipantWithChat(chats);
     } else {
       print('Error: ${response.error}');
@@ -915,7 +951,7 @@ class ChatRepoImpl extends ChatRepo {
           return chat;
         }
       }).toList();
-      _chatStream.add(chats);
+      _chatStream.add(ChatEvent(chats: chats, isSearch: false));
     }
   }
 
@@ -926,7 +962,6 @@ class ChatRepoImpl extends ChatRepo {
   }
 
   _sendUserStatus() async {
-    print('userStatusRepo $userStatus');
     if (!isInCallChat) {
       var data = {'userStatus': userStatus};
       var json = DataChannelCommand(
