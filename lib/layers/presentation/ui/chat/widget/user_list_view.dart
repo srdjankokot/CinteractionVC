@@ -97,10 +97,6 @@ class _UsersListViewState extends State<UsersListView> {
 
   @override
   Widget build(BuildContext context) {
-    List<UserDto> filteredUsers = widget.state.users!.where((user) {
-      final userName = user.name.toLowerCase();
-      return userName.contains(searchTerm);
-    }).toList();
     return widget.state.users == null || widget.state.users!.isEmpty
         ? Center(
             child: Text(
@@ -117,26 +113,33 @@ class _UsersListViewState extends State<UsersListView> {
                   decoration: InputDecoration(
                     hintText: 'Search users...',
                     prefixIcon: const Icon(Icons.search),
+                    suffixIcon: _searchController.text.isNotEmpty
+                        ? IconButton(
+                            icon: const Icon(Icons.clear),
+                            onPressed: () {
+                              _searchController.clear();
+                              context.read<ChatCubit>().loadUsers(1, 20);
+                            },
+                          )
+                        : null,
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(10),
                     ),
                   ),
                   onChanged: (value) {
-                    setState(() {
-                      searchTerm = value.toLowerCase();
-                    });
+                    context.read<ChatCubit>().loadUsers(1, 20, value.trim());
                   },
                 )),
             Expanded(
               child: ListView.builder(
                 controller: _scrollController,
-                itemCount: filteredUsers.length +
+                itemCount: widget.state.users!.length +
                     ((isLoading && widget.state.pagination?.nextPageUrl != null)
                         ? 1
                         : 0),
                 itemBuilder: (context, index) {
-                  if (index < filteredUsers.length) {
-                    var user = filteredUsers[index];
+                  if (index < widget.state.users!.length) {
+                    var user = widget.state.users![index];
                     int userId = int.parse(user.id);
                     bool isSelected = userId ==
                         int.parse(widget.state.currentParticipant?.id ?? "-1");

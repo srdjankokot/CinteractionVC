@@ -62,13 +62,29 @@ class ApiImpl extends Api {
 
   @override
   Future<ApiResponse<UserListResponse>> getCompanyUsers(
-      int page, int paginate) async {
+    int page,
+    int paginate,
+    String? search,
+  ) async {
     try {
       Dio dio = await getIt.getAsync<Dio>();
-      Response response = await dio
-          .get('${Urls.getCompanyUsers}?page=$page&paginate=$paginate');
+
+      final queryParams = <String, dynamic>{
+        if (search == null || search.isEmpty) ...{
+          'page': page.toString(),
+          'paginate': paginate.toString(),
+        },
+        if (search != null && search.isNotEmpty) 'search': search,
+      };
+
+      Response response = await dio.get(
+        Urls.getCompanyUsers,
+        queryParameters: queryParams,
+      );
 
       var userListResponse = UserListResponse.fromJson(response.data);
+
+      print('usersListResponse: ${userListResponse.users}');
 
       return ApiResponse(response: userListResponse);
     } on DioException catch (e) {
@@ -218,7 +234,7 @@ class ApiImpl extends Api {
           .toList();
 
       final futureMeetings = allMeetings
-          .where((meeting) => meeting.meetingStart.isAfter(now))
+          .where((meeting) => meeting.meetingEnd!.isAfter(now))
           .toList();
 
       futureMeetings.sort((a, b) => a.meetingStart.compareTo(b.meetingStart));
@@ -398,12 +414,24 @@ class ApiImpl extends Api {
   Future<ApiResponse<ChatPagination>> getAllChats({
     required int page,
     required int paginate,
+    String? search,
   }) async {
     try {
       Dio dio = await getIt.getAsync<Dio>();
-      Response response =
-          await dio.get('${Urls.getAllChats}?page=$page&paginate=$paginate');
+      print('SEARCH $search');
+      final queryParams = <String, dynamic>{
+        if (search == null || search.isEmpty) ...{
+          'page': page.toString(),
+          'paginate': paginate.toString(),
+        },
+        if (search != null && search.isNotEmpty) 'search': search,
+      };
 
+      Response response = await dio.get(
+        Urls.getAllChats,
+        queryParameters: queryParams,
+      );
+      print('response: ${response.data}');
       ChatPagination chatPagination =
           ChatPagination.fromJson(response.data as Map<String, dynamic>);
 

@@ -159,10 +159,6 @@ class _ChatsListViewState extends State<ChatsListView> {
         return (bTime ?? DateTime(0)).compareTo(aTime ?? DateTime(0));
       });
 
-    List<ChatDto> filteredChats = sortedChats.where((chat) {
-      final chatName = chat.getChatName().toLowerCase();
-      return chatName.contains(searchTerm);
-    }).toList();
     return widget.state.chats == null || widget.state.chats!.isEmpty
         ? Center(
             child: Text(
@@ -180,28 +176,35 @@ class _ChatsListViewState extends State<ChatsListView> {
                   decoration: InputDecoration(
                     hintText: 'Search chats...',
                     prefixIcon: Icon(Icons.search),
+                    suffixIcon: _searchController.text.isNotEmpty
+                        ? IconButton(
+                            icon: Icon(Icons.clear),
+                            onPressed: () {
+                              _searchController.clear();
+                              context.read<ChatCubit>().loadChats(1, 20);
+                            },
+                          )
+                        : null,
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(10),
                     ),
                   ),
                   onChanged: (value) {
-                    setState(() {
-                      searchTerm = value.toLowerCase();
-                    });
+                    context.read<ChatCubit>().loadChats(1, 20, value.trim());
                   },
                 ),
               ),
               Expanded(
                 child: ListView.builder(
                   controller: _scrollController,
-                  itemCount: filteredChats.length +
+                  itemCount: sortedChats.length +
                       ((isLoading &&
                               widget.state.pagination?.nextPageUrl != null)
                           ? 1
                           : 0),
                   itemBuilder: (context, index) {
-                    if (index < filteredChats.length) {
-                      var chat = filteredChats[index];
+                    if (index < sortedChats.length) {
+                      var chat = sortedChats[index];
                       bool isSelected = chat.id == widget.state.currentChat?.id;
 
                       final allParticipants = [
@@ -212,7 +215,7 @@ class _ChatsListViewState extends State<ChatsListView> {
                       List<UserImageDto> userImages = allParticipants
                           .map((a) => a.getUserImageDTO())
                           .toList();
-                      final unreadChats = filteredChats
+                      final unreadChats = sortedChats
                           .where((chat) => chat.haveUnread == true)
                           .toList();
 
