@@ -5,7 +5,7 @@ class LoadChats {
 
   final ChatRepo repo;
 
-  call(int page, int paginate) {
-    repo.loadChats(page, paginate);
+  call(int page, int paginate, String? search) {
+    repo.loadChats(page, paginate, search);
   }
 }
