@@ -84,7 +84,7 @@ String detectWebOS() {
   return 'Unknown';
 }
 
-Widget getVideoView(BuildContext context, RTCVideoRenderer renderer, bool mirror, double width, double height, String id, String publisherName) {
+Widget getVideoView(BuildContext context, RTCVideoRenderer renderer, bool mirror, double width, double height, String id, String publisherName, Widget userImage) {
   // ui.platformViewRegistry.registerViewFactory(id, (int _) {
   //   final html.MediaStream nativeStream = getNativeMediaStream(renderer.srcObject!);
   //
@@ -108,7 +108,7 @@ Widget getVideoView(BuildContext context, RTCVideoRenderer renderer, bool mirror
 // print("video width: ${renderer.videoWidth} for ${renderer.textureId}");
 // print("video height: ${renderer.videoHeight} for ${renderer.textureId}");
 // print(renderer.videoWidth);
-  return rtcVideoWidget(context, renderer, mirror, width, height, id, publisherName);
+  return rtcVideoWidget(context, renderer, mirror, width, height, id, publisherName, userImage);
 }
 
 String _boxFitToCss(BoxFit fit) {

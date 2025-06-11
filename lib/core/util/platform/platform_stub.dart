@@ -21,9 +21,9 @@ void startMeetOnDesktop(int roomId)
 
 }
 
-Widget getVideoView(BuildContext context, RTCVideoRenderer renderer, bool mirror, double width, double height, String id, String publisherName)
+Widget getVideoView(BuildContext context, RTCVideoRenderer renderer, bool mirror, double width, double height, String id, String publisherName, Widget userImage)
 {
-  return rtcVideoWidget(context, renderer, mirror, width, height, id, publisherName);
+  return rtcVideoWidget(context, renderer, mirror, width, height, id, publisherName, userImage);
 }
 
 

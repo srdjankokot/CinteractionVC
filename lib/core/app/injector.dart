@@ -45,6 +45,7 @@ import '../../layers/presentation/ui/roles/provider/roles_provider.dart';
 import '../../layers/presentation/ui/roles/repository/roles_repository.dart';
 import '../../layers/presentation/ui/users/provider/users_provider.dart';
 import '../../layers/presentation/ui/users/repository/users_repository.dart';
+import '../io/network/urls.dart';
 import '../janus/janus_client.dart';
 import '../util/conf.dart';
 
@@ -82,7 +83,7 @@ Future<void> initializeGetIt() async {
           DioException e,
           handler,
         ) async {
-          if (e.response?.statusCode == 401) {
+          if (e.response?.statusCode == 401 && e.requestOptions.path!= Urls.engagement) {
             print("Token expired. Logging out...");
             await getIt.get<LocalStorage>().clearUser();
             // getIt.get<ChatCubit>().chatUseCases.leaveRoom();

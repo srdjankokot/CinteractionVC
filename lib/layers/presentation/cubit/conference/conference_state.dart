@@ -16,6 +16,7 @@ class ConferenceState extends Equatable {
   final bool isEnded;
   final bool isCallStarted;
   final Map<dynamic, StreamRenderer>? streamRenderers;
+  final Map<dynamic, StreamRenderer>? streamScreenShares;
   final Map<dynamic, StreamRenderer>? streamSubscribers;
   final List<ChatMessage>? messages;
   final bool audioMuted;
@@ -32,16 +33,19 @@ class ConferenceState extends Equatable {
   final int? meetId;
   final int? chatId;
   final int numberOfStreamsCopy;
+  final int screenShareId;
   final bool isGridLayout;
   final String? error;
   final String? toastMessage;
   final RecordingStatus recording;
 
   const ConferenceState(
+
       {required this.isInitial,
       required this.isEnded,
       required this.isCallStarted,
       this.streamRenderers,
+      this.streamScreenShares,
       this.streamSubscribers,
       this.messages,
       required this.audioMuted,
@@ -57,7 +61,8 @@ class ConferenceState extends Equatable {
       this.unreadMessages,
       this.meetId,
       this.chatId,
-      required this.numberOfStreamsCopy,
+        required  this.screenShareId,
+        required this.numberOfStreamsCopy,
       required this.isGridLayout,
       this.error,
       this.toastMessage,
@@ -68,6 +73,7 @@ class ConferenceState extends Equatable {
       bool isEnded = false,
       bool isCallStarted = false,
       Map<dynamic, StreamRenderer>? streamRenderers,
+      Map<dynamic, StreamRenderer>? streamScreenShares,
       bool audioMuted = false,
       bool videoMuted = false,
       bool handUp = false,
@@ -79,6 +85,7 @@ class ConferenceState extends Equatable {
       int? isGridLayout,
       int? avgEngagement = 0,
       int? unreadMessages = 0,
+      int screenShareId = -1,
       RecordingStatus recording = RecordingStatus.notRecording})
       : this(
             isInitial: isInitial,
@@ -95,13 +102,16 @@ class ConferenceState extends Equatable {
             showingChat: showingChat,
             showingMicIsOff: false,
             showingParticipants: showingParticipants,
-            recording: recording);
+            recording: recording,
+        screenShareId: screenShareId
+  );
 
   const ConferenceState.ended(
       {bool isInitial = false,
       bool isEnded = true,
       bool isCallStarted = false,
       Map<dynamic, StreamRenderer>? streamRenderers,
+      Map<dynamic, StreamRenderer>? streamScreenShares,
       bool audioMuted = false,
       bool videoMuted = false,
       bool handUp = false,
@@ -124,13 +134,15 @@ class ConferenceState extends Equatable {
             showingChat: showingChat,
             showingMicIsOff: false,
             showingParticipants: showingParticipants,
-            recording: recording);
+            recording: recording,
+            screenShareId: -1);
 
   const ConferenceState.error(
       {bool isInitial = false,
       bool isEnded = true,
       bool isCallStarted = false,
       Map<dynamic, StreamRenderer>? streamRenderers,
+      Map<dynamic, StreamRenderer>? streamScreenShares,
       bool audioMuted = false,
       bool videoMuted = false,
       bool handUp = false,
@@ -155,13 +167,15 @@ class ConferenceState extends Equatable {
             error: error,
             showingChat: showingChat,
             showingParticipants: showingParticipants,
-            recording: recording);
+            recording: recording,
+      screenShareId: -1);
 
   ConferenceState copyWith({
     bool? isInitial,
     bool? isEnded,
     bool? isCallStarted,
     Map<dynamic, StreamRenderer>? streamRenderers,
+    Map<dynamic, StreamRenderer>? streamScreenShares,
     Map<dynamic, StreamRenderer>? streamSubscribers,
     List<ChatMessage>? messages,
     int? numberOfStreams,
@@ -181,12 +195,14 @@ class ConferenceState extends Equatable {
     int? meetId,
     int? chatId,
     String? toastMessage,
+    int? screenShareId,
   }) {
     return ConferenceState(
         isInitial: isInitial ?? this.isInitial,
         isEnded: isEnded ?? this.isEnded,
         isCallStarted: isCallStarted ?? this.isCallStarted,
         streamRenderers: streamRenderers ?? this.streamRenderers,
+        streamScreenShares: streamScreenShares ?? this.streamScreenShares,
         streamSubscribers: streamSubscribers ?? this.streamSubscribers,
         numberOfStreams: numberOfStreams ?? this.numberOfStreams,
         audioMuted: audioMuted ?? this.audioMuted,
@@ -205,6 +221,8 @@ class ConferenceState extends Equatable {
         chatId: chatId ?? this.chatId,
         recording: recording ?? this.recording,
         showingMicIsOff: showingMicIsOff ?? this.showingMicIsOff,
+        screenShareId: screenShareId ?? this.screenShareId,
+
         toastMessage: toastMessage);
   }
 
@@ -214,6 +232,7 @@ class ConferenceState extends Equatable {
         isEnded,
         isCallStarted,
         streamRenderers,
+        streamScreenShares,
         streamSubscribers,
         numberOfStreams,
         audioMuted,
@@ -232,6 +251,7 @@ class ConferenceState extends Equatable {
         recording,
         toastMessage,
         handUp,
-        showingMicIsOff
+        showingMicIsOff,
+    screenShareId
       ];
 }
