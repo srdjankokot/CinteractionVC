@@ -1,3 +1,8 @@
+import 'dart:async';
+import 'dart:typed_data';
+
+import 'package:cinteraction_vc/core/util/platform/platform_stub.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter_webrtc/flutter_webrtc.dart';
 
 import '../../layers/data/dto/chat/chat_detail_dto.dart';
@@ -11,6 +16,7 @@ class StreamRenderer {
   String? publisherId;
   String publisherName;
   int? engagement;
+  int? drowsiness;
   String? audioMid;
   String? videoMid;
   bool? initialSet;
@@ -19,11 +25,32 @@ class StreamRenderer {
   String? imageUrl;
   // List<bool> selectedQuality = [false, false, true];
   bool? isVideoMuted;
-  bool? isVideoFlowing;
+  bool? isSharing;
+
   bool? mirrorVideo = false;
   ConfigureStreamQuality subStreamQuality = ConfigureStreamQuality.HIGH;
   // bool? isTalking;
+  Uint8List? lastFrameBytes;
 
+  bool savingFrames = false;
+  Timer? fallbackTimer;
+
+  // bool? isVideoFlowing;
+  bool bitrateIsOk = true;
+  bool? _isVideoFlowing;
+
+  bool? get isVideoFlowing => _isVideoFlowing!;
+  set setVideoFlowing(bool? value) {
+    // fallbackTimer?.cancel();
+    // showLastFrame = false;
+    // if (!value! && !isVideoMuted!) {
+    //   showLastFrame = true;
+    //   fallbackTimer = Timer(const Duration(seconds: 5), () {
+    //     showLastFrame = false;
+    //   });
+    // }
+    _isVideoFlowing = value;
+  }
 
   UserImageDto getUserImageDTO()
   {
@@ -33,26 +60,19 @@ class StreamRenderer {
         imageUrl: imageUrl ?? ""
     );
   }
-  
-  
-  Future<void> dispose() async {
-    if(!isRendererDisposed(videoRenderer))
-      {
-        await stopAllTracks(mediaStream);
-        videoRenderer.srcObject = null;
-        await videoRenderer.dispose();
-      }
-  }
 
-  Future<void> disposeVideo() async {
+
+  Future<void> dispose({bool disposeTrack = true}) async {
+
     if(!isRendererDisposed(videoRenderer))
     {
-      await stopVideoTracks(mediaStream);
+      if(disposeTrack) await stopAllTracks(mediaStream);
+      await mediaStream?.dispose();
       videoRenderer.srcObject = null;
       await videoRenderer.dispose();
+      savingFrames = false;
     }
   }
-
 
   bool? _isTalking;
   bool? get isTalking => _isTalking;
@@ -60,13 +80,10 @@ class StreamRenderer {
 
   set isTalking(bool? value) {
     if (value == true && _isTalking != true) {
-      // it just switched to true — record time
       talkingStartTime = DateTime.now();
-      // print("Talking started at: $talkingStartTime");
     }
     _isTalking = value;
   }
-
 
 
 
@@ -76,7 +93,7 @@ class StreamRenderer {
 
   StreamRenderer(this.id, this.publisherName);
 
-  Future<void> init() async {
+  Future<void> init({bool saveFrames = false}) async {
 
     print("init streamRenderer $id");
 
@@ -84,13 +101,42 @@ class StreamRenderer {
     mediaStream = await createLocalMediaStream('mediaStream_$id');
     isAudioMuted = false;
     isVideoMuted = false;
+    isSharing = false;
     initialSet = false;
-    isVideoFlowing = true;
+    setVideoFlowing = true;
     isTalking = false;
     isHandUp = false;
     videoRenderer = RTCVideoRenderer();
     await videoRenderer.initialize();
     videoRenderer.srcObject = mediaStream;
+    // saveLastFrame();
+    savingFrames = saveFrames;
+    if(savingFrames) saveLastFrame();
+  }
+
+  void saveLastFrame() async
+  {
+    // print("save the last FRAME ${publisherName}");
+    // print(" ${savingFrames} ${isVideoFlowing!}");
+    if(savingFrames)
+    {
+      if(isVideoFlowing!)
+      {
+        try {
+          var buffer = await captureFrameFromVideo(this);
+          lastFrameBytes = Uint8List.view(buffer!);
+          // print("${publisherName}, lastFrameBytes: ${lastFrameBytes?.lengthInBytes}");
+        } catch (e) {
+          print("Failed to capture frame: $e");
+        }
+      }
+
+      // if(videoRenderer.srcObject != null){
+      await Future.delayed(const Duration(seconds: 1));
+      saveLastFrame();
+      // }
+    }
+
   }
 }
 

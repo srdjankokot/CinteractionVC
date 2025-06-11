@@ -29,6 +29,7 @@ class ConferenceCubit extends Cubit<ConferenceState> with BlocLoggy {
   final ConferenceUseCases conferenceUseCases;
 
   StreamSubscription<Map<dynamic, StreamRenderer>>? _conferenceSubscription;
+  StreamSubscription<Map<dynamic, StreamRenderer>>? _conferenceScreenShareSubscription;
   StreamSubscription<String>? _conferenceEndedStream;
   StreamSubscription<List<ChatMessage>>? _conferenceMessageStream;
   StreamSubscription<Map<dynamic, StreamRenderer>>? _subscribersStream;
@@ -41,6 +42,8 @@ class ConferenceCubit extends Cubit<ConferenceState> with BlocLoggy {
         displayName: displayName, roomId: roomId);
     _conferenceSubscription =
         conferenceUseCases.getRendererStream().listen(_onConference);
+    _conferenceScreenShareSubscription = conferenceUseCases.getScreenShareStream().listen(_onConferenceScreenShare);
+
     _conferenceEndedStream =
         conferenceUseCases.getEndStream().listen(_onConferenceEnded);
     _subscribersStream =
@@ -106,6 +109,15 @@ class ConferenceCubit extends Cubit<ConferenceState> with BlocLoggy {
 
   // bool audioMuted = false;
   // final Map<dynamic, StreamRenderer> streamRenderers = {};
+  Future<void> setShareScreenId(int userId) async {
+
+    if(state.screenShareId == userId * 1000 + 999)
+      {
+        emit(state.copyWith(screenShareId: 0));
+          return;
+      }
+    emit(state.copyWith(screenShareId: userId * 1000 + 999));
+  }
 
   Future<void> audioMute() async {
     var mute = state.audioMuted;
@@ -140,6 +152,24 @@ class ConferenceCubit extends Cubit<ConferenceState> with BlocLoggy {
     // loggy.info('list of streams: ${streams.length}');
     // Map<dynamic, StreamRenderer> s = streams;
     emit(state.copyWith(isInitial: false, streamRenderers: streams));
+    conferenceUseCases.getParticipants();
+  }
+
+  void _onConferenceScreenShare(Map<dynamic, StreamRenderer> screenShareStreams) {
+    // loggy.info('list of streams: ${streams.length}');
+    // Map<dynamic, StreamRenderer> s = streams;
+
+    var lastShare = screenShareStreams.values.lastOrNull;
+    emit(state.copyWith(isInitial: false, streamScreenShares: screenShareStreams));
+    if(lastShare != null && state.screenShareId == -1)
+    {
+      emit(state.copyWith(screenShareId: int.parse(lastShare.id)));
+    }
+
+    if(screenShareStreams.isEmpty)
+    {
+      emit(state.copyWith( screenShareId: -1));
+    }
     conferenceUseCases.getParticipants();
   }
 

@@ -69,7 +69,7 @@ class ConferenceRepoImpl extends ConferenceRepo {
 
   final _conferenceStream =
       StreamController<Map<dynamic, StreamRenderer>>.broadcast();
-
+  final _conferenceScreenShareStream = StreamController<Map<dynamic, StreamRenderer>>.broadcast();
   // final _contributorsStream = StreamController<Map<dynamic, StreamRenderer>>.broadcast();
 
   final _conferenceEndedStream = StreamController<String>.broadcast();
@@ -86,7 +86,7 @@ class ConferenceRepoImpl extends ConferenceRepo {
   late String myId = user?.id ?? "";
   late String displayName = user?.name ?? 'User $myId';
 
-  get screenShareId => int.parse(myId) * 774352;
+  get screenShareId => int.parse(myId) * 1000 + 999;
 
   int? callId;
 
@@ -143,7 +143,7 @@ class ConferenceRepoImpl extends ConferenceRepo {
   _initLocalMediaRenderer() {
     print('initLocalMediaRenderer');
     localScreenSharingRenderer =
-        StreamRenderer('localScreenShare', 'local_screenshare');
+        StreamRenderer(screenShareId.toString(), 'local_screenshare');
     localVideoRenderer = StreamRenderer('local', 'local');
     localVideoRenderer.imageUrl = user?.imageUrl;
   }
@@ -631,7 +631,7 @@ class ConferenceRepoImpl extends ConferenceRepo {
           if(renderer == null) return;
           if (isVideo) {
             print("try to set video flowing");
-            renderer.isVideoFlowing = event.flowing;
+            renderer.setVideoFlowing = event.flowing;
 
             _checkVideoStreams();
             _refreshStreams();
@@ -687,7 +687,7 @@ class ConferenceRepoImpl extends ConferenceRepo {
 
             renderer.audioMid = event.mid;
           } else if (isVideo) {
-            renderer.isVideoFlowing = event.flowing;
+            renderer.setVideoFlowing = event.flowing;
             // Remove existing video tracks
             renderer.mediaStream?.getVideoTracks().forEach((track) {
               renderer?.mediaStream?.removeTrack(track);
@@ -1085,14 +1085,16 @@ class ConferenceRepoImpl extends ConferenceRepo {
     // setState(() {
     screenSharing = false;
     // });
-    await screenPlugin?.unpublish();
+        await screenPlugin?.unpublish();
     StreamRenderer? rendererRemoved;
     // setState(() {
-    rendererRemoved =
-        videoState.streamsToBeRendered.remove(localScreenSharingRenderer.id);
+
+    rendererRemoved = videoState.streamsToBeRendered.remove(localScreenSharingRenderer.id);
     // });
     await rendererRemoved?.dispose();
+    await localScreenSharingRenderer.mediaStream?.dispose();
     await screenPlugin?.hangup();
+    // await screenPlugin?.dispose();
     screenPlugin = null;
     _refreshStreams();
   }
@@ -1341,22 +1343,42 @@ class ConferenceRepoImpl extends ConferenceRepo {
   }
 
   _refreshStreams() {
-    // print("_refreshStreams");
-    // _checkVideoStreams();
     var screenshareKeys = videoState.streamsToBeRendered.keys
         .where((key) =>
-            key.contains('_screenshare') || key.contains('ScreenShare'))
+    isScreenShare(key.toString()))
         .toList();
 
     Iterable<String> currentTalkers = currentTalkerIds.cast<String>();
     Iterable<String> screenshare = screenshareKeys.cast<String>();
 
-    final List<String> list = ["local", ...currentTalkers, ...screenshare];
 
-    // print("_refreshStreams: $list" );
+    final List<String> list = ["local", ...currentTalkers];
+    final List<String> screenshareList = [ ...screenshare];
+
+
+    videoState.streamsToBeRendered.forEach((key, value) {
+      if(key == 'local') {
+        value.isSharing = screenshareList.contains(screenShareId.toString());
+        return;
+      }
+
+      if(!isScreenShare(key))
+      {
+        var checkKey = int.parse(value.publisherId!) * 1000 + 999;
+        value.isSharing = screenshareList.contains(checkKey.toString());
+      }
+    },);
 
     _conferenceStream.add(Map.fromEntries(
       list
+          .where((key){
+            return videoState.streamsToBeRendered.containsKey(key) && !isScreenShare(key);
+      })
+          .map((key) => MapEntry(key, videoState.streamsToBeRendered[key]!)),
+    ));
+
+    _conferenceScreenShareStream.add(Map.fromEntries(
+      screenshareList
           .where((key) => videoState.streamsToBeRendered.containsKey(key))
           .map((key) => MapEntry(key, videoState.streamsToBeRendered[key]!)),
     ));
@@ -1803,5 +1825,22 @@ class ConferenceRepoImpl extends ConferenceRepo {
   @override
   Stream<void> getUserTalkingStream() {
     return _userIsTalkingStream.stream;
+  }
+
+  @override
+  Stream<Map<dynamic, StreamRenderer>> getConferenceScreenShareStream() {
+    return _conferenceScreenShareStream.stream;
+  }
+
+  bool isScreenShare(String id) {
+
+    var key = int.tryParse(id);
+    if(key == null) return false;
+
+    return key % 1000 == 999;
+  }
+
+  int getUserIdFromScreenShareId(int screenShareId) {
+    return screenShareId ~/ 1000;
   }
 }
