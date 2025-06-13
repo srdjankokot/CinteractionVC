@@ -48,11 +48,12 @@ abstract class Api {
   Future<ApiResponse<List<Meeting>?>> getScheduledMeetings();
   Future<ApiResponse<MeetingDto?>> getNextMeeting();
 
-  Future<ApiResponse<String?>> scheduleMeeting(
+  Future<ApiResponse<Meeting?>> scheduleMeeting(
       {required String name,
       required String description,
       required String tag,
-      required DateTime date});
+      required DateTime date,
+      required List<String> emails});
 
   Future<ApiResponse<bool?>> sendMessage(
       {required String userId,
@@ -68,11 +69,13 @@ abstract class Api {
   Future<ApiResponse<bool>> sentChatMessage(
       {required text, required from, required to});
 
-  Future<ApiResponse<UserListResponse>> getCompanyUsers(int page, int paginate);
+  Future<ApiResponse<UserListResponse>> getCompanyUsers(
+      int page, int paginate, String? search);
 
   Future<ApiResponse<ChatPagination>> getAllChats(
-      {required int page, required int paginate});
-  Future<ApiResponse<List<ChatDto>>> deleteChat({required int id});
+      {required int page, required int paginate, String? search});
+  Future<ApiResponse<List<ChatDto>>> deleteChat(
+      {required int chatId, required int userId});
   Future<ApiResponse<ChatDetailsDto>> getChatById(
       {required int id, required int page});
   Future<ApiResponse<ChatDetailsDto>> getChat();

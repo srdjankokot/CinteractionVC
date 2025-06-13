@@ -5,7 +5,7 @@ class LoadUsers {
 
   final ChatRepo repo;
 
-  call(int page, int paginate) {
-    repo.loadUsers(page, paginate);
+  call(int page, int paginate, String? search) {
+    repo.loadUsers(page, paginate, search);
   }
 }

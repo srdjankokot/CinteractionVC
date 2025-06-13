@@ -5,7 +5,7 @@ class DeleteChat {
 
   final ChatRepo repo;
 
-  call(int id) {
-    repo.deleteChat(id);
+  call(int chatId, int userId) {
+    repo.deleteChat(chatId, userId);
   }
 }

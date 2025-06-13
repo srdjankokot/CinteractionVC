@@ -49,8 +49,13 @@ class ChatCubit extends Cubit<ChatState> with BlocLoggy {
       }
 
       chatUseCases.getParticipantsStream().listen(_onParticipants);
-      chatUseCases.getUsersStream().listen(_onUsers);
-      chatUseCases.getChatsStream().listen(_onChats);
+      chatUseCases.getUsersStream().listen((event) {
+        _onUsers(event.users, isSearch: event.isSearch);
+      });
+      chatUseCases.getChatsStream().listen((event) {
+        _onChats(event.chats, isSearch: event.isSearch);
+      });
+
       chatUseCases.getMessageStream().listen(_onMessages);
       chatUseCases.getChatDetailsStream().listen(_onChatDetails);
       chatUseCases.getPaginationStream().listen(_onPagination);
@@ -111,11 +116,20 @@ class ChatCubit extends Cubit<ChatState> with BlocLoggy {
         numberOfParticipants: Random().nextInt(10000)));
   }
 
-  void _onUsers(List<UserDto> newUsers) {
-    List<UserDto> updatedUsers = List.from(state.users ?? []);
+  void _onUsers(List<UserDto> newUsers, {bool isSearch = false}) {
+    if (isSearch) {
+      emit(state.copyWith(
+        isInitial: false,
+        users: newUsers,
+        numberOfParticipants: Random().nextInt(10000),
+      ));
+      return;
+    }
+
+    final updatedUsers = List<UserDto>.from(state.users ?? []);
 
     for (var user in newUsers) {
-      int existingIndex = updatedUsers.indexWhere((u) => u.id == user.id);
+      final existingIndex = updatedUsers.indexWhere((u) => u.id == user.id);
 
       if (existingIndex != -1) {
         updatedUsers[existingIndex] = updatedUsers[existingIndex].copyWith(
@@ -135,34 +149,45 @@ class ChatCubit extends Cubit<ChatState> with BlocLoggy {
     ));
   }
 
-  void _onChats(List<ChatDto> newChats) {
-    List<ChatDto> updatedChats = List.from(state.chats ?? []);
+  void _onChats(List<ChatDto> newChats, {bool isSearch = false}) {
+    List<ChatDto> updatedChats;
 
-    for (var chat in newChats) {
-      int existingIndex = updatedChats.indexWhere((c) => c.id == chat.id);
+    if (isSearch) {
+      updatedChats = newChats;
+    } else {
+      updatedChats = List.from(state.chats ?? []);
+      for (var chat in newChats) {
+        int existingIndex = updatedChats.indexWhere((c) => c.id == chat.id);
 
-      if (existingIndex != -1) {
-        updatedChats[existingIndex] = updatedChats[existingIndex].copyWith(
+        if (existingIndex != -1) {
+          updatedChats[existingIndex] = updatedChats[existingIndex].copyWith(
             lastMessage: chat.lastMessage,
             isOnline: chat.isOnline,
             haveUnread: chat.haveUnread,
-            userStatus: chat.userStatus);
-      } else {
-        updatedChats.add(chat);
+            userStatus: chat.userStatus,
+          );
+        } else {
+          updatedChats.add(chat);
+        }
       }
+    }
 
-      if (state.currentChat?.id == chat.id) {
-        emit(state.copyWith(
-          currentChat: state.currentChat!
-              .copyWith(isOnline: chat.isOnline, userStatus: chat.userStatus),
-        ));
-      }
-
+    final current = state.currentChat;
+    if (current != null) {
+      final updated =
+          newChats.firstWhere((c) => c.id == current.id, orElse: () => current);
       emit(state.copyWith(
-        isLoading: false,
-        chats: updatedChats,
+        currentChat: current.copyWith(
+          isOnline: updated.isOnline,
+          userStatus: updated.userStatus,
+        ),
       ));
     }
+
+    emit(state.copyWith(
+      isLoading: false,
+      chats: updatedChats,
+    ));
   }
 
   void _onChatDetails(ChatDetailsDto chatDetails) async {
@@ -247,30 +272,34 @@ class ChatCubit extends Cubit<ChatState> with BlocLoggy {
     chatUseCases.downloadMedia(id, fileName);
   }
 
-  Future<void> loadChats(int page, int paginate) async {
+  Future<void> loadChats(int page, int paginate, [String? search]) async {
     try {
-      final chats = await chatUseCases.loadChats(page, paginate);
-      // emit(state.copyWith(chats: chats));
+      final chats = await chatUseCases.loadChats(page, paginate, search);
+
+      print('chatsSearch: $chats');
+      emit(state.copyWith(chats: chats));
     } catch (e) {
       print("Error loading chats: $e");
     }
   }
 
-  Future<void> loadUsers(int page, int paginate) async {
+  Future<void> loadUsers(int page, int paginate, [String? search]) async {
     try {
-      final users = await chatUseCases.loadUsers(page, paginate);
+      final users = await chatUseCases.loadUsers(page, paginate, search);
+      print('users: $users');
+      // _onUsers(users);
     } catch (e) {
       print('Error loading users: $e');
     }
   }
 
-  Future<void> deleteChat(int id) async {
+  Future<void> deleteChat(int chatId, int userId) async {
     try {
       //Updated becasue of pagination on scroll//
       List<ChatDto> updatedChats = List.from(state.chats ?? []);
-      updatedChats.removeWhere((chat) => chat.id == id);
+      updatedChats.removeWhere((chat) => chat.id == chatId);
       emit(state.copyWith(chats: updatedChats));
-      await chatUseCases.deleteChat(id);
+      await chatUseCases.deleteChat(chatId, userId);
     } catch (e) {
       print("❌ Error delete chat: $e");
     }
@@ -369,6 +398,7 @@ class ChatCubit extends Cubit<ChatState> with BlocLoggy {
   Future<void> sendChatMessage(
       {required String messageContent,
       List<PlatformFile>? uploadedFiles}) async {
+    print('ChatId: ${state.chatDetails?.chatId}');
     var participiansList = !isInCallChat
         ? state.chatDetails!.chatParticipants.map((data) => data.id).toList()
         : state.participants!.map((data) => data.id).toList();

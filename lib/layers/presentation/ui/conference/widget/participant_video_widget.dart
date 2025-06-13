@@ -88,53 +88,6 @@ class ParticipantVideoWidget extends StatelessWidget {
                   if ((remoteStream.isVideoMuted == true) && !screenShare)
                     userAvatar,
 
-                  if (remoteStream.bitrateIsOk == false &&
-                      remoteStream.isVideoMuted == false &&
-                      remoteStream.lastFrameBytes != null)
-                    ClipRRect(
-                        borderRadius: BorderRadius.circular(16),
-                        child: Stack(
-                          children: [
-                            Container(
-                                height: double.maxFinite,
-                                width: double.maxFinite,
-                                decoration: BoxDecoration(
-                                  borderRadius: BorderRadius.circular(16),
-                                  border: Border.all(
-                                    color: remoteStream.isTalking == true
-                                        ? Colors.white
-                                        : Colors.transparent,
-                                    width: remoteStream.isTalking == true
-                                        ? 2.0
-                                        : 0.0,
-                                  ),
-                                ),
-                                child: (!screenShare)
-                                    ? Transform(
-                                        alignment: Alignment.center,
-                                        transform: Matrix4.identity()
-                                          ..scale(-1.0, 1.0, 1.0),
-                                        // Mirror horizontally
-                                        child: Image.memory(
-                                          remoteStream.lastFrameBytes!,
-                                          fit: isPortrait
-                                              ? BoxFit.contain
-                                              : BoxFit.cover,
-                                        ),
-                                      )
-                                    : Image.memory(
-                                        remoteStream.lastFrameBytes!,
-                                        fit: BoxFit.contain,
-                                      )),
-                            Positioned(
-                              child: Container(
-                                width: 20,
-                                height: 20,
-                                color: Colors.green,
-                              ),
-                            )
-                          ],
-                        ))
                 ]),
               ),
               // Text('${remoteStream.videoRenderer.videoWidth}:${remoteStream.videoRenderer.videoHeight}'),
@@ -144,7 +97,7 @@ class ParticipantVideoWidget extends StatelessWidget {
                   child: Row(
                     children: [
                       Visibility(
-                          visible: width > 200 && showEngagement!,
+                          visible: width > 200 && showEngagement! && (remoteStream.engagement ?? 0) > 0,
                           child: Column(
                             spacing: 5,
                             children: [

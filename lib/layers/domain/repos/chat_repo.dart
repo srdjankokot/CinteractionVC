@@ -2,6 +2,8 @@ import 'dart:io';
 import 'dart:typed_data';
 
 import 'package:cinteraction_vc/layers/data/dto/chat/chat_detail_dto.dart';
+import 'package:cinteraction_vc/layers/data/dto/chat/chat_event.dart';
+import 'package:cinteraction_vc/layers/data/dto/chat/user_event.dart';
 import 'package:cinteraction_vc/layers/data/dto/user_dto.dart';
 import 'package:cinteraction_vc/layers/domain/usecases/chat/get_chat_details.dart';
 import 'package:cinteraction_vc/layers/domain/usecases/chat/send_message.dart';
@@ -20,8 +22,8 @@ abstract class ChatRepo {
   Future<void> initialize({required int chatGroupId, required bool isInCall});
   Future<void> sendMessage(String msg, List<String> participantIds);
   Stream<List<Participant>> getParticipantsStream();
-  Stream<List<UserDto>> getUsersStream();
-  Stream<List<ChatDto>> getChatsStream();
+  Stream<UserEvent> getUsersStream();
+  Stream<ChatEvent> getChatsStream();
   Stream<List<MessageDto>> getMessageStream();
   Stream<ChatDetailsDto> getChatDetailsStream();
   Stream<ChatPagination> getPaginationStream();
@@ -31,14 +33,14 @@ abstract class ChatRepo {
       String? messageContent, int senderId, List<int> participantIds,
       {List<PlatformFile>? uploadedFiles});
   // Future<void> createGroup(String name, int senderId, List<int> participantIds,);
-  Future<void> loadChats(int page, int paginate);
-  Future<void> loadUsers(int page, int paginate);
+  Future<void> loadChats(int page, int paginate, String? search);
+  Future<void> loadUsers(int page, int paginate, String? search);
   Future<void> setCurrentParticipant(UserDto user);
   Future<void> setCurrentChat(ChatDto? chat);
   Future<void> setUserStatus(String status);
   Future<void> getChatDetails(int id, int page);
   Future<void> getChatDetailsByParticipiant(int id, int page);
-  Future<void> deleteChat(int id);
+  Future<void> deleteChat(int chatId, int userId);
   Future<void> deleteMessage(int id);
   Future<void> editMessage(int id, String message);
   Future<void> removeUserFromGroup(int chatId, int userId);

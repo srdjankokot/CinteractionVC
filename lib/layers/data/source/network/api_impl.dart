@@ -5,6 +5,7 @@ import 'package:cinteraction_vc/core/io/network/models/login_response.dart';
 import 'package:cinteraction_vc/layers/data/dto/api_error_dto.dart';
 import 'package:cinteraction_vc/layers/data/dto/chat/chat_detail_dto.dart';
 import 'package:cinteraction_vc/layers/data/dto/user_dto.dart';
+import 'package:cinteraction_vc/layers/domain/entities/meetings/meeting.dart';
 import 'package:cinteraction_vc/layers/domain/entities/user.dart';
 import 'package:cinteraction_vc/layers/domain/source/api.dart';
 import 'package:cinteraction_vc/layers/presentation/ui/profile/ui/widget/user_image.dart';
@@ -61,13 +62,29 @@ class ApiImpl extends Api {
 
   @override
   Future<ApiResponse<UserListResponse>> getCompanyUsers(
-      int page, int paginate) async {
+    int page,
+    int paginate,
+    String? search,
+  ) async {
     try {
       Dio dio = await getIt.getAsync<Dio>();
-      Response response = await dio
-          .get('${Urls.getCompanyUsers}?page=$page&paginate=$paginate');
+
+      final queryParams = <String, dynamic>{
+        if (search == null || search.isEmpty) ...{
+          'page': page.toString(),
+          'paginate': paginate.toString(),
+        },
+        if (search != null && search.isNotEmpty) 'search': search,
+      };
+
+      Response response = await dio.get(
+        Urls.getCompanyUsers,
+        queryParameters: queryParams,
+      );
 
       var userListResponse = UserListResponse.fromJson(response.data);
+
+      print('usersListResponse: ${userListResponse.users}');
 
       return ApiResponse(response: userListResponse);
     } on DioException catch (e) {
@@ -105,8 +122,7 @@ class ApiImpl extends Api {
     try {
       dio.options.headers['Authorization'] = Urls.IVIAccessToken;
       var response = await dio.post(Urls.engagement, data: formData);
-      return double.parse(
-          response.data['engagements'][0]['engagement_rank'].toString());
+      return double.parse(response.data['engagements'][0]['engagement_rank'].toString());
       return -1;
     } on DioException catch (e, s) {
       print(e);
@@ -238,13 +254,20 @@ class ApiImpl extends Api {
     try {
       Response response = await dio.get(Urls.nextScheduledMeetings);
       MeetingDto? nextMeeting;
-      for (var meet in response.data['data']) {
-        var meeting = MeetingDto.fromJson(meet as Map<String, dynamic>);
-        if (DateTime.now().difference(meeting.meetingStart).abs() <
-            const Duration(hours: 24)) {
-          nextMeeting = meeting;
-          break;
-        }
+      final now = DateTime.now();
+
+      final allMeetings = (response.data['data'] as List)
+          .map((meet) => MeetingDto.fromJson(meet as Map<String, dynamic>))
+          .toList();
+
+      final futureMeetings = allMeetings
+          .where((meeting) => meeting.meetingEnd!.isAfter(now))
+          .toList();
+
+      futureMeetings.sort((a, b) => a.meetingStart.compareTo(b.meetingStart));
+
+      if (futureMeetings.isNotEmpty) {
+        nextMeeting = futureMeetings.first;
       }
 
       return ApiResponse(response: nextMeeting);
@@ -275,19 +298,21 @@ class ApiImpl extends Api {
   }
 
   @override
-  Future<ApiResponse<String?>> scheduleMeeting(
+  Future<ApiResponse<Meeting?>> scheduleMeeting(
       {required String name,
       required String description,
       required String tag,
-      required DateTime date}) async {
+      required DateTime date,
+      required List<String> emails}) async {
     Dio dio = await getIt.getAsync<Dio>();
 
     var formData = {
-      'name': name,
-      'description': description,
-      'tag': tag,
+      'event_name': name,
+      'event_description': description,
+      // 'tag': tag,
       'startDateTime': DateFormat('yyyy-MM-dd HH:mm').format(date),
-      'timezone': 'Europe/Belgrade'
+      'timezone': 'Europe/Belgrade',
+      'participants_emails': emails
     };
 
     print(DateFormat('yyyy-MM-dd HH:mm').format(date));
@@ -295,7 +320,7 @@ class ApiImpl extends Api {
     try {
       Response response = await dio.post(Urls.scheduleMeeting, data: formData);
       print(response);
-      return ApiResponse(response: response.data['link']);
+      return ApiResponse(response: Meeting.fromJson(response.data));
     } on DioException catch (e, s) {
       print(e.response?.statusMessage);
       return ApiResponse(error: ApiErrorDto.fromDioException(e));
@@ -416,12 +441,24 @@ class ApiImpl extends Api {
   Future<ApiResponse<ChatPagination>> getAllChats({
     required int page,
     required int paginate,
+    String? search,
   }) async {
     try {
       Dio dio = await getIt.getAsync<Dio>();
-      Response response =
-          await dio.get('${Urls.getAllChats}?page=$page&paginate=$paginate');
+      print('SEARCH $search');
+      final queryParams = <String, dynamic>{
+        if (search == null || search.isEmpty) ...{
+          'page': page.toString(),
+          'paginate': paginate.toString(),
+        },
+        if (search != null && search.isNotEmpty) 'search': search,
+      };
 
+      Response response = await dio.get(
+        Urls.getAllChats,
+        queryParameters: queryParams,
+      );
+      print('response: ${response.data}');
       ChatPagination chatPagination =
           ChatPagination.fromJson(response.data as Map<String, dynamic>);
 
@@ -432,16 +469,23 @@ class ApiImpl extends Api {
   }
 
   @override
-  Future<ApiResponse<List<ChatDto>>> deleteChat({required int id}) async {
+  Future<ApiResponse<List<ChatDto>>> deleteChat({
+    required int chatId,
+    required int userId,
+  }) async {
     try {
       Dio dio = await getIt.getAsync<Dio>();
-      Response response = await dio.delete('${Urls.deleteChat}$id');
+
+      Response response = await dio.post(
+        '${Urls.deleteChat}$chatId/$userId',
+      );
 
       List<ChatDto> chats = [];
       for (var chat in response.data['data']) {
         var chatDto = ChatDto.fromJson(chat as Map<String, dynamic>);
         chats.add(chatDto);
       }
+
       return ApiResponse(response: chats);
     } on DioException catch (e) {
       return ApiResponse(error: ApiErrorDto.fromDioException(e));

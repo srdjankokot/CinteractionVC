@@ -1,10 +1,5 @@
-import 'package:json_annotation/json_annotation.dart';
-
 import '../../../../layers/domain/entities/chat_message.dart';
 
-part 'participant.g.dart';
-
-@JsonSerializable()
 class Participant {
   Participant({
     required this.id,
@@ -12,32 +7,42 @@ class Participant {
     this.publisher = false,
     this.talking = false,
     List<String>? deviceId,
-  }) : deviceId = deviceId ?? [];
+    List<ChatMessage>? messages,
+  })  : deviceId = deviceId ?? [],
+        messages = messages ?? [];
 
-  @JsonKey(name: 'id')
   int id;
-
-  @JsonKey(name: 'display')
   String display;
-
-  @JsonKey(name: 'publisher')
   bool publisher;
-
-  @JsonKey(name: 'talking')
   bool talking;
 
-  @JsonKey(includeFromJson: false, includeToJson: false)
+  // Not serialized
   List<String> deviceId;
 
-  List<ChatMessage> messages = [];
+  // Not included in serialization; could be added if needed
+  List<ChatMessage> messages;
 
   bool haveUnreadMessages = false;
 
   bool get isOnline => deviceId.isNotEmpty;
 
-  @override
-  factory Participant.fromJson(Map<String, dynamic> json) =>
-      _$ParticipantFromJson(json);
+  factory Participant.fromJson(Map<String, dynamic> json) {
+    return Participant(
+      id: json['id'] as int,
+      display: json['display'] as String,
+      publisher: json['publisher'] as bool? ?? false,
+      talking: json['talking'] as bool? ?? false,
+      // deviceId is excluded from JSON, handled separately
+    );
+  }
 
-  Map<String, dynamic> toJson() => _$ParticipantToJson(this);
+  Map<String, dynamic> toJson() {
+    return {
+      'id': id,
+      'display': display,
+      'publisher': publisher,
+      'talking': talking,
+      // deviceId is excluded from JSON
+    };
+  }
 }
