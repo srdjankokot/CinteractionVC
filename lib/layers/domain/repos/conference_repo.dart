@@ -55,7 +55,7 @@ abstract class ConferenceRepo {
   Future<void> changeSubStream(
       {required ConfigureStreamQuality quality,
       required StreamRenderer remoteStream});
-  Future<void> shareScreen(MediaStream? mediaStream);
+  Future<void> shareScreen();
 
   Future<MeetingDto?> startCall();
 
@@ -65,4 +65,5 @@ abstract class ConferenceRepo {
   Future<bool> startRecording();
   Future<void> stopRecording();
   Stream<String> getToastStream();
+  Stream<void> getDisposeScreenSharingStream();
 }

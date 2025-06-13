@@ -97,7 +97,7 @@ class ParticipantVideoWidget extends StatelessWidget {
                   child: Row(
                     children: [
                       Visibility(
-                          visible: width > 200 && showEngagement!,
+                          visible: width > 200 && showEngagement! && (remoteStream.engagement ?? 0) > 0,
                           child: Column(
                             spacing: 5,
                             children: [

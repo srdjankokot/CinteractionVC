@@ -36,6 +36,7 @@ class ConferenceCubit extends Cubit<ConferenceState> with BlocLoggy {
   StreamSubscription<int>? _avgEngagementStream;
   StreamSubscription<String>? _toastMessageStream;
   StreamSubscription<void>? _userIsTalkingStream;
+  StreamSubscription<void>? _disposeScreenSharingStream;
 
   void _load() async {
     await conferenceUseCases.conferenceInitialize(
@@ -59,6 +60,7 @@ class ConferenceCubit extends Cubit<ConferenceState> with BlocLoggy {
     _toastMessageStream = conferenceUseCases.getToastMessageStream().listen(_onToastMessage);
 
     _userIsTalkingStream = conferenceUseCases.userTalkingStream().listen(_showMicIsOff);
+    _disposeScreenSharingStream = conferenceUseCases.getDisposeScreenShareStream().listen(_screenShareDisposed);
 
     var meet = await conferenceUseCases.startCall();
 
@@ -73,9 +75,14 @@ class ConferenceCubit extends Cubit<ConferenceState> with BlocLoggy {
   @override
   Future<void> close() {
     _conferenceSubscription?.cancel();
+    _conferenceScreenShareSubscription?.cancel();
     _conferenceEndedStream?.cancel();
+    _conferenceMessageStream?.cancel();
     _subscribersStream?.cancel();
+    _avgEngagementStream?.cancel();
     _toastMessageStream?.cancel();
+    _userIsTalkingStream?.cancel();
+    _disposeScreenSharingStream?.cancel();
     return super.close();
   }
 
@@ -238,12 +245,17 @@ class ConferenceCubit extends Cubit<ConferenceState> with BlocLoggy {
     conferenceUseCases.getParticipants();
   }
 
-  Future<void> shareScreen(MediaStream? mediaStream) async {
+  Future<void> shareScreen() async {
     var screenShared = state.screenShared;
 
-    conferenceUseCases.shareScreen(mediaStream);
+    conferenceUseCases.shareScreen();
 
     emit(state.copyWith(screenShared: !screenShared));
+  }
+
+  void _screenShareDisposed(void event)
+  {
+    emit(state.copyWith(screenShared: false));
   }
 
   Future<void> switchCamera() async {
