@@ -1,11 +1,10 @@
-import 'dart:math';
 import 'dart:ui';
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
 class ColorConstants {
-  static const kPrimaryColor = Color(0xFFbc101c);
+  static const kPrimaryColor = Color(0xFFF1471C);
   static const kSecondaryColor = Color(0xFF403736);
 
   static const kStateColors = [ kEngProgress30];
