@@ -123,9 +123,6 @@ class ConferenceCubit extends Cubit<ConferenceState> with BlocLoggy {
     emit(state.copyWith(screenShareId: userId * 1000 + 999));
   }
 
-  Future<void> setShareScreenId(int userId) async {
-    emit(state.copyWith(screenShareId: userId * 1000 + 999));
-  }
 
   Future<void> audioMute() async {
     var mute = state.audioMuted;

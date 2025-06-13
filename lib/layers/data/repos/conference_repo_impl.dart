@@ -244,7 +244,7 @@ class ConferenceRepoImpl extends ConferenceRepo {
 
   _eventMessagesHandler() async {
     videoPlugin?.messages?.listen((payload) async {
-      // print('eventMessagesHandlerTest: $payload');
+      print('eventMessagesHandlerTest: $payload');
 
       JanusEvent event = JanusEvent.fromJson(payload.event);
       List<dynamic>? publishers = event.plugindata?.data['publishers'];
@@ -872,8 +872,6 @@ class ConferenceRepoImpl extends ConferenceRepo {
       return;
     }
 
-    // feed.isVideoMuted = false;
-
     List<Map> subscribeStreams = [];
     subscribeStreams.add({
       'feed': id,
@@ -1050,11 +1048,21 @@ class ConferenceRepoImpl extends ConferenceRepo {
     });
     await localScreenSharingRenderer.init();
     localScreenSharingRenderer.publisherId = screenShareId.toString();
-    localScreenSharingRenderer.mediaStream =
-        await screenPlugin?.initializeMediaDevices(mediaConstraints: {
-      'video': {'width': 1920, 'height': 1080},
+
+
+
+
+
+
+    localScreenSharingRenderer.mediaStream = await screenPlugin?.initializeMediaDevices(mediaConstraints: {
+      'video': {
+        'frameRate': 30,
+        'width': 1920,
+        'height': 1080
+      },
       'audio': true
     }, useDisplayMediaDevices: true);
+
     localScreenSharingRenderer.videoRenderer.srcObject =
         localScreenSharingRenderer.mediaStream;
     localScreenSharingRenderer.publisherName = "Your Screenshare";
@@ -1290,7 +1298,7 @@ class ConferenceRepoImpl extends ConferenceRepo {
   }
 
   ///End Stream actions
-  var maxVisibleSlots = 5;
+  var maxVisibleSlots = 8;
   List<String> currentTalkerIds = [];
 
   void updateTalkerSlots(Map<dynamic, StreamRenderer> publisherMap,
@@ -1409,7 +1417,9 @@ class ConferenceRepoImpl extends ConferenceRepo {
       'audiolevel_event': true,
       'audio_active_packets': 25,
       'audio_level_average': 35,
-      'audio_level_threshold': 10
+      'audio_level_threshold': 10,
+      "audio_level_event": true,
+      "audio_level_ext": true,
     };
     var created = await videoPlugin?.createRoom(room, extras: extras);
     JanusEvent event = JanusEvent.fromJson(created);
@@ -1429,7 +1439,7 @@ class ConferenceRepoImpl extends ConferenceRepo {
       "isVideoMuted": localVideoRenderer.isVideoMuted,
       "isHandUp": localVideoRenderer.isHandUp,
       "imageUrl":
-          "https://www.shareicon.net/data/512x512/2016/07/26/802043_man_512x512.png"
+          localVideoRenderer.imageUrl
     };
 
     await videoPlugin?.joinPublisher(room,

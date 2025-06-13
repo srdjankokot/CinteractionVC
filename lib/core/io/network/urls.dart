@@ -1,6 +1,6 @@
 class Urls {
-  // static String baseUrl = 'https://vc.cinteraction.com';
-  static String baseUrl = 'https://huawei.nswebdevelopment.com';
+  static String baseUrl = 'https://vc.cinteraction.com';
+  // static String baseUrl = 'https://huawei.nswebdevelopment.com';
   // static String baseUrl = 'https://80d0-24-135-247-244.ngrok-free.app/api';
 
   static String loginEndpoint = '$baseUrl/api/login';
