@@ -35,7 +35,6 @@ import '../../layers/domain/usecases/meeting/meeting_use_cases.dart';
 import '../../layers/presentation/cubit/dashboard/dashboard_cubit.dart';
 import '../../layers/presentation/cubit/home/home_cubit.dart';
 import '../../layers/presentation/cubit/meetings/meetings_cubit.dart';
-import '../../layers/presentation/cubit/profile/profile_cubit.dart';
 import '../../layers/presentation/cubit/users/users_cubit.dart';
 import '../../layers/presentation/ui/groups/provider/groups_provider.dart';
 import '../../layers/presentation/ui/groups/repository/groups_repository.dart';
