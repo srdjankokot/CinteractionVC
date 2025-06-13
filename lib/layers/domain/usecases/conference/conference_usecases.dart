@@ -1,6 +1,7 @@
 import 'package:cinteraction_vc/layers/domain/usecases/conference/conference_end_stream.dart';
 import 'package:cinteraction_vc/layers/domain/usecases/conference/conference_share_screen.dart';
 import 'package:cinteraction_vc/layers/domain/usecases/conference/conference_subscribers_stream.dart';
+import 'package:cinteraction_vc/layers/domain/usecases/conference/dispose_screen_sharing_stream.dart';
 
 import '../../../../core/app/injector.dart';
 import '../../repos/conference_repo.dart';
@@ -59,6 +60,7 @@ class ConferenceUseCases {
         getToastMessageStream = ConferenceToastMessageStream(repo: repo),
         handUpU = ConferenceHandUp(repo: repo),
         getScreenShareStream = GetScreenShareStream(repo: repo),
+        getDisposeScreenShareStream = DisposeScreenSharingStream(repo: repo),
         userTalkingStream = GetUserTalkingStream(repo: repo);
 
   final ConferenceRepo repo;
@@ -91,4 +93,5 @@ class ConferenceUseCases {
   ConferenceHandUp handUpU;
   GetUserTalkingStream userTalkingStream;
   GetScreenShareStream getScreenShareStream;
+  DisposeScreenSharingStream getDisposeScreenShareStream;
 }

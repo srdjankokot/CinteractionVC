@@ -10,7 +10,7 @@ class ConferenceShareScreen {
 
   final ConferenceRepo repo;
 
-  call(MediaStream? mediaStream) {
-    repo.shareScreen(mediaStream);
+  call( ) {
+    repo.shareScreen();
   }
 }

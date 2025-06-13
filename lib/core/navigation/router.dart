@@ -12,9 +12,7 @@ import 'package:cinteraction_vc/layers/presentation/cubit/chat/chat_cubit.dart';
 import 'package:cinteraction_vc/layers/presentation/cubit/home/home_cubit.dart';
 import 'package:cinteraction_vc/layers/presentation/ui/auth/reset_pass_enter_new.dart';
 import 'package:cinteraction_vc/layers/presentation/ui/chat/chat_room.dart';
-import 'package:cinteraction_vc/layers/presentation/ui/conference/widget/dynamic_layout/cubit/dynamic_layout_cubit.dart';
-import 'package:flutter/foundation.dart';
-import 'package:flutter/material.dart';
+
 
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
@@ -237,8 +235,8 @@ final GoRouter router = GoRouter(
         // final roomId = state.pathParameters['roomId'];
         return MultiBlocProvider(
           providers: [
-            BlocProvider<HomeCubit>(
-              create: (context) => getIt.get<HomeCubit>(),
+            BlocProvider<HomeCubit>.value(
+              value: getIt<HomeCubit>(),
             ),
             BlocProvider<ChatCubit>.value(
               value: getIt.get<ChatCubit>(),

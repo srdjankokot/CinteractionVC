@@ -128,14 +128,15 @@ class ChatRoomPage extends StatelessWidget {
       );
     }
 
-    Future<void> displayAddScheduleMeetingPopup() async {
+    Future<void> displayAddScheduleMeetingPopup(ChatState state) async {
       return showDialog(
         context: context,
-        builder: (context) {
-          return SchedulePopup(
-            context: context,
-          );
-        },
+        builder: (_) => BlocProvider.value(
+            value: context.read<HomeCubit>(), // koristi instancu iz stranice
+            child: SchedulePopup(
+              context: context,
+              state: state,
+            )),
       );
     }
 
@@ -220,7 +221,7 @@ class ChatRoomPage extends StatelessWidget {
                             state,
                             300,
                             () => {displayJoinRoomPopup(context)},
-                            () => {displayAddScheduleMeetingPopup()},
+                            () => {displayAddScheduleMeetingPopup(state)},
                             () => {displayCreateGroupPopup(context, state)}),
 
                         const VerticalDivider(
@@ -243,7 +244,7 @@ class ChatRoomPage extends StatelessWidget {
                             state,
                             double.maxFinite,
                             () => {displayJoinRoomPopup(context)},
-                            () => {displayAddScheduleMeetingPopup()},
+                            () => {displayAddScheduleMeetingPopup(state)},
                             () => {displayCreateGroupPopup(context, state)}),
                         Visibility(
                             visible: state.currentChat != null ||
@@ -393,17 +394,20 @@ Widget getLeftSide(BuildContext context, ChatState state, double? width,
         ),
         BlocBuilder<HomeCubit, HomeState>(
           builder: (context, state) {
-            // return Text("NextMeeting containerw");
+            print(
+                "Builder rebuilding with nextMeeting: ${state.nextMeeting?.eventName}");
+
             return Visibility(
-                visible: state.nextMeeting != null,
-                child: state.nextMeeting == null
-                    ? Container()
-                    : NextMeetingWidget(
-                        meeting: state.nextMeeting!,
-                        banner: true,
-                      ));
+              visible: state.nextMeeting != null,
+              child: state.nextMeeting == null
+                  ? Container()
+                  : NextMeetingWidget(
+                      meeting: state.nextMeeting!,
+                      banner: true,
+                    ),
+            );
           },
-        ),
+        )
       ],
     ),
   );
@@ -727,54 +731,57 @@ Widget getChatDetailsView(
                                 // await context.read<ChatCubit>().rejectCall();
                               },
                             )),
-                        IconButton(
-                          icon: const Icon(Icons.person_add,
-                              color: ColorConstants.kSecondaryColor),
-                          onPressed: () async {
-                            final currentParticipants = state
-                                .chatDetails!.chatParticipants
-                                .map((p) => p.id.toString())
-                                .toSet();
+                        Tooltip(
+                          message: 'Start a group chat',
+                          child: IconButton(
+                            icon: const Icon(Icons.person_add,
+                                color: ColorConstants.kSecondaryColor),
+                            onPressed: () async {
+                              final currentParticipants = state
+                                  .chatDetails!.chatParticipants
+                                  .map((p) => p.id.toString())
+                                  .toSet();
 
-                            final availableUsers = state.users!
-                                .where((user) => !currentParticipants
-                                    .contains(user.id.toString()))
-                                .toList();
-                            showDialog(
-                              context: context,
-                              builder: (BuildContext context) =>
-                                  AddParticipantsDialog(
-                                users: availableUsers,
-                                onAddParticipants: (selectedUsers) async {
-                                  final participantIds = selectedUsers
-                                      .map((user) => int.parse(user.id))
-                                      .toList();
-
-                                  if (!state.chatDetails!.isGroup) {
-                                    participantIds.add(state
-                                        .chatDetails!.chatParticipants[0].id);
-                                  }
-
-                                  state.chatDetails!.isGroup
-                                      ? await getIt
-                                          .get<ChatCubit>()
-                                          .chatUseCases
-                                          .addUserToGroup(
-                                              state.chatDetails!.chatId!,
-                                              state.chatDetails!.authUser.id,
-                                              participantIds)
-                                      : await getIt
-                                          .get<ChatCubit>()
-                                          .chatUseCases
-                                          .sendMessageToChatStream(
-                                              senderId: state
-                                                  .chatDetails!.authUser.id,
-                                              participantIds: participantIds);
-                                },
+                              final availableUsers = state.users!
+                                  .where((user) => !currentParticipants
+                                      .contains(user.id.toString()))
+                                  .toList();
+                              showDialog(
                                 context: context,
-                              ),
-                            );
-                          },
+                                builder: (BuildContext context) =>
+                                    AddParticipantsDialog(
+                                  users: availableUsers,
+                                  onAddParticipants: (selectedUsers) async {
+                                    final participantIds = selectedUsers
+                                        .map((user) => int.parse(user.id))
+                                        .toList();
+
+                                    if (!state.chatDetails!.isGroup) {
+                                      participantIds.add(state
+                                          .chatDetails!.chatParticipants[0].id);
+                                    }
+
+                                    state.chatDetails!.isGroup
+                                        ? await getIt
+                                            .get<ChatCubit>()
+                                            .chatUseCases
+                                            .addUserToGroup(
+                                                state.chatDetails!.chatId!,
+                                                state.chatDetails!.authUser.id,
+                                                participantIds)
+                                        : await getIt
+                                            .get<ChatCubit>()
+                                            .chatUseCases
+                                            .sendMessageToChatStream(
+                                                senderId: state
+                                                    .chatDetails!.authUser.id,
+                                                participantIds: participantIds);
+                                  },
+                                  context: context,
+                                ),
+                              );
+                            },
+                          ),
                         ),
                       ],
                     ),

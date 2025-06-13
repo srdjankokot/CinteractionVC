@@ -84,13 +84,16 @@ Widget getDesktopView(
                             ),
 
 
-                            Positioned(
-                              bottom: 20,
-                              left: 24,
-                              child: EngagementProgress(
-                                engagement: state.avgEngagement ?? 0,
-                                width: 266,
-                                height: 28,
+                            Visibility(
+                              visible: (state.avgEngagement ?? 0) > 0,
+                              child: Positioned(
+                                bottom: 20,
+                                left: 24,
+                                child: EngagementProgress(
+                                  engagement: state.avgEngagement ?? 0,
+                                  width: 266,
+                                  height: 28,
+                                ),
                               ),
                             ),
                           ],
@@ -159,23 +162,12 @@ Widget getDesktopView(
                                 image: imageSVGAsset('icon_arrow_square_up') as Widget,
                                 bgColor: state.screenShared ? ColorConstants.kPrimaryColor : ColorConstants.kWhite30,
                                 onClickAction: () async {
-                                  if (state.screenShared) {
+
+                                  // if (!state.screenShared) {
                                     await context
                                         .read<ConferenceCubit>()
-                                        .shareScreen(null);
-                                  } else {
-
-
-
-                                    await context
-                                        .read<ConferenceCubit>()
-                                        .shareScreen(await navigator
-                                            .mediaDevices
-                                            .getDisplayMedia({
-                                          'video': true,
-                                          'audio': true
-                                        }));
-                                  }
+                                        .shareScreen();
+                                  // }
                                 }),
                             const SizedBox(width: 20),
                             CallButtonShape(

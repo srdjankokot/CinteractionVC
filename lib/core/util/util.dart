@@ -65,13 +65,13 @@ class StreamRenderer {
   Future<void> dispose({bool disposeTrack = true}) async {
 
     if(!isRendererDisposed(videoRenderer))
-      {
-        if(disposeTrack) await stopAllTracks(mediaStream);
-        await mediaStream?.dispose();
-        videoRenderer.srcObject = null;
-        await videoRenderer.dispose();
-        savingFrames = false;
-      }
+    {
+      if(disposeTrack) await stopAllTracks(mediaStream);
+      await mediaStream?.dispose();
+      videoRenderer.srcObject = null;
+      await videoRenderer.dispose();
+      savingFrames = false;
+    }
   }
 
   bool? _isTalking;
@@ -119,23 +119,23 @@ class StreamRenderer {
     // print("save the last FRAME ${publisherName}");
     // print(" ${savingFrames} ${isVideoFlowing!}");
     if(savingFrames)
+    {
+      if(isVideoFlowing!)
       {
-        if(isVideoFlowing!)
-        {
-          try {
-            var buffer = await captureFrameFromVideo(this);
-            lastFrameBytes = Uint8List.view(buffer!);
-            // print("${publisherName}, lastFrameBytes: ${lastFrameBytes?.lengthInBytes}");
-          } catch (e) {
-            print("Failed to capture frame: $e");
-          }
+        try {
+          var buffer = await captureFrameFromVideo(this);
+          lastFrameBytes = Uint8List.view(buffer!);
+          // print("${publisherName}, lastFrameBytes: ${lastFrameBytes?.lengthInBytes}");
+        } catch (e) {
+          print("Failed to capture frame: $e");
         }
-
-        // if(videoRenderer.srcObject != null){
-        await Future.delayed(const Duration(seconds: 1));
-        saveLastFrame();
-        // }
       }
+
+      // if(videoRenderer.srcObject != null){
+      await Future.delayed(const Duration(seconds: 1));
+      saveLastFrame();
+      // }
+    }
 
   }
 }

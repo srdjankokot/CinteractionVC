@@ -85,7 +85,7 @@ class ConferenceState extends Equatable {
       int? isGridLayout,
       int? avgEngagement = 0,
       int? unreadMessages = 0,
-      int screenShareId = 0,
+      int screenShareId = -1,
       RecordingStatus recording = RecordingStatus.notRecording})
       : this(
             isInitial: isInitial,
@@ -135,7 +135,7 @@ class ConferenceState extends Equatable {
             showingMicIsOff: false,
             showingParticipants: showingParticipants,
             recording: recording,
-            screenShareId: 0);
+            screenShareId: -1);
 
   const ConferenceState.error(
       {bool isInitial = false,
@@ -168,7 +168,7 @@ class ConferenceState extends Equatable {
             showingChat: showingChat,
             showingParticipants: showingParticipants,
             recording: recording,
-      screenShareId: 0);
+      screenShareId: -1);
 
   ConferenceState copyWith({
     bool? isInitial,
