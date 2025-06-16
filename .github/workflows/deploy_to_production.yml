@@ -31,16 +31,16 @@ jobs:
         run: flutter --version
 
       - name: FTP Deploy
-        uses: SamKirkland/FTP-Deploy-Action@v4.3.5
+        uses: sand4rt/ftp-deployer@v1.8
         with:
      # ftp server
-          server: ${{ secrets.FTP_SERVER }}
+          host: ${{ secrets.FTP_SERVER }}
      # ftp username
           username:  ${{ secrets.FTP_USERNAME }}
      # ftp password
           password: ${{ secrets.FTP_PASSWORD }}
-          timeout: 190000
-          local-dir: build/web/
+         
+          local_folder: build/web/
           exclude: |
              index.html
              .htaccess
