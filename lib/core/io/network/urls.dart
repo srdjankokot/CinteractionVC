@@ -49,4 +49,10 @@ class Urls {
       '$baseUrl/api/chats/remove/user/from/chat/';
   static String addUserOnGroupChat = '$baseUrl/api/chats/add/user/';
   static String downloadMedia = '$baseUrl/api/chats/show/media/';
+  static String userImage = '$baseUrl/api/users/image/';
+
+
+  static String updateUser(String userId) {
+    return '$baseUrl/api/users/update/$userId';
+  }
 }

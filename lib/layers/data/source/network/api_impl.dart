@@ -640,7 +640,7 @@ class ApiImpl extends Api {
 
     try {
       final response = await dio.post(
-        'https://huawei.nswebdevelopment.com/api/users/image',
+        Urls.userImage,
         data: formData,
         options: Options(headers: {
           Headers.contentTypeHeader: 'multipart/form-data',
@@ -722,7 +722,7 @@ class ApiImpl extends Api {
 
     try {
       final response = await dio.post(
-        'https://huawei.nswebdevelopment.com/api/users/update/${user.id}',
+        Urls.updateUser(user.id),
         data: formData,
         options: Options(
           headers: {
