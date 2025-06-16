@@ -39,8 +39,7 @@ jobs:
           username:  ${{ secrets.FTP_USERNAME }}
      # ftp password
           password: ${{ secrets.FTP_PASSWORD }}
-          port: 21
-          protocol: ftp
+          timeout: 190000
           local-dir: build/web/
           exclude: |
              index.html
