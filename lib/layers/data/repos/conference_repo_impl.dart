@@ -1093,6 +1093,7 @@ class ConferenceRepoImpl extends ConferenceRepo {
     screenPlugin = null;
 
     _disposeScreenSharingStream.add(null);
+    _refreshStreams();
   }
 
   @override
@@ -1354,7 +1355,7 @@ class ConferenceRepoImpl extends ConferenceRepo {
     Iterable<String> screenshare = screenshareKeys.cast<String>();
 
     final List<String> list = ["local", ...currentTalkers];
-    final List<String> screenshareList = [screenShareId.toString(), ...screenshare];
+    final List<String> screenshareList = [if (screenSharing) screenShareId.toString(), ...screenshare];
 
     videoState.streamsToBeRendered.forEach(
       (key, value) {
