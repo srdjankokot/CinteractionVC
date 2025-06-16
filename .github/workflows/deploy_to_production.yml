@@ -40,7 +40,7 @@ jobs:
      # ftp password
           password: ${{ secrets.FTP_PASSWORD }}
           local_folder: build/web/
-          exclude: '['index.html', '.htaccess']'
+          exclude: "['index.html', '.htaccess']"
              
             
 
