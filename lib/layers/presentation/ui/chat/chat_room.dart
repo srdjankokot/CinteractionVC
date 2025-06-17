@@ -131,8 +131,9 @@ class ChatRoomPage extends StatelessWidget {
     Future<void> displayAddScheduleMeetingPopup(ChatState state) async {
       return showDialog(
         context: context,
+        barrierDismissible: false,
         builder: (_) => BlocProvider.value(
-            value: context.read<HomeCubit>(), // koristi instancu iz stranice
+            value: context.read<HomeCubit>(),
             child: SchedulePopup(
               context: context,
               state: state,
@@ -385,18 +386,11 @@ Widget getLeftSide(BuildContext context, ChatState state, double? width,
         const Divider(),
         Expanded(
           child: state.listType == ListType.Chats
-              ? (state.chats?.isNotEmpty ?? false)
-                  ? ChatsListView(state: state)
-                  : const Center(
-                      child: Text('There is no chats'),
-                    )
-              : UsersListView(state: state),
+              ? _buildChatsSection(state)
+              : _buildUsersSection(state),
         ),
         BlocBuilder<HomeCubit, HomeState>(
           builder: (context, state) {
-            print(
-                "Builder rebuilding with nextMeeting: ${state.nextMeeting?.eventName}");
-
             return Visibility(
               visible: state.nextMeeting != null,
               child: state.nextMeeting == null
@@ -824,4 +818,28 @@ Widget getChatDetailsView(
       }(),
     ),
   );
+}
+
+Widget _buildChatsSection(ChatState state) {
+  if (state.chats == null) {
+    return const Center(child: CircularProgressIndicator());
+  }
+
+  if (state.chats!.isEmpty) {
+    return const Center(child: Text('There is no chats'));
+  }
+
+  return ChatsListView(state: state);
+}
+
+Widget _buildUsersSection(ChatState state) {
+  if (state.users == null) {
+    return const Center(child: CircularProgressIndicator());
+  }
+
+  if (state.users!.isEmpty) {
+    return const Center(child: Text('There are no users'));
+  }
+
+  return UsersListView(state: state);
 }

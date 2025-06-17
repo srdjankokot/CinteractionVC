@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:cinteraction_vc/assets/colors/Colors.dart';
 import 'package:cinteraction_vc/layers/data/dto/user_dto.dart';
 import 'package:cinteraction_vc/layers/presentation/cubit/chat/chat_cubit.dart';
@@ -21,17 +23,15 @@ class SchedulePopup extends StatefulWidget {
 }
 
 class _SchedulePopupState extends State<SchedulePopup> {
+  final nameController = TextEditingController();
+  final descController = TextEditingController();
+  final tagController = TextEditingController();
+  final formKey = GlobalKey<FormState>();
+  late TextEditingController autocompleteController;
+  final List<UserDto> selectedParticipants = [];
+
   @override
   Widget build(BuildContext innerContext) {
-    final nameController = TextEditingController();
-    final descController = TextEditingController();
-    final tagController = TextEditingController();
-    final formKey = GlobalKey<FormState>();
-    late TextEditingController autocompleteController;
-
-    final List<UserDto> selectedParticipants = [];
-    final List<UserDto>? allUsers = widget.state.users;
-
     return BlocProvider.value(
       value: widget.context.read<HomeCubit>(),
       child: BlocConsumer<HomeCubit, HomeState>(
@@ -106,96 +106,117 @@ class _SchedulePopupState extends State<SchedulePopup> {
                         const SizedBox(height: 15),
                         LayoutBuilder(
                           builder: (context, constraints) {
-                            return Autocomplete<UserDto>(
-                              optionsBuilder:
-                                  (TextEditingValue textEditingValue) {
-                                if (textEditingValue.text.isEmpty) {
-                                  return const Iterable.empty();
-                                }
-                                return allUsers!.where((user) =>
-                                    user.name.toLowerCase().contains(
-                                        textEditingValue.text.toLowerCase()) &&
-                                    !selectedParticipants.contains(user));
-                              },
-                              displayStringForOption: (UserDto option) =>
-                                  option.name,
-                              onSelected: (UserDto selection) {
-                                if (selection.name == "Select All") {
-                                  final remainingUsers = allUsers!
-                                      .where((user) =>
-                                          !selectedParticipants.contains(user))
-                                      .toList();
-                                  selectedParticipants.addAll(remainingUsers);
-                                } else {
-                                  if (!selectedParticipants
-                                      .contains(selection)) {
-                                    selectedParticipants.add(selection);
-                                  }
-                                }
+                            return BlocProvider<ChatCubit>.value(
+                              value: widget.context.read<ChatCubit>(),
+                              child: BlocBuilder<ChatCubit, ChatState>(
+                                buildWhen: (previous, current) =>
+                                    previous.users != current.users,
+                                builder: (context, state) {
+                                  return Autocomplete<UserDto>(
+                                    optionsBuilder:
+                                        (TextEditingValue textEditingValue) {
+                                      if (textEditingValue.text.isEmpty) {
+                                        return const Iterable.empty();
+                                      }
+                                      return state.users!.where((user) => user
+                                          .name
+                                          .toLowerCase()
+                                          .contains(textEditingValue.text
+                                              .toLowerCase()));
+                                    },
+                                    displayStringForOption: (UserDto option) =>
+                                        option.name,
+                                    onSelected: (UserDto selection) {
+                                      if (selection.name == "Select All") {
+                                        final remainingUsers = state.users!
+                                            .where((user) =>
+                                                !selectedParticipants
+                                                    .contains(user))
+                                            .toList();
+                                        selectedParticipants
+                                            .addAll(remainingUsers);
+                                      } else {
+                                        if (!selectedParticipants
+                                            .contains(selection)) {
+                                          selectedParticipants.add(selection);
+                                        }
+                                      }
 
-                                autocompleteController.clear();
-                                (innerContext as Element).markNeedsBuild();
-                              },
-                              fieldViewBuilder: (context, controller, focusNode,
-                                  onEditingComplete) {
-                                autocompleteController = controller;
-                                return TextField(
-                                  controller: controller,
-                                  focusNode: focusNode,
-                                  onEditingComplete: onEditingComplete,
-                                  decoration: const InputDecoration(
-                                    labelText: "Choose Participants",
-                                    hintText: "Start typing name...",
-                                    border: OutlineInputBorder(),
-                                  ),
-                                );
-                              },
-                              optionsViewBuilder:
-                                  (context, onSelected, options) {
-                                final selectAllOption = UserDto(
-                                    id: 'select_all',
-                                    name: 'Select All',
-                                    email: '',
-                                    imageUrl: '');
-                                final extendedOptions = [
-                                  selectAllOption,
-                                  ...options
-                                ];
-
-                                return Align(
-                                  alignment: Alignment.topLeft,
-                                  child: Material(
-                                    elevation: 4,
-                                    shape: const RoundedRectangleBorder(
-                                      borderRadius: BorderRadius.vertical(
-                                          bottom: Radius.circular(4.0)),
-                                    ),
-                                    child: Container(
-                                      width: constraints.maxWidth,
-                                      height: 52.0 *
-                                          extendedOptions.length
-                                              .clamp(1, 6), // max 6 items
-                                      child: ListView.builder(
-                                        padding: EdgeInsets.zero,
-                                        itemCount: extendedOptions.length,
-                                        itemBuilder:
-                                            (BuildContext context, int index) {
-                                          final UserDto option =
-                                              extendedOptions[index];
-                                          return InkWell(
-                                            onTap: () => onSelected(option),
-                                            child: Padding(
-                                              padding:
-                                                  const EdgeInsets.all(16.0),
-                                              child: Text(option.name),
-                                            ),
-                                          );
+                                      autocompleteController.clear();
+                                      (innerContext as Element)
+                                          .markNeedsBuild();
+                                    },
+                                    fieldViewBuilder: (context, controller,
+                                        focusNode, onEditingComplete) {
+                                      autocompleteController = controller;
+                                      return TextField(
+                                        controller: controller,
+                                        focusNode: focusNode,
+                                        onEditingComplete: onEditingComplete,
+                                        decoration: const InputDecoration(
+                                          labelText: "Choose Participants",
+                                          hintText: "Start typing name...",
+                                          border: OutlineInputBorder(),
+                                        ),
+                                        onChanged: (value) {
+                                          context
+                                              .read<ChatCubit>()
+                                              .loadUsers(1, 20, value.trim());
                                         },
-                                      ),
-                                    ),
-                                  ),
-                                );
-                              },
+                                      );
+                                    },
+                                    optionsViewBuilder:
+                                        (context, onSelected, options) {
+                                      final selectAllOption = UserDto(
+                                          id: 'select_all',
+                                          name: 'Select All',
+                                          email: '',
+                                          imageUrl: '');
+                                      final extendedOptions = [
+                                        selectAllOption,
+                                        ...options
+                                      ];
+
+                                      return Align(
+                                        alignment: Alignment.topLeft,
+                                        child: Material(
+                                          elevation: 4,
+                                          shape: const RoundedRectangleBorder(
+                                            borderRadius: BorderRadius.vertical(
+                                                bottom: Radius.circular(4.0)),
+                                          ),
+                                          child: SizedBox(
+                                            width: constraints.maxWidth,
+                                            height: 52.0 *
+                                                extendedOptions.length
+                                                    .clamp(1, 6), // max 6 items
+                                            child: ListView.builder(
+                                              padding: EdgeInsets.zero,
+                                              itemCount: extendedOptions.length,
+                                              itemBuilder:
+                                                  (BuildContext context,
+                                                      int index) {
+                                                final UserDto option =
+                                                    extendedOptions[index];
+                                                return InkWell(
+                                                  onTap: () =>
+                                                      onSelected(option),
+                                                  child: Padding(
+                                                    padding:
+                                                        const EdgeInsets.all(
+                                                            16.0),
+                                                    child: Text(option.name),
+                                                  ),
+                                                );
+                                              },
+                                            ),
+                                          ),
+                                        ),
+                                      );
+                                    },
+                                  );
+                                },
+                              ),
                             );
                           },
                         )
@@ -285,7 +306,10 @@ class _SchedulePopupState extends State<SchedulePopup> {
           actionsAlignment: MainAxisAlignment.end,
           actions: [
             TextButton(
-              onPressed: () => Navigator.pop(widget.context),
+              onPressed: () async {
+                await getIt.get<ChatCubit>().loadUsers(1, 20);
+                Navigator.pop(widget.context);
+              },
               child: const Text(
                 'Cancel',
                 style: TextStyle(color: Colors.grey),
@@ -297,13 +321,14 @@ class _SchedulePopupState extends State<SchedulePopup> {
 
                 List<String> emailList =
                     selectedParticipants.map((user) => user.email).toList();
-                print('Emails to send: $emailList');
 
                 await context.read<HomeCubit>().scheduleMeeting(
                     nameController.text,
                     descController.text,
                     tagController.text,
                     emailList);
+
+                await getIt.get<ChatCubit>().loadUsers(1, 20);
 
                 // try {
                 //   final link = response.response?.scheduledAt ?? '';

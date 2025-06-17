@@ -267,7 +267,8 @@ class ChatRepoImpl extends ChatRepo {
           final parsed = jsonDecode(receviedMessage);
           int? chatIdParsed = parsed['chatId'];
           int? msgIdParsed = parsed['msgId'];
-          print('recevidedMsgId: $msgIdParsed');
+          List<dynamic> participantIds = parsed['participantId'];
+
           try {
             Map<String, dynamic> result = jsonDecode(receviedMessage);
             var command = DataChannelCommand.fromJson(result);
@@ -286,6 +287,12 @@ class ChatRepoImpl extends ChatRepo {
           List<ChatParticipantDto> chatParticipants =
               chatDetailsDto.chatParticipants;
           ChatParticipantDto? matchedChat;
+
+          if (participantIds.contains(user!.id) &&
+              !chats.any((chat) => chat.id == chatIdParsed)) {
+            loadChats(1, 20);
+            unreadMessageSound();
+          }
 
           if (chatParticipants.isNotEmpty) {
             try {
@@ -832,6 +839,7 @@ class ChatRepoImpl extends ChatRepo {
       "chatId": chatId,
       "message": msg,
       "msgId": msgId,
+      "participantId": participantIds,
     });
     await textRoom.sendMessage(
       room,
