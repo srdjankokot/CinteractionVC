@@ -34,7 +34,7 @@ abstract class ChatRepo {
       {List<PlatformFile>? uploadedFiles});
   // Future<void> createGroup(String name, int senderId, List<int> participantIds,);
   Future<void> loadChats(int page, int paginate, String? search);
-  Future<void> loadUsers(int page, int paginate, String? search);
+  Future<void> loadUsers(int page, int paginate, int companyId, String? search);
   Future<void> setCurrentParticipant(UserDto user);
   Future<void> setCurrentChat(ChatDto? chat);
   Future<void> setUserStatus(String status);

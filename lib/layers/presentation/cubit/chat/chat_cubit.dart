@@ -283,9 +283,11 @@ class ChatCubit extends Cubit<ChatState> with BlocLoggy {
     }
   }
 
-  Future<void> loadUsers(int page, int paginate, [String? search]) async {
+  Future<void> loadUsers(int page, int paginate, int companyId,
+      [String? search]) async {
     try {
-      final users = await chatUseCases.loadUsers(page, paginate, search);
+      final users =
+          await chatUseCases.loadUsers(page, paginate, companyId, search);
       print('users: $users');
       // _onUsers(users);
     } catch (e) {

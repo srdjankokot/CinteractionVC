@@ -61,9 +61,74 @@ class ApiImpl extends Api {
   }
 
   @override
+  Future<ApiResponse<void>> createCompany({
+    required int ownerId,
+    required String name,
+  }) async {
+    try {
+      Dio dio = await getIt.getAsync<Dio>();
+
+      final data = {
+        "owner_id": ownerId,
+        "name": name,
+        "welcome_text": "Welcome to the company",
+        "timetable_link": null,
+      };
+
+      final response = await dio.post(
+        Urls.createCompany,
+        data: data,
+      );
+
+      print('✅ createCompany response: ${response.statusCode}');
+      return ApiResponse(response: null);
+    } on DioException catch (e) {
+      return ApiResponse(error: ApiErrorDto.fromDioException(e));
+    }
+  }
+
+  @override
+  Future<ApiResponse<void>> deleteCompany({required companyId}) async {
+    try {
+      Dio dio = await getIt.getAsync<Dio>();
+      final response = await dio.delete('${Urls.deleteCompany} $companyId');
+      return ApiResponse(response: null);
+    } on DioException catch (e) {
+      return ApiResponse(error: ApiErrorDto.fromDioException(e));
+    }
+  }
+
+  @override
+  Future<ApiResponse<void>> inviteUserToCompany({
+    required int companyId,
+    required String email,
+    required bool isAdmin,
+  }) async {
+    try {
+      Dio dio = await getIt.getAsync<Dio>();
+
+      final data = {
+        "company_id": companyId,
+        "email": email,
+        "company_admin": isAdmin,
+      };
+
+      final response = await dio.post(
+        Urls.inviteUserToCompany,
+        data: data,
+      );
+
+      return ApiResponse(response: response);
+    } on DioException catch (e) {
+      return ApiResponse(error: ApiErrorDto.fromDioException(e));
+    }
+  }
+
+  @override
   Future<ApiResponse<UserListResponse>> getCompanyUsers(
     int page,
     int paginate,
+    int companyId,
     String? search,
   ) async {
     try {
@@ -78,7 +143,7 @@ class ApiImpl extends Api {
       };
 
       Response response = await dio.get(
-        Urls.getCompanyUsers,
+        '${Urls.getCompanyUsers}/$companyId/users',
         queryParameters: queryParams,
       );
 
@@ -122,7 +187,8 @@ class ApiImpl extends Api {
     try {
       dio.options.headers['Authorization'] = Urls.IVIAccessToken;
       var response = await dio.post(Urls.engagement, data: formData);
-      return double.parse(response.data['engagements'][0]['engagement_rank'].toString());
+      return double.parse(
+          response.data['engagements'][0]['engagement_rank'].toString());
       return -1;
     } on DioException catch (e, s) {
       print(e);
@@ -132,9 +198,12 @@ class ApiImpl extends Api {
     return 0;
   }
 
-
   @override
-  Future<double?> getDrowsiness({required averageAttention, required callId, required image, required participantId}) async{
+  Future<double?> getDrowsiness(
+      {required averageAttention,
+      required callId,
+      required image,
+      required participantId}) async {
     var formData = {
       'average_attention': 0,
       'call_id': callId,
@@ -155,10 +224,9 @@ class ApiImpl extends Api {
     } on Exception catch (e) {
       print(e);
     }
-    return 0;;
+    return 0;
+    ;
   }
-
-
 
   @override
   Future<ApiResponse<MeetingDto>> startCall(
