@@ -30,8 +30,6 @@ import '../../domain/source/api.dart';
 
 import '../source/local/local_storage.dart';
 
-
-
 import 'package:url_launcher/url_launcher.dart';
 import 'package:http/http.dart' as http;
 
@@ -198,7 +196,8 @@ class ConferenceRepoImpl extends ConferenceRepo {
 
     List<Map> sources = [];
     for (Map publisher in publishers) {
-      if ([myId, screenShareId.toString()].contains(publisher['id'].toString())) {
+      if ([myId, screenShareId.toString()]
+          .contains(publisher['id'].toString())) {
         print('PUBLISHER CHANGE: publishers: its me');
         continue;
       }
@@ -361,7 +360,8 @@ class ConferenceRepoImpl extends ConferenceRepo {
       await videoPlugin?.configure(sessionDescription: offer);
     });
     screenPlugin?.renegotiationNeeded?.listen((event) async {
-      if (screenPlugin?.webRTCHandle?.peerConnection?.signalingState != RTCSignalingState.RTCSignalingStateStable) return;
+      if (screenPlugin?.webRTCHandle?.peerConnection?.signalingState !=
+          RTCSignalingState.RTCSignalingStateStable) return;
       // print('retrying to connect publisher');
       var offer =
           await screenPlugin?.createOffer(audioRecv: false, videoRecv: false);
@@ -646,8 +646,7 @@ class ConferenceRepoImpl extends ConferenceRepo {
           if (renderer == null) {
             renderer = StreamRenderer(feedKey, feedKey);
             await renderer.init();
-            renderer.mediaStream =
-                await createLocalMediaStream(feedKey);
+            renderer.mediaStream = await createLocalMediaStream(feedKey);
             videoState.streamsToBeRendered[feedKey] = renderer;
             print("Created new renderer for $feedKey");
           }
@@ -1049,17 +1048,9 @@ class ConferenceRepoImpl extends ConferenceRepo {
     await localScreenSharingRenderer.init();
     localScreenSharingRenderer.publisherId = screenShareId.toString();
 
-
-
-
-
-
-    localScreenSharingRenderer.mediaStream = await screenPlugin?.initializeMediaDevices(mediaConstraints: {
-      'video': {
-        'frameRate': 30,
-        'width': 1920,
-        'height': 1080
-      },
+    localScreenSharingRenderer.mediaStream =
+        await screenPlugin?.initializeMediaDevices(mediaConstraints: {
+      'video': {'frameRate': 30, 'width': 1920, 'height': 1080},
       'audio': true
     }, useDisplayMediaDevices: true);
 
@@ -1073,8 +1064,10 @@ class ConferenceRepoImpl extends ConferenceRepo {
     await screenPlugin?.joinPublisher(room,
         displayName: "${displayName}_screenshare", id: screenShareId, pin: "");
 
-    localScreenSharingRenderer.mediaStream?.getVideoTracks().forEach((videoTrack){
-      videoTrack.onEnded = (){
+    localScreenSharingRenderer.mediaStream
+        ?.getVideoTracks()
+        .forEach((videoTrack) {
+      videoTrack.onEnded = () {
         print("onEnded");
         _disposeScreenSharing();
       };
@@ -1083,18 +1076,17 @@ class ConferenceRepoImpl extends ConferenceRepo {
     _refreshStreams();
   }
 
-
   Future<void> _disposeScreenSharing() async {
-
     screenSharing = false;
 
-    (localScreenSharingRenderer.mediaStream?.getTracks())?.forEach((track){
+    (localScreenSharingRenderer.mediaStream?.getTracks())?.forEach((track) {
       track.stop();
     });
     StreamRenderer? rendererRemoved;
 
     videoState.feedIdToMidSubscriptionMap.remove(localScreenSharingRenderer.id);
-    rendererRemoved = videoState.streamsToBeRendered.remove(localScreenSharingRenderer.id);
+    rendererRemoved =
+        videoState.streamsToBeRendered.remove(localScreenSharingRenderer.id);
 
     await rendererRemoved?.dispose();
     await screenPlugin?.hangup();
@@ -1108,8 +1100,6 @@ class ConferenceRepoImpl extends ConferenceRepo {
   Stream<void> getDisposeScreenSharingStream() {
     return _disposeScreenSharingStream.stream;
   }
-
-
 
   @override
   Future<void> finishCall() async {
@@ -1229,8 +1219,7 @@ class ConferenceRepoImpl extends ConferenceRepo {
 
   _replaceAudioTrack() async {
     print('track is ended');
-    var stream = await navigator.mediaDevices
-        .getUserMedia({'audio': true});
+    var stream = await navigator.mediaDevices.getUserMedia({'audio': true});
     var audioTrack = stream.getAudioTracks()[0];
 
     _addOnEndedToTrack(audioTrack);
@@ -1363,7 +1352,10 @@ class ConferenceRepoImpl extends ConferenceRepo {
     Iterable<String> screenshare = screenshareKeys.cast<String>();
 
     final List<String> list = ["local", ...currentTalkers];
-    final List<String> screenshareList = [if (screenSharing) screenShareId.toString(), ...screenshare];
+    final List<String> screenshareList = [
+      if (screenSharing) screenShareId.toString(),
+      ...screenshare
+    ];
 
     videoState.streamsToBeRendered.forEach(
       (key, value) {
@@ -1439,8 +1431,7 @@ class ConferenceRepoImpl extends ConferenceRepo {
       "isAudioMuted": localVideoRenderer.isAudioMuted,
       "isVideoMuted": localVideoRenderer.isVideoMuted,
       "isHandUp": localVideoRenderer.isHandUp,
-      "imageUrl":
-          localVideoRenderer.imageUrl
+      "imageUrl": localVideoRenderer.imageUrl
     };
 
     await videoPlugin?.joinPublisher(room,
@@ -1548,7 +1539,7 @@ class ConferenceRepoImpl extends ConferenceRepo {
   }
 
   _getEngagement() async {
-    return;
+    // return;
 
     if (engagementIsRunning || (localVideoRenderer.isVideoMuted ?? false))
       return;
