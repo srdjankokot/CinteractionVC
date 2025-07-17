@@ -36,7 +36,7 @@ class Urls {
   static String sentMessage =
       'https://7a2f-188-2-51-157.ngrok-free.app/api/message';
 
-  static String getCompanyUsers = '$baseUrl/api/users/chat';
+  static String getCompanyUsers = '$baseUrl/api/companies';
 
   ////////CHAT_URLS////////
   static String getAllChats = '$baseUrl/api/chats';
@@ -52,6 +52,9 @@ class Urls {
   static String downloadMedia = '$baseUrl/api/chats/show/media/';
   static String userImage = '$baseUrl/api/users/image/';
 
+  static String createCompany = '$baseUrl/api/companies/create';
+  static String deleteCompany = '$baseUrl/api/companies/delete/';
+  static String inviteUserToCompany = '$baseUrl/api/companies/invite/user';
 
   static String updateUser(String userId) {
     return '$baseUrl/api/users/update/$userId';

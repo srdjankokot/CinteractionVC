@@ -49,7 +49,7 @@ final desktopMenu = <MenuItem>[
   profile,
 
   // insights,
-  // users,
+  users,
   // groups,
   // tags,
   // roles,
@@ -79,7 +79,7 @@ class UsersScreen extends MenuItem {
   UsersScreen({required this.id})
       : super(
             label: 'Users',
-            assetName: 'menu_profile',
+            assetName: 'menu_roles',
             body: BlocProvider(
               create: (context) => UsersCubit(
                 usersRepository: getIt.get<UsersRepository>(),

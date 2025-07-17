@@ -6,14 +6,16 @@ import '../../data/dto/chat/chat_detail_dto.dart';
 import '../../presentation/ui/profile/ui/widget/user_image.dart';
 
 class User {
-  User(
-      {required this.id,
-      required this.name,
-      required this.email,
-      required this.imageUrl,
-      this.createdAt,
-      this.emailVerifiedAt,
-      this.online = false});
+  User({
+    required this.id,
+    required this.name,
+    required this.email,
+    required this.imageUrl,
+    this.createdAt,
+    this.emailVerifiedAt,
+    this.companyId,
+    this.online = false,
+  });
 
   String id;
   String name;
@@ -28,6 +30,9 @@ class User {
 
   @JsonKey(name: 'email_verified_at')
   DateTime? emailVerifiedAt;
+
+  @JsonKey(name: 'company_id')
+  int? companyId;
 
   int? groups = Random().nextInt(10);
   int? avgEngagement = Random().nextInt(100);
@@ -48,6 +53,7 @@ class User {
       emailVerifiedAt: json['email_verified_at'] != null
           ? DateTime.tryParse(json['email_verified_at'])
           : null,
+      companyId: json['company_id'],
     );
   }
 

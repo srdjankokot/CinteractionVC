@@ -28,14 +28,26 @@ abstract class Api {
       required image,
       required participantId});
 
-
   Future<double?> getDrowsiness(
       {required averageAttention,
-        required callId,
-        required image,
-        required participantId});
+      required callId,
+      required image,
+      required participantId});
 
+  Future<ApiResponse<void>> createCompany({
+    required int ownerId,
+    required String name,
+  });
 
+  Future<ApiResponse<void>> deleteCompany({
+    required companyId,
+  });
+
+  Future<ApiResponse<void>> inviteUserToCompany({
+    required int companyId,
+    required String email,
+    required bool isAdmin,
+  });
 
   Future<ApiResponse<bool>> sendEngagement(
       {required engagement, required userId, required callId});
@@ -70,7 +82,7 @@ abstract class Api {
       {required text, required from, required to});
 
   Future<ApiResponse<UserListResponse>> getCompanyUsers(
-      int page, int paginate, String? search);
+      int page, int paginate, int companyId, String? search);
 
   Future<ApiResponse<ChatPagination>> getAllChats(
       {required int page, required int paginate, String? search});

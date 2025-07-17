@@ -1,8 +1,13 @@
 import 'package:cinteraction_vc/assets/colors/Colors.dart';
+import 'package:cinteraction_vc/core/app/injector.dart';
 import 'package:cinteraction_vc/core/extension/context.dart';
+import 'package:cinteraction_vc/core/extension/context_user.dart';
 import 'package:cinteraction_vc/core/extension/string.dart';
 import 'package:cinteraction_vc/core/ui/images/image.dart';
 import 'package:cinteraction_vc/core/ui/widget/engagement_progress.dart';
+import 'package:cinteraction_vc/layers/presentation/cubit/company/company_cubit.dart';
+import 'package:cinteraction_vc/layers/presentation/ui/users/ui/widget/delete_company_dialog.dart';
+import 'package:cinteraction_vc/layers/presentation/ui/users/ui/widget/invite_users_dialog.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
@@ -15,9 +20,6 @@ import '../../../profile/ui/widget/user_image.dart';
 class UserListLayout extends StatelessWidget {
   final List<User> users;
   const UserListLayout({super.key, required this.users});
-  
-  
-  
 
   @override
   Widget build(BuildContext context) {
@@ -36,7 +38,7 @@ class UserListLayout extends StatelessWidget {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          'Users',
+                          'Company users',
                           style: context.titleTheme.headlineLarge,
                         ),
                         Text(
@@ -45,8 +47,42 @@ class UserListLayout extends StatelessWidget {
                       ],
                     )),
                     ElevatedButton(
-                        onPressed: () => {context.read<UsersCubit>().addUser()},
-                        child: const Text('Add user'))
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.blue[900],
+                        foregroundColor: Colors.white,
+                      ),
+                      onPressed: () {
+                        showDialog(
+                          context: context,
+                          builder: (context) =>
+                              BlocProvider<CompanyCubit>.value(
+                            value: getIt<CompanyCubit>(),
+                            child: const InviteUsersDialog(),
+                          ),
+                        );
+                      },
+                      child: const Text('Invite users to company'),
+                    ),
+                    const SizedBox(
+                      width: 15,
+                    ),
+                    ElevatedButton(
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.red[800],
+                        foregroundColor: Colors.white,
+                      ),
+                      onPressed: () {
+                        showDialog(
+                          context: context,
+                          builder: (context) =>
+                              BlocProvider<CompanyCubit>.value(
+                            value: getIt<CompanyCubit>(),
+                            child: const DeleteCompanyDialog(),
+                          ),
+                        );
+                      },
+                      child: const Text('Delete Company'),
+                    ),
                   ],
                 ),
               ),
@@ -57,36 +93,72 @@ class UserListLayout extends StatelessWidget {
                 //   4: FixedColumnWidth(209),
               }, children: const [
                 TableRow(
-                    decoration: BoxDecoration(color: Color(0xFFF0F0F0)),
-                    children: [
-                      TableCell(
-                          child: Padding(
-                        padding: EdgeInsets.only(top: 12.0, bottom: 12.0),
-                        child: Text(''),
-                      )),
-                      TableCell(
-                          verticalAlignment: TableCellVerticalAlignment.middle,
-                          child: Center(child: Text('Basic info'))),
-                      TableCell(
-                          verticalAlignment: TableCellVerticalAlignment.middle,
-                          child: Center(child: Text('Groups'))),
-                      TableCell(
-                          verticalAlignment: TableCellVerticalAlignment.middle,
-                          child: Text('Average Engagement')),
-                      TableCell(
-                          verticalAlignment: TableCellVerticalAlignment.middle,
-                          child: Center(child: Text('Total Meetings'))),
-                      TableCell(
-                          verticalAlignment: TableCellVerticalAlignment.middle,
-                          child: Center(child: Text('Onboarded'))),
-                      TableCell(
-                          verticalAlignment: TableCellVerticalAlignment.middle,
-                          child: Text('Created date')),
-
-                      // TableCell(
-                      //     verticalAlignment: TableCellVerticalAlignment.middle,
-                      //     child: imageSVGAsset('')!),
-                    ])
+                  decoration: const BoxDecoration(
+                    color: Color(0xFFF0F0F0),
+                    border: Border(
+                      bottom: BorderSide(
+                        color: Color(0xFFD0D0D0),
+                        width: 1,
+                      ),
+                    ),
+                  ),
+                  children: [
+                    TableCell(
+                      child: Padding(
+                        padding: EdgeInsets.symmetric(vertical: 16),
+                        child: Center(child: Text('')),
+                      ),
+                    ),
+                    TableCell(
+                      child: Padding(
+                        padding: EdgeInsets.symmetric(vertical: 16),
+                        child: Center(
+                          child: Text(
+                            'Basic Info',
+                            style: TextStyle(
+                                fontWeight: FontWeight.w600, fontSize: 16),
+                          ),
+                        ),
+                      ),
+                    ),
+                    TableCell(
+                      child: Padding(
+                        padding: EdgeInsets.symmetric(vertical: 16),
+                        child: Center(
+                          child: Text(
+                            'Roles',
+                            style: TextStyle(
+                                fontWeight: FontWeight.w600, fontSize: 16),
+                          ),
+                        ),
+                      ),
+                    ),
+                    TableCell(
+                      child: Padding(
+                        padding: EdgeInsets.symmetric(vertical: 16),
+                        child: Center(
+                          child: Text(
+                            'Created Date',
+                            style: TextStyle(
+                                fontWeight: FontWeight.w600, fontSize: 16),
+                          ),
+                        ),
+                      ),
+                    ),
+                    TableCell(
+                      child: Padding(
+                        padding: EdgeInsets.symmetric(vertical: 16),
+                        child: Center(
+                          child: Text(
+                            'Actions',
+                            style: TextStyle(
+                                fontWeight: FontWeight.w600, fontSize: 16),
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
               ]),
               Expanded(
                 child: SingleChildScrollView(
@@ -106,13 +178,10 @@ class UserListLayout extends StatelessWidget {
                     children: [
                       for (var user in users)
                         TableRow(children: [
-                          TableCell(
+                          const TableCell(
                             verticalAlignment:
                                 TableCellVerticalAlignment.middle,
-                            child: Checkbox(
-                              value: user.checked,
-                              onChanged: (bool? value) {},
-                            ),
+                            child: Text(''),
                           ),
                           TableCell(
                               child: Padding(
@@ -120,51 +189,61 @@ class UserListLayout extends StatelessWidget {
                             child: Row(
                               crossAxisAlignment: CrossAxisAlignment.center,
                               children: [
-                                UserImage.medium([user.getUserImageDTO()]),
+                                UserImage.medium([
+                                  context.getCurrentUser!.getUserImageDTO()
+                                ]),
                                 Padding(
-                                  padding: const EdgeInsets.only(left: 12.0),
+                                  padding: const EdgeInsets.only(left: 25.0),
                                   child: Column(
                                     crossAxisAlignment:
                                         CrossAxisAlignment.start,
                                     children: [
                                       Text(
-                                        user.name,
+                                        context.getCurrentUser!.name,
                                         style: context.textTheme.displaySmall,
                                       ),
-                                      Text(user.email)
+                                      Text(context.getCurrentUser!.email)
                                     ],
                                   ),
                                 )
                               ],
                             ),
                           )),
-                          TableCell(
+                          const TableCell(
                               verticalAlignment:
                                   TableCellVerticalAlignment.middle,
-                              child: Center(child: Text('${user.groups}'))),
+                              child: Center(child: Text('Admin'))),
+                          // TableCell(
+                          //     verticalAlignment:
+                          //         TableCellVerticalAlignment.middle,
+                          //     child: EngagementProgress(
+                          //       engagement: user.avgEngagement!,
+                          //       width: double.maxFinite,
+                          //     )),
                           TableCell(
-                              verticalAlignment:
-                                  TableCellVerticalAlignment.middle,
-                              child: EngagementProgress(
-                                engagement: user.avgEngagement!,
-                                width: double.maxFinite,
-                              )),
+                            verticalAlignment:
+                                TableCellVerticalAlignment.middle,
+                            child: Center(
+                              child: Text(
+                                '${user.createdAt?.day}/${user.createdAt?.month}/${user.createdAt?.year}',
+                              ),
+                            ),
+                          ),
                           TableCell(
-                              verticalAlignment:
-                                  TableCellVerticalAlignment.middle,
-                              child:
-                                  Center(child: Text('${user.totalMeetings}'))),
-                          TableCell(
-                              verticalAlignment:
-                                  TableCellVerticalAlignment.middle,
-                              child: Center(
-                                  child: imageSVGAsset(user.onboarded
-                                      ? 'badge_approved'
-                                      : 'badge_waiting'))),
-                          TableCell(
-                              verticalAlignment:
-                                  TableCellVerticalAlignment.middle,
-                              child: Text('${user.createdAt?.day}/${user.createdAt?.month}/${user.createdAt?.year}')),
+                            verticalAlignment:
+                                TableCellVerticalAlignment.middle,
+                            child: Center(
+                              child: TextButton(
+                                child: const Text('Remove user'),
+                                onPressed: () {
+                                  // ovde pozovi funkciju za brisanje korisnika
+                                  // context
+                                  //     .read<UsersCubit>()
+                                  //     .deleteUser(user.id);
+                                },
+                              ),
+                            ),
+                          ),
                         ]),
                     ],
                   ),
@@ -190,10 +269,11 @@ class UserListLayout extends StatelessWidget {
                       Expanded(
                           child: Text(
                         '${users.length} Users',
-                            style: context.textTheme.bodySmall,
+                        style: context.textTheme.bodySmall,
                       )),
                       IconButton(
-                          onPressed: () => {context.read<UsersCubit>().addUser()},
+                          onPressed: () =>
+                              {context.read<UsersCubit>().addUser()},
                           icon: imageSVGAsset('user_plus') as Widget)
                     ],
                   ),

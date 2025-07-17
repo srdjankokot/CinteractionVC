@@ -9,6 +9,7 @@ class UserDto extends User {
     required super.name,
     required super.email,
     required super.imageUrl,
+    super.companyId,
     this.chatId,
     super.online = false,
   });
@@ -21,6 +22,7 @@ class UserDto extends User {
         email: json['email'] as String,
         imageUrl: json['profile_photo_path'] as String,
         chatId: json['chat_id'] as int?,
+        companyId: json['company_id'] as int?,
       );
 
   Map<String, dynamic> toJson() => <String, dynamic>{
@@ -29,6 +31,7 @@ class UserDto extends User {
         'email': email,
         'profile_photo_path': imageUrl,
         'chat_id': chatId,
+        'company_id': companyId,
       };
 
   UserDto copyWith({
@@ -38,6 +41,7 @@ class UserDto extends User {
     String? imageUrl,
     int? chatId,
     bool? online,
+    int? companyId,
   }) {
     return UserDto(
       id: id ?? this.id,
@@ -46,6 +50,7 @@ class UserDto extends User {
       imageUrl: imageUrl ?? this.imageUrl,
       chatId: chatId ?? this.chatId,
       online: online ?? this.online,
+      companyId: companyId ?? this.companyId,
     );
   }
 
