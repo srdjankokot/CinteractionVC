@@ -10,7 +10,7 @@ import '../../ui/users/repository/users_repository.dart';
 
 part 'users_state.dart';
 
-class UsersCubit extends Cubit<UsersState> with BlocLoggy{
+class UsersCubit extends Cubit<UsersState> with BlocLoggy {
   UsersCubit({
     required this.usersRepository,
     required this.groupRepository,
@@ -31,10 +31,10 @@ class UsersCubit extends Cubit<UsersState> with BlocLoggy{
     return super.close();
   }
 
-
   void _load() {
     _usersSubscription = usersRepository.getUsersStream().listen(_onUsers);
-    _groupUsersSubscription = groupRepository.getUSerGroupsStream().listen(_onUsers);
+    _groupUsersSubscription =
+        groupRepository.getUSerGroupsStream().listen(_onUsers);
   }
 
   void loadUsers() {
@@ -42,8 +42,7 @@ class UsersCubit extends Cubit<UsersState> with BlocLoggy{
     usersRepository.getListOfUsers();
   }
 
-  void loadUsersOfGroup(String groupId)
-  {
+  void loadUsersOfGroup(String groupId) {
     emit(const UsersIsLoading());
     groupRepository.getListOfUsersOfGroup(groupId);
   }
@@ -58,10 +57,8 @@ class UsersCubit extends Cubit<UsersState> with BlocLoggy{
     usersRepository.addUser();
   }
 
-
   Future<void> addUserGroup(String id) async {
     emit(const UsersIsLoading());
     groupRepository.addUserGroup(id);
   }
-
 }

@@ -28,7 +28,7 @@ final mobileBottomMenu = <MenuItem>[
   buildChatMenuItem(),
   dashboard,
   meetings,
-
+  users,
   // insights,
   profile
 ];
@@ -46,10 +46,11 @@ final desktopMenu = <MenuItem>[
   buildChatMenuItem(),
   dashboard,
   meetings,
+  users,
   profile,
 
   // insights,
-  users,
+
   // groups,
   // tags,
   // roles,

@@ -10,6 +10,9 @@ abstract class CompanyRepo {
     required companyId,
   });
 
+  Future<void> removeUserFromCompany(
+      {required int companyId, required int userId});
+
   Future<void> inviteUserToCompany({
     required int companyId,
     required String email,

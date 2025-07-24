@@ -80,7 +80,7 @@ class ApiImpl extends Api {
         data: data,
       );
 
-      print('✅ createCompany response: ${response.statusCode}');
+      print('createCompany response: ${response.statusCode}');
       return ApiResponse(response: null);
     } on DioException catch (e) {
       return ApiResponse(error: ApiErrorDto.fromDioException(e));
@@ -91,8 +91,22 @@ class ApiImpl extends Api {
   Future<ApiResponse<void>> deleteCompany({required companyId}) async {
     try {
       Dio dio = await getIt.getAsync<Dio>();
-      final response = await dio.delete('${Urls.deleteCompany} $companyId');
+      await dio.delete('${Urls.deleteCompany} $companyId');
       return ApiResponse(response: null);
+    } on DioException catch (e) {
+      return ApiResponse(error: ApiErrorDto.fromDioException(e));
+    }
+  }
+
+  @override
+  Future<ApiResponse<void>> removeUserFromCompany(
+      {required companyId, required userId}) async {
+    try {
+      Dio dio = await getIt.getAsync<Dio>();
+      final response = await dio.post(
+        '${Urls.baseUrl}/api/companies/$companyId/remove/$userId',
+      );
+      return ApiResponse(response: response);
     } on DioException catch (e) {
       return ApiResponse(error: ApiErrorDto.fromDioException(e));
     }
@@ -116,11 +130,25 @@ class ApiImpl extends Api {
       final response = await dio.post(
         Urls.inviteUserToCompany,
         data: data,
+        options: Options(
+          validateStatus: (_) => true,
+        ),
       );
 
-      return ApiResponse(response: response);
-    } on DioException catch (e) {
-      return ApiResponse(error: ApiErrorDto.fromDioException(e));
+      if (response.statusCode != null && response.statusCode! >= 400) {
+        return ApiResponse(
+          error: ApiErrorDto.fromDioResponse(response),
+        );
+      }
+
+      return ApiResponse(response: null);
+    } catch (e) {
+      return ApiResponse(
+        error: ApiErrorDto(
+          errorCode: 0,
+          errorMessage: e.toString(),
+        ),
+      );
     }
   }
 

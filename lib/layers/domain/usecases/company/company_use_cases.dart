@@ -21,6 +21,12 @@ class CompanyUseCases {
     return companyRepos.deleteCompany(companyId: companyId);
   }
 
+  Future<void> removeUserFromCompany(
+      {required int companyId, required int userId}) {
+    return companyRepos.removeUserFromCompany(
+        companyId: companyId, userId: userId);
+  }
+
   Future<void> inviteUserToCompany({
     required int companyId,
     required String email,

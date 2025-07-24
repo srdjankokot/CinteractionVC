@@ -1,21 +1,19 @@
 part of 'users_cubit.dart';
 
 @immutable
-sealed class UsersState{
+sealed class UsersState {
   const UsersState();
 }
 
-class InitialUsersState extends UsersState{
+class InitialUsersState extends UsersState {
   const InitialUsersState();
 }
 
-class UsersLoaded extends UsersState{
+class UsersLoaded extends UsersState {
   const UsersLoaded({required this.users});
   final List<User>? users;
 }
 
-
-class UsersIsLoading extends UsersState{
+class UsersIsLoading extends UsersState {
   const UsersIsLoading();
 }
-

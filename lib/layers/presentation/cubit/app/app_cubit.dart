@@ -61,6 +61,7 @@ class AppCubit extends Cubit<AppState> {
   }
 
   Future<void> fetchAndUpdateUser() async {
+    print('UserChanged');
     final response = await getIt<Api>().getUserDetails();
     if (response.response != null) {
       final updatedUser = await api.getUserDetails();

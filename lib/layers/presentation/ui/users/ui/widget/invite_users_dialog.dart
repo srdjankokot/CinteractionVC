@@ -1,3 +1,4 @@
+import 'package:cinteraction_vc/core/extension/context.dart';
 import 'package:cinteraction_vc/core/extension/context_user.dart';
 import 'package:cinteraction_vc/layers/presentation/cubit/company/company_cubit.dart';
 import 'package:cinteraction_vc/layers/presentation/cubit/company/companyState.dart';
@@ -60,14 +61,12 @@ class _InviteUsersDialogState extends State<InviteUsersDialog> {
     return BlocListener<CompanyCubit, CompanyState>(
       listener: (context, state) {
         if (state is CompanySuccess) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text(" Invites sent successfully")),
-          );
+          context.showSnackBarMessage(
+              'Invitation sent successfully. Awaiting user confirmation...',
+              isError: false);
           if (mounted) Navigator.of(context).pop();
         } else if (state is CompanyError) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text("❌ ${state.message}")),
-          );
+          context.showSnackBarMessage(state.message, isError: true);
           setState(() => isSubmitting = false);
         }
       },
