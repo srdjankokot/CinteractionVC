@@ -38,6 +38,19 @@ class CompanyRepoImpl extends CompanyRepo {
   }
 
   @override
+  Future<void> removeUserFromCompany({
+    required int companyId,
+    required int userId,
+  }) async {
+    final response =
+        await _api.removeUserFromCompany(companyId: companyId, userId: userId);
+
+    if (response.error != null) {
+      throw Exception(response.error);
+    }
+  }
+
+  @override
   Future<void> inviteUserToCompany({
     required int companyId,
     required String email,

@@ -43,6 +43,9 @@ abstract class Api {
     required companyId,
   });
 
+  Future<ApiResponse<void>> removeUserFromCompany(
+      {required companyId, required userId});
+
   Future<ApiResponse<void>> inviteUserToCompany({
     required int companyId,
     required String email,

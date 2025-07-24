@@ -14,6 +14,7 @@ class User {
     this.createdAt,
     this.emailVerifiedAt,
     this.companyId,
+    this.companyAdmin,
     this.online = false,
   });
 
@@ -33,6 +34,8 @@ class User {
 
   @JsonKey(name: 'company_id')
   int? companyId;
+
+  bool? companyAdmin;
 
   int? groups = Random().nextInt(10);
   int? avgEngagement = Random().nextInt(100);
@@ -54,6 +57,7 @@ class User {
           ? DateTime.tryParse(json['email_verified_at'])
           : null,
       companyId: json['company_id'],
+      companyAdmin: json['company_admin'] as bool?,
     );
   }
 

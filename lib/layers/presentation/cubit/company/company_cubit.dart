@@ -1,3 +1,4 @@
+import 'package:cinteraction_vc/core/app/injector.dart';
 import 'package:cinteraction_vc/core/logger/loggy_types.dart';
 import 'package:cinteraction_vc/layers/domain/usecases/company/company_use_cases.dart';
 import 'package:cinteraction_vc/layers/presentation/cubit/app/app_cubit.dart';
@@ -31,7 +32,7 @@ class CompanyCubit extends Cubit<CompanyState> with BlocLoggy {
 
       emit(CompanySuccess());
     } catch (e, stack) {
-      loggy.error("❌ Failed to create company", e, stack);
+      loggy.error("Failed to create company", e, stack);
       emit(CompanyError("Error: ${e.toString()}"));
     }
   }
@@ -43,7 +44,21 @@ class CompanyCubit extends Cubit<CompanyState> with BlocLoggy {
       await companyUseCases.deleteCompany(companyId: companyId);
       await appCubit.fetchAndUpdateUser();
     } catch (e, stack) {
-      loggy.error("❌ Failed to create company", e, stack);
+      loggy.error("Failed to create company", e, stack);
+      emit(CompanyError("Error: ${e.toString()}"));
+    }
+  }
+
+  Future<void> removeUserFromCompany({
+    required int companyId,
+    required int userId,
+  }) async {
+    try {
+      await companyUseCases.removeUserFromCompany(
+          companyId: companyId, userId: userId);
+      emit(CompanyInitial());
+    } catch (e, stack) {
+      loggy.error("Failed to remove user from company", e, stack);
       emit(CompanyError("Error: ${e.toString()}"));
     }
   }
@@ -65,7 +80,7 @@ class CompanyCubit extends Cubit<CompanyState> with BlocLoggy {
 
       emit(CompanySuccess());
     } catch (e, stack) {
-      loggy.error("❌ Failed to invite users", e, stack);
+      loggy.error("Failed to invite users", e, stack);
       emit(CompanyError("There is error: ${e.toString()}"));
     }
   }
