@@ -41,16 +41,22 @@ class InsightsScreen extends StatelessWidget {
                   SizedBox(
                     width: containerWidth,
                     child: PieChartStats(
-                      values:  [NameValueClass(name: 'Chat Messages', value: 13), NameValueClass(name: 'Raised Hands', value: 40), NameValueClass(name: 'Emoticons', value: 47)],
+                      values: [
+                        NameValueClass(name: 'Chat Messages', value: 13),
+                        NameValueClass(name: 'Raised Hands', value: 40),
+                        NameValueClass(name: 'Emoticons', value: 47)
+                      ],
                       title: 'Participation Levels',
                     ),
                   ),
-
                   SizedBox(
                     width: containerWidth,
-                    child: PieChartStats(
-                        values:  [NameValueClass(name: '- 0 mins', value: 30), NameValueClass(name: ' - 5 mins', value: 40), NameValueClass(name: '- 10 mins', value: 20), NameValueClass(name: '- 15+ mins', value: 10)],
-                        title: 'Inactivity'),
+                    child: PieChartStats(values: [
+                      NameValueClass(name: '- 0 mins', value: 30),
+                      NameValueClass(name: ' - 5 mins', value: 40),
+                      NameValueClass(name: '- 10 mins', value: 20),
+                      NameValueClass(name: '- 15+ mins', value: 10)
+                    ], title: 'Inactivity'),
                   ),
                 ],
               );
@@ -66,7 +72,6 @@ class InsightsScreen extends StatelessWidget {
             const SizedBox(
               height: 20,
             ),
-
 
             LayoutBuilder(builder: (context, constraints) {
               var minWidth = 400;
@@ -89,18 +94,18 @@ class InsightsScreen extends StatelessWidget {
                   SizedBox(
                     width: containerWidth,
                     child: const CircularProgress(
-                        title: 'Content Interaction',
-                        centerTitle: 'Switching',
-                        centerSubtitle: '54 Users',
-                      bigProgressBar: NameValueClass(name: 'Closing App', value: 75),
-                      smallProgressBar: NameValueClass(name: 'Switching tabs', value: 90),
-
+                      title: 'Content Interaction',
+                      centerTitle: 'Switching',
+                      centerSubtitle: '54 Users',
+                      bigProgressBar:
+                          NameValueClass(name: 'Closing App', value: 75),
+                      smallProgressBar:
+                          NameValueClass(name: 'Switching tabs', value: 90),
                     ),
                   ),
                 ],
               );
             }),
-
 
             const SizedBox(
               height: 20,
@@ -121,23 +126,26 @@ class InsightsScreen extends StatelessWidget {
                   SizedBox(
                     width: containerWidth,
                     child: const CircularProgress(
-                        title: 'Technical Issue',
-                        centerTitle: 'Technical issues',
-                        centerSubtitle: '24 Users',
-                      bigProgressBar: NameValueClass(name: 'Poor internet connection', value: 75),
-                      smallProgressBar: NameValueClass(name: 'Audio/Video problems', value: 50),),
+                      title: 'Technical Issue',
+                      centerTitle: 'Technical issues',
+                      centerSubtitle: '24 Users',
+                      bigProgressBar: NameValueClass(
+                          name: 'Poor internet connection', value: 75),
+                      smallProgressBar: NameValueClass(
+                          name: 'Audio/Video problems', value: 50),
+                    ),
                   ),
-
                   SizedBox(
                     width: containerWidth,
-                    child: const PieChartStats(
-                        values: [NameValueClass(name: 'Discontent', value: 13), NameValueClass(name: 'Neutral', value: 40), NameValueClass(name: 'Content', value: 47)],
-                        title: 'Emotional recognition'),
+                    child: const PieChartStats(values: [
+                      NameValueClass(name: 'Discontent', value: 13),
+                      NameValueClass(name: 'Neutral', value: 40),
+                      NameValueClass(name: 'Content', value: 47)
+                    ], title: 'Emotional recognition'),
                   ),
                 ],
               );
-            })
-            ,
+            }),
 
             const SizedBox(
               height: 20,
@@ -155,11 +163,3 @@ class InsightsScreen extends StatelessWidget {
     );
   }
 }
-
-
-
-
-
-
-
-

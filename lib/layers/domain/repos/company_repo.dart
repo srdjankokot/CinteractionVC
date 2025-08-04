@@ -7,7 +7,7 @@ abstract class CompanyRepo {
   });
 
   Future<void> deleteCompany({
-    required companyId,
+    required int companyId,
   });
 
   Future<void> removeUserFromCompany(

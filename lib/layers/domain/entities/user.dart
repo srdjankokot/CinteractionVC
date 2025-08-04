@@ -1,8 +1,8 @@
 import 'dart:math';
 
+import 'package:cinteraction_vc/layers/data/dto/ai/ai_module_dto.dart';
 import 'package:json_annotation/json_annotation.dart';
 
-import '../../data/dto/chat/chat_detail_dto.dart';
 import '../../presentation/ui/profile/ui/widget/user_image.dart';
 
 class User {
@@ -15,6 +15,7 @@ class User {
     this.emailVerifiedAt,
     this.companyId,
     this.companyAdmin,
+    this.modules = const [],
     this.online = false,
   });
 
@@ -37,6 +38,8 @@ class User {
 
   bool? companyAdmin;
 
+  List<ModuleDto> modules;
+
   int? groups = Random().nextInt(10);
   int? avgEngagement = Random().nextInt(100);
   int? totalMeetings = Random().nextInt(50);
@@ -49,7 +52,7 @@ class User {
       id: json['id'].toString(),
       name: json['name'] ?? '',
       email: json['email'] ?? '',
-      imageUrl: json['url'] ?? '',
+      imageUrl: json['profile_photo_path'] ?? '',
       createdAt: json['created_at'] != null
           ? DateTime.parse(json['created_at'])
           : null,
@@ -58,6 +61,10 @@ class User {
           : null,
       companyId: json['company_id'],
       companyAdmin: json['company_admin'] as bool?,
+      modules: (json['modules'] as List<dynamic>?)
+              ?.map((e) => ModuleDto.fromJson(e as Map<String, dynamic>))
+              .toList() ??
+          [],
     );
   }
 

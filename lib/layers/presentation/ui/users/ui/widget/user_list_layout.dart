@@ -324,7 +324,7 @@ Widget _buildMobileLayout(BuildContext context, List<UserDto> users) {
                   )),
                   IconButton(
                       onPressed: () => {context.read<UsersCubit>().addUser()},
-                      icon: imageSVGAsset('user_plus') as Widget)
+                      icon: imageSVGAsset('user_plus') as Widget),
                 ],
               ),
               Expanded(
