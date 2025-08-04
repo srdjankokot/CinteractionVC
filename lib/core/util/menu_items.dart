@@ -1,6 +1,9 @@
 import 'package:cinteraction_vc/core/extension/context.dart';
+import 'package:cinteraction_vc/core/extension/context_user.dart';
+import 'package:cinteraction_vc/layers/presentation/cubit/ai/ai_cubit.dart';
 import 'package:cinteraction_vc/layers/presentation/cubit/app/app_cubit.dart';
 import 'package:cinteraction_vc/layers/presentation/cubit/dashboard/dashboard_cubit.dart';
+import 'package:cinteraction_vc/layers/presentation/ui/ai/ui/ai_page.dart';
 import 'package:cinteraction_vc/layers/presentation/ui/chat/chat_room.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -29,6 +32,7 @@ final mobileBottomMenu = <MenuItem>[
   dashboard,
   meetings,
   users,
+  aiModules,
   // insights,
   profile
 ];
@@ -47,6 +51,7 @@ final desktopMenu = <MenuItem>[
   dashboard,
   meetings,
   users,
+  aiModules,
   profile,
 
   // insights,
@@ -80,7 +85,7 @@ class UsersScreen extends MenuItem {
   UsersScreen({required this.id})
       : super(
             label: 'Users',
-            assetName: 'menu_roles',
+            assetName: 'community',
             body: BlocProvider(
               create: (context) => UsersCubit(
                 usersRepository: getIt.get<UsersRepository>(),
@@ -123,12 +128,23 @@ final meetings = MenuItem(
       create: (context) => getIt.get<MeetingCubit>(),
       child: const MeetingsPage(),
     ));
-final insights = MenuItem(
-  route: null,
-  label: 'Insights',
-  assetName: 'menu_insights',
-  body: const InsightsScreen(),
-);
+// final insights = MenuItem(
+//   route: null,
+//   label: 'Insights',
+//   assetName: 'menu_insights',
+//   body: const InsightsScreen(),
+// );
+
+final aiModules = MenuItem(
+    route: null,
+    label: 'AI',
+    assetName: 'menu_ai',
+    body: BlocProvider(
+      create: (context) =>
+          AiCubit(aiUseCases: getIt.get(), appCubit: getIt.get<AppCubit>()),
+      child: const AiModulesPage(),
+    ));
+
 final profile = MenuItem(
   route: null,
   label: 'Profile',

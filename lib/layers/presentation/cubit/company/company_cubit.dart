@@ -1,11 +1,9 @@
-import 'package:cinteraction_vc/core/app/injector.dart';
 import 'package:cinteraction_vc/core/logger/loggy_types.dart';
 import 'package:cinteraction_vc/layers/domain/usecases/company/company_use_cases.dart';
 import 'package:cinteraction_vc/layers/presentation/cubit/app/app_cubit.dart';
-import 'package:cinteraction_vc/layers/presentation/cubit/company/companyState.dart';
+import 'package:cinteraction_vc/layers/presentation/cubit/company/company_state.dart';
 import 'package:cinteraction_vc/layers/presentation/ui/users/ui/widget/invite_users_dialog.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:loggy/loggy.dart';
 
 class CompanyCubit extends Cubit<CompanyState> with BlocLoggy {
   final CompanyUseCases companyUseCases;

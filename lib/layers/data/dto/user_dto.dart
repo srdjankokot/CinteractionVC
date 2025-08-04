@@ -1,9 +1,15 @@
+import 'package:cinteraction_vc/layers/data/dto/ai/ai_module_dto.dart';
 import 'package:cinteraction_vc/layers/presentation/ui/profile/ui/widget/user_image.dart';
 
 import '../../domain/entities/user.dart';
 import 'chat/chat_detail_dto.dart';
 
+import 'package:cinteraction_vc/layers/presentation/ui/profile/ui/widget/user_image.dart';
+
 class UserDto extends User {
+  final int? chatId;
+  final List<ModuleDto> modules;
+
   UserDto({
     required super.id,
     required super.name,
@@ -12,10 +18,9 @@ class UserDto extends User {
     super.companyId,
     super.companyAdmin,
     this.chatId,
+    this.modules = const [],
     super.online = false,
   });
-
-  final int? chatId;
 
   factory UserDto.fromJson(Map<String, dynamic> json) => UserDto(
         id: "${json['id']}",
@@ -24,7 +29,11 @@ class UserDto extends User {
         imageUrl: json['profile_photo_path'] as String,
         chatId: json['chat_id'] as int?,
         companyId: json['company_id'] as int?,
-        companyAdmin: json['company_admin'] as bool?, // 👈 dodat ovde
+        companyAdmin: json['company_admin'] as bool?,
+        modules: (json['modules'] as List<dynamic>?)
+                ?.map((e) => ModuleDto.fromJson(e as Map<String, dynamic>))
+                .toList() ??
+            [],
       );
 
   Map<String, dynamic> toJson() => <String, dynamic>{
@@ -34,7 +43,8 @@ class UserDto extends User {
         'profile_photo_path': imageUrl,
         'chat_id': chatId,
         'company_id': companyId,
-        'company_admin': companyAdmin, // 👈 dodat ovde
+        'company_admin': companyAdmin,
+        'modules': modules.map((m) => m.toJson()).toList(),
       };
 
   UserDto copyWith({
@@ -45,7 +55,8 @@ class UserDto extends User {
     int? chatId,
     bool? online,
     int? companyId,
-    bool? companyAdmin, // 👈 dodat ovde
+    bool? companyAdmin,
+    List<ModuleDto>? modules,
   }) {
     return UserDto(
       id: id ?? this.id,
@@ -56,6 +67,7 @@ class UserDto extends User {
       online: online ?? this.online,
       companyId: companyId ?? this.companyId,
       companyAdmin: companyAdmin ?? this.companyAdmin,
+      modules: modules ?? this.modules,
     );
   }
 

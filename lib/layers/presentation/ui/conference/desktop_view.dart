@@ -46,8 +46,8 @@ Widget getDesktopView(
                   Expanded(
                     child: LayoutBuilder(
                       builder: (context, constraints) {
-                            return Stack(
-                            children: [
+                        return Stack(
+                          children: [
                             // MultiProvider(
                             //   providers: [
                             //     BlocProvider.value(value: staggeredCubit),
@@ -57,32 +57,44 @@ Widget getDesktopView(
                             // ),
 
                             // Conditional screen share overlay
-                            screenShares.isNotEmpty && screenShares.where((element) => int.parse(element.publisherId!) == state.screenShareId).firstOrNull != null
+                            screenShares.isNotEmpty &&
+                                    screenShares
+                                            .where((element) =>
+                                                int.parse(
+                                                    element.publisherId!) ==
+                                                state.screenShareId)
+                                            .firstOrNull !=
+                                        null
                                 ? Row(
-                              children: [
-                                Expanded(
-                                  flex: 7,
-                                  child: ParticipantVideoWidget(
-                                    remoteStream: screenShares.where((element) => int.parse(element.publisherId!) == state.screenShareId).first,
-                                    height: double.maxFinite,
-                                    width: double.maxFinite,
-                                    showEngagement: false,
-                                  ),
-                                ),
-                                Expanded(
-                                  flex: 3,
-                                  child: BlocProvider<DynamicLayoutCubit>.value(
+                                    children: [
+                                      Expanded(
+                                        flex: 7,
+                                        child: ParticipantVideoWidget(
+                                          remoteStream: screenShares
+                                              .where((element) =>
+                                                  int.parse(
+                                                      element.publisherId!) ==
+                                                  state.screenShareId)
+                                              .first,
+                                          height: double.maxFinite,
+                                          width: double.maxFinite,
+                                          showEngagement: false,
+                                        ),
+                                      ),
+                                      Expanded(
+                                        flex: 3,
+                                        child: BlocProvider<
+                                            DynamicLayoutCubit>.value(
+                                          value: staggeredCubit,
+                                          child: const DynamicLayoutGrid(),
+                                        ),
+                                      ),
+                                    ],
+                                  )
+                                : BlocProvider<DynamicLayoutCubit>.value(
                                     value: staggeredCubit,
                                     child: const DynamicLayoutGrid(),
                                   ),
-                                ),
-                              ],
-                            )
-                                : BlocProvider<DynamicLayoutCubit>.value(
-                              value: staggeredCubit,
-                              child: const DynamicLayoutGrid(),
-                            ),
-
 
                             Visibility(
                               visible: (state.avgEngagement ?? 0) > 0,
@@ -159,14 +171,16 @@ Widget getDesktopView(
                                 }),
                             const SizedBox(width: 20),
                             CallButtonShape(
-                                image: imageSVGAsset('icon_arrow_square_up') as Widget,
-                                bgColor: state.screenShared ? ColorConstants.kPrimaryColor : ColorConstants.kWhite30,
+                                image: imageSVGAsset('icon_arrow_square_up')
+                                    as Widget,
+                                bgColor: state.screenShared
+                                    ? ColorConstants.kPrimaryColor
+                                    : ColorConstants.kWhite30,
                                 onClickAction: () async {
-
                                   // if (!state.screenShared) {
-                                    await context
-                                        .read<ConferenceCubit>()
-                                        .shareScreen();
+                                  await context
+                                      .read<ConferenceCubit>()
+                                      .shareScreen();
                                   // }
                                 }),
                             const SizedBox(width: 20),

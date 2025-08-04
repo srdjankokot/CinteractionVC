@@ -17,6 +17,7 @@ class StreamRenderer {
   String publisherName;
   int? engagement;
   int? drowsiness;
+  Map<String, int> moduleScores = {};
   String? audioMid;
   String? videoMid;
   bool? initialSet;
@@ -52,21 +53,16 @@ class StreamRenderer {
     _isVideoFlowing = value;
   }
 
-  UserImageDto getUserImageDTO()
-  {
+  UserImageDto getUserImageDTO() {
     return UserImageDto(
-        id: int.parse(publisherId??"0"),
+        id: int.parse(publisherId ?? "0"),
         name: publisherName,
-        imageUrl: imageUrl ?? ""
-    );
+        imageUrl: imageUrl ?? "");
   }
 
-
   Future<void> dispose({bool disposeTrack = true}) async {
-
-    if(!isRendererDisposed(videoRenderer))
-    {
-      if(disposeTrack) await stopAllTracks(mediaStream);
+    if (!isRendererDisposed(videoRenderer)) {
+      if (disposeTrack) await stopAllTracks(mediaStream);
       await mediaStream?.dispose();
       videoRenderer.srcObject = null;
       await videoRenderer.dispose();
@@ -85,8 +81,6 @@ class StreamRenderer {
     _isTalking = value;
   }
 
-
-
   bool isRendererDisposed(RTCVideoRenderer renderer) {
     return renderer.textureId == null;
   }
@@ -94,9 +88,7 @@ class StreamRenderer {
   StreamRenderer(this.id, this.publisherName);
 
   Future<void> init({bool saveFrames = false}) async {
-
     print("init streamRenderer $id");
-
 
     mediaStream = await createLocalMediaStream('mediaStream_$id');
     isAudioMuted = false;
@@ -111,17 +103,14 @@ class StreamRenderer {
     videoRenderer.srcObject = mediaStream;
     // saveLastFrame();
     savingFrames = saveFrames;
-    if(savingFrames) saveLastFrame();
+    if (savingFrames) saveLastFrame();
   }
 
-  void saveLastFrame() async
-  {
+  void saveLastFrame() async {
     // print("save the last FRAME ${publisherName}");
     // print(" ${savingFrames} ${isVideoFlowing!}");
-    if(savingFrames)
-    {
-      if(isVideoFlowing!)
-      {
+    if (savingFrames) {
+      if (isVideoFlowing!) {
         try {
           var buffer = await captureFrameFromVideo(this);
           lastFrameBytes = Uint8List.view(buffer!);
@@ -136,12 +125,10 @@ class StreamRenderer {
       saveLastFrame();
       // }
     }
-
   }
 }
 
-
-class Publisher{
+class Publisher {
   int id;
   String displayName;
   List<PStream> streams;
@@ -151,7 +138,6 @@ class Publisher{
     required this.displayName,
     required this.streams,
   });
-
 
   factory Publisher.fromJson(Map<String, dynamic> json) {
     return Publisher(
@@ -163,16 +149,14 @@ class Publisher{
     );
   }
 
-
   Map<String, dynamic> toJson() => {
-    'id': id,
-    'displayName': displayName,
-    'streams': streams.map((stream) => stream.toJson()).toList(),
-  };
-
+        'id': id,
+        'displayName': displayName,
+        'streams': streams.map((stream) => stream.toJson()).toList(),
+      };
 }
 
-class PStream{
+class PStream {
   String type;
   int minindex;
   String mid;
@@ -196,19 +180,20 @@ class PStream{
     );
   }
 
-
   Map<String, dynamic> toJson() => {
-    'type': type,
-    'minindex': minindex,
-    'mid': mid,
-  };
+        'type': type,
+        'minindex': minindex,
+        'mid': mid,
+      };
 }
 
-
 class VideoRoomPluginStateManager {
-  Map<String, StreamRenderer> streamsToBeRendered = {}; //streams sends to ui to be rendered
-  Map<int, Publisher> feedIdToDisplayStreamsMap = {}; //store id, displayName, streams from publishers
-  Map<dynamic, dynamic> feedIdToMidSubscriptionMap = {}; //feed id as a key, mid as a value
+  Map<String, StreamRenderer> streamsToBeRendered =
+      {}; //streams sends to ui to be rendered
+  Map<int, Publisher> feedIdToDisplayStreamsMap =
+      {}; //store id, displayName, streams from publishers
+  Map<dynamic, dynamic> feedIdToMidSubscriptionMap =
+      {}; //feed id as a key, mid as a value
   Map<dynamic, dynamic> subStreamsToFeedIdMap = {}; //
   Map<int, int> lastSpeakingTimeMap = {};
 

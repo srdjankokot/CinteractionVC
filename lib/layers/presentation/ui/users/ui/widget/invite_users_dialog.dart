@@ -1,7 +1,7 @@
 import 'package:cinteraction_vc/core/extension/context.dart';
 import 'package:cinteraction_vc/core/extension/context_user.dart';
 import 'package:cinteraction_vc/layers/presentation/cubit/company/company_cubit.dart';
-import 'package:cinteraction_vc/layers/presentation/cubit/company/companyState.dart';
+import 'package:cinteraction_vc/layers/presentation/cubit/company/company_state.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 

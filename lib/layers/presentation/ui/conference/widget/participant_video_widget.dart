@@ -32,12 +32,10 @@ class ParticipantVideoWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    var screenShare = remoteStream.publisherName.toLowerCase().contains('screenshare');
+    var screenShare =
+        remoteStream.publisherName.toLowerCase().contains('screenshare');
 
     if (context.isWide) {
-
-
-
       return SizedBox(
         height: height,
         width: width,
@@ -84,32 +82,40 @@ class ParticipantVideoWidget extends StatelessWidget {
                           ))
                     ],
                   ),
-
                   if ((remoteStream.isVideoMuted == true) && !screenShare)
                     userAvatar,
-
                 ]),
               ),
               // Text('${remoteStream.videoRenderer.videoWidth}:${remoteStream.videoRenderer.videoHeight}'),
               Positioned(
-                  top: 20,
-                  right: 24,
-                  child: Row(
-                    children: [
-                      Visibility(
-                          visible: width > 200 && showEngagement! && (remoteStream.engagement ?? 0) > 0,
-                          child: Column(
-                            spacing: 5,
-                            children: [
-                              EngagementProgress(
-                                  engagement: remoteStream.engagement ?? 0),
-
-                              // EngagementProgress(
-                              //     engagement: remoteStream.drowsiness ?? 0)
-                            ],
-                          )),
-                    ],
-                  )),
+                top: 20,
+                right: 24,
+                child: Row(
+                  children: [
+                    Visibility(
+                      visible: width > 200 &&
+                          showEngagement == true &&
+                          (remoteStream.moduleScores.values
+                              .any((score) => score > 0)),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: remoteStream.moduleScores.entries
+                            .where((entry) => entry.value > 0)
+                            .expand((entry) => [
+                                  Text(
+                                    entry.key,
+                                    style: const TextStyle(
+                                        fontSize: 10, color: Colors.white70),
+                                  ),
+                                  EngagementProgress(engagement: entry.value),
+                                  const SizedBox(height: 8),
+                                ])
+                            .toList(),
+                      ),
+                    )
+                  ],
+                ),
+              ),
 
               Positioned(
                   left: 24,

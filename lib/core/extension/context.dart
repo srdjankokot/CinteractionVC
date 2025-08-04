@@ -2,10 +2,6 @@ import 'package:cinteraction_vc/assets/colors/Colors.dart';
 import 'package:cinteraction_vc/core/app/style.dart';
 import 'package:cinteraction_vc/core/extension/router.dart';
 import 'package:cinteraction_vc/core/io/network/urls.dart';
-import 'package:cinteraction_vc/layers/data/repos/auth_repo_impl.dart';
-import 'package:cinteraction_vc/layers/data/repos/chat_repo_impl.dart';
-import 'package:cinteraction_vc/layers/data/source/network/api_impl.dart';
-import 'package:cinteraction_vc/layers/domain/repos/chat_repo.dart';
 import 'package:cinteraction_vc/layers/presentation/cubit/chat/chat_cubit.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
@@ -14,7 +10,6 @@ import 'package:go_router/go_router.dart';
 import '../../layers/data/source/local/local_storage.dart';
 import '../app/injector.dart';
 import '../ui/widget/responsive.dart';
-import 'package:flutter/foundation.dart';
 
 import '../util/secure_local_storage.dart';
 

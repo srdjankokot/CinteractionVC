@@ -30,8 +30,6 @@ import '../../domain/source/api.dart';
 
 import '../source/local/local_storage.dart';
 
-
-
 import 'package:url_launcher/url_launcher.dart';
 import 'package:http/http.dart' as http;
 
@@ -171,7 +169,7 @@ class ConferenceRepoImpl extends ConferenceRepo {
           _canBePublished().then((value) async {
             if (value) {
               await _publishMyOwn();
-              _getEngagement();
+              _getScore();
             }
           });
         }
@@ -198,7 +196,8 @@ class ConferenceRepoImpl extends ConferenceRepo {
 
     List<Map> sources = [];
     for (Map publisher in publishers) {
-      if ([myId, screenShareId.toString()].contains(publisher['id'].toString())) {
+      if ([myId, screenShareId.toString()]
+          .contains(publisher['id'].toString())) {
         print('PUBLISHER CHANGE: publishers: its me');
         continue;
       }
@@ -361,7 +360,8 @@ class ConferenceRepoImpl extends ConferenceRepo {
       await videoPlugin?.configure(sessionDescription: offer);
     });
     screenPlugin?.renegotiationNeeded?.listen((event) async {
-      if (screenPlugin?.webRTCHandle?.peerConnection?.signalingState != RTCSignalingState.RTCSignalingStateStable) return;
+      if (screenPlugin?.webRTCHandle?.peerConnection?.signalingState !=
+          RTCSignalingState.RTCSignalingStateStable) return;
       // print('retrying to connect publisher');
       var offer =
           await screenPlugin?.createOffer(audioRecv: false, videoRecv: false);
@@ -646,8 +646,7 @@ class ConferenceRepoImpl extends ConferenceRepo {
           if (renderer == null) {
             renderer = StreamRenderer(feedKey, feedKey);
             await renderer.init();
-            renderer.mediaStream =
-                await createLocalMediaStream(feedKey);
+            renderer.mediaStream = await createLocalMediaStream(feedKey);
             videoState.streamsToBeRendered[feedKey] = renderer;
             print("Created new renderer for $feedKey");
           }
@@ -991,7 +990,7 @@ class ConferenceRepoImpl extends ConferenceRepo {
 
     await _changeMetaData();
     _refreshStreams();
-    _getEngagement();
+    _getScore();
   }
 
   @override
@@ -1049,17 +1048,9 @@ class ConferenceRepoImpl extends ConferenceRepo {
     await localScreenSharingRenderer.init();
     localScreenSharingRenderer.publisherId = screenShareId.toString();
 
-
-
-
-
-
-    localScreenSharingRenderer.mediaStream = await screenPlugin?.initializeMediaDevices(mediaConstraints: {
-      'video': {
-        'frameRate': 30,
-        'width': 1920,
-        'height': 1080
-      },
+    localScreenSharingRenderer.mediaStream =
+        await screenPlugin?.initializeMediaDevices(mediaConstraints: {
+      'video': {'frameRate': 30, 'width': 1920, 'height': 1080},
       'audio': true
     }, useDisplayMediaDevices: true);
 
@@ -1073,8 +1064,10 @@ class ConferenceRepoImpl extends ConferenceRepo {
     await screenPlugin?.joinPublisher(room,
         displayName: "${displayName}_screenshare", id: screenShareId, pin: "");
 
-    localScreenSharingRenderer.mediaStream?.getVideoTracks().forEach((videoTrack){
-      videoTrack.onEnded = (){
+    localScreenSharingRenderer.mediaStream
+        ?.getVideoTracks()
+        .forEach((videoTrack) {
+      videoTrack.onEnded = () {
         print("onEnded");
         _disposeScreenSharing();
       };
@@ -1083,18 +1076,17 @@ class ConferenceRepoImpl extends ConferenceRepo {
     _refreshStreams();
   }
 
-
   Future<void> _disposeScreenSharing() async {
-
     screenSharing = false;
 
-    (localScreenSharingRenderer.mediaStream?.getTracks())?.forEach((track){
+    (localScreenSharingRenderer.mediaStream?.getTracks())?.forEach((track) {
       track.stop();
     });
     StreamRenderer? rendererRemoved;
 
     videoState.feedIdToMidSubscriptionMap.remove(localScreenSharingRenderer.id);
-    rendererRemoved = videoState.streamsToBeRendered.remove(localScreenSharingRenderer.id);
+    rendererRemoved =
+        videoState.streamsToBeRendered.remove(localScreenSharingRenderer.id);
 
     await rendererRemoved?.dispose();
     await screenPlugin?.hangup();
@@ -1108,8 +1100,6 @@ class ConferenceRepoImpl extends ConferenceRepo {
   Stream<void> getDisposeScreenSharingStream() {
     return _disposeScreenSharingStream.stream;
   }
-
-
 
   @override
   Future<void> finishCall() async {
@@ -1229,8 +1219,7 @@ class ConferenceRepoImpl extends ConferenceRepo {
 
   _replaceAudioTrack() async {
     print('track is ended');
-    var stream = await navigator.mediaDevices
-        .getUserMedia({'audio': true});
+    var stream = await navigator.mediaDevices.getUserMedia({'audio': true});
     var audioTrack = stream.getAudioTracks()[0];
 
     _addOnEndedToTrack(audioTrack);
@@ -1363,7 +1352,10 @@ class ConferenceRepoImpl extends ConferenceRepo {
     Iterable<String> screenshare = screenshareKeys.cast<String>();
 
     final List<String> list = ["local", ...currentTalkers];
-    final List<String> screenshareList = [if (screenSharing) screenShareId.toString(), ...screenshare];
+    final List<String> screenshareList = [
+      if (screenSharing) screenShareId.toString(),
+      ...screenshare
+    ];
 
     videoState.streamsToBeRendered.forEach(
       (key, value) {
@@ -1439,8 +1431,7 @@ class ConferenceRepoImpl extends ConferenceRepo {
       "isAudioMuted": localVideoRenderer.isAudioMuted,
       "isVideoMuted": localVideoRenderer.isVideoMuted,
       "isHandUp": localVideoRenderer.isHandUp,
-      "imageUrl":
-          localVideoRenderer.imageUrl
+      "imageUrl": localVideoRenderer.imageUrl
     };
 
     await videoPlugin?.joinPublisher(room,
@@ -1520,19 +1511,40 @@ class ConferenceRepoImpl extends ConferenceRepo {
         break;
 
       case DataChannelCmd.engagement:
-        videoState.streamsToBeRendered[command.id]?.engagement =
-            command.data['engagement'] as int;
-        _refreshStreams();
+        final modules = command.data['modules'] as List<dynamic>?;
+
+        print('MODULEEES $modules');
+
+        if (modules != null) {
+          print('[renderCommand] Received modules: $modules');
+
+          for (final module in modules) {
+            final name = module['name'];
+            final value = module['value'] as int?;
+
+            print('[renderCommand] Processing module: $name = $value');
+
+            if (name == 'engagement') {
+              videoState.streamsToBeRendered[command.id]?.engagement = value;
+            } else if (name == 'drowsiness') {
+              videoState.streamsToBeRendered[command.id]?.drowsiness = value;
+            }
+          }
+          _refreshStreams();
+        } else {
+          print('[renderCommand] No modules received in engagement command');
+        }
         break;
 
       case DataChannelCmd.message:
         print('message received ${command.data['message']}');
         messages.add(ChatMessage(
-            message: command.data['message'],
-            displayName: command.data['displayName'],
-            time: DateTime.parse(command.data['time']),
-            avatarUrl: command.data['avatarUrl'],
-            seen: false));
+          message: command.data['message'],
+          displayName: command.data['displayName'],
+          time: DateTime.parse(command.data['time']),
+          avatarUrl: command.data['avatarUrl'],
+          seen: false,
+        ));
         _conferenceChatStream.add(messages);
         break;
 
@@ -1541,51 +1553,61 @@ class ConferenceRepoImpl extends ConferenceRepo {
           mute(kind: 'audio', muted: !localVideoRenderer.isAudioMuted!);
         }
         break;
+
       case DataChannelCmd.userStatus:
-        // TODO: Handle this case.
         throw UnimplementedError();
     }
   }
 
-  _getEngagement() async {
-    return;
-
+  _getScore() async {
     if (engagementIsRunning || (localVideoRenderer.isVideoMuted ?? false))
       return;
 
     engagementIsRunning = true;
 
     try {
-      // var image = await localVideoRenderer.mediaStream
-      //     ?.getVideoTracks()
-      //     .first
-      //     .captureFrame();
+      final image = await captureFrameFromVideo(localVideoRenderer);
+      final img = base64Encode(image!.asUint8List().toList()).toString();
 
-      var image = await captureFrameFromVideo(localVideoRenderer);
+      final activeModules =
+          user?.modules.where((m) => m.enabled == 1).toList() ?? [];
 
-      var img = base64Encode(image!.asUint8List().toList()).toString();
-
-      final engagement = await _api.getEngagement(
+      for (final module in activeModules) {
+        final result = await _api.getModuleScore(
+          url: module.url,
+          name: module.name,
           averageAttention: 0,
-          callId: callId,
+          callId: callId!,
           image: img,
-          participantId: user?.id);
+          participantId: user!.id,
+        );
 
-      // var engagement = Random().nextDouble() * (0.85 - 0.4) + 0.4;
+        if (result != null) {
+          final scoreInt = (result.score! * 100).toInt();
 
-      if (engagement! > 0) {
-        var eng = ((engagement) * 100).toInt();
-        videoState.streamsToBeRendered['local']?.engagement = eng;
-        _refreshStreams();
-        _calculateAverageEngagement();
-        _sendMyEngagementToOthers(eng);
-        await _sendMyEngagementToServer(engagement);
+          print('aaaaaaaa');
+          print(videoState.streamsToBeRendered['local']
+              ?.moduleScores[result.name.toLowerCase()]);
+          videoState.streamsToBeRendered['local']?.moduleScores[result.name] =
+              scoreInt;
+
+          // if (result.name == 'engagement') {
+          //   videoState.streamsToBeRendered['local']?.engagement = scoreInt;
+          //   await _sendMyEngagementToServer(result.score!);
+          // } else if (result.name == 'drowsiness') {
+          //   videoState.streamsToBeRendered['local']?.drowsiness = scoreInt;
+          // }
+
+          _sendMyEngagementToOthers(score: scoreInt, name: result.name);
+        }
       }
+
+      _refreshStreams();
     } finally {
       engagementIsRunning = false;
       if (engagementEnabled) {
         await Future.delayed(const Duration(seconds: 3));
-        _getEngagement();
+        _getScore();
       }
     }
   }
@@ -1621,14 +1643,29 @@ class ConferenceRepoImpl extends ConferenceRepo {
         engagement: engagement, userId: user!.id.toString(), callId: callId);
   }
 
-  _sendMyEngagementToOthers(int engagement) async {
-    var data = {'engagement': engagement};
+  _sendMyEngagementToOthers({
+    int? score,
+    String? name,
+  }) async {
+    final List<Map<String, dynamic>> modulesToSend = [];
 
-    await videoPlugin?.sendData(jsonEncode(DataChannelCommand(
-            command: DataChannelCmd.engagement,
-            id: user!.id.toString(),
-            data: data)
-        .toJson()));
+    if (score != null) {
+      modulesToSend.add({'name': name, 'value': score});
+    }
+
+    if (modulesToSend.isEmpty) return;
+
+    final data = {'modules': modulesToSend};
+
+    await videoPlugin?.sendData(
+      jsonEncode(
+        DataChannelCommand(
+          command: DataChannelCmd.engagement,
+          id: user!.id.toString(),
+          data: data,
+        ).toJson(),
+      ),
+    );
   }
 
   _broadcastMessage(String msg) async {
@@ -1667,7 +1704,7 @@ class ConferenceRepoImpl extends ConferenceRepo {
   @override
   Future<void> toggleEngagement({required bool enabled}) async {
     engagementEnabled = enabled;
-    _getEngagement();
+    _getScore();
   }
 
   @override

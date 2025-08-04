@@ -2,10 +2,8 @@ import 'dart:async';
 import 'dart:math';
 import 'dart:typed_data';
 
-import 'package:cinteraction_vc/core/io/network/models/data_channel_command.dart';
 import 'package:cinteraction_vc/layers/data/dto/chat/chat_detail_dto.dart';
 import 'package:cinteraction_vc/layers/data/dto/chat/chat_dto.dart';
-import 'package:cinteraction_vc/layers/domain/entities/user.dart';
 import 'package:cinteraction_vc/layers/presentation/cubit/chat/chat_state.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -299,6 +297,7 @@ class ChatCubit extends Cubit<ChatState> with BlocLoggy {
       final users =
           await chatUseCases.loadUsers(page, paginate, companyId, search);
       print('usersSSSS: $users');
+
       // _onUsers(users);
     } catch (e) {
       print('Error loading users: $e');
