@@ -122,7 +122,7 @@ class ApiImpl extends Api {
     try {
       dio.options.headers['Authorization'] = Urls.IVIAccessToken;
       var response = await dio.post(Urls.engagement, data: formData);
-      return double.parse(response.data['engagements'][0]['engagement_rank'].toString());
+      return double.parse(response.data['engagements'][0]['score'].toString());
       return -1;
     } on DioException catch (e, s) {
       print(e);
@@ -132,9 +132,12 @@ class ApiImpl extends Api {
     return 0;
   }
 
-
   @override
-  Future<double?> getDrowsiness({required averageAttention, required callId, required image, required participantId}) async{
+  Future<double?> getDrowsiness(
+      {required averageAttention,
+      required callId,
+      required image,
+      required participantId}) async {
     var formData = {
       'average_attention': 0,
       'call_id': callId,
@@ -155,10 +158,9 @@ class ApiImpl extends Api {
     } on Exception catch (e) {
       print(e);
     }
-    return 0;;
+    return 0;
+    ;
   }
-
-
 
   @override
   Future<ApiResponse<MeetingDto>> startCall(
