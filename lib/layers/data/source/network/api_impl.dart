@@ -122,7 +122,7 @@ class ApiImpl extends Api {
     try {
       dio.options.headers['Authorization'] = Urls.IVIAccessToken;
       var response = await dio.post(Urls.engagement, data: formData);
-      return double.parse(response.data['engagements'][0]['engagement_rank'].toString());
+      return double.parse(response.data['engagements'][0]['score'].toString());
       return -1;
     } on DioException catch (e, s) {
       print(e);
