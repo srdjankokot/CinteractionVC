@@ -1,3 +1,4 @@
+import 'package:cinteraction_vc/core/extension/context.dart';
 import 'package:cinteraction_vc/core/extension/context_user.dart';
 import 'package:cinteraction_vc/core/ui/widget/content_layout_web.dart';
 import 'package:cinteraction_vc/layers/presentation/cubit/ai/ai_cubit.dart';
@@ -82,26 +83,29 @@ class _AiModulesPageState extends State<AiModulesPage> {
                   child: Column(
                     children: [
                       const SizedBox(height: 24),
-                      Container(
-                        color: const Color(0xFFEFEFEF),
-                        padding: const EdgeInsets.symmetric(vertical: 12),
-                        child: Row(
-                          children: [
-                            const Expanded(child: Center(child: Text('Name'))),
-                            const Expanded(
-                              flex: 3,
-                              child: Center(child: Text('URL')),
-                            ),
-                            if (context.getCurrentUser?.companyAdmin == true)
+                      if (context.isWide)
+                        Container(
+                          color: const Color(0xFFEFEFEF),
+                          padding: const EdgeInsets.symmetric(vertical: 12),
+                          child: Row(
+                            children: [
                               const Expanded(
-                                flex: 2,
-                                child: Center(child: Text('Active')),
+                                  child: Center(child: Text('Name'))),
+                              const Expanded(
+                                flex: 3,
+                                child: Center(child: Text('URL')),
                               ),
-                            const Expanded(
-                                child: Center(child: Text('Actions'))),
-                          ],
+                              if (context.getCurrentUser?.companyAdmin == true)
+                                const Expanded(
+                                  flex: 2,
+                                  child: Center(child: Text('Active')),
+                                ),
+                              if (context.getCurrentUser?.companyAdmin == true)
+                                const Expanded(
+                                    child: Center(child: Text('Actions'))),
+                            ],
+                          ),
                         ),
-                      ),
                       if (state is AiLoading)
                         const Padding(
                           padding: EdgeInsets.symmetric(vertical: 50),
@@ -124,100 +128,213 @@ class _AiModulesPageState extends State<AiModulesPage> {
                                     ],
                                   ),
                                 )
-                              : ListView.separated(
-                                  itemCount: modules.length,
-                                  separatorBuilder: (_, __) =>
-                                      const Divider(height: 1),
-                                  itemBuilder: (context, index) {
-                                    final module = modules[index];
+                              : context.isWide
+                                  ? ListView.separated(
+                                      itemCount: modules.length,
+                                      separatorBuilder: (_, __) =>
+                                          const Divider(height: 1),
+                                      itemBuilder: (context, index) {
+                                        final module = modules[index];
 
-                                    return Padding(
-                                      padding: const EdgeInsets.symmetric(
-                                          vertical: 12),
-                                      child: Row(
-                                        children: [
-                                          Expanded(
-                                            child: Center(
-                                              child: Text(module.name),
-                                            ),
-                                          ),
-                                          Expanded(
-                                            flex: 3,
-                                            child: Center(
-                                              child: Text(
-                                                module.url,
-                                                style: theme
-                                                    .textTheme.bodyMedium
-                                                    ?.copyWith(
-                                                  color: Colors.blue,
+                                        return Padding(
+                                          padding: const EdgeInsets.symmetric(
+                                              vertical: 12),
+                                          child: Row(
+                                            children: [
+                                              Expanded(
+                                                child: Center(
+                                                  child: Text(module.name),
                                                 ),
                                               ),
-                                            ),
-                                          ),
-                                          if (context.getCurrentUser
-                                                  ?.companyAdmin ==
-                                              true)
-                                            Expanded(
-                                              flex: 2,
-                                              child: Center(
-                                                child: Switch(
-                                                  value: module.enabled == 1,
-                                                  onChanged: (val) {
-                                                    final newEnabled =
-                                                        val ? 1 : 0;
-                                                    final companyId = context
-                                                        .getCurrentUser
-                                                        ?.companyId;
-                                                    if (companyId != null) {
-                                                      context
-                                                          .read<AiCubit>()
-                                                          .updateModule(
-                                                            moduleId: module.id,
-                                                            companyId:
-                                                                companyId,
-                                                            name: module.name,
-                                                            url: module.url,
-                                                            enabled: newEnabled,
-                                                            isGlobal:
-                                                                module.isGlobal,
-                                                          );
-                                                    }
-                                                  },
-                                                  inactiveThumbColor:
-                                                      Colors.black,
-                                                  activeTrackColor:
-                                                      Colors.green,
-                                                ),
-                                              ),
-                                            ),
-                                          Expanded(
-                                            child: Center(
-                                              child: TextButton(
-                                                child:
-                                                    const Text('Remove module'),
-                                                onPressed: () {
-                                                  showDialog(
-                                                    context: context,
-                                                    builder: (_) =>
-                                                        BlocProvider.value(
-                                                      value: context
-                                                          .read<AiCubit>(),
-                                                      child: DeleteAiModuleDialog(
-                                                          companyId: context
-                                                              .getCurrentUser!
-                                                              .companyId!,
-                                                          moduleId: module.id),
+                                              Expanded(
+                                                flex: 3,
+                                                child: Center(
+                                                  child: Text(
+                                                    module.url,
+                                                    style: theme
+                                                        .textTheme.bodyMedium
+                                                        ?.copyWith(
+                                                      color: Colors.blue,
                                                     ),
-                                                  );
-                                                },
+                                                  ),
+                                                ),
                                               ),
+                                              if (context.getCurrentUser
+                                                      ?.companyAdmin ==
+                                                  true)
+                                                Expanded(
+                                                  flex: 2,
+                                                  child: Center(
+                                                    child: Switch(
+                                                      value:
+                                                          module.enabled == 1,
+                                                      onChanged: (val) {
+                                                        final newEnabled =
+                                                            val ? 1 : 0;
+                                                        final companyId =
+                                                            context
+                                                                .getCurrentUser
+                                                                ?.companyId;
+                                                        if (companyId != null) {
+                                                          context
+                                                              .read<AiCubit>()
+                                                              .updateModule(
+                                                                moduleId:
+                                                                    module.id,
+                                                                companyId:
+                                                                    companyId,
+                                                                name:
+                                                                    module.name,
+                                                                url: module.url,
+                                                                enabled:
+                                                                    newEnabled,
+                                                                isGlobal: module
+                                                                    .isGlobal,
+                                                              );
+                                                        }
+                                                      },
+                                                      inactiveThumbColor:
+                                                          Colors.black,
+                                                      activeTrackColor:
+                                                          Colors.green,
+                                                    ),
+                                                  ),
+                                                ),
+                                              if (context.getCurrentUser!
+                                                      .companyAdmin ==
+                                                  true)
+                                                Expanded(
+                                                  child: Center(
+                                                    child: TextButton(
+                                                      child: const Text(
+                                                          'Remove module'),
+                                                      onPressed: () {
+                                                        showDialog(
+                                                          context: context,
+                                                          builder: (_) =>
+                                                              BlocProvider
+                                                                  .value(
+                                                            value: context.read<
+                                                                AiCubit>(),
+                                                            child:
+                                                                DeleteAiModuleDialog(
+                                                              companyId: context
+                                                                  .getCurrentUser!
+                                                                  .companyId!,
+                                                              moduleId:
+                                                                  module.id,
+                                                            ),
+                                                          ),
+                                                        );
+                                                      },
+                                                    ),
+                                                  ),
+                                                ),
+                                            ],
+                                          ),
+                                        );
+                                      },
+                                    )
+                                  : ListView.separated(
+                                      itemCount: modules.length,
+                                      separatorBuilder: (_, __) =>
+                                          const Divider(height: 1),
+                                      itemBuilder: (context, index) {
+                                        final module = modules[index];
+                                        return Card(
+                                          margin: const EdgeInsets.symmetric(
+                                              vertical: 8, horizontal: 4),
+                                          child: Padding(
+                                            padding: const EdgeInsets.all(12.0),
+                                            child: Column(
+                                              crossAxisAlignment:
+                                                  CrossAxisAlignment.start,
+                                              children: [
+                                                Text("Name: ${module.name}",
+                                                    style: theme
+                                                        .textTheme.titleMedium),
+                                                const SizedBox(height: 4),
+                                                Text("URL: ${module.url}",
+                                                    style: theme
+                                                        .textTheme.bodySmall
+                                                        ?.copyWith(
+                                                            color:
+                                                                Colors.blue)),
+                                                const SizedBox(height: 8),
+                                                if (context.getCurrentUser
+                                                        ?.companyAdmin ==
+                                                    true)
+                                                  Row(
+                                                    children: [
+                                                      const Text("Active: "),
+                                                      Switch(
+                                                        value:
+                                                            module.enabled == 1,
+                                                        onChanged: (val) {
+                                                          final companyId =
+                                                              context
+                                                                  .getCurrentUser
+                                                                  ?.companyId;
+                                                          if (companyId !=
+                                                              null) {
+                                                            context
+                                                                .read<AiCubit>()
+                                                                .updateModule(
+                                                                  moduleId:
+                                                                      module.id,
+                                                                  companyId:
+                                                                      companyId,
+                                                                  name: module
+                                                                      .name,
+                                                                  url: module
+                                                                      .url,
+                                                                  enabled: val
+                                                                      ? 1
+                                                                      : 0,
+                                                                  isGlobal: module
+                                                                      .isGlobal,
+                                                                );
+                                                          }
+                                                        },
+                                                      ),
+                                                    ],
+                                                  ),
+                                                if (context.getCurrentUser
+                                                        ?.companyAdmin ==
+                                                    true)
+                                                  Align(
+                                                    alignment:
+                                                        Alignment.centerRight,
+                                                    child: TextButton(
+                                                      child: const Text(
+                                                          'Remove module'),
+                                                      onPressed: () {
+                                                        showDialog(
+                                                          context: context,
+                                                          builder: (_) =>
+                                                              BlocProvider
+                                                                  .value(
+                                                            value: context.read<
+                                                                AiCubit>(),
+                                                            child:
+                                                                DeleteAiModuleDialog(
+                                                              companyId: context
+                                                                  .getCurrentUser!
+                                                                  .companyId!,
+                                                              moduleId:
+                                                                  module.id,
+                                                            ),
+                                                          ),
+                                                        );
+                                                      },
+                                                    ),
+                                                  ),
+                                              ],
                                             ),
                                           ),
-                                        ],
-                                      ),
-                                    );
-                                  },
-                                ),
+                                        );
+                                      },
+                                    ),
                         ),
                     ],
                   ),
