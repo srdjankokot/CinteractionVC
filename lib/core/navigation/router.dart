@@ -9,10 +9,12 @@ import 'package:cinteraction_vc/layers/domain/usecases/chat/chat_usecases.dart';
 import 'package:cinteraction_vc/layers/domain/usecases/conference/conference_usecases.dart';
 import 'package:cinteraction_vc/layers/presentation/cubit/app/app_cubit.dart';
 import 'package:cinteraction_vc/layers/presentation/cubit/chat/chat_cubit.dart';
+import 'package:cinteraction_vc/layers/presentation/cubit/company/company_cubit.dart';
 import 'package:cinteraction_vc/layers/presentation/cubit/home/home_cubit.dart';
 import 'package:cinteraction_vc/layers/presentation/ui/auth/reset_pass_enter_new.dart';
 import 'package:cinteraction_vc/layers/presentation/ui/chat/chat_room.dart';
-
+import 'package:cinteraction_vc/layers/presentation/ui/company/create_company_page.dart';
+import 'package:flutter/material.dart';
 
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
@@ -56,7 +58,7 @@ final GoRouter router = GoRouter(
         );
       },
       redirect: (context, state) {
-        print('🔁 Router redirect triggered for path: ${state.uri.toString()}');
+        print('🔁${state.uri.toString()}');
         var user = context.getCurrentUser;
         if (user != null) {
           print("router: ${AppRoute.home.path}");
@@ -136,12 +138,27 @@ final GoRouter router = GoRouter(
           print("router: ${AppRoute.auth.path}");
           return AppRoute.auth.path;
         }
+
+        if (user.companyId == null) {
+          return AppRoute.createCompany.path;
+        }
         var roomId = getIt.get<LocalStorage>().getRoomId();
         if (roomId != null) {
           getIt.get<LocalStorage>().clearRoomId();
           return AppRoute.meeting.path.replaceAll(':roomId', roomId);
         }
         return null;
+      },
+    ),
+
+    // Create company
+    GoRoute(
+      path: AppRoute.createCompany.path,
+      builder: (context, state) {
+        return BlocProvider(
+          create: (_) => getIt<CompanyCubit>(), // ako si ga registrovao u getIt
+          child: const CreateCompanyPage(),
+        );
       },
     ),
 
@@ -167,7 +184,7 @@ final GoRouter router = GoRouter(
                 chatUseCases: getIt.get<ChatUseCases>(),
                 isInCallChat: true),
           ),
-        ], child: VideoRoomPage());
+        ], child: const VideoRoomPage());
       },
       redirect: (context, state) {
         print('🔁 Router redirect triggered for path: ${state.uri.toString()}');

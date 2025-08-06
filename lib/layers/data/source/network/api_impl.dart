@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:cinteraction_vc/core/app/injector.dart';
 import 'package:cinteraction_vc/core/io/network/models/login_response.dart';
+import 'package:cinteraction_vc/layers/data/dto/ai/ai_module_dto.dart';
 import 'package:cinteraction_vc/layers/data/dto/api_error_dto.dart';
 import 'package:cinteraction_vc/layers/data/dto/chat/chat_detail_dto.dart';
 import 'package:cinteraction_vc/layers/data/dto/user_dto.dart';
@@ -61,9 +62,210 @@ class ApiImpl extends Api {
   }
 
   @override
+  Future<ApiResponse<void>> createCompany({
+    required int ownerId,
+    required String name,
+  }) async {
+    try {
+      Dio dio = await getIt.getAsync<Dio>();
+
+      final data = {
+        "owner_id": ownerId,
+        "name": name,
+        "welcome_text": "Welcome to the company",
+        "timetable_link": null,
+      };
+
+      final response = await dio.post(
+        Urls.createCompany,
+        data: data,
+      );
+
+      print('createCompany response: ${response.statusCode}');
+      return ApiResponse(response: null);
+    } on DioException catch (e) {
+      return ApiResponse(error: ApiErrorDto.fromDioException(e));
+    }
+  }
+
+  @override
+  Future<ApiResponse<void>> deleteCompany({required companyId}) async {
+    try {
+      Dio dio = await getIt.getAsync<Dio>();
+      await dio.delete('${Urls.deleteCompany} $companyId');
+      return ApiResponse(response: null);
+    } on DioException catch (e) {
+      return ApiResponse(error: ApiErrorDto.fromDioException(e));
+    }
+  }
+
+  @override
+  Future<ApiResponse<void>> removeUserFromCompany(
+      {required companyId, required userId}) async {
+    try {
+      Dio dio = await getIt.getAsync<Dio>();
+      final response = await dio.post(
+        '${Urls.baseUrl}/api/companies/$companyId/remove/$userId',
+      );
+      return ApiResponse(response: response);
+    } on DioException catch (e) {
+      return ApiResponse(error: ApiErrorDto.fromDioException(e));
+    }
+  }
+
+  @override
+  Future<ApiResponse<void>> inviteUserToCompany({
+    required int companyId,
+    required String email,
+    required bool isAdmin,
+  }) async {
+    try {
+      Dio dio = await getIt.getAsync<Dio>();
+
+      final data = {
+        "company_id": companyId,
+        "email": email,
+        "company_admin": isAdmin,
+      };
+
+      final response = await dio.post(
+        Urls.inviteUserToCompany,
+        data: data,
+        options: Options(
+          validateStatus: (_) => true,
+        ),
+      );
+
+      if (response.statusCode != null && response.statusCode! >= 400) {
+        return ApiResponse(
+          error: ApiErrorDto.fromDioResponse(response),
+        );
+      }
+
+      return ApiResponse(response: null);
+    } catch (e) {
+      return ApiResponse(
+        error: ApiErrorDto(
+          errorCode: 0,
+          errorMessage: e.toString(),
+        ),
+      );
+    }
+  }
+
+  @override
+  Future<ApiResponse<ModuleListResponse>> getCompanyModules(
+      {required int companyId}) async {
+    try {
+      Dio dio = await getIt.getAsync<Dio>();
+
+      Response response = await dio.get(
+        '${Urls.getAllAiModules}$companyId',
+      );
+
+      var moduleListResponse = ModuleListResponse.fromJson(response.data);
+
+      print('moduleListResponse: ${moduleListResponse.modules}');
+
+      return ApiResponse(response: moduleListResponse);
+    } on DioException catch (e) {
+      return ApiResponse(error: ApiErrorDto.fromDioException(e));
+    }
+  }
+
+  @override
+  Future<ApiResponse<ModuleListResponse>> updateModule({
+    required int moduleId,
+    required int companyId,
+    required String aiModuleName,
+    required String aiModuleUrl,
+    required int enabled,
+    required int isGlobal,
+  }) async {
+    try {
+      Dio dio = await getIt.getAsync<Dio>();
+
+      final payload = {
+        'company_id': companyId,
+        'name': aiModuleName,
+        'url': aiModuleUrl,
+        'enabled': enabled,
+      };
+
+      final url = isGlobal == 1
+          ? '${Urls.editGlobalModule}$moduleId'
+          : '${Urls.editModule}$moduleId';
+
+      final response = await dio.put(
+        url,
+        data: payload,
+      );
+
+      final moduleListResponse = ModuleListResponse.fromJson(response.data);
+
+      return ApiResponse(response: moduleListResponse);
+    } on DioException catch (e) {
+      return ApiResponse(error: ApiErrorDto.fromDioException(e));
+    }
+  }
+
+  @override
+  Future<ApiResponse<ModuleListResponse>> deleteAiModule({
+    required int moduleId,
+    required int companyId,
+  }) async {
+    try {
+      Dio dio = await getIt.getAsync<Dio>();
+      final payload = {
+        'company_id': companyId,
+      };
+      Response response = await dio.delete(
+        '${Urls.deleteModule}$moduleId',
+        data: payload,
+      );
+      final moduleListResponse = ModuleListResponse.fromJson(response.data);
+
+      return ApiResponse(response: moduleListResponse);
+    } on DioException catch (e) {
+      return ApiResponse(error: ApiErrorDto.fromDioException(e));
+    }
+  }
+
+  @override
+  Future<ApiResponse<ModuleListResponse>> addAiModule({
+    required int companyId,
+    required String aiModuleName,
+    required String aiModuleUrl,
+    required int enabled,
+  }) async {
+    try {
+      final dio = await getIt.getAsync<Dio>();
+
+      final payload = {
+        'company_id': companyId,
+        'name': aiModuleName,
+        'url': aiModuleUrl,
+        'enabled': enabled,
+      };
+
+      final response = await dio.post(
+        Urls.createModule,
+        data: payload,
+      );
+
+      final moduleListResponse = ModuleListResponse.fromJson(response.data);
+
+      return ApiResponse(response: moduleListResponse);
+    } on DioException catch (e) {
+      return ApiResponse(error: ApiErrorDto.fromDioException(e));
+    }
+  }
+
+  @override
   Future<ApiResponse<UserListResponse>> getCompanyUsers(
     int page,
     int paginate,
+    int companyId,
     String? search,
   ) async {
     try {
@@ -78,7 +280,7 @@ class ApiImpl extends Api {
       };
 
       Response response = await dio.get(
-        Urls.getCompanyUsers,
+        '${Urls.getCompanyUsers}/$companyId/users',
         queryParameters: queryParams,
       );
 
@@ -150,8 +352,8 @@ class ApiImpl extends Api {
     try {
       dio.options.headers['Authorization'] = Urls.IVIAccessToken;
       var response = await dio.post(Urls.drowsiness, data: formData);
-      return double.parse(
-          response.data['engagements'][0]['engagement_rank'].toString());
+
+      return double.parse(response.data['drowsiness'][0]['score'].toString());
       return -1;
     } on DioException catch (e, s) {
       print(e);
@@ -160,6 +362,48 @@ class ApiImpl extends Api {
     }
     return 0;
     ;
+  }
+
+  @override
+  Future<({double score, String name})?> getModuleScore({
+    required String url,
+    required String name,
+    required int averageAttention,
+    required int callId,
+    required String image,
+    required String participantId,
+  }) async {
+    final formData = {
+      'average_attention': averageAttention,
+      'call_id': callId,
+      'current_attention': 0,
+      'image': image,
+      'participant_id': participantId,
+    };
+
+    final Dio dio = await getIt.getAsync<Dio>();
+    try {
+      dio.options.headers['Authorization'] = Urls.IVIAccessToken;
+      final response = await dio.post(url, data: formData);
+
+      final responseData = response.data;
+      if (responseData is Map && responseData.isNotEmpty) {
+        final firstKey = responseData.keys.first;
+        final score = responseData[firstKey]?[0]?['score'];
+
+        if (score != null) {
+          print('module: $name, score: $score');
+          return (
+            score: double.parse(score.toString()),
+            name: name.toLowerCase(),
+          );
+        }
+      }
+    } catch (e) {
+      print('getModuleScore error: $e');
+    }
+
+    return null;
   }
 
   @override

@@ -88,7 +88,7 @@ class ChatRepoImpl extends ChatRepo {
     _session = await getIt.getAsync<JanusSession>();
     await _attachPlugin();
     if (!isInCall) {
-      loadUsers(1, 20);
+      loadUsers(1, 20, user!.companyId!);
       loadChats(1, 20);
     }
     _setup();
@@ -581,8 +581,9 @@ class ChatRepoImpl extends ChatRepo {
   //   _chatDetailsStream.add(updatedChatDetails);
   // }
   @override
-  loadUsers(int page, int paginate, [String? search]) async {
-    var response = await _api.getCompanyUsers(page, paginate, search);
+  loadUsers(int page, int paginate, int companyId, [String? search]) async {
+    var response =
+        await _api.getCompanyUsers(page, paginate, companyId, search);
 
     if (response.response != null) {
       var newUsers = response.response!.users

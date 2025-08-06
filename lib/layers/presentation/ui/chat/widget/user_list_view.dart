@@ -1,5 +1,6 @@
 import 'package:cinteraction_vc/assets/colors/Colors.dart';
 import 'package:cinteraction_vc/core/extension/context.dart';
+import 'package:cinteraction_vc/core/extension/context_user.dart';
 import 'package:cinteraction_vc/core/extension/string.dart';
 import 'package:cinteraction_vc/layers/data/dto/user_dto.dart';
 import 'package:flutter/material.dart';
@@ -80,9 +81,10 @@ class _UsersListViewState extends State<UsersListView> {
     });
 
     try {
-      await context
-          .read<ChatCubit>()
-          .loadUsers(widget.state.usersPagination!.meta.currentPage + 1, 10);
+      await context.read<ChatCubit>().loadUsers(
+          widget.state.usersPagination!.meta.currentPage + 1,
+          context.getCurrentUser!.companyId!,
+          10);
     } catch (e) {
       debugPrint("⚠️ Greška pri učitavanju korisnika: $e");
     }
@@ -118,7 +120,8 @@ class _UsersListViewState extends State<UsersListView> {
                             icon: const Icon(Icons.clear),
                             onPressed: () {
                               _searchController.clear();
-                              context.read<ChatCubit>().loadUsers(1, 20);
+                              context.read<ChatCubit>().loadUsers(
+                                  1, 20, context.getCurrentUser!.companyId!);
                             },
                           )
                         : null,
@@ -127,7 +130,9 @@ class _UsersListViewState extends State<UsersListView> {
                     ),
                   ),
                   onChanged: (value) {
-                    context.read<ChatCubit>().loadUsers(1, 20, value.trim());
+                    context
+                        .read<ChatCubit>()
+                        .loadUsers(1, 20, context.getCurrentUser!.companyId!);
                   },
                 )),
             Expanded(
