@@ -1524,11 +1524,13 @@ class ConferenceRepoImpl extends ConferenceRepo {
 
             print('[renderCommand] Processing module: $name = $value');
 
-            if (name == 'engagement') {
-              videoState.streamsToBeRendered[command.id]?.engagement = value;
-            } else if (name == 'drowsiness') {
-              videoState.streamsToBeRendered[command.id]?.drowsiness = value;
-            }
+
+            videoState.streamsToBeRendered[command.id]?.moduleScores[name] = value!;
+            // if (name == 'engagement') {
+            //   videoState.streamsToBeRendered[command.id]?.engagement = value;
+            // } else if (name == 'drowsiness') {
+            //   videoState.streamsToBeRendered[command.id]?.drowsiness = value;
+            // }
           }
           _refreshStreams();
         } else {
@@ -1683,20 +1685,7 @@ class ConferenceRepoImpl extends ConferenceRepo {
         .toJson()));
   }
 
-  _calculateAverageEngagement() {
-    var sum = 0;
-    var avgInclude = 0;
-    for (var videoStream in videoState.streamsToBeRendered.values) {
-      if (videoStream.engagement != null) {
-        if (videoStream.engagement! > 0) {
-          avgInclude++;
-          sum = sum + videoStream.engagement!;
-        }
-      }
-    }
-    double avg = sum / avgInclude;
-    _avgEngagementStream.add(avg.toInt());
-  }
+
 
   bool engagementEnabled = true;
   bool engagementIsRunning = false;

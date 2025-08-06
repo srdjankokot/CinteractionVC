@@ -9,8 +9,7 @@ class VideoWidgetState extends Equatable {
   final bool audioMuted;
   final bool handUp;
   final bool isSpeaking;
-  final int engagement;
-  final int drowsiness;
+  final Map<String, int>? moduleScores;
   final int publisherId;
   final String publisherName;
   final StreamRenderer videoRenderer;
@@ -23,8 +22,7 @@ class VideoWidgetState extends Equatable {
     required this.audioMuted,
     required this.isSpeaking,
     required this.handUp,
-    required this.engagement,
-    required this.drowsiness,
+    required this.moduleScores,
     required this.publisherId,
     required this.publisherName,
     required this.videoRenderer,
@@ -37,8 +35,7 @@ class VideoWidgetState extends Equatable {
     bool audioMuted = false,
     bool isSpeaking = false,
     bool handUp = false,
-    int engagement = 0,
-    int drowsiness = 0,
+        Map<String, int> moduleScores = const {},
     int publisherId = 0,
     String publisherName = "1",
   }) : this(
@@ -49,8 +46,7 @@ class VideoWidgetState extends Equatable {
           audioMuted: audioMuted,
           isSpeaking: isSpeaking,
           handUp: handUp,
-          engagement: engagement,
-          drowsiness: drowsiness,
+          moduleScores: moduleScores,
           publisherId: publisherId,
           publisherName: publisherName,
           videoRenderer: videoRenderer,
@@ -64,8 +60,7 @@ class VideoWidgetState extends Equatable {
     bool? audioMuted,
     bool? isSpeaking,
     bool? handUp,
-    int? engagement,
-    int? drowsiness,
+    Map<String, int>? moduleScores,
     int? publisherId,
     String? publisherName,
     StreamRenderer? videoRenderer,
@@ -78,8 +73,7 @@ class VideoWidgetState extends Equatable {
       audioMuted: audioMuted ?? this.audioMuted,
       isSpeaking: isSpeaking ?? this.isSpeaking,
       handUp: handUp ?? this.handUp,
-      engagement: engagement ?? this.engagement,
-      drowsiness: drowsiness ?? this.drowsiness,
+      moduleScores: moduleScores ?? this.moduleScores,
       publisherId: publisherId ?? this.publisherId,
       publisherName: publisherName ?? this.publisherName,
       videoRenderer: videoRenderer ?? this.videoRenderer,
@@ -95,8 +89,7 @@ class VideoWidgetState extends Equatable {
         audioMuted,
         isSpeaking,
         handUp,
-        engagement,
-        drowsiness,
+        moduleScores,
         publisherId,
         publisherName,
         videoRenderer,

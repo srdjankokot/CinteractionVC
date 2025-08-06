@@ -15,8 +15,10 @@ class StreamRenderer {
   String id;
   String? publisherId;
   String publisherName;
-  int? engagement;
-  int? drowsiness;
+
+
+  // int? engagement;
+  // int? drowsiness;
   Map<String, int> moduleScores = {};
   String? audioMid;
   String? videoMid;
