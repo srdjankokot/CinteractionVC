@@ -27,7 +27,7 @@ class Urls {
       'Bearer 15|Jsoy8PjvLXRw3Y9ggJyYRr4ylHamlWecHNKDSOVk';
 
   static String engagement = '$baseIviUrl/engagement/rank';
-  static String drowsiness = '$baseIviUrl/engagement/rank';
+  static String drowsiness = '$baseIviUrl/drowsiness/';
   static String sendEngagement = '$baseUrl/api/meetings/update/attention/';
   static String dashboard = '$baseUrl/api/dashboards';
 
@@ -35,8 +35,6 @@ class Urls {
   static String setNewPassword = '$baseUrl/api/reset-password';
   static String sentMessage =
       'https://7a2f-188-2-51-157.ngrok-free.app/api/message';
-
-  static String getCompanyUsers = '$baseUrl/api/users/chat';
 
   ////////CHAT_URLS////////
   static String getAllChats = '$baseUrl/api/chats';
@@ -52,6 +50,18 @@ class Urls {
   static String downloadMedia = '$baseUrl/api/chats/show/media/';
   static String userImage = '$baseUrl/api/users/image/';
 
+  //////////COMPANY/////////////
+  static String getCompanyUsers = '$baseUrl/api/companies';
+  static String createCompany = '$baseUrl/api/companies/create';
+  static String deleteCompany = '$baseUrl/api/companies/delete/';
+  static String inviteUserToCompany = '$baseUrl/api/companies/invite/user';
+
+  /////////AI_MODULE/////////////
+  static String getAllAiModules = '$baseUrl/api/module/company/';
+  static String createModule = '$baseUrl/api/module/create';
+  static String editModule = '$baseUrl/api/module/update/';
+  static String editGlobalModule = '$baseUrl/api/module/update/global/';
+  static String deleteModule = '$baseUrl/api/module/force/delete/';
 
   static String updateUser(String userId) {
     return '$baseUrl/api/users/update/$userId';

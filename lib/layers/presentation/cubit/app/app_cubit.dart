@@ -60,6 +60,16 @@ class AppCubit extends Cubit<AppState> {
     emit(state.copyWith(user: updatedUser.response));
   }
 
+  Future<void> fetchAndUpdateUser() async {
+    print('UserChanged');
+    final response = await getIt<Api>().getUserDetails();
+    if (response.response != null) {
+      final updatedUser = await api.getUserDetails();
+      getIt.get<LocalStorage>().saveLoggedUser(user: updatedUser.response!);
+      emit(state.copyWith(user: updatedUser.response));
+    }
+  }
+
   Future<void> changeUserStatus(UserStatus status) async {
     emit(state.copyWith(userStatus: status));
   }

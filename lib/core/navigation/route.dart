@@ -15,7 +15,8 @@ enum AppRoute {
   forgotPasswordSuccess('/auth/forgot_password/success'),
   enterNewPassword('/reset-app'),
   chat('/chat'),
-  echo('/echo');
+  echo('/echo'),
+  createCompany('/create-company');
 
   const AppRoute(this.path);
 
@@ -27,5 +28,4 @@ extension AppRouteNavigation on AppRoute {
 
   void push(BuildContext context) => context.push(path);
   void pushReplacement(BuildContext context) => context.pushReplacement(path);
-
 }

@@ -1,6 +1,7 @@
 import 'dart:io';
 import 'dart:typed_data';
 
+import 'package:cinteraction_vc/layers/data/dto/ai/ai_module_dto.dart';
 import 'package:cinteraction_vc/layers/data/dto/meetings/meeting_dto.dart';
 import 'package:cinteraction_vc/layers/domain/entities/dashboard/dashboard_response.dart';
 import 'package:cinteraction_vc/layers/domain/entities/user.dart';
@@ -28,14 +29,63 @@ abstract class Api {
       required image,
       required participantId});
 
-
   Future<double?> getDrowsiness(
       {required averageAttention,
-        required callId,
-        required image,
-        required participantId});
+      required callId,
+      required image,
+      required participantId});
 
+  Future<({double? score, String name})?> getModuleScore({
+    required String url,
+    required String name,
+    required int averageAttention,
+    required int callId,
+    required String image,
+    required String participantId,
+  });
 
+  Future<ApiResponse<ModuleListResponse>> getCompanyModules({
+    required int companyId,
+  });
+
+  Future<ApiResponse<ModuleListResponse>> addAiModule({
+    required int companyId,
+    required String aiModuleName,
+    required String aiModuleUrl,
+    required int enabled,
+  });
+
+  Future<ApiResponse<ModuleListResponse>> updateModule({
+    required int moduleId,
+    required int companyId,
+    required String aiModuleName,
+    required String aiModuleUrl,
+    required int enabled,
+    required int isGlobal,
+  });
+
+  Future<ApiResponse<ModuleListResponse>> deleteAiModule({
+    required int moduleId,
+    required int companyId,
+  });
+
+  Future<ApiResponse<void>> createCompany({
+    required int ownerId,
+    required String name,
+  });
+
+  Future<ApiResponse<void>> deleteCompany({
+    required companyId,
+  });
+
+  Future<ApiResponse<void>> removeUserFromCompany(
+      {required companyId, required userId});
+
+  Future<ApiResponse<void>> inviteUserToCompany({
+    required int companyId,
+    required String email,
+    required bool isAdmin,
+  });
 
   Future<ApiResponse<bool>> sendEngagement(
       {required engagement, required userId, required callId});
@@ -70,7 +120,7 @@ abstract class Api {
       {required text, required from, required to});
 
   Future<ApiResponse<UserListResponse>> getCompanyUsers(
-      int page, int paginate, String? search);
+      int page, int paginate, int companyId, String? search);
 
   Future<ApiResponse<ChatPagination>> getAllChats(
       {required int page, required int paginate, String? search});

@@ -1,22 +1,30 @@
 import 'package:cinteraction_vc/core/navigation/route.dart';
 import 'package:cinteraction_vc/core/navigation/router.dart';
 import 'package:cinteraction_vc/core/util/secure_local_storage.dart';
+import 'package:cinteraction_vc/layers/data/repos/ai_module_repo_impl.dart';
 import 'package:cinteraction_vc/layers/data/repos/chat_repo_impl.dart';
+import 'package:cinteraction_vc/layers/data/repos/company_repo_impl.dart';
 import 'package:cinteraction_vc/layers/data/repos/conference_repo_impl.dart';
 import 'package:cinteraction_vc/layers/data/repos/dashboard_repo_impl.dart';
 import 'package:cinteraction_vc/layers/data/repos/meetings_repo_impl.dart';
 import 'package:cinteraction_vc/layers/data/source/network/api_impl.dart';
+import 'package:cinteraction_vc/layers/domain/repos/ai_repo.dart';
 import 'package:cinteraction_vc/layers/domain/repos/call_repo.dart';
 import 'package:cinteraction_vc/layers/domain/repos/chat_repo.dart';
+import 'package:cinteraction_vc/layers/domain/repos/company_repo.dart';
 import 'package:cinteraction_vc/layers/domain/repos/conference_repo.dart';
 import 'package:cinteraction_vc/layers/domain/repos/dashboard_repo.dart';
 import 'package:cinteraction_vc/layers/domain/repos/home_repo.dart';
+import 'package:cinteraction_vc/layers/domain/usecases/ai/ai_use_cases.dart';
 import 'package:cinteraction_vc/layers/domain/usecases/call/call_use_cases.dart';
 import 'package:cinteraction_vc/layers/domain/usecases/chat/chat_usecases.dart';
+import 'package:cinteraction_vc/layers/domain/usecases/company/company_use_cases.dart';
 import 'package:cinteraction_vc/layers/domain/usecases/dashboard/dashboard_usecases.dart';
 import 'package:cinteraction_vc/layers/domain/usecases/home/home_use_cases.dart';
+import 'package:cinteraction_vc/layers/presentation/cubit/ai/ai_cubit.dart';
 import 'package:cinteraction_vc/layers/presentation/cubit/app/app_cubit.dart';
 import 'package:cinteraction_vc/layers/presentation/cubit/chat/chat_cubit.dart';
+import 'package:cinteraction_vc/layers/presentation/cubit/company/company_cubit.dart';
 import 'package:cinteraction_vc/main.dart';
 import 'package:dio/dio.dart';
 import 'package:get_it/get_it.dart';
@@ -82,7 +90,8 @@ Future<void> initializeGetIt() async {
           DioException e,
           handler,
         ) async {
-          if (e.response?.statusCode == 401 && e.requestOptions.path!= Urls.engagement) {
+          if (e.response?.statusCode == 401 &&
+              e.requestOptions.path != Urls.engagement) {
             print("Token expired. Logging out...");
             await getIt.get<LocalStorage>().clearUser();
             // getIt.get<ChatCubit>().chatUseCases.leaveRoom();
@@ -190,6 +199,20 @@ Future<void> initializeGetIt() async {
   });
 
   getIt.registerLazySingleton<AppCubit>(() => AppCubit());
+
+  getIt.registerFactory<CompanyRepo>(() => CompanyRepoImpl(api: getIt()));
+  getIt.registerFactory(() => CompanyUseCases(companyRepos: getIt()));
+  getIt.registerFactory(() => CompanyCubit(
+        companyUseCases: getIt(),
+        appCubit: getIt<AppCubit>(),
+      ));
+
+  getIt.registerFactory<AiRepo>(() => AiModuleRepoImpl(api: getIt()));
+  getIt.registerFactory(() => AiUseCases(aiRepos: getIt()));
+  getIt.registerFactory(() => AiCubit(
+        aiUseCases: getIt(),
+        appCubit: getIt<AppCubit>(),
+      ));
 
   Map<String, dynamic>? getHeader() {
     return {

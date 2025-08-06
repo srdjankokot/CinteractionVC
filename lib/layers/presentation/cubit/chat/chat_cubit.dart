@@ -2,7 +2,6 @@ import 'dart:async';
 import 'dart:math';
 import 'dart:typed_data';
 
-import 'package:cinteraction_vc/core/io/network/models/data_channel_command.dart';
 import 'package:cinteraction_vc/layers/data/dto/chat/chat_detail_dto.dart';
 import 'package:cinteraction_vc/layers/data/dto/chat/chat_dto.dart';
 import 'package:cinteraction_vc/layers/presentation/cubit/chat/chat_state.dart';
@@ -116,7 +115,16 @@ class ChatCubit extends Cubit<ChatState> with BlocLoggy {
         numberOfParticipants: Random().nextInt(10000)));
   }
 
+  Future<void> removeUserLocally(int userId) async {
+    final currentUsers = List<UserDto>.from(state.users ?? []);
+    currentUsers.removeWhere((user) => int.parse(user.id) == userId);
+
+    emit(state.copyWith(users: currentUsers));
+  }
+
   void _onUsers(List<UserDto> newUsers, {bool isSearch = false}) {
+    print('newUsers: $newUsers');
+
     if (isSearch) {
       emit(state.copyWith(
         isInitial: false,
@@ -283,10 +291,13 @@ class ChatCubit extends Cubit<ChatState> with BlocLoggy {
     }
   }
 
-  Future<void> loadUsers(int page, int paginate, [String? search]) async {
+  Future<void> loadUsers(int page, int paginate, int companyId,
+      [String? search]) async {
     try {
-      final users = await chatUseCases.loadUsers(page, paginate, search);
-      print('users: $users');
+      final users =
+          await chatUseCases.loadUsers(page, paginate, companyId, search);
+      print('usersSSSS: $users');
+
       // _onUsers(users);
     } catch (e) {
       print('Error loading users: $e');

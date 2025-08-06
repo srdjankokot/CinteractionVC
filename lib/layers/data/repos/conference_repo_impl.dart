@@ -169,7 +169,7 @@ class ConferenceRepoImpl extends ConferenceRepo {
           _canBePublished().then((value) async {
             if (value) {
               await _publishMyOwn();
-              _getEngagement();
+              _getScore();
             }
           });
         }
@@ -990,7 +990,7 @@ class ConferenceRepoImpl extends ConferenceRepo {
 
     await _changeMetaData();
     _refreshStreams();
-    _getEngagement();
+    _getScore();
   }
 
   @override
@@ -1511,19 +1511,40 @@ class ConferenceRepoImpl extends ConferenceRepo {
         break;
 
       case DataChannelCmd.engagement:
-        videoState.streamsToBeRendered[command.id]?.engagement =
-            command.data['engagement'] as int;
-        _refreshStreams();
+        final modules = command.data['modules'] as List<dynamic>?;
+
+        print('MODULEEES $modules');
+
+        if (modules != null) {
+          print('[renderCommand] Received modules: $modules');
+
+          for (final module in modules) {
+            final name = module['name'];
+            final value = module['value'] as int?;
+
+            print('[renderCommand] Processing module: $name = $value');
+
+            if (name == 'engagement') {
+              videoState.streamsToBeRendered[command.id]?.engagement = value;
+            } else if (name == 'drowsiness') {
+              videoState.streamsToBeRendered[command.id]?.drowsiness = value;
+            }
+          }
+          _refreshStreams();
+        } else {
+          print('[renderCommand] No modules received in engagement command');
+        }
         break;
 
       case DataChannelCmd.message:
         print('message received ${command.data['message']}');
         messages.add(ChatMessage(
-            message: command.data['message'],
-            displayName: command.data['displayName'],
-            time: DateTime.parse(command.data['time']),
-            avatarUrl: command.data['avatarUrl'],
-            seen: false));
+          message: command.data['message'],
+          displayName: command.data['displayName'],
+          time: DateTime.parse(command.data['time']),
+          avatarUrl: command.data['avatarUrl'],
+          seen: false,
+        ));
         _conferenceChatStream.add(messages);
         break;
 
@@ -1532,51 +1553,61 @@ class ConferenceRepoImpl extends ConferenceRepo {
           mute(kind: 'audio', muted: !localVideoRenderer.isAudioMuted!);
         }
         break;
+
       case DataChannelCmd.userStatus:
-        // TODO: Handle this case.
         throw UnimplementedError();
     }
   }
 
-  _getEngagement() async {
-    // return;
-
+  _getScore() async {
     if (engagementIsRunning || (localVideoRenderer.isVideoMuted ?? false))
       return;
 
     engagementIsRunning = true;
 
     try {
-      // var image = await localVideoRenderer.mediaStream
-      //     ?.getVideoTracks()
-      //     .first
-      //     .captureFrame();
+      final image = await captureFrameFromVideo(localVideoRenderer);
+      final img = base64Encode(image!.asUint8List().toList()).toString();
 
-      var image = await captureFrameFromVideo(localVideoRenderer);
+      final activeModules =
+          user?.modules.where((m) => m.enabled == 1).toList() ?? [];
 
-      var img = base64Encode(image!.asUint8List().toList()).toString();
-
-      final engagement = await _api.getEngagement(
+      for (final module in activeModules) {
+        final result = await _api.getModuleScore(
+          url: module.url,
+          name: module.name,
           averageAttention: 0,
-          callId: callId,
+          callId: callId!,
           image: img,
-          participantId: user?.id);
+          participantId: user!.id,
+        );
 
-      // var engagement = Random().nextDouble() * (0.85 - 0.4) + 0.4;
+        if (result != null) {
+          final scoreInt = (result.score! * 100).toInt();
 
-      if (engagement! > 0) {
-        var eng = ((engagement) * 100).toInt();
-        videoState.streamsToBeRendered['local']?.engagement = eng;
-        _refreshStreams();
-        _calculateAverageEngagement();
-        _sendMyEngagementToOthers(eng);
-        await _sendMyEngagementToServer(engagement);
+          print('aaaaaaaa');
+          print(videoState.streamsToBeRendered['local']
+              ?.moduleScores[result.name.toLowerCase()]);
+          videoState.streamsToBeRendered['local']?.moduleScores[result.name] =
+              scoreInt;
+
+          // if (result.name == 'engagement') {
+          //   videoState.streamsToBeRendered['local']?.engagement = scoreInt;
+          //   await _sendMyEngagementToServer(result.score!);
+          // } else if (result.name == 'drowsiness') {
+          //   videoState.streamsToBeRendered['local']?.drowsiness = scoreInt;
+          // }
+
+          _sendMyEngagementToOthers(score: scoreInt, name: result.name);
+        }
       }
+
+      _refreshStreams();
     } finally {
       engagementIsRunning = false;
       if (engagementEnabled) {
         await Future.delayed(const Duration(seconds: 3));
-        _getEngagement();
+        _getScore();
       }
     }
   }
@@ -1612,14 +1643,29 @@ class ConferenceRepoImpl extends ConferenceRepo {
         engagement: engagement, userId: user!.id.toString(), callId: callId);
   }
 
-  _sendMyEngagementToOthers(int engagement) async {
-    var data = {'engagement': engagement};
+  _sendMyEngagementToOthers({
+    int? score,
+    String? name,
+  }) async {
+    final List<Map<String, dynamic>> modulesToSend = [];
 
-    await videoPlugin?.sendData(jsonEncode(DataChannelCommand(
-            command: DataChannelCmd.engagement,
-            id: user!.id.toString(),
-            data: data)
-        .toJson()));
+    if (score != null) {
+      modulesToSend.add({'name': name, 'value': score});
+    }
+
+    if (modulesToSend.isEmpty) return;
+
+    final data = {'modules': modulesToSend};
+
+    await videoPlugin?.sendData(
+      jsonEncode(
+        DataChannelCommand(
+          command: DataChannelCmd.engagement,
+          id: user!.id.toString(),
+          data: data,
+        ).toJson(),
+      ),
+    );
   }
 
   _broadcastMessage(String msg) async {
@@ -1658,7 +1704,7 @@ class ConferenceRepoImpl extends ConferenceRepo {
   @override
   Future<void> toggleEngagement({required bool enabled}) async {
     engagementEnabled = enabled;
-    _getEngagement();
+    _getScore();
   }
 
   @override
