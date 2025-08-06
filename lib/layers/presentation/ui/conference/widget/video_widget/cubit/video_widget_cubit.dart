@@ -40,8 +40,7 @@ class VideoWidgetCubit extends Cubit<VideoWidgetState> {
       isVideoFlowing: stream.isVideoFlowing,
       isSpeaking: stream.isTalking,
       handUp: stream.isHandUp,
-      engagement: stream.engagement,
-      drowsiness: stream.drowsiness,
+      moduleScores: stream.moduleScores,
     ));
   }
 }
