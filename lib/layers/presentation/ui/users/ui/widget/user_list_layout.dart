@@ -29,6 +29,9 @@ class UserListLayout extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return BlocBuilder<ChatCubit, ChatState>(
+      buildWhen: (previous, current) {
+        return previous != current;
+      },
       builder: (context, state) {
         final users = state.users ?? [];
 

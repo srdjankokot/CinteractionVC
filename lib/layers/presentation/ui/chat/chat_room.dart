@@ -393,6 +393,9 @@ Widget getLeftSide(BuildContext context, ChatState state, double? width,
               : UsersListView(state: state),
         ),
         BlocBuilder<HomeCubit, HomeState>(
+          buildWhen: (previous, current) {
+            return previous != current;
+          },
           builder: (context, state) {
             print(
                 "Builder rebuilding with nextMeeting: ${state.nextMeeting?.eventName}");
