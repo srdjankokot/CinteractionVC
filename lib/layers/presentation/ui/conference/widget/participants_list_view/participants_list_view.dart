@@ -83,64 +83,64 @@ Widget getParticipantsView(
           ),
           Expanded(
               child: ListView.builder(
-                itemCount: contributors.length,
-                itemBuilder: (context, index) {
-                  var contributor = contributors[index];
-                  var name = contributor.publisherName;
+            itemCount: contributors.length,
+            itemBuilder: (context, index) {
+              var contributor = contributors[index];
+              var name = contributor.publisherName;
 
-                  return Padding(
-                    padding: const EdgeInsets.all(2.0),
-                    child: Row(
-                      crossAxisAlignment: CrossAxisAlignment.center,
-                      children: [
-                        UserImage.medium([contributor.getUserImageDTO()]),
-                        const SizedBox(width: 12),
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                name,
-                                style: const TextStyle(
-                                  fontFamily: 'Montserrat',
-                                  fontSize: 16,
-                                  fontWeight: FontWeight.w500,
-                                  color: Colors.black87,
-                                ),
-                                overflow: TextOverflow.ellipsis,
-                                maxLines: 1,
-                              ),
-                            ],
+              return Padding(
+                padding: const EdgeInsets.all(2.0),
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    UserImage.medium([contributor.getUserImageDTO()]),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            name,
+                            style: const TextStyle(
+                              fontFamily: 'Montserrat',
+                              fontSize: 16,
+                              fontWeight: FontWeight.w500,
+                              color: Colors.black87,
+                            ),
+                            overflow: TextOverflow.ellipsis,
+                            maxLines: 1,
                           ),
-                        ),
-                        CallButtonShape(
-                            size: 35,
-                            bgColor: !contributor.isAudioMuted!
-                                ? ColorConstants.kStateSuccess
-                                : ColorConstants.kPrimaryColor,
-                            image: !contributor.isAudioMuted!
-                                ? imageSVGAsset('icon_microphone') as Widget
-                                : imageSVGAsset('icon_microphone_disabled')
-                            as Widget,
-                            onClickAction: () async {
-                              await context
-                                  .read<ConferenceCubit>()
-                                  .muteByID(contributor.id);
-                            }),
-                        const SizedBox(width: 6),
-                        TextButton(
-                            onPressed: () {
-                              context.read<ConferenceCubit>().kick(contributor.id);
-                            },
-                            child: Text(
-                              "Kick",
-                              style: context.textTheme.bodySmall,
-                            ))
-                      ],
+                        ],
+                      ),
                     ),
-                  );
-                },
-              )),
+                    CallButtonShape(
+                        size: 35,
+                        bgColor: !(contributor.isAudioMuted ?? true)
+                            ? ColorConstants.kStateSuccess
+                            : ColorConstants.kPrimaryColor,
+                        image: !(contributor.isAudioMuted ?? true)
+                            ? imageSVGAsset('icon_microphone') as Widget
+                            : imageSVGAsset('icon_microphone_disabled')
+                                as Widget,
+                        onClickAction: () async {
+                          await context
+                              .read<ConferenceCubit>()
+                              .muteByID(contributor.id);
+                        }),
+                    const SizedBox(width: 6),
+                    TextButton(
+                        onPressed: () {
+                          context.read<ConferenceCubit>().kick(contributor.id);
+                        },
+                        child: Text(
+                          "Kick",
+                          style: context.textTheme.bodySmall,
+                        ))
+                  ],
+                ),
+              );
+            },
+          )),
         ],
       ),
     ),

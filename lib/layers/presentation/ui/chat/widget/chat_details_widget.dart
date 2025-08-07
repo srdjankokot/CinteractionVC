@@ -593,9 +593,9 @@ class _ChatDetailsWidgetState extends State<ChatDetailsWidget> {
                                                                               file.path)) {
                                                                             return GestureDetector(
                                                                               onTap: () async {
-                                                                                String updatedImagePath = file.path.replaceAll("cinteraction", "huawei");
+                                                                                // String updatedImagePath = file.path.replaceAll("cinteraction", "huawei");
 
-                                                                                _showImageDialog(context, updatedImagePath);
+                                                                                _showImageDialog(context, file.path);
                                                                               },
                                                                               child: Padding(
                                                                                 padding: const EdgeInsets.only(top: 8.0),
@@ -609,7 +609,7 @@ class _ChatDetailsWidgetState extends State<ChatDetailsWidget> {
                                                                                           fit: BoxFit.cover,
                                                                                         )
                                                                                       : Image.network(
-                                                                                          file.path.replaceAll("cinteraction", "huawei"),
+                                                                                          file.path,
                                                                                           width: 200,
                                                                                           height: 200,
                                                                                           fit: BoxFit.cover,

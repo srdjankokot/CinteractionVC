@@ -1513,7 +1513,7 @@ class ConferenceRepoImpl extends ConferenceRepo {
       case DataChannelCmd.engagement:
         final modules = command.data['modules'] as List<dynamic>?;
 
-        print('MODULEEES $modules');
+        // print('MODULEEES $modules');
 
         if (modules != null) {
           print('[renderCommand] Received modules: $modules');
@@ -1522,10 +1522,10 @@ class ConferenceRepoImpl extends ConferenceRepo {
             final name = module['name'];
             final value = module['value'] as int?;
 
-            print('[renderCommand] Processing module: $name = $value');
+            // print('[renderCommand] Processing module: $name = $value');
 
-
-            videoState.streamsToBeRendered[command.id]?.moduleScores[name] = value!;
+            videoState.streamsToBeRendered[command.id]?.moduleScores[name] =
+                value!;
             // if (name == 'engagement') {
             //   videoState.streamsToBeRendered[command.id]?.engagement = value;
             // } else if (name == 'drowsiness') {
@@ -1684,8 +1684,6 @@ class ConferenceRepoImpl extends ConferenceRepo {
             data: data)
         .toJson()));
   }
-
-
 
   bool engagementEnabled = true;
   bool engagementIsRunning = false;

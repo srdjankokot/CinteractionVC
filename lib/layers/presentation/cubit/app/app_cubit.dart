@@ -12,7 +12,7 @@ import 'package:file_picker/file_picker.dart';
 
 class AppCubit extends Cubit<AppState> {
   AppCubit() : super(const AppState.initial()) {
-    loadUser();
+    _loadUserFromApi();
     load();
   }
 
@@ -58,6 +58,26 @@ class AppCubit extends Cubit<AppState> {
     final updatedUser = await api.getUserDetails();
     getIt.get<LocalStorage>().saveLoggedUser(user: updatedUser.response!);
     emit(state.copyWith(user: updatedUser.response));
+  }
+
+  Future<void> _loadUserFromApi() async {
+    try {
+      final response = await api.getUserDetails();
+      final user = response.response;
+
+      if (user != null) {
+        getIt.get<LocalStorage>().saveLoggedUser(user: user);
+
+        emit(state.copyWith(user: user));
+      }
+    } catch (e) {
+      print('Failed to load user from API: $e');
+
+      final user = getIt.get<LocalStorage>().loadLoggedUser();
+      if (user != null) {
+        emit(state.copyWith(user: user));
+      }
+    }
   }
 
   Future<void> fetchAndUpdateUser() async {
