@@ -103,12 +103,13 @@ class ParticipantVideoWidget extends StatelessWidget {
                             .where((entry) => entry.value > 0)
                             .expand((entry) => [
                                   Text(
-                                    entry.key,
-                                    style: const TextStyle(
-                                        fontSize: 10, color: Colors.white70),
+                                    '${entry.key[0].toUpperCase()}${entry.key.substring(1)}',
+                                    style: context.textTheme.displaySmall
+                                        ?.copyWith(color: Colors.white),
                                   ),
+                                  const SizedBox(height: 5),
                                   EngagementProgress(engagement: entry.value),
-                                  const SizedBox(height: 8),
+                                  const SizedBox(height: 5),
                                 ])
                             .toList(),
                       ),

@@ -136,14 +136,14 @@ final meetings = MenuItem(
 // );
 
 final aiModules = MenuItem(
-    route: null,
-    label: 'AI',
-    assetName: 'menu_ai',
-    body: BlocProvider(
-      create: (context) =>
-          AiCubit(aiUseCases: getIt.get(), appCubit: getIt.get<AppCubit>()),
-      child: const AiModulesPage(),
-    ));
+  route: null,
+  label: 'AI',
+  assetName: 'menu_ai',
+  body: BlocProvider.value(
+    value: getIt<AiCubit>(),
+    child: const AiModulesPage(),
+  ),
+);
 
 final profile = MenuItem(
   route: null,

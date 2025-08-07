@@ -20,8 +20,9 @@ class _AiModulesPageState extends State<AiModulesPage> {
   void initState() {
     super.initState();
     final companyId = context.getCurrentUser?.companyId;
-    if (companyId != null) {
-      context.read<AiCubit>().load(companyId: companyId);
+    final aiCubit = context.read<AiCubit>();
+    if (companyId != null && aiCubit.state is! AiLoaded) {
+      aiCubit.load(companyId: companyId);
     }
   }
 
@@ -70,6 +71,9 @@ class _AiModulesPageState extends State<AiModulesPage> {
           ),
           const SizedBox(height: 8),
           BlocBuilder<AiCubit, AiState>(
+            buildWhen: (previous, current) {
+              return previous != current;
+            },
             builder: (context, state) {
               if (state is AiError) {
                 return Center(
