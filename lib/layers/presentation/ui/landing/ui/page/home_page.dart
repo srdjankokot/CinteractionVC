@@ -36,9 +36,14 @@ class _HomePageState extends State<HomePage> {
 
   @override
   Widget build(BuildContext context) {
-    final tabs = context.isWide ? desktopMenu : mobileBottomMenu;
-
     final user = context.getCurrentUser;
+    final tabs = context.isWide
+        ? desktopMenu
+            .where((item) => item != aiModules || user?.companyAdmin == true)
+            .toList()
+        : mobileBottomMenu
+            .where((item) => item != aiModules || user?.companyAdmin == true)
+            .toList();
 
     final content = tabs[_selectedIndex].builder(context);
 

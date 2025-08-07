@@ -209,7 +209,7 @@ Future<void> initializeGetIt() async {
 
   getIt.registerFactory<AiRepo>(() => AiModuleRepoImpl(api: getIt()));
   getIt.registerFactory(() => AiUseCases(aiRepos: getIt()));
-  getIt.registerFactory(() => AiCubit(
+  getIt.registerLazySingleton<AiCubit>(() => AiCubit(
         aiUseCases: getIt(),
         appCubit: getIt<AppCubit>(),
       ));
