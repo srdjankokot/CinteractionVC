@@ -52,11 +52,7 @@ class EditGroupDialog extends StatelessWidget {
                 Align(
                   alignment: Alignment.center,
                   child: Text(
-                    "${allParticipants.length} participants", // Sada uključuje authUser-a
-                    style: const TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.bold,
-                    ),
+                    "${allParticipants.length} participants",
                   ),
                 ),
                 const SizedBox(height: 40.0),
@@ -73,8 +69,7 @@ class EditGroupDialog extends StatelessWidget {
 
                       return HoverParticipantTile(
                         participant: participant,
-                        isAuthUser:
-                            isAuthUser, // Prosleđuje se informacija da li je auth user
+                        isAuthUser: isAuthUser,
                         onRemove: () {
                           if (!isAuthUser) {
                             _showRemoveDialog(context, participant.name,

@@ -268,6 +268,7 @@ class ChatRepoImpl extends ChatRepo {
           int? chatIdParsed = parsed['chatId'];
           int? msgIdParsed = parsed['msgId'];
           print('recevidedMsgId: $msgIdParsed');
+          print('recevidedChatId: $chatIdParsed');
           try {
             Map<String, dynamic> result = jsonDecode(receviedMessage);
             var command = DataChannelCommand.fromJson(result);
@@ -323,7 +324,15 @@ class ChatRepoImpl extends ChatRepo {
             }
           }
 
-          if (matchedChat != null && chatIdParsed == chatDetailsDto.chatId) {
+          bool shouldShowInCurrentChat = matchedChat != null &&
+              chatDetailsDto.chatId != null &&
+              chatIdParsed == chatDetailsDto.chatId;
+
+          if (!shouldShowInCurrentChat && chatIdParsed != null) {
+            loadChats(1, 20);
+          }
+
+          if (shouldShowInCurrentChat) {
             final isFile = messageParsed.startsWith('http') &&
                 messageParsed.contains('/storage/');
 
@@ -367,7 +376,10 @@ class ChatRepoImpl extends ChatRepo {
             _chatDetailsStream.add(chatDetailsDto);
           }
 
-          getChatMessages(chatIdParsed!);
+          if (chatIdParsed != null) {
+            getChatMessages(chatIdParsed);
+          }
+
           _participantsStream.add((subscribers as List).cast<Participant>());
           _matchParticipantWithUser();
           // _matchParticipiantWithChat();
@@ -592,7 +604,7 @@ class ChatRepoImpl extends ChatRepo {
 
       if (search == null || search.isEmpty) {
         if (page == 1) {
-          users.clear(); // ← očisti listu ako je prva stranica
+          users.clear();
         }
         users.addAll(newUsers);
       } else {
@@ -858,15 +870,29 @@ class ChatRepoImpl extends ChatRepo {
     );
 
     if (response.error == null && response.response != null) {
-      List<String> participants =
-          participantIds.map((int value) => value.toString()).toList();
-      sendMessage(
-          response.response?.files?.isNotEmpty == true
-              ? response.response!.files![0].path
-              : messageContent,
-          participants,
-          chatId: chatId,
-          msgId: response.response!.id);
+      print('response.response!.chatId: ${response.response!.chatId}');
+      print('chatId: $chatId');
+      if (chatId == null && response.response!.chatId != null) {
+        chatDetailsDto = chatDetailsDto.copyWith(
+          chatId: response.response!.chatId,
+        );
+        _chatDetailsStream.add(chatDetailsDto);
+      } else {
+        List<String> participants =
+            participantIds.map((int value) => value.toString()).toList();
+
+        int? finalChatId = response.response!.chatId;
+
+        if (finalChatId != null) {
+          sendMessage(
+              response.response?.files?.isNotEmpty == true
+                  ? response.response!.files![0].path
+                  : messageContent,
+              participants,
+              chatId: finalChatId,
+              msgId: response.response!.id);
+        }
+      }
 
       // if (messageContent == '!@checkList') {
       //   return;
