@@ -3,6 +3,7 @@ import 'dart:typed_data';
 
 import 'package:cinteraction_vc/layers/data/dto/ai/ai_module_dto.dart';
 import 'package:cinteraction_vc/layers/data/dto/meetings/meeting_dto.dart';
+import 'package:cinteraction_vc/layers/data/dto/engagement_dto.dart';
 import 'package:cinteraction_vc/layers/domain/entities/dashboard/dashboard_response.dart';
 import 'package:cinteraction_vc/layers/domain/entities/user.dart';
 import 'package:file_picker/file_picker.dart';
@@ -159,5 +160,12 @@ abstract class Api {
     String? email,
     String? password,
     String? passwordConfirmation,
+  });
+
+  Future<ApiResponse<EngagementResponseDto>> createEngagement({
+    required int meetingId,
+    required int userId,
+    required int moduleId,
+    required double value,
   });
 }

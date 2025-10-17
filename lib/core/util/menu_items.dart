@@ -1,5 +1,4 @@
 import 'package:cinteraction_vc/core/extension/context.dart';
-import 'package:cinteraction_vc/core/extension/context_user.dart';
 import 'package:cinteraction_vc/layers/presentation/cubit/ai/ai_cubit.dart';
 import 'package:cinteraction_vc/layers/presentation/cubit/app/app_cubit.dart';
 import 'package:cinteraction_vc/layers/presentation/cubit/dashboard/dashboard_cubit.dart';
@@ -13,11 +12,10 @@ import '../../layers/presentation/cubit/home/home_cubit.dart';
 import '../../layers/presentation/cubit/meetings/meetings_cubit.dart';
 import '../../layers/presentation/cubit/roles/roles_cubit.dart';
 import '../../layers/presentation/cubit/users/users_cubit.dart';
-import '../../layers/presentation/ui/dashboard/ui/dashboard_screen.dart';
+import '../../layers/presentation/ui/charts/ui/charts_screen.dart';
 import '../../layers/presentation/ui/groups/repository/groups_repository.dart';
 import '../../layers/presentation/ui/groups/ui/groups_page.dart';
 import '../../layers/presentation/ui/home/ui/home_tab.dart';
-import '../../layers/presentation/ui/insights/ui/insights_screen.dart';
 import '../../layers/presentation/ui/meetings/ui/meetings_page.dart';
 import '../../layers/presentation/ui/profile/ui/profile_tab.dart';
 import '../../layers/presentation/ui/roles/repository/roles_repository.dart';
@@ -114,11 +112,11 @@ final home = MenuItem(
     ));
 final dashboard = MenuItem(
     route: null,
-    label: 'Dashboard',
+    label: 'Charts',
     assetName: 'menu_dashboard',
     body: BlocProvider(
       create: (context) => getIt.get<DashboardCubit>(),
-      child: const DashboardScreen(),
+      child: const ChartsScreen(),
     ));
 final meetings = MenuItem(
     route: null,
