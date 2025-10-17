@@ -6,6 +6,7 @@ import 'package:cinteraction_vc/layers/data/dto/ai/ai_module_dto.dart';
 import 'package:cinteraction_vc/layers/data/dto/api_error_dto.dart';
 import 'package:cinteraction_vc/layers/data/dto/chat/chat_detail_dto.dart';
 import 'package:cinteraction_vc/layers/data/dto/user_dto.dart';
+import 'package:cinteraction_vc/layers/data/dto/engagement_dto.dart';
 import 'package:cinteraction_vc/layers/domain/entities/meetings/meeting.dart';
 import 'package:cinteraction_vc/layers/domain/entities/user.dart';
 import 'package:cinteraction_vc/layers/domain/source/api.dart';
@@ -1117,6 +1118,37 @@ class ApiImpl extends Api {
       }
       var messageDto = MessageDto.fromJson(response.data);
       return ApiResponse(response: messageDto);
+    } on DioException catch (e) {
+      return ApiResponse(error: ApiErrorDto.fromDioException(e));
+    }
+  }
+
+  @override
+  Future<ApiResponse<EngagementResponseDto>> createEngagement({
+    required int meetingId,
+    required int userId,
+    required int moduleId,
+    required double value,
+  }) async {
+    try {
+      Dio dio = await getIt.getAsync<Dio>();
+
+      final data = {
+        'meeting_id': meetingId,
+        'user_id': userId,
+        'module_id': moduleId,
+        'value': value,
+      };
+
+      final response = await dio.post(
+        '${Urls.baseUrl}/api/engagement/create',
+        data: data,
+      );
+
+      print('createEngagement response: ${response.statusCode}');
+
+      final engagementResponse = EngagementResponseDto.fromJson(response.data);
+      return ApiResponse(response: engagementResponse);
     } on DioException catch (e) {
       return ApiResponse(error: ApiErrorDto.fromDioException(e));
     }

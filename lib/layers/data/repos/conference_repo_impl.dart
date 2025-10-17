@@ -1593,12 +1593,13 @@ class ConferenceRepoImpl extends ConferenceRepo {
           videoState.streamsToBeRendered['local']?.moduleScores[result.name] =
               scoreInt;
 
-          // if (result.name == 'engagement') {
-          //   videoState.streamsToBeRendered['local']?.engagement = scoreInt;
-          //   await _sendMyEngagementToServer(result.score!);
-          // } else if (result.name == 'drowsiness') {
-          //   videoState.streamsToBeRendered['local']?.drowsiness = scoreInt;
-          // }
+          // Šalji na server za sve module
+          await _createEngagementOnServer(result.score!, result.name);
+
+          // Dodatno šalji na engagement endpoint samo za engagement module
+          if (result.name == 'engagement') {
+            await _sendMyEngagementToServer(result.score!);
+          }
 
           _sendMyEngagementToOthers(score: scoreInt, name: result.name);
         }
@@ -1643,6 +1644,28 @@ class ConferenceRepoImpl extends ConferenceRepo {
   _sendMyEngagementToServer(double engagement) async {
     await _api.sendEngagement(
         engagement: engagement, userId: user!.id.toString(), callId: callId);
+  }
+
+  _createEngagementOnServer(double value, String moduleName) async {
+    try {
+      // Pronađi module_id na osnovu moduleName
+      final module = user?.modules.firstWhere(
+        (m) => m.name.toLowerCase() == moduleName.toLowerCase(),
+        orElse: () => user!.modules.first, // fallback na prvi modul
+      );
+
+      if (module != null) {
+        await _api.createEngagement(
+          meetingId: callId!,
+          userId: int.parse(user!.id),
+          moduleId: module.id,
+          value: value,
+        );
+        print('Engagement kreiran za $moduleName: $value');
+      }
+    } catch (e) {
+      print('Greška pri kreiranju engagement-a: $e');
+    }
   }
 
   _sendMyEngagementToOthers({
