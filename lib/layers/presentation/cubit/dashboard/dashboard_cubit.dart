@@ -1,3 +1,4 @@
+import 'package:cinteraction_vc/layers/data/dto/engagement_dto.dart';
 import 'package:cinteraction_vc/layers/domain/entities/dashboard/dashboard_response.dart';
 import 'package:cinteraction_vc/layers/domain/usecases/dashboard/dashboard_usecases.dart';
 import 'package:equatable/equatable.dart';
@@ -33,21 +34,14 @@ class DashboardCubit extends Cubit<DashboardState> with BlocLoggy {
 
     List<double> meetingAttended = [];
     data.response?.meetingsAttended.meetings.forEach((element) {
-      meetingAttended.add((element.value is int)
-          ? (element.value as int).toDouble()
-          : element.value as double);
+      meetingAttended.add(element.value.toDouble());
     });
 
     List<double> avgSession = [];
     List<double> avgUser = [];
     data.response?.sessionDuration.meetings.forEach((element) {
-      avgSession.add((element.duration is int)
-          ? (element.duration as int).toDouble()
-          : element.duration as double);
-
-      avgUser.add((element.users is int)
-          ? (element.users as int).toDouble()
-          : element.users as double);
+      avgSession.add(element.duration.toDouble());
+      avgUser.add(element.users.toDouble());
     });
 
     emit(state.copyWith(
@@ -62,5 +56,37 @@ class DashboardCubit extends Cubit<DashboardState> with BlocLoggy {
       realizedMeetings: data.response?.realizedMeetings.realized,
       missedMeetings: data.response?.realizedMeetings.missed,
     ));
+  }
+
+  void getEngagementTotalAverage(
+      {required int meetingId, required int moduleId}) async {
+    print(
+        '🔄 DashboardCubit: getEngagementTotalAverage called with meetingId: $meetingId, moduleId: $moduleId');
+    emit(state.copyWith(engagementLoading: true));
+
+    ApiResponse<EngagementTotalAverageDto> data =
+        await _dashboardUseCases.getEngagementTotalAverageUseCase(
+            meetingId: meetingId, moduleId: moduleId);
+
+    print('🔄 DashboardCubit: API response received');
+    print('🔄 Error: ${data.error}');
+    print('🔄 Response: ${data.response}');
+
+    if (data.error == null && data.response != null) {
+      print('✅ Engagement data loaded successfully');
+      print(
+          '✅ Total attention average points: ${data.response!.totalAttentionAverage.length}');
+      print('✅ Users average: ${data.response!.usersAverage.length}');
+
+      loggy.info('Engagement data loaded successfully');
+      emit(state.copyWith(
+        engagementLoading: false,
+        engagementData: data.response,
+      ));
+    } else {
+      print('❌ Failed to load engagement data: ${data.error?.toString()}');
+      loggy.error('Failed to load engagement data: ${data.error?.toString()}');
+      emit(state.copyWith(engagementLoading: false));
+    }
   }
 }

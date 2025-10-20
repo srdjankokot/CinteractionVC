@@ -66,4 +66,8 @@ class Urls {
   static String updateUser(String userId) {
     return '$baseUrl/api/users/update/$userId';
   }
+
+  static String getEngagementTotalAverage(int meetingId) {
+    return '$baseUrl/api/engagement/${1181}';
+  }
 }

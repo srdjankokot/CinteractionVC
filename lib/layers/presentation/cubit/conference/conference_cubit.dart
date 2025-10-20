@@ -26,7 +26,8 @@ class ConferenceCubit extends Cubit<ConferenceState> with BlocLoggy {
   final ConferenceUseCases conferenceUseCases;
 
   StreamSubscription<Map<dynamic, StreamRenderer>>? _conferenceSubscription;
-  StreamSubscription<Map<dynamic, StreamRenderer>>? _conferenceScreenShareSubscription;
+  StreamSubscription<Map<dynamic, StreamRenderer>>?
+      _conferenceScreenShareSubscription;
   StreamSubscription<String>? _conferenceEndedStream;
   StreamSubscription<List<ChatMessage>>? _conferenceMessageStream;
   StreamSubscription<Map<dynamic, StreamRenderer>>? _subscribersStream;
@@ -40,7 +41,9 @@ class ConferenceCubit extends Cubit<ConferenceState> with BlocLoggy {
         displayName: displayName, roomId: roomId);
     _conferenceSubscription =
         conferenceUseCases.getRendererStream().listen(_onConference);
-    _conferenceScreenShareSubscription = conferenceUseCases.getScreenShareStream().listen(_onConferenceScreenShare);
+    _conferenceScreenShareSubscription = conferenceUseCases
+        .getScreenShareStream()
+        .listen(_onConferenceScreenShare);
 
     _conferenceEndedStream =
         conferenceUseCases.getEndStream().listen(_onConferenceEnded);
@@ -54,18 +57,29 @@ class ConferenceCubit extends Cubit<ConferenceState> with BlocLoggy {
         .getAvgEngagementStream()
         .listen(_onEngagementChanged);
 
-    _toastMessageStream = conferenceUseCases.getToastMessageStream().listen(_onToastMessage);
+    _toastMessageStream =
+        conferenceUseCases.getToastMessageStream().listen(_onToastMessage);
 
-    _userIsTalkingStream = conferenceUseCases.userTalkingStream().listen(_showMicIsOff);
-    _disposeScreenSharingStream = conferenceUseCases.getDisposeScreenShareStream().listen(_screenShareDisposed);
+    _userIsTalkingStream =
+        conferenceUseCases.userTalkingStream().listen(_showMicIsOff);
+    _disposeScreenSharingStream = conferenceUseCases
+        .getDisposeScreenShareStream()
+        .listen(_screenShareDisposed);
 
     var meet = await conferenceUseCases.startCall();
+    print(
+        '🔵 startCall result: meet=$meet, callId=${meet?.callId}, chatId=${meet?.chatId}');
 
     if (meet == null) {
+      print('❌ startCall returned null!');
       emit(const ConferenceState.error(error: "Something went wrong"));
       return;
     } else {
-      emit(state.copyWith(isCallStarted: true, chatId: meet.chatId));
+      print(
+          '✅ Meeting started! callId: ${meet.callId}, chatId: ${meet.chatId}');
+      emit(state.copyWith(
+          isCallStarted: true, chatId: meet.chatId, meetId: meet.callId));
+      print('📝 State after emit: meetId=${state.meetId}');
     }
   }
 
@@ -114,23 +128,18 @@ class ConferenceCubit extends Cubit<ConferenceState> with BlocLoggy {
   // bool audioMuted = false;
   // final Map<dynamic, StreamRenderer> streamRenderers = {};
   Future<void> setShareScreenId(int userId) async {
-
-    if(state.screenShareId == userId * 1000 + 999)
-      {
-        emit(state.copyWith(screenShareId: 0));
-          return;
-      }
+    if (state.screenShareId == userId * 1000 + 999) {
+      emit(state.copyWith(screenShareId: 0));
+      return;
+    }
     emit(state.copyWith(screenShareId: userId * 1000 + 999));
   }
-
 
   Future<void> audioMute() async {
     var mute = state.audioMuted;
     await conferenceUseCases.mute('audio', !mute);
     emit(state.copyWith(audioMuted: !mute));
   }
-
-
 
   Future<void> videoMute() async {
     var muted = state.videoMuted;
@@ -162,27 +171,36 @@ class ConferenceCubit extends Cubit<ConferenceState> with BlocLoggy {
     conferenceUseCases.getParticipants();
   }
 
-  void _onConferenceScreenShare(Map<dynamic, StreamRenderer> screenShareStreams) {
+  void _onConferenceScreenShare(
+      Map<dynamic, StreamRenderer> screenShareStreams) {
     // loggy.info('list of streams: ${streams.length}');
     // Map<dynamic, StreamRenderer> s = streams;
 
     var lastShare = screenShareStreams.values.lastOrNull;
-    emit(state.copyWith(isInitial: false, streamScreenShares: screenShareStreams));
-    if(lastShare != null && state.screenShareId == -1)
-    {
+    emit(state.copyWith(
+        isInitial: false, streamScreenShares: screenShareStreams));
+    if (lastShare != null && state.screenShareId == -1) {
       emit(state.copyWith(screenShareId: int.parse(lastShare.id)));
     }
 
-    if(screenShareStreams.isEmpty)
-    {
-      emit(state.copyWith( screenShareId: -1));
+    if (screenShareStreams.isEmpty) {
+      emit(state.copyWith(screenShareId: -1));
     }
     conferenceUseCases.getParticipants();
   }
 
   void _onConferenceEnded(String reason) {
     loggy.info('call ended with reason: $reason');
-    emit(const ConferenceState.ended());
+    print(
+        '🔴 _onConferenceEnded called! Current state.meetId: ${state.meetId}');
+
+    // Use copyWith to preserve meetId and other state data
+    emit(state.copyWith(
+      isEnded: true,
+      isCallStarted: false,
+    ));
+
+    print('🔴 _onConferenceEnded: State after emit, meetId: ${state.meetId}');
   }
 
   void _onSubscribers(Map<dynamic, StreamRenderer> subscribers) {
@@ -253,8 +271,7 @@ class ConferenceCubit extends Cubit<ConferenceState> with BlocLoggy {
     emit(state.copyWith(screenShared: !screenShared));
   }
 
-  void _screenShareDisposed(void event)
-  {
+  void _screenShareDisposed(void event) {
     emit(state.copyWith(screenShared: false));
   }
 
@@ -305,9 +322,7 @@ class ConferenceCubit extends Cubit<ConferenceState> with BlocLoggy {
     }
   }
 
-
-  void _showMicIsOff(void event)
-  {
+  void _showMicIsOff(void event) {
     emit(state.copyWith(showingMicIsOff: true));
     Future.delayed(const Duration(seconds: 2)).then((_) {
       emit(state.copyWith(showingMicIsOff: false));

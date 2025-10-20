@@ -40,7 +40,6 @@ class ConferenceState extends Equatable {
   final RecordingStatus recording;
 
   const ConferenceState(
-
       {required this.isInitial,
       required this.isEnded,
       required this.isCallStarted,
@@ -61,8 +60,8 @@ class ConferenceState extends Equatable {
       this.unreadMessages,
       this.meetId,
       this.chatId,
-        required  this.screenShareId,
-        required this.numberOfStreamsCopy,
+      required this.screenShareId,
+      required this.numberOfStreamsCopy,
       required this.isGridLayout,
       this.error,
       this.toastMessage,
@@ -103,8 +102,7 @@ class ConferenceState extends Equatable {
             showingMicIsOff: false,
             showingParticipants: showingParticipants,
             recording: recording,
-        screenShareId: screenShareId
-  );
+            screenShareId: screenShareId);
 
   const ConferenceState.ended(
       {bool isInitial = false,
@@ -168,7 +166,7 @@ class ConferenceState extends Equatable {
             showingChat: showingChat,
             showingParticipants: showingParticipants,
             recording: recording,
-      screenShareId: -1);
+            screenShareId: -1);
 
   ConferenceState copyWith({
     bool? isInitial,
@@ -222,7 +220,6 @@ class ConferenceState extends Equatable {
         recording: recording ?? this.recording,
         showingMicIsOff: showingMicIsOff ?? this.showingMicIsOff,
         screenShareId: screenShareId ?? this.screenShareId,
-
         toastMessage: toastMessage);
   }
 
@@ -252,6 +249,6 @@ class ConferenceState extends Equatable {
         toastMessage,
         handUp,
         showingMicIsOff,
-    screenShareId
+        screenShareId
       ];
 }

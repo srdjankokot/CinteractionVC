@@ -10,23 +10,34 @@ class DashboardState extends Equatable {
       this.avgDurationPerSession,
       this.avgUsersPerMeeting,
       required this.usersPerMeeting,
-      required this.durationsPerSession});
+      required this.durationsPerSession,
+      this.engagementData,
+      this.engagementLoading});
 
   @override
-  List<Object?> get props =>
-      [loading, meetingAttendedSum, durationsPerSession, usersPerMeeting];
+  List<Object?> get props => [
+        loading,
+        meetingAttendedSum,
+        durationsPerSession,
+        usersPerMeeting,
+        engagementData,
+        engagementLoading
+      ];
 
   final bool? loading;
+  final bool? engagementLoading;
   final int? meetingAttendedSum;
   final int? realizedMeetings;
   final int? missedMeetings;
-  List<double> meetingAttended = List.empty();
+  final List<double> meetingAttended;
 
   final int? avgUsersPerMeeting;
-  List<double> usersPerMeeting = List.empty();
+  final List<double> usersPerMeeting;
 
   final int? avgDurationPerSession;
-  List<double> durationsPerSession = List.empty();
+  final List<double> durationsPerSession;
+
+  final EngagementTotalAverageDto? engagementData;
 
   DashboardState.initial(
       {bool loading = false,
@@ -48,7 +59,9 @@ class DashboardState extends Equatable {
       int? avgDurationPerSession,
       List<double>? meetingAttended,
       List<double>? usersPerMeeting,
-      List<double>? durationsPerSession}) {
+      List<double>? durationsPerSession,
+      EngagementTotalAverageDto? engagementData,
+      bool? engagementLoading}) {
     return DashboardState(
       loading: loading,
       meetingAttendedSum: meetingAttendedSum ?? this.meetingAttendedSum,
@@ -58,6 +71,8 @@ class DashboardState extends Equatable {
       usersPerMeeting: usersPerMeeting ?? this.usersPerMeeting,
       meetingAttended: meetingAttended ?? this.meetingAttended,
       durationsPerSession: durationsPerSession ?? this.durationsPerSession,
+      engagementData: engagementData ?? this.engagementData,
+      engagementLoading: engagementLoading ?? this.engagementLoading,
     );
   }
 }

@@ -1,17 +1,18 @@
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 import '../../../../../../assets/colors/Colors.dart';
+import '../../../../../data/dto/engagement_dto.dart';
 
 class UserChartCard extends StatelessWidget {
   final String userName;
   final double performanceValue;
-  final List<double> chartData;
+  final List<EngagementDataPoint> chartPoints; // time-based points
 
   const UserChartCard({
     super.key,
     required this.userName,
     required this.performanceValue,
-    required this.chartData,
+    required this.chartPoints,
   });
 
   @override
@@ -90,6 +91,15 @@ class UserChartCard extends StatelessWidget {
   }
 
   LineChartData _mainData(Color color) {
+    // Build spots from time-based points
+    final spots = chartPoints.asMap().entries.map((entry) {
+      final i = entry.key;
+      final y = (entry.value.avgValue * 100).toDouble();
+      return FlSpot(i.toDouble(), y);
+    }).toList();
+
+    final maxX = spots.isNotEmpty ? spots.last.x.toDouble() : 0.0;
+
     return LineChartData(
       gridData: FlGridData(
         show: true,
@@ -114,7 +124,7 @@ class UserChartCard extends StatelessWidget {
           sideTitles: SideTitles(
             showTitles: true,
             reservedSize: 30,
-            interval: 4,
+            interval: 1, // titles widget decides filtering
             getTitlesWidget: _bottomTitleWidgets,
           ),
         ),
@@ -135,14 +145,12 @@ class UserChartCard extends StatelessWidget {
         ),
       ),
       minX: 0,
-      maxX: 23,
+      maxX: maxX,
       minY: 0,
       maxY: 100,
       lineBarsData: [
         LineChartBarData(
-          spots: chartData.asMap().entries.map((entry) {
-            return FlSpot(entry.key.toDouble(), entry.value);
-          }).toList(),
+          spots: spots,
           isCurved: true,
           color: color,
           barWidth: 2.5,
@@ -173,13 +181,33 @@ class UserChartCard extends StatelessWidget {
       fontSize: 10,
     );
 
-    // Prikazujemo samo svaki 4. sat da ne bude previše gužve
-    if (value.toInt() % 4 == 0) {
-      return SideTitleWidget(
-        axisSide: meta.axisSide,
-        child: Text('${value.toInt().toString().padLeft(2, '0')}:00',
-            style: style),
-      );
+    final index = value.toInt();
+    if (index >= 0 && index < chartPoints.length) {
+      try {
+        final baseTime = DateTime.parse(chartPoints[index].timeSlotStart);
+        final time = baseTime.add(const Duration(hours: 2));
+
+        // Determine overall duration of this series
+        final first = DateTime.parse(chartPoints.first.timeSlotStart);
+        final last = DateTime.parse(chartPoints.last.timeSlotStart);
+        final totalSeconds = last.difference(first).inSeconds.abs();
+
+        final showSeconds = totalSeconds < 60; // under 1 minute
+        final shouldShow =
+            showSeconds || chartPoints.length <= 10 || index % 2 == 0;
+
+        if (!shouldShow) return const SizedBox.shrink();
+
+        final label = showSeconds
+            ? '${time.hour.toString().padLeft(2, '0')}:${time.minute.toString().padLeft(2, '0')}:${time.second.toString().padLeft(2, '0')}'
+            : '${time.hour.toString().padLeft(2, '0')}:${time.minute.toString().padLeft(2, '0')}';
+        return SideTitleWidget(
+          axisSide: meta.axisSide,
+          child: Text(label, style: style),
+        );
+      } catch (_) {
+        return const SizedBox.shrink();
+      }
     }
 
     return const SizedBox.shrink();
