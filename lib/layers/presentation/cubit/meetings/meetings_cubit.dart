@@ -33,7 +33,8 @@ class MeetingCubit extends Cubit<MeetingState> with BlocLoggy {
     }
 
     emit(state.copyWith(isLoading: true));
-    var meetings = await meetingUseCases.getPastMeetingsUseCase(meetingLoadPage);
+    var meetings =
+        await meetingUseCases.getPastMeetingsUseCase(meetingLoadPage);
     if (meetings.error == null) {
       var meetingsList = state.meetings;
       if (meetingsList.isEmpty) {
@@ -48,7 +49,6 @@ class MeetingCubit extends Cubit<MeetingState> with BlocLoggy {
 
       meetingLastPage = meetings.response?.lastPage ?? 100;
       emit(state.copyWith(meetings: meetingsList));
-
     } else {
       emit(state.copyWith(meetings: List.empty()));
     }

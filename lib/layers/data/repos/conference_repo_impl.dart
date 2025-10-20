@@ -25,6 +25,7 @@ import '../../../core/util/debouncer.dart';
 import '../../../core/util/platform/platform.dart';
 import '../../domain/entities/user.dart';
 import '../../domain/source/api.dart';
+import '../../presentation/cubit/chat/chat_cubit.dart';
 
 import '../source/local/local_storage.dart';
 
@@ -1106,9 +1107,7 @@ class ConferenceRepoImpl extends ConferenceRepo {
 
   Future<dynamic> _closeCall(String reason) async {
     await _endCall();
-    // Removed loadChats call to prevent navigation to chat after call ends
-    // Navigation is now handled in video_room.dart to go to ChartsScreen
-    // await getIt.get<ChatCubit>().loadChats(1, 20);
+    await getIt.get<ChatCubit>().loadChats(1, 20);
 
     // var listFeed = videoState.feedIdToDisplayStreamsMap.keys;
     List<int> listFeed = videoState.feedIdToDisplayStreamsMap.keys.toList();

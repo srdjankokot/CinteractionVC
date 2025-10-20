@@ -4,6 +4,7 @@ import 'package:cinteraction_vc/layers/presentation/cubit/app/app_cubit.dart';
 import 'package:cinteraction_vc/layers/presentation/cubit/dashboard/dashboard_cubit.dart';
 import 'package:cinteraction_vc/layers/presentation/ui/ai/ui/ai_page.dart';
 import 'package:cinteraction_vc/layers/presentation/ui/chat/chat_room.dart';
+import 'package:cinteraction_vc/layers/presentation/ui/dashboard/ui/dashboard_screen.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../layers/presentation/cubit/chat/chat_cubit.dart';
@@ -112,11 +113,11 @@ final home = MenuItem(
     ));
 final dashboard = MenuItem(
     route: null,
-    label: 'Charts',
+    label: 'Dashboard',
     assetName: 'menu_dashboard',
     body: BlocProvider(
       create: (context) => getIt.get<DashboardCubit>(),
-      child: const ChartsScreen(),
+      child: const DashboardScreen(),
     ));
 final meetings = MenuItem(
     route: null,

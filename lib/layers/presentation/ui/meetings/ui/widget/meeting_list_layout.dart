@@ -9,6 +9,9 @@ import '../../../../../../core/ui/images/image.dart';
 import '../../../../../../core/ui/widget/content_layout_web.dart';
 import '../../../../../../core/ui/widget/engagement_progress.dart';
 import '../../../../cubit/meetings/meetings_cubit.dart';
+import '../../../../../../core/app/injector.dart';
+import '../../../charts/ui/charts_screen.dart';
+import 'package:cinteraction_vc/layers/presentation/cubit/dashboard/dashboard_cubit.dart';
 
 class MeetingListLayout extends StatefulWidget {
   const MeetingListLayout({super.key});
@@ -20,6 +23,8 @@ class MeetingListLayout extends StatefulWidget {
 class _MeetingListLayoutState extends State<MeetingListLayout> {
   late double extentAfter;
   final _controller = ScrollController();
+
+  int? _selectedMeetingId; // inline charts selection
 
   @override
   void initState() {
@@ -39,8 +44,46 @@ class _MeetingListLayoutState extends State<MeetingListLayout> {
     }
   }
 
+  void _selectMeeting(int meetingId) {
+    setState(() => _selectedMeetingId = meetingId);
+  }
+
+  void _clearSelection() {
+    setState(() => _selectedMeetingId = null);
+  }
+
   @override
   Widget build(BuildContext context) {
+    if (_selectedMeetingId != null) {
+      // Show Charts inline with back button
+      return Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: Row(
+              children: [
+                IconButton(
+                  icon: const Icon(Icons.arrow_back),
+                  onPressed: _clearSelection,
+                ),
+                const SizedBox(width: 8),
+                Text('Charts for meeting #${_selectedMeetingId}',
+                    style: context.titleTheme.titleLarge),
+              ],
+            ),
+          ),
+          const Divider(height: 1),
+          Expanded(
+            child: BlocProvider(
+              create: (_) => getIt.get<DashboardCubit>(),
+              child: ChartsScreen(meetingId: _selectedMeetingId),
+            ),
+          ),
+        ],
+      );
+    }
+
     void showPastMeetings() {
       context.read<MeetingCubit>().loadMeetings();
       context.read<MeetingCubit>().tabChanged();
@@ -52,6 +95,7 @@ class _MeetingListLayoutState extends State<MeetingListLayout> {
     }
 
     return BlocConsumer<MeetingCubit, MeetingState>(
+      listener: (context, state) {},
       builder: (context, state) {
         Widget body;
         if (context.isWide) {
@@ -273,36 +317,43 @@ class _MeetingListLayoutState extends State<MeetingListLayout> {
                               TableCell(
                                 verticalAlignment:
                                     TableCellVerticalAlignment.middle,
-                                child: Padding(
-                                  padding: const EdgeInsets.all(12.0),
-                                  child: Text(
-                                    meeting.callId.toString(),
-                                    overflow: TextOverflow.clip,
+                                child: InkWell(
+                                  onTap: () => _selectMeeting(meeting.callId),
+                                  child: Padding(
+                                    padding: const EdgeInsets.all(12.0),
+                                    child: Text(
+                                      meeting.callId.toString(),
+                                      overflow: TextOverflow.clip,
+                                    ),
                                   ),
                                 ),
                               ),
                               TableCell(
-                                  child: Padding(
-                                padding:
-                                    const EdgeInsets.only(top: 27, bottom: 27),
-                                child: Row(
-                                  crossAxisAlignment: CrossAxisAlignment.center,
-                                  children: [
-                                    // UserImage.medium(meeting.organizer.imageUrl),
-                                    Padding(
-                                      padding:
-                                          const EdgeInsets.only(left: 12.0),
-                                      child: Column(
-                                        crossAxisAlignment:
-                                            CrossAxisAlignment.start,
-                                        children: [
-                                          Text(meeting.organizer ?? '',
-                                              style: context
-                                                  .textTheme.displaySmall)
-                                        ],
-                                      ),
-                                    )
-                                  ],
+                                  child: InkWell(
+                                onTap: () => _selectMeeting(meeting.callId),
+                                child: Padding(
+                                  padding: const EdgeInsets.only(
+                                      top: 27, bottom: 27),
+                                  child: Row(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.center,
+                                    children: [
+                                      // UserImage.medium(meeting.organizer.imageUrl),
+                                      Padding(
+                                        padding:
+                                            const EdgeInsets.only(left: 12.0),
+                                        child: Column(
+                                          crossAxisAlignment:
+                                              CrossAxisAlignment.start,
+                                          children: [
+                                            Text(meeting.organizer,
+                                                style: context
+                                                    .textTheme.displaySmall)
+                                          ],
+                                        ),
+                                      )
+                                    ],
+                                  ),
                                 ),
                               )),
                               Visibility(
@@ -310,20 +361,27 @@ class _MeetingListLayoutState extends State<MeetingListLayout> {
                                 child: TableCell(
                                     verticalAlignment:
                                         TableCellVerticalAlignment.middle,
-                                    child: EngagementProgress(
-                                      engagement:
-                                          ((meeting.averageEngagement ?? 0) *
-                                                  100)
-                                              .toInt(),
-                                      width: double.maxFinite,
+                                    child: InkWell(
+                                      onTap: () =>
+                                          _selectMeeting(meeting.callId),
+                                      child: EngagementProgress(
+                                        engagement:
+                                            ((meeting.averageEngagement ?? 0) *
+                                                    100)
+                                                .toInt(),
+                                        width: double.maxFinite,
+                                      ),
                                     )),
                               ),
                               TableCell(
-                                  verticalAlignment:
-                                      TableCellVerticalAlignment.middle,
-                                  child: Center(
-                                      child: Text(
-                                          '${meeting.totalNumberOfUsers ?? 0}'))),
+                                verticalAlignment:
+                                    TableCellVerticalAlignment.middle,
+                                child: InkWell(
+                                    onTap: () => _selectMeeting(meeting.callId),
+                                    child: Center(
+                                        child: Text(
+                                            '${meeting.totalNumberOfUsers ?? 0}'))),
+                              ),
                               //     child: isShowingPastMeetings
                               //         ? Center(child: Text('${meeting.users.length}'))
                               //         : Center(child: MembersWidget(users: meeting.users)))
@@ -334,33 +392,43 @@ class _MeetingListLayoutState extends State<MeetingListLayout> {
                                     verticalAlignment:
                                         TableCellVerticalAlignment.middle,
                                     child: Center(
-                                        child: imageSVGAsset(
-                                            meeting.recorded ?? false
-                                                ? 'badge_approved'
-                                                : 'badge_waiting'))),
+                                        child: InkWell(
+                                            onTap: () =>
+                                                _selectMeeting(meeting.callId),
+                                            child: imageSVGAsset(
+                                                meeting.recorded ?? false
+                                                    ? 'badge_approved'
+                                                    : 'badge_waiting')))),
                               ),
                               TableCell(
                                 verticalAlignment:
                                     TableCellVerticalAlignment.middle,
-                                child: Padding(
-                                  padding: const EdgeInsets.all(12.0),
-                                  child: Text(DateFormat('dd.MM.yyyy. hh:mm a')
-                                      .format(meeting.meetingStart)),
+                                child: InkWell(
+                                  onTap: () => _selectMeeting(meeting.callId),
+                                  child: Padding(
+                                    padding: const EdgeInsets.all(12.0),
+                                    child: Text(
+                                        DateFormat('dd.MM.yyyy. hh:mm a')
+                                            .format(meeting.meetingStart)),
+                                  ),
                                 ),
                               ),
 
                               TableCell(
                                   verticalAlignment:
                                       TableCellVerticalAlignment.middle,
-                                  child: Padding(
-                                    padding: const EdgeInsets.all(12.0),
-                                    child: Visibility(
-                                        visible: meeting.meetingEnd != null,
-                                        child: meeting.meetingEnd != null
-                                            ? Text(DateFormat(
-                                                    'dd.MM.yyyy. hh:mm a')
-                                                .format(meeting.meetingEnd!))
-                                            : const Text('')),
+                                  child: InkWell(
+                                    onTap: () => _selectMeeting(meeting.callId),
+                                    child: Padding(
+                                      padding: const EdgeInsets.all(12.0),
+                                      child: Visibility(
+                                          visible: meeting.meetingEnd != null,
+                                          child: meeting.meetingEnd != null
+                                              ? Text(DateFormat(
+                                                      'dd.MM.yyyy. hh:mm a')
+                                                  .format(meeting.meetingEnd!))
+                                              : const Text('')),
+                                    ),
                                   )),
                             ]),
                         ],
@@ -404,12 +472,14 @@ class _MeetingListLayoutState extends State<MeetingListLayout> {
                                         Expanded(
                                           flex: 1,
                                           child: Container(
-                                              color: ColorConstants.kPrimaryColor
+                                              color: ColorConstants
+                                                  .kPrimaryColor
                                                   .withOpacity(0.05)),
                                         ),
                                         Container(
                                             height: 2,
-                                            color: ColorConstants.kPrimaryColor),
+                                            color:
+                                                ColorConstants.kPrimaryColor),
                                       ],
                                     ),
                                   ),
@@ -445,12 +515,14 @@ class _MeetingListLayoutState extends State<MeetingListLayout> {
                                         Expanded(
                                           flex: 1,
                                           child: Container(
-                                              color: ColorConstants.kPrimaryColor
+                                              color: ColorConstants
+                                                  .kPrimaryColor
                                                   .withOpacity(0.05)),
                                         ),
                                         Container(
                                             height: 2,
-                                            color: ColorConstants.kPrimaryColor),
+                                            color:
+                                                ColorConstants.kPrimaryColor),
                                       ],
                                     ),
                                   ),
@@ -480,105 +552,117 @@ class _MeetingListLayoutState extends State<MeetingListLayout> {
                             child: ListView.builder(
                                 itemCount: state.meetings.length,
                                 itemBuilder: (BuildContext context, int index) {
-                                  return Padding(
-                                    padding: const EdgeInsets.only(
-                                        top: 10, bottom: 20, right: 10, left: 10),
-                                    child: Column(
-                                      crossAxisAlignment:
-                                          CrossAxisAlignment.start,
-                                      children: [
-                                        Row(
-                                          children: [
-                                            Text(
-                                              '${index + 1}.',
-                                              style: context.textTheme.titleSmall,
-                                            ),
-                                            const SizedBox(
-                                              width: 3,
-                                            ),
-                                            Expanded(
-                                              child: Text(
-                                                  state.meetings[index].callId
-                                                      .toString(),
-                                                  style: context
-                                                      .textTheme.titleSmall),
-                                            ),
-                                            Visibility(
-                                                visible:
-                                                    !state.isShowingPastMeetings,
-                                                child: Text(
-                                                    '${state.meetings[index].meetingStart.day}.${state.meetings[index].meetingStart.month}.${state.meetings[index].meetingStart.year}')),
-                                          ],
-                                        ),
-                                        const SizedBox(
-                                          height: 10,
-                                        ),
-                                        Container(
-                                          margin: const EdgeInsets.only(left: 10),
-                                          child: Column(
-                                            crossAxisAlignment:
-                                                CrossAxisAlignment.start,
+                                  return InkWell(
+                                    onTap: () => _selectMeeting(
+                                        state.meetings[index].callId),
+                                    child: Padding(
+                                      padding: const EdgeInsets.only(
+                                          top: 10,
+                                          bottom: 20,
+                                          right: 10,
+                                          left: 10),
+                                      child: Column(
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.start,
+                                        children: [
+                                          Row(
                                             children: [
-                                              Text(state.meetings[index]
-                                                      .organizer ??
-                                                  ''),
+                                              Text(
+                                                '${index + 1}.',
+                                                style: context
+                                                    .textTheme.titleSmall,
+                                              ),
                                               const SizedBox(
-                                                height: 10,
+                                                width: 3,
+                                              ),
+                                              Expanded(
+                                                child: Text(
+                                                    state.meetings[index].callId
+                                                        .toString(),
+                                                    style: context
+                                                        .textTheme.titleSmall),
                                               ),
                                               Visibility(
-                                                visible:
-                                                    state.isShowingPastMeetings,
-                                                child: Column(
-                                                  crossAxisAlignment:
-                                                      CrossAxisAlignment.start,
-                                                  children: [
-                                                    Row(
-                                                      children: [
-                                                         Expanded(child: Text('Duration: ${state.meetings[index].formatMeetingDuration()}')),
-                                                        const Text('Recorded: '),
-                                                        imageSVGAsset(state
-                                                                        .meetings[
-                                                                            index]
-                                                                        .recorded ??
-                                                                    false
-                                                                ? 'badge_approved'
-                                                                : 'badge_waiting')
-                                                            as Widget
-                                                      ],
-                                                    ),
-                                                    const SizedBox(
-                                                      height: 10,
-                                                    ),
-                                                    EngagementProgress(
-                                                      engagement: (state
-                                                                  .meetings[index]
-                                                                  .averageEngagement! *
-                                                              100)
-                                                          .toInt(),
-                                                      width: double.maxFinite,
-                                                    )
-                                                  ],
-                                                ),
-                                              ),
-                                              Visibility(
-                                                visible:
-                                                    !state.isShowingPastMeetings,
-                                                child: Column(
-                                                  children: [
-                                                    Text(
-                                                        'Start: ${state.meetings[index].meetingStart.hour}:${state.meetings[index].meetingStart.minute}'),
-                                                    const SizedBox(
-                                                      height: 10,
-                                                    ),
-                                                    Text(
-                                                        'Start: ${state.meetings[index].meetingEnd?.hour}:${state.meetings[index].meetingEnd?.minute}'),
-                                                  ],
-                                                ),
-                                              ),
+                                                  visible: !state
+                                                      .isShowingPastMeetings,
+                                                  child: Text(
+                                                      '${state.meetings[index].meetingStart.day}.${state.meetings[index].meetingStart.month}.${state.meetings[index].meetingStart.year}')),
                                             ],
                                           ),
-                                        )
-                                      ],
+                                          const SizedBox(
+                                            height: 10,
+                                          ),
+                                          Container(
+                                            margin:
+                                                const EdgeInsets.only(left: 10),
+                                            child: Column(
+                                              crossAxisAlignment:
+                                                  CrossAxisAlignment.start,
+                                              children: [
+                                                Text(state
+                                                    .meetings[index].organizer),
+                                                const SizedBox(
+                                                  height: 10,
+                                                ),
+                                                Visibility(
+                                                  visible: state
+                                                      .isShowingPastMeetings,
+                                                  child: Column(
+                                                    crossAxisAlignment:
+                                                        CrossAxisAlignment
+                                                            .start,
+                                                    children: [
+                                                      Row(
+                                                        children: [
+                                                          Expanded(
+                                                              child: Text(
+                                                                  'Duration: ${state.meetings[index].formatMeetingDuration()}')),
+                                                          const Text(
+                                                              'Recorded: '),
+                                                          imageSVGAsset(state
+                                                                      .meetings[
+                                                                          index]
+                                                                      .recorded ??
+                                                                  false
+                                                              ? 'badge_approved'
+                                                              : 'badge_waiting') as Widget
+                                                        ],
+                                                      ),
+                                                      const SizedBox(
+                                                        height: 10,
+                                                      ),
+                                                      EngagementProgress(
+                                                        engagement: (state
+                                                                    .meetings[
+                                                                        index]
+                                                                    .averageEngagement! *
+                                                                100)
+                                                            .toInt(),
+                                                        width: double.maxFinite,
+                                                      )
+                                                    ],
+                                                  ),
+                                                ),
+                                                Visibility(
+                                                  visible: !state
+                                                      .isShowingPastMeetings,
+                                                  child: Column(
+                                                    children: [
+                                                      Text(
+                                                          'Start: ${state.meetings[index].meetingStart.hour}:${state.meetings[index].meetingStart.minute}'),
+                                                      const SizedBox(
+                                                        height: 10,
+                                                      ),
+                                                      Text(
+                                                          'Start: ${state.meetings[index].meetingEnd?.hour}:${state.meetings[index].meetingEnd?.minute}'),
+                                                    ],
+                                                  ),
+                                                ),
+                                              ],
+                                            ),
+                                          )
+                                        ],
+                                      ),
                                     ),
                                   );
                                 })),
@@ -597,12 +681,6 @@ class _MeetingListLayoutState extends State<MeetingListLayout> {
             children: [body],
           ),
         );
-      },
-      listener: (context, state) {
-        //   double currentScrollPosition = _controller.position.pixels;
-        //   WidgetsBinding.instance.addPostFrameCallback((_) {
-        //     _controller.jumpTo(currentScrollPosition);
-        // });
       },
     );
   }

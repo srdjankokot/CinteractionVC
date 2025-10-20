@@ -1,6 +1,5 @@
 import 'package:cinteraction_vc/assets/colors/Colors.dart';
 import 'package:cinteraction_vc/core/extension/context.dart';
-import 'package:cinteraction_vc/layers/data/source/local/local_storage.dart';
 import 'package:cinteraction_vc/layers/presentation/cubit/chat/chat_cubit.dart';
 import 'package:cinteraction_vc/layers/presentation/ui/conference/mobile_view.dart';
 import 'package:cinteraction_vc/layers/presentation/ui/conference/widget/dynamic_layout/cubit/dynamic_layout_cubit.dart';
@@ -9,9 +8,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
-import '../../../../core/app/injector.dart';
 import '../../../../core/io/network/models/data_channel_command.dart';
-import '../../../../core/navigation/route.dart';
 import '../../../../core/util/util.dart';
 import '../../cubit/app/app_cubit.dart';
 import '../../cubit/conference/conference_cubit.dart';
@@ -151,20 +148,9 @@ class _VideoRoomPageState extends State<VideoRoomPage> {
       context.showSnackBarMessage(state.error ?? 'Error', isError: true);
     }
     if (state.isEnded) {
-      print('🔴 Call ended! meetId: ${state.meetId}');
-
-      // Save meetingId to localStorage for HomePage to use
-      if (state.meetId != null) {
-        print(
-            '✅ Saving meetingId ${state.meetId} and navigating to home with Charts tab');
-        getIt.get<LocalStorage>().saveMeetingIdForCharts(state.meetId!);
-      }
-
-      // Navigate back to home - HomePage will check for saved meetingId
       if (Navigator.of(context).canPop()) {
         Navigator.of(context).pop();
       }
-      AppRoute.home.pushReplacement(context);
 
       await context.read<AppCubit>().changeUserStatus(UserStatus.online);
     }

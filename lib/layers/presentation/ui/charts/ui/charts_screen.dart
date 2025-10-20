@@ -1,6 +1,4 @@
-import 'package:cinteraction_vc/core/app/injector.dart';
 import 'package:cinteraction_vc/core/extension/context_user.dart';
-import 'package:cinteraction_vc/layers/data/source/local/local_storage.dart';
 import 'package:cinteraction_vc/layers/presentation/cubit/dashboard/dashboard_cubit.dart';
 import 'package:cinteraction_vc/layers/presentation/ui/charts/ui/widget/all_users_chart.dart';
 import 'package:cinteraction_vc/layers/presentation/ui/charts/ui/widget/user_chart_card.dart';
@@ -23,13 +21,8 @@ class _ChartsScreenState extends State<ChartsScreen> {
   void initState() {
     super.initState();
 
-    // Call API when screen opens
-    int? meetingId = widget.meetingId;
-
-    // If meetingId is not provided, check LocalStorage
-    if (meetingId == null) {
-      meetingId = getIt.get<LocalStorage>().getMeetingIdForCharts();
-    }
+    // Call API when screen opens if meetingId is provided
+    final meetingId = widget.meetingId;
 
     if (meetingId != null) {
       print('📊 ChartsScreen: Loading data for meetingId: $meetingId');
@@ -49,18 +42,15 @@ class _ChartsScreenState extends State<ChartsScreen> {
           print(
               '📊 Using module: ${engagementModule.name} (id: ${engagementModule.id})');
           context.read<DashboardCubit>().getEngagementTotalAverage(
-                meetingId: meetingId!,
+                meetingId: meetingId,
                 moduleId: engagementModule.id,
               );
         } else {
           print('⚠️ No enabled module found for user');
         }
-
-        // Clear the saved meetingId after using it
-        getIt.get<LocalStorage>().clearMeetingIdForCharts();
       });
     } else {
-      print('⚠️ ChartsScreen: No meetingId found');
+      print('⚠️ ChartsScreen: No meetingId provided');
     }
   }
 
