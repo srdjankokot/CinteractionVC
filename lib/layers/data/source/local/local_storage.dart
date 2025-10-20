@@ -12,9 +12,6 @@ abstract class LocalStorage {
   Future<bool> saveRoomId({required String roomId});
   String? getRoomId();
   Future<void> clearRoomId();
-  Future<bool> saveMeetingIdForCharts(int meetingId);
-  int? getMeetingIdForCharts();
-  Future<void> clearMeetingIdForCharts();
 }
 
 class LocalStorageImpl extends LocalStorage {
@@ -64,24 +61,5 @@ class LocalStorageImpl extends LocalStorage {
   @override
   Future<void> clearRoomId() async {
     _sharedPref.remove('roomId');
-  }
-
-  @override
-  Future<bool> saveMeetingIdForCharts(int meetingId) {
-    print('💾 Saving meetingId for charts: $meetingId');
-    return _sharedPref.setInt('meetingIdForCharts', meetingId);
-  }
-
-  @override
-  int? getMeetingIdForCharts() {
-    final meetingId = _sharedPref.getInt('meetingIdForCharts');
-    print('📖 Retrieved meetingId for charts: $meetingId');
-    return meetingId;
-  }
-
-  @override
-  Future<void> clearMeetingIdForCharts() async {
-    print('🗑️ Clearing meetingId for charts');
-    _sharedPref.remove('meetingIdForCharts');
   }
 }

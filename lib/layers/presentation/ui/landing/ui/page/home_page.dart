@@ -2,19 +2,15 @@ import 'package:cinteraction_vc/assets/colors/Colors.dart';
 import 'package:cinteraction_vc/core/extension/context.dart';
 import 'package:cinteraction_vc/core/extension/context_user.dart';
 import 'package:cinteraction_vc/core/extension/image.dart';
-import 'package:cinteraction_vc/core/extension/string.dart';
-import 'package:cinteraction_vc/layers/data/source/local/local_storage.dart';
 import 'package:cinteraction_vc/layers/presentation/cubit/app/app_cubit.dart';
 import 'package:cinteraction_vc/layers/presentation/cubit/app/app_state.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
-import '../../../../../../core/app/injector.dart';
 import '../../../../../../core/ui/images/image.dart';
 import '../../../../../../core/util/menu_items.dart';
 
 import '../../../../cubit/chat/chat_cubit.dart';
-import '../../../../cubit/chat/chat_state.dart';
 import '../../../profile/ui/widget/user_image.dart';
 
 class HomePage extends StatefulWidget {
@@ -30,14 +26,6 @@ class _HomePageState extends State<HomePage> {
   @override
   void initState() {
     super.initState();
-
-    // Check if there's a saved meetingId to show Charts tab
-    final meetingId = getIt.get<LocalStorage>().getMeetingIdForCharts();
-    if (meetingId != null) {
-      print('🏠 HomePage: Found meetingId $meetingId, switching to Charts tab');
-      // Dashboard/Charts is at index 1 in desktopMenu
-      _selectedIndex = 1;
-    }
   }
 
   @override
