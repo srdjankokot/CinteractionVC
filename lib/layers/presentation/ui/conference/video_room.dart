@@ -1,5 +1,6 @@
 import 'package:cinteraction_vc/assets/colors/Colors.dart';
 import 'package:cinteraction_vc/core/extension/context.dart';
+import 'package:cinteraction_vc/layers/data/source/local/local_storage.dart';
 import 'package:cinteraction_vc/layers/presentation/cubit/chat/chat_cubit.dart';
 import 'package:cinteraction_vc/layers/presentation/ui/conference/mobile_view.dart';
 import 'package:cinteraction_vc/layers/presentation/ui/conference/widget/dynamic_layout/cubit/dynamic_layout_cubit.dart';
@@ -8,6 +9,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
+import '../../../../core/app/injector.dart';
 import '../../../../core/io/network/models/data_channel_command.dart';
 import '../../../../core/navigation/route.dart';
 import '../../../../core/util/util.dart';
@@ -65,7 +67,7 @@ class _VideoRoomPageState extends State<VideoRoomPage> {
 
   void _showOverlay() {
     final renderBox =
-    _micTargetKey.currentContext?.findRenderObject() as RenderBox?;
+        _micTargetKey.currentContext?.findRenderObject() as RenderBox?;
     if (renderBox == null) return;
 
     final targetPosition = renderBox.localToGlobal(Offset.zero);
@@ -76,24 +78,23 @@ class _VideoRoomPageState extends State<VideoRoomPage> {
     _overlayEntryMic = null;
 
     _overlayEntryMic = OverlayEntry(
-      builder: (context) =>
-          Positioned(
-            left: targetPosition.dx - width / 2 + targetSize.width / 2,
-            top: targetPosition.dy - 40 - targetSize.height,
-            // place above the widget
-            width: width,
-            child: Material(
-              color: Colors.transparent,
-              child: Container(
-                  padding: const EdgeInsets.all(8),
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                  child: _buildToast(
-                      'Are you talking? Your mic is off. Click the mic to turn it on.',
-                      background: Colors.black54)),
-            ),
-          ),
+      builder: (context) => Positioned(
+        left: targetPosition.dx - width / 2 + targetSize.width / 2,
+        top: targetPosition.dy - 40 - targetSize.height,
+        // place above the widget
+        width: width,
+        child: Material(
+          color: Colors.transparent,
+          child: Container(
+              padding: const EdgeInsets.all(8),
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: _buildToast(
+                  'Are you talking? Your mic is off. Click the mic to turn it on.',
+                  background: Colors.black54)),
+        ),
+      ),
     );
 
     Overlay.of(context).insert(_overlayEntryMic!);
@@ -150,6 +151,16 @@ class _VideoRoomPageState extends State<VideoRoomPage> {
       context.showSnackBarMessage(state.error ?? 'Error', isError: true);
     }
     if (state.isEnded) {
+      print('🔴 Call ended! meetId: ${state.meetId}');
+
+      // Save meetingId to localStorage for HomePage to use
+      if (state.meetId != null) {
+        print(
+            '✅ Saving meetingId ${state.meetId} and navigating to home with Charts tab');
+        getIt.get<LocalStorage>().saveMeetingIdForCharts(state.meetId!);
+      }
+
+      // Navigate back to home - HomePage will check for saved meetingId
       if (Navigator.of(context).canPop()) {
         Navigator.of(context).pop();
       }
@@ -174,7 +185,6 @@ class _VideoRoomPageState extends State<VideoRoomPage> {
 
   @override
   Widget build(BuildContext context) {
-
     final ScrollController chatController = ScrollController();
 
     return BlocConsumer<ConferenceCubit, ConferenceState>(
@@ -199,12 +209,10 @@ class _VideoRoomPageState extends State<VideoRoomPage> {
             });
           }
 
-
           List<StreamRenderer> items = [];
           List<StreamRenderer> screenShares = [];
           List<StreamRenderer> contributors = [];
           List<StreamRenderer> contributorsHandUp = [];
-
 
           // items.addAll(state.streamRenderers!.entries.map(
           //         (e) {
@@ -213,24 +221,21 @@ class _VideoRoomPageState extends State<VideoRoomPage> {
           //     }
           // ).toList());
 
-          screenShares.addAll(state.streamScreenShares!.entries.map(
-                  (e) {
-                participantManager.updateStream(e.value.id, e.value);
-                return e.value;
-              }
-          ).toList());
+          screenShares.addAll(state.streamScreenShares!.entries.map((e) {
+            participantManager.updateStream(e.value.id, e.value);
+            return e.value;
+          }).toList());
 
           for (var i = 0; i < state.numberOfStreamsCopy; i++) {
-            items.addAll(state.streamRenderers!.entries.map(
-                    (e) {
-                  participantManager.updateStream(e.value.id, e.value);
-                  return e.value;
-                }
-            ).toList());
+            items.addAll(state.streamRenderers!.entries.map((e) {
+              participantManager.updateStream(e.value.id, e.value);
+              return e.value;
+            }).toList());
           }
 
           // var subscribers = state.streamSubscribers?.toList();
-          contributors.addAll(state.streamSubscribers!.entries.map((e) => e.value).toList());
+          contributors.addAll(
+              state.streamSubscribers!.entries.map((e) => e.value).toList());
           contributorsHandUp.addAll(contributors
               .where((e) => e.isHandUp == true)
               .map((e) => e)
@@ -259,9 +264,19 @@ class _VideoRoomPageState extends State<VideoRoomPage> {
                     child: Builder(
                       builder: (context) {
                         if (context.isWide) {
-                          return getDesktopView(context, state, items, screenShares, contributors, contributorsHandUp, _micTargetKey, staggeredCubit, participantManager);
+                          return getDesktopView(
+                              context,
+                              state,
+                              items,
+                              screenShares,
+                              contributors,
+                              contributorsHandUp,
+                              _micTargetKey,
+                              staggeredCubit,
+                              participantManager);
                         } else {
-                         return getMobileView(context, state, items, contributors, contributorsHandUp);
+                          return getMobileView(context, state, items,
+                              contributors, contributorsHandUp);
                         }
                       },
                     )),

@@ -1153,4 +1153,27 @@ class ApiImpl extends Api {
       return ApiResponse(error: ApiErrorDto.fromDioException(e));
     }
   }
+
+  @override
+  Future<ApiResponse<EngagementTotalAverageDto>> getEngagementTotalAverage({
+    required int meetingId,
+    required int moduleId,
+  }) async {
+    try {
+      Dio dio = await getIt.getAsync<Dio>();
+
+      final response = await dio.get(
+        Urls.getEngagementTotalAverage(meetingId),
+      );
+
+      print('getEngagementTotalAverage response: ${response.statusCode}');
+      print('getEngagementTotalAverage data: ${response.data}');
+
+      final engagementData = EngagementTotalAverageDto.fromJson(response.data);
+      return ApiResponse(response: engagementData);
+    } on DioException catch (e) {
+      print('❌ getEngagementTotalAverage error: ${e.response?.data}');
+      return ApiResponse(error: ApiErrorDto.fromDioException(e));
+    }
+  }
 }

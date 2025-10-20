@@ -3,6 +3,7 @@ import 'package:cinteraction_vc/core/extension/context.dart';
 import 'package:cinteraction_vc/core/extension/context_user.dart';
 import 'package:cinteraction_vc/core/extension/image.dart';
 import 'package:cinteraction_vc/core/extension/string.dart';
+import 'package:cinteraction_vc/layers/data/source/local/local_storage.dart';
 import 'package:cinteraction_vc/layers/presentation/cubit/app/app_cubit.dart';
 import 'package:cinteraction_vc/layers/presentation/cubit/app/app_state.dart';
 import 'package:flutter/material.dart';
@@ -29,9 +30,14 @@ class _HomePageState extends State<HomePage> {
   @override
   void initState() {
     super.initState();
-    // setState(() {
-    //   _selectedIndex =  context.getCurrentUser?.id == "1" ? 0 : 2;
-    // });
+
+    // Check if there's a saved meetingId to show Charts tab
+    final meetingId = getIt.get<LocalStorage>().getMeetingIdForCharts();
+    if (meetingId != null) {
+      print('🏠 HomePage: Found meetingId $meetingId, switching to Charts tab');
+      // Dashboard/Charts is at index 1 in desktopMenu
+      _selectedIndex = 1;
+    }
   }
 
   @override

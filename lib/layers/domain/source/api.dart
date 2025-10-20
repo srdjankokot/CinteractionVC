@@ -168,4 +168,9 @@ abstract class Api {
     required int moduleId,
     required double value,
   });
+
+  Future<ApiResponse<EngagementTotalAverageDto>> getEngagementTotalAverage({
+    required int meetingId,
+    required int moduleId,
+  });
 }

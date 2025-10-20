@@ -9,8 +9,6 @@ import 'package:cinteraction_vc/layers/domain/entities/api_response.dart';
 import 'package:cinteraction_vc/layers/domain/entities/chat_message.dart';
 import 'package:cinteraction_vc/layers/domain/repos/conference_repo.dart';
 
-import 'package:cinteraction_vc/layers/presentation/cubit/chat/chat_cubit.dart';
-
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/foundation.dart';
 import 'package:logging/logging.dart';
@@ -1108,7 +1106,9 @@ class ConferenceRepoImpl extends ConferenceRepo {
 
   Future<dynamic> _closeCall(String reason) async {
     await _endCall();
-    await getIt.get<ChatCubit>().loadChats(1, 20);
+    // Removed loadChats call to prevent navigation to chat after call ends
+    // Navigation is now handled in video_room.dart to go to ChartsScreen
+    // await getIt.get<ChatCubit>().loadChats(1, 20);
 
     // var listFeed = videoState.feedIdToDisplayStreamsMap.keys;
     List<int> listFeed = videoState.feedIdToDisplayStreamsMap.keys.toList();
