@@ -62,24 +62,23 @@ class MultiLineChart extends StatelessWidget {
 
   final Color backgroundColor;
 
-  const MultiLineChart({
-    super.key,
-    required this.series,
-    this.minX,
-    this.maxX,
-    this.bottomInterval,
-    this.leftInterval,
-    this.bottomTitleBuilder,
-    this.leftTitleBuilder,
-    this.showGrid = true,
-    this.showBorder = true,
-    this.showLegend = true,
-    this.showSideTitles = true,
-    this.showBottomTitles = true,
-    this.height = 260,
-    this.padding = const EdgeInsets.all(12),
-    this.backgroundColor = Colors.white
-  });
+  const MultiLineChart(
+      {super.key,
+      required this.series,
+      this.minX,
+      this.maxX,
+      this.bottomInterval,
+      this.leftInterval,
+      this.bottomTitleBuilder,
+      this.leftTitleBuilder,
+      this.showGrid = true,
+      this.showBorder = true,
+      this.showLegend = true,
+      this.showSideTitles = true,
+      this.showBottomTitles = true,
+      this.height = 260,
+      this.padding = const EdgeInsets.all(12),
+      this.backgroundColor = Colors.white});
 
   @override
   Widget build(BuildContext context) {
@@ -87,11 +86,20 @@ class MultiLineChart extends StatelessWidget {
 
     // Flatten all points to infer bounds if not provided.
     final allSpots = series.expand((s) => s.spots);
-    final inferredMinX = minX ?? (allSpots.map((e) => e.x).fold<double>(double.infinity, (a, b) => a < b ? a : b)) - 0.5;
-    final inferredMaxX = maxX ?? (allSpots.map((e) => e.x).fold<double>(-double.infinity, (a, b) => a > b ? a : b)) + 0.5;
+    final inferredMinX = minX ??
+        (allSpots
+                .map((e) => e.x)
+                .fold<double>(double.infinity, (a, b) => a < b ? a : b)) -
+            0.5;
+    final inferredMaxX = maxX ??
+        (allSpots
+                .map((e) => e.x)
+                .fold<double>(-double.infinity, (a, b) => a > b ? a : b)) +
+            0.5;
 
     // Add a touch of padding so lines don’t hug the border
-    final xInterval = bottomInterval ?? _niceInterval(inferredMinX, inferredMaxX, targetTicks: 6);
+    final xInterval = bottomInterval ??
+        _niceInterval(inferredMinX, inferredMaxX, targetTicks: 6);
 
     final lines = series.map((s) {
       final gradient = s.gradient;
@@ -136,8 +144,11 @@ class MultiLineChart extends StatelessWidget {
           drawVerticalLine: true,
           horizontalInterval: yInterval,
           verticalInterval: xInterval,
-          getDrawingHorizontalLine: (value) => FlLine(strokeWidth: 0.3, color: Theme.of(context).dividerColor),
-          getDrawingVerticalLine: (value) => FlLine(strokeWidth: 0.3, color: Theme.of(context).dividerColor.withOpacity(0.6)),
+          getDrawingHorizontalLine: (value) =>
+              FlLine(strokeWidth: 0.3, color: Theme.of(context).dividerColor),
+          getDrawingVerticalLine: (value) => FlLine(
+              strokeWidth: 0.3,
+              color: Theme.of(context).dividerColor.withOpacity(0.6)),
         ),
         titlesData: FlTitlesData(
           leftTitles: AxisTitles(
@@ -146,10 +157,10 @@ class MultiLineChart extends StatelessWidget {
               reservedSize: 44,
               interval: yInterval,
               getTitlesWidget: leftTitleBuilder ??
-                      (v, meta) => Text(
-                    _trimTrailingZeros(v),
-                    style: Theme.of(context).textTheme.bodySmall,
-                  ),
+                  (v, meta) => Text(
+                        _trimTrailingZeros(v),
+                        style: Theme.of(context).textTheme.bodySmall,
+                      ),
             ),
           ),
           bottomTitles: AxisTitles(
@@ -158,17 +169,19 @@ class MultiLineChart extends StatelessWidget {
               interval: xInterval,
               reservedSize: 28,
               getTitlesWidget: bottomTitleBuilder ??
-                      (v, meta) => Padding(
-                    padding: const EdgeInsets.only(top: 6),
-                    child: Text(
-                      _trimTrailingZeros(v),
-                      style: Theme.of(context).textTheme.bodySmall,
-                    ),
-                  ),
+                  (v, meta) => Padding(
+                        padding: const EdgeInsets.only(top: 6),
+                        child: Text(
+                          _trimTrailingZeros(v),
+                          style: Theme.of(context).textTheme.bodySmall,
+                        ),
+                      ),
             ),
           ),
-          rightTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
-          topTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
+          rightTitles:
+              const AxisTitles(sideTitles: SideTitles(showTitles: false)),
+          topTitles:
+              const AxisTitles(sideTitles: SideTitles(showTitles: false)),
         ),
         borderData: FlBorderData(
           show: showBorder,
@@ -180,7 +193,8 @@ class MultiLineChart extends StatelessWidget {
         lineTouchData: LineTouchData(
           handleBuiltInTouches: true,
           touchTooltipData: LineTouchTooltipData(
-            tooltipBgColor: Theme.of(context).colorScheme.surface.withOpacity(0.95),
+            tooltipBgColor:
+                Theme.of(context).colorScheme.surface.withOpacity(0.95),
             fitInsideHorizontally: true,
             fitInsideVertically: true,
             getTooltipItems: (touchedSpots) {
@@ -188,7 +202,8 @@ class MultiLineChart extends StatelessWidget {
               return touchedSpots.map((ts) {
                 final s = series[ts.barIndex];
                 final label = s.id;
-                final val = '(${_trimTrailingZeros(ts.x)}, ${_trimTrailingZeros(ts.y)})';
+                final val =
+                    '(${_trimTrailingZeros(ts.x)}, ${_trimTrailingZeros(ts.y)})';
                 return LineTooltipItem(
                   '$label\n$val',
                   TextStyle(
@@ -205,24 +220,27 @@ class MultiLineChart extends StatelessWidget {
       curve: Curves.easeInOut,
     );
 
-
     return Card(
       color: backgroundColor,
       margin: padding,
       elevation: showBorder ? 2 : 0,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(12),
-        side: showBorder ? const BorderSide(color: Colors.white, width: 1) : BorderSide.none,
+        side: showBorder
+            ? const BorderSide(color: Colors.white, width: 1)
+            : BorderSide.none,
       ),
       child: Padding(
         padding: padding,
         child: Column(
-          mainAxisSize: MainAxisSize.min, // helps if parent allows intrinsic height
+          mainAxisSize:
+              MainAxisSize.min, // helps if parent allows intrinsic height
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             if (showLegend) _Legend(series: series),
             const SizedBox(height: 12),
-            Flexible( // 👈 instead of SizedBox(height: height)
+            Flexible(
+              // 👈 instead of SizedBox(height: height)
               child: SizedBox(
                 width: double.infinity,
                 child: chart,
@@ -279,6 +297,14 @@ class _Legend extends StatelessWidget {
       runSpacing: 8,
       children: series.map((s) {
         final color = s.color ?? Colors.blueGrey;
+
+        // Calculate average value for this series
+        double averageValue = 0;
+        if (s.spots.isNotEmpty) {
+          averageValue = s.spots.map((spot) => spot.y).reduce((a, b) => a + b) /
+              s.spots.length;
+        }
+
         return Row(
           mainAxisSize: MainAxisSize.min,
           children: [
@@ -293,7 +319,8 @@ class _Legend extends StatelessWidget {
               ),
             ),
             const SizedBox(width: 6),
-            Text(s.id, style: Theme.of(context).textTheme.bodySmall),
+            Text('${s.id} (${averageValue.toInt()}%)',
+                style: Theme.of(context).textTheme.bodySmall),
           ],
         );
       }).toList(),

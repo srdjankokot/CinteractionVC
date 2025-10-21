@@ -8,9 +8,11 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../../../assets/colors/Colors.dart';
 
 class ChartsScreen extends StatefulWidget {
-  const ChartsScreen({
-    super.key,
-    this.meetingId, required this.meetStart, required this.meetEnd});
+  const ChartsScreen(
+      {super.key,
+      this.meetingId,
+      required this.meetStart,
+      required this.meetEnd});
 
   final int? meetingId;
   final DateTime meetStart;
@@ -21,9 +23,7 @@ class ChartsScreen extends StatefulWidget {
 }
 
 class _ChartsScreenState extends State<ChartsScreen> {
-
   var duration = 0.0;
-
 
   @override
   void initState() {
@@ -61,10 +61,8 @@ class _ChartsScreenState extends State<ChartsScreen> {
       print('⚠️ ChartsScreen: No meetingId provided');
     }
 
-     duration = widget.meetEnd.difference(widget.meetStart).inSeconds as double;
+    duration = widget.meetEnd.difference(widget.meetStart).inSeconds as double;
   }
-
-
 
   @override
   Widget build(BuildContext context) {
@@ -83,32 +81,60 @@ class _ChartsScreenState extends State<ChartsScreen> {
 
                       SizedBox(
                           height: 350,
-                          child:  MultiLineChart(
-                        series: state.engagementData?.buildBinnedSeriesByModule(
-                          slot: const Duration(seconds: 10),
-                          xAsTime: true,
-                          meetStart: widget.meetStart,
-                          meetEnd: widget.meetEnd,
-
-                        ) ?? [],
-                        // Example: custom bottom titles if x is time index
-                        bottomTitleBuilder: (value, meta)
-                        {
-                          if(value % 10 != 0)
-                          {
-                            return const Text("");
-                          }
-
-                          final secs = value.round(); // or: (value + 1e-6).floor()
-                          final m = (secs ~/ 60).toString().padLeft(2, '0');
-                          final s = (secs % 60).toString().padLeft(2, '0');
-                          return Text('$m:$s', style: Theme.of(context).textTheme.labelSmall);
-                        }
-
-                        ,
-                        leftTitleBuilder: (value, meta) => Text('${value.toInt()}%', style: Theme.of(context).textTheme.labelSmall),
-                      ))
-                     ,
+                          child: state.engagementLoading == true
+                              ? const Center(
+                                  child: CircularProgressIndicator(),
+                                )
+                              : state.engagementData == null ||
+                                      state.engagementData!
+                                          .buildBinnedSeriesByModule(
+                                            slot: const Duration(seconds: 10),
+                                            xAsTime: true,
+                                            meetStart: widget.meetStart,
+                                            meetEnd: widget.meetEnd,
+                                          )
+                                          .isEmpty
+                                  ? const Center(
+                                      child: Text(
+                                        'No engagement data available',
+                                        style: TextStyle(
+                                          fontSize: 16,
+                                          color: Colors.grey,
+                                        ),
+                                      ),
+                                    )
+                                  : MultiLineChart(
+                                      series: state.engagementData!
+                                          .buildBinnedSeriesByModule(
+                                        slot: const Duration(seconds: 10),
+                                        xAsTime: true,
+                                        meetStart: widget.meetStart,
+                                        meetEnd: widget.meetEnd,
+                                      ),
+                                      // Example: custom bottom titles if x is time index
+                                      bottomTitleBuilder: (value, meta) {
+                                        if (value % 10 != 0) {
+                                          return const Text("");
+                                        }
+                                        final secs = value
+                                            .round(); // or: (value + 1e-6).floor()
+                                        final m = (secs ~/ 60)
+                                            .toString()
+                                            .padLeft(2, '0');
+                                        final s = (secs % 60)
+                                            .toString()
+                                            .padLeft(2, '0');
+                                        return Text('$m:$s',
+                                            style: Theme.of(context)
+                                                .textTheme
+                                                .labelSmall);
+                                      },
+                                      leftTitleBuilder: (value, meta) => Text(
+                                          '${value.toInt()}%',
+                                          style: Theme.of(context)
+                                              .textTheme
+                                              .labelSmall),
+                                    )),
 
                       const SizedBox(
                         height: 30,
@@ -144,29 +170,44 @@ class _ChartsScreenState extends State<ChartsScreen> {
                           containerWidth = constraints.maxWidth;
                         }
 
+                        if (state.engagementLoading == true) {
+                          return const Center(
+                            child: CircularProgressIndicator(),
+                          );
+                        } else if (state.engagementData == null ||
+                            state.engagementData!.users.isEmpty) {
+                          return const Center(
+                            child: Text(
+                              'No individual user data available',
+                              style: TextStyle(
+                                fontSize: 16,
+                                color: Colors.grey,
+                              ),
+                            ),
+                          );
+                        } else {
                           return Wrap(
                             spacing: space,
                             runSpacing: space,
-                            children: state.engagementData!.users.map((userData) {
+                            children:
+                                state.engagementData!.users.map((userData) {
                               return SizedBox(
                                 width: containerWidth,
                                 child: UserChartCard(
                                   userName: userData.name,
                                   duration: duration,
-                                  data: state.engagementData?.buildBinnedSeriesByModule(
-                                      slot: const Duration(seconds: 10),
-                                      userId: userData.id,
-                                      xAsTime: true,
-                                      meetStart: widget.meetStart,
-                                      meetEnd: widget.meetEnd
-                                  ) ?? [],
-
+                                  data: state.engagementData!
+                                      .buildBinnedSeriesByModule(
+                                          slot: const Duration(seconds: 10),
+                                          userId: userData.id,
+                                          xAsTime: true,
+                                          meetStart: widget.meetStart,
+                                          meetEnd: widget.meetEnd),
                                 ),
                               );
                             }).toList(),
                           );
-
-
+                        }
                       }),
 
                       const SizedBox(

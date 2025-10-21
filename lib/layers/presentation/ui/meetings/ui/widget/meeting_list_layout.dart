@@ -78,7 +78,12 @@ class _MeetingListLayoutState extends State<MeetingListLayout> {
           Expanded(
             child: BlocProvider(
               create: (_) => getIt.get<DashboardCubit>(),
-              child: ChartsScreen(meetingId: _selectedMeeting?.callId, meetStart:_selectedMeeting!.meetingStart, meetEnd: _selectedMeeting!.meetingEnd ?? _selectedMeeting!.meetingStart.add(Duration(minutes: 30) ) ),
+              child: ChartsScreen(
+                  meetingId: _selectedMeeting?.callId,
+                  meetStart: _selectedMeeting!.meetingStart,
+                  meetEnd: _selectedMeeting!.meetingEnd ??
+                      _selectedMeeting!.meetingStart
+                          .add(Duration(minutes: 30))),
             ),
           ),
         ],
@@ -363,8 +368,7 @@ class _MeetingListLayoutState extends State<MeetingListLayout> {
                                     verticalAlignment:
                                         TableCellVerticalAlignment.middle,
                                     child: InkWell(
-                                      onTap: () =>
-                                          _selectMeeting(meeting),
+                                      onTap: () => _selectMeeting(meeting),
                                       child: EngagementProgress(
                                         engagement:
                                             ((meeting.averageEngagement ?? 0) *
@@ -554,8 +558,8 @@ class _MeetingListLayoutState extends State<MeetingListLayout> {
                                 itemCount: state.meetings.length,
                                 itemBuilder: (BuildContext context, int index) {
                                   return InkWell(
-                                    onTap: () => _selectMeeting(
-                                        state.meetings[index]),
+                                    onTap: () =>
+                                        _selectMeeting(state.meetings[index]),
                                     child: Padding(
                                       padding: const EdgeInsets.only(
                                           top: 10,
@@ -640,7 +644,10 @@ class _MeetingListLayoutState extends State<MeetingListLayout> {
                                                                 100)
                                                             .toInt(),
                                                         width: double.maxFinite,
-                                                      )
+                                                      ),
+                                                      const SizedBox(
+                                                        height: 10,
+                                                      ),
                                                     ],
                                                   ),
                                                 ),
