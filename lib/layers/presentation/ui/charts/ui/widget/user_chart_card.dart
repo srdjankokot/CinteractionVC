@@ -21,9 +21,7 @@ class UserChartCard extends StatelessWidget {
     return
       SizedBox(
         height: 300,
-        child: Expanded(
-                child:
-                  MultiLineChart(
+         child:         MultiLineChart(
                     title: userName,
                     minX: 0,
                     maxX: duration,
@@ -42,7 +40,7 @@ class UserChartCard extends StatelessWidget {
                     },
                     leftTitleBuilder: (value, meta) => Text('${value.toInt()}%', style: Theme.of(context).textTheme.labelSmall),
                   )
-            ),
+
       );
   }
 }
