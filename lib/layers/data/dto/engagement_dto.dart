@@ -1,3 +1,8 @@
+import 'package:fl_chart/fl_chart.dart';
+import 'package:flutter/material.dart';
+
+import '../../presentation/ui/charts/ui/widget/chart.dart';
+
 class CreateEngagementDto {
   final int meetingId;
   final int userId;
@@ -44,13 +49,30 @@ class EngagementResponseDto {
   }
 }
 
+
+class GraphUser{
+  final int id;
+  final String name;
+
+  GraphUser({required this.id, required this.name});
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+          other is GraphUser && runtimeType == other.runtimeType && id == other.id;
+
+  @override
+  int get hashCode => id.hashCode;
+}
+
 class EngagementTotalAverageDto {
-  final List<EngagementDataPoint> totalAttentionAverage;
-  final List<UserEngagementData> usersAverage;
+
+  final List<RawEngagementData> data;
+  final List<GraphUser> users;
 
   EngagementTotalAverageDto({
-    required this.totalAttentionAverage,
-    required this.usersAverage,
+    required this.data,
+    required this.users
   });
 
   factory EngagementTotalAverageDto.fromJson(List<dynamic> json) {
@@ -59,132 +81,119 @@ class EngagementTotalAverageDto {
         .map((item) => RawEngagementData.fromJson(item as Map<String, dynamic>))
         .toList();
 
-    // Group by user
-    final Map<int, List<RawEngagementData>> userData = {};
-    for (final data in rawData) {
-      userData.putIfAbsent(data.userId, () => []).add(data);
-    }
 
-    // Calculate time slots (every 5 minutes)
-    final timeSlots = _calculateTimeSlots(rawData);
+    final users = rawData.map((e) => GraphUser(id: e.userId, name: e.userName)).toSet().toList();
 
-    // Calculate averages for each time slot
-    final totalAverages = <EngagementDataPoint>[];
-    final userAverages = <UserEngagementData>[];
-
-    for (final slot in timeSlots) {
-      // Calculate total average for this time slot
-      // Include data points: start <= createdAt < end
-      final slotData = rawData
-          .where((d) =>
-              (d.createdAt.isAtSameMomentAs(slot.start) ||
-                  d.createdAt.isAfter(slot.start)) &&
-              d.createdAt.isBefore(slot.end))
-          .toList();
-
-      if (slotData.isNotEmpty) {
-        final avgValue = slotData.map((d) => d.value).reduce((a, b) => a + b) /
-            slotData.length;
-        totalAverages.add(EngagementDataPoint(
-          timeSlotStart: slot.start.toIso8601String(),
-          avgValue: avgValue,
-        ));
-
-        print(
-            '  📈 Slot ${slot.start.toString().substring(11, 19)} - ${slot.end.toString().substring(11, 19)}: ${slotData.length} data points, avg: ${(avgValue * 100).toStringAsFixed(1)}%');
-      }
-
-      // Calculate user averages for this time slot
-      for (final userId in userData.keys) {
-        final userSlotData = userData[userId]!
-            .where((d) =>
-                (d.createdAt.isAtSameMomentAs(slot.start) ||
-                    d.createdAt.isAfter(slot.start)) &&
-                d.createdAt.isBefore(slot.end))
-            .toList();
-
-        if (userSlotData.isNotEmpty) {
-          final userAvgValue =
-              userSlotData.map((d) => d.value).reduce((a, b) => a + b) /
-                  userSlotData.length;
-
-          // Find or create user data
-          var userEngagement = userAverages.firstWhere(
-            (u) => u.userId == userId,
-            orElse: () => UserEngagementData(
-              userId: userId,
-              name: userData[userId]!.first.userName,
-              data: [],
-            ),
-          );
-
-          if (userAverages.contains(userEngagement)) {
-            userAverages.remove(userEngagement);
-          }
-
-          userEngagement = UserEngagementData(
-            userId: userId,
-            name: userEngagement.name,
-            data: [
-              ...userEngagement.data,
-              EngagementDataPoint(
-                timeSlotStart: slot.start.toIso8601String(),
-                avgValue: userAvgValue,
-              ),
-            ],
-          );
-
-          userAverages.add(userEngagement);
-        }
-      }
-    }
 
     return EngagementTotalAverageDto(
-      totalAttentionAverage: totalAverages,
-      usersAverage: userAverages,
+      data: rawData,
+        users: users
     );
   }
 
-  static List<TimeSlot> _calculateTimeSlots(List<RawEngagementData> rawData) {
-    if (rawData.isEmpty) return [];
 
-    final firstTime =
-        rawData.map((d) => d.createdAt).reduce((a, b) => a.isBefore(b) ? a : b);
-    final lastTime =
-        rawData.map((d) => d.createdAt).reduce((a, b) => a.isAfter(b) ? a : b);
+// One line per moduleId. X axis == seconds since `meetStart`.
+  /// Each dot is the average for that module inside its time slot.
+  List<LineSeries> buildBinnedSeriesByModule({
 
-    // Always build 5 dynamic slots across the whole duration (min slot = 5s)
-    final totalSeconds = lastTime.difference(firstTime).inSeconds.abs();
-    if (totalSeconds <= 0) {
-      return [
-        TimeSlot(
-            start: firstTime, end: firstTime.add(const Duration(seconds: 5)))
-      ];
+    required Duration slot,                 // e.g. Duration(seconds: 10)
+    required DateTime meetStart,            // meeting absolute start time
+    required DateTime meetEnd,              // meeting absolute end time
+    int? userId,                            // optional filter
+    bool xAsTime = true,                    // true -> x in seconds since start; false -> x = bin index
+    bool isCurved = false,
+    bool showDots = false,
+    double strokeWidth = 1,
+  }) {
+    if (data.isEmpty) return [];
+    assert(meetEnd.isAfter(meetStart), 'meetEnd must be after meetStart');
+    final slotMs = slot.inMilliseconds;
+    assert(slotMs > 0, 'slot must be > 0');
+
+    // Filter by user if provided and clamp to meeting window [meetStart, meetEnd)
+    final filtered = (userId == null ? data : data.where((e) => e.userId == userId))
+        .where((e) => !e.createdAt.isBefore(meetStart) && e.createdAt.isBefore(meetEnd))
+        .toList();
+    if (filtered.isEmpty) return [];
+
+    // Number of slots covering [meetStart, meetEnd)
+    final meetDurMs = meetEnd.millisecondsSinceEpoch - meetStart.millisecondsSinceEpoch;
+    final slotCount = (meetDurMs + slotMs - 1) ~/ slotMs; // ceil
+    if (slotCount <= 0) return [];
+
+    // Group by module
+    final Map<int, List<RawEngagementData>> byModule = {};
+    for (final d in filtered) {
+      byModule.putIfAbsent(d.moduleId, () => []).add(d);
     }
 
-    const desiredSlots = 5;
-    final slotSeconds = (totalSeconds / desiredSlots).ceil();
-    final effectiveSlotSeconds = slotSeconds < 5 ? 5 : slotSeconds;
+    final List<LineSeries> out = [];
 
-    final slots = <TimeSlot>[];
-    var currentTime = firstTime;
+    for (final entry in byModule.entries) {
+      final moduleId = entry.key;
+      final points = entry.value..sort((a, b) => a.createdAt.compareTo(b.createdAt));
 
-    for (int i = 0; i < desiredSlots; i++) {
-      final slotStart = currentTime;
-      // Last slot ends exactly at lastTime to avoid trailing gaps/overruns
-      final slotEnd = i == desiredSlots - 1
-          ? lastTime
-          : currentTime.add(Duration(seconds: effectiveSlotSeconds));
-      slots.add(TimeSlot(start: slotStart, end: slotEnd));
-      currentTime = slotEnd;
+      // Aggregate values per slot index
+      final Map<int, _Agg> binAgg = {}; // slotIndex -> agg
+      for (final p in points) {
+        final diffMs = p.createdAt.millisecondsSinceEpoch - meetStart.millisecondsSinceEpoch;
+        if (diffMs < 0 || diffMs >= meetDurMs) continue; // safety
+        final slotIdx = diffMs ~/ slotMs;                // floor → first 10s is slot 0
+        (binAgg[slotIdx] ??= _Agg()).add(p.value);
+      }
+
+      // Produce FlSpots: one per slot that has data (gaps are allowed)
+      final sortedIdx = binAgg.keys.toList()..sort();
+      final spots = <FlSpot>[];
+      for (final idx in sortedIdx) {
+        final x = xAsTime
+            ? (idx * slotMs) / 1000.0            // seconds from meeting start
+            : idx.toDouble();                    // slot index 0,1,2,...
+        spots.add(FlSpot(x, binAgg[idx]!.avg * 100));
+      }
+
+      if (spots.isEmpty) continue;
+
+      out.add(
+        LineSeries(
+          id: points.first.moduleName.isNotEmpty ? points.first.moduleName : 'Module $moduleId',
+          spots: spots,
+          color: _stableColorFor(moduleId),
+          isCurved: isCurved,
+          showDots: showDots,
+          strokeWidth: strokeWidth,
+          fillBelowLine: true,
+        ),
+      );
     }
 
-    final durationInMinutes = totalSeconds / 60;
-    print(
-        '📊 Meeting duration: ${durationInMinutes.toStringAsFixed(1)} min, Slots: ${slots.length}, Slot span: ~${effectiveSlotSeconds}s');
-
-    return slots;
+    return out;
   }
+
+  /// Consistent color selection per module
+  Color _stableColorFor(int key) {
+  const palette = [
+  Color(0xFF1e88e5), // blue
+  Color(0xFFe53935), // red
+  Color(0xFF43a047), // green
+  Color(0xFF8e24aa), // purple
+  Color(0xFFfb8c00), // orange
+  Color(0xFF00acc1), // cyan
+  Color(0xFF6d4c41), // brown
+  Color(0xFF7cb342), // light green
+  Color(0xFF3949ab), // indigo
+  Color(0xFFf4511e), // deep orange
+  ];
+  return palette[key.hashCode.abs() % palette.length];
+  }
+
+}
+
+class _Agg {
+  double sum = 0;
+  int count = 0;
+  void add(double v) { sum += v; count++; }
+  double get avg => count == 0 ? 0 : sum / count;
 }
 
 class EngagementDataPoint {
