@@ -1,6 +1,7 @@
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 
+import '../../../assets/colors/Colors.dart';
 import '../../presentation/ui/charts/ui/widget/chart.dart';
 
 class CreateEngagementDto {
@@ -158,7 +159,7 @@ class EngagementTotalAverageDto {
         LineSeries(
           id: points.first.moduleName.isNotEmpty ? points.first.moduleName : 'Module $moduleId',
           spots: spots,
-          color: _stableColorFor(moduleId),
+          color: ColorConstants.graphColorFor(moduleId),
           isCurved: isCurved,
           showDots: showDots,
           strokeWidth: strokeWidth,
@@ -169,24 +170,6 @@ class EngagementTotalAverageDto {
 
     return out;
   }
-
-  /// Consistent color selection per module
-  Color _stableColorFor(int key) {
-  const palette = [
-  Color(0xFF1e88e5), // blue
-  Color(0xFFe53935), // red
-  Color(0xFF43a047), // green
-  Color(0xFF8e24aa), // purple
-  Color(0xFFfb8c00), // orange
-  Color(0xFF00acc1), // cyan
-  Color(0xFF6d4c41), // brown
-  Color(0xFF7cb342), // light green
-  Color(0xFF3949ab), // indigo
-  Color(0xFFf4511e), // deep orange
-  ];
-  return palette[key.hashCode.abs() % palette.length];
-  }
-
 }
 
 class _Agg {

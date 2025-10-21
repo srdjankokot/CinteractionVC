@@ -27,6 +27,7 @@ import '../../domain/entities/user.dart';
 import '../../domain/source/api.dart';
 import '../../presentation/cubit/chat/chat_cubit.dart';
 
+import '../dto/ai/ai_module_dto.dart';
 import '../source/local/local_storage.dart';
 
 import 'package:url_launcher/url_launcher.dart';
@@ -92,6 +93,9 @@ class ConferenceRepoImpl extends ConferenceRepo {
 
   final _debouncer = Debouncer(delay: const Duration(milliseconds: 50));
 
+
+  List<ModuleDto> activeModules = [];
+
   @override
   Future<void> initialize(
       {required int roomId, required String displayName}) async {
@@ -109,6 +113,7 @@ class ConferenceRepoImpl extends ConferenceRepo {
     session = await client?.createSession();
     _initLocalMediaRenderer();
 
+    activeModules = user?.modules.where((m) => m.enabled == 1).toList() ?? [];
     await _configureConnection();
     await _joinRoom();
   }
@@ -1525,6 +1530,14 @@ class ConferenceRepoImpl extends ConferenceRepo {
 
             videoState.streamsToBeRendered[command.id]?.moduleScores[name] =
                 value!;
+
+
+            final ModuleDto? foundModule = activeModules
+                .where((m) => m.name.toLowerCase() == name.toString().toLowerCase())
+                .cast<ModuleDto?>()
+                .firstOrNull; // Dart >= 3.0 (collection_extensions)
+
+            videoState.streamsToBeRendered[command.id]?.addSpot(name, value!, foundModule?.id ?? 1);
             // if (name == 'engagement') {
             //   videoState.streamsToBeRendered[command.id]?.engagement = value;
             // } else if (name == 'drowsiness') {
@@ -1570,8 +1583,8 @@ class ConferenceRepoImpl extends ConferenceRepo {
       final image = await captureFrameFromVideo(localVideoRenderer);
       final img = base64Encode(image!.asUint8List().toList()).toString();
 
-      final activeModules =
-          user?.modules.where((m) => m.enabled == 1).toList() ?? [];
+      // final activeModules =
+      //     user?.modules.where((m) => m.enabled == 1).toList() ?? [];
 
       for (final module in activeModules) {
         final result = await _api.getModuleScore(
@@ -1589,8 +1602,9 @@ class ConferenceRepoImpl extends ConferenceRepo {
           print('aaaaaaaa');
           print(videoState.streamsToBeRendered['local']
               ?.moduleScores[result.name.toLowerCase()]);
-          videoState.streamsToBeRendered['local']?.moduleScores[result.name] =
-              scoreInt;
+          videoState.streamsToBeRendered['local']?.moduleScores[result.name] = scoreInt;
+
+          videoState.streamsToBeRendered['local']?.addSpot(result.name, scoreInt, module.id);
 
           // Šalji na server za sve module
           await _createEngagementOnServer(result.score!, result.name);

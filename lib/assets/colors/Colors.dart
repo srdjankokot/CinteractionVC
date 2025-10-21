@@ -106,4 +106,24 @@ class ColorConstants {
       adjust((color.b * 255).toInt()),
     );
   }
+
+
+
+
+
+  static Color graphColorFor(int key) {
+    const palette = [
+      Color(0xFF1e88e5), // blue
+      Color(0xFFe53935), // red
+      Color(0xFF43a047), // green
+      Color(0xFF8e24aa), // purple
+      Color(0xFFfb8c00), // orange
+      Color(0xFF00acc1), // cyan
+      Color(0xFF6d4c41), // brown
+      Color(0xFF7cb342), // light green
+      Color(0xFF3949ab), // indigo
+      Color(0xFFf4511e), // deep orange
+    ];
+    return palette[key.hashCode.abs() % palette.length];
+  }
 }
