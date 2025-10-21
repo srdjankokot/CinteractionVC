@@ -1526,23 +1526,15 @@ class ConferenceRepoImpl extends ConferenceRepo {
             final name = module['name'];
             final value = module['value'] as int?;
 
-            // print('[renderCommand] Processing module: $name = $value');
-
-            videoState.streamsToBeRendered[command.id]?.moduleScores[name] =
-                value!;
-
-
             final ModuleDto? foundModule = activeModules
                 .where((m) => m.name.toLowerCase() == name.toString().toLowerCase())
                 .cast<ModuleDto?>()
-                .firstOrNull; // Dart >= 3.0 (collection_extensions)
+                .firstOrNull;
 
-            videoState.streamsToBeRendered[command.id]?.addSpot(name, value!, foundModule?.id ?? 1);
-            // if (name == 'engagement') {
-            //   videoState.streamsToBeRendered[command.id]?.engagement = value;
-            // } else if (name == 'drowsiness') {
-            //   videoState.streamsToBeRendered[command.id]?.drowsiness = value;
-            // }
+            if (foundModule != null){
+              videoState.streamsToBeRendered[command.id]?.moduleScores[foundModule] = value!;
+              videoState.streamsToBeRendered[command.id]?.addSpot(name, value!, foundModule.id ?? 1);
+            }
           }
           _refreshStreams();
         } else {
@@ -1599,11 +1591,7 @@ class ConferenceRepoImpl extends ConferenceRepo {
         if (result != null) {
           final scoreInt = (result.score! * 100).toInt();
 
-          print('aaaaaaaa');
-          print(videoState.streamsToBeRendered['local']
-              ?.moduleScores[result.name.toLowerCase()]);
-          videoState.streamsToBeRendered['local']?.moduleScores[result.name] = scoreInt;
-
+          videoState.streamsToBeRendered['local']?.moduleScores[module] = scoreInt;
           videoState.streamsToBeRendered['local']?.addSpot(result.name, scoreInt, module.id);
 
           // Šalji na server za sve module

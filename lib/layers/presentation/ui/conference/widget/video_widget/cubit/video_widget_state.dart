@@ -1,3 +1,4 @@
+import 'package:cinteraction_vc/layers/data/dto/ai/ai_module_dto.dart';
 import 'package:equatable/equatable.dart';
 import '../../../../../../../core/util/util.dart';
 
@@ -9,7 +10,7 @@ class VideoWidgetState extends Equatable {
   final bool audioMuted;
   final bool handUp;
   final bool isSpeaking;
-  final Map<String, int>? moduleScores;
+  final Map<ModuleDto, int>? moduleScores;
   final int publisherId;
   final String publisherName;
   final StreamRenderer videoRenderer;
@@ -35,7 +36,7 @@ class VideoWidgetState extends Equatable {
     bool audioMuted = false,
     bool isSpeaking = false,
     bool handUp = false,
-        Map<String, int> moduleScores = const {},
+        Map<ModuleDto, int> moduleScores = const {},
     int publisherId = 0,
     String publisherName = "1",
   }) : this(
@@ -60,7 +61,7 @@ class VideoWidgetState extends Equatable {
     bool? audioMuted,
     bool? isSpeaking,
     bool? handUp,
-    Map<String, int>? moduleScores,
+    Map<ModuleDto, int>? moduleScores,
     int? publisherId,
     String? publisherName,
     StreamRenderer? videoRenderer,
