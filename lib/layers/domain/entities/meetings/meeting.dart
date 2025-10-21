@@ -8,6 +8,7 @@ class Meeting extends Equatable {
     required this.organizerId,
     required this.organizer,
     this.averageEngagement,
+    this.averageDrowsiness,
     this.totalNumberOfUsers,
     this.recorded,
     required this.meetingStart,
@@ -26,6 +27,7 @@ class Meeting extends Equatable {
   String organizer; // <- set manually after parsing if needed
   String? streamId;
   double? averageEngagement;
+  double? averageDrowsiness;
   int? totalNumberOfUsers;
   bool? recorded;
   String? eventName;
@@ -60,6 +62,9 @@ class Meeting extends Equatable {
       averageEngagement: (json['average_engagement'] != null)
           ? (json['average_engagement'] as num).toDouble()
           : null,
+      averageDrowsiness: (json['average_drowsiness'] != null)
+          ? (json['average_drowsiness'] as num).toDouble()
+          : null,
       totalNumberOfUsers: json['total_number_of_users'] as int?,
       recorded: json['recorded'] as bool?,
       eventName: json['event_name'] as String?,
@@ -87,6 +92,7 @@ class Meeting extends Equatable {
       'organizer_id': organizerId,
       'stream_id': streamId,
       'average_engagement': averageEngagement,
+      'average_drowsiness': averageDrowsiness,
       'total_number_of_users': totalNumberOfUsers,
       'recorded': recorded,
       'event_name': eventName,
@@ -108,6 +114,7 @@ class Meeting extends Equatable {
         organizer,
         streamId,
         averageEngagement,
+        averageDrowsiness,
         totalNumberOfUsers,
         recorded,
         eventName,

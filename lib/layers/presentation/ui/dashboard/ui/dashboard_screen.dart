@@ -17,6 +17,15 @@ class DashboardScreen extends StatelessWidget {
     return BlocConsumer<DashboardCubit, DashboardState>(
         listener: (context, state) {},
         builder: (context, state) {
+          if (state.loading == true) {
+            return const Scaffold(
+              backgroundColor: ColorConstants.kGrey100,
+              body: Center(
+                child: CircularProgressIndicator(),
+              ),
+            );
+          }
+
           return Scaffold(
               backgroundColor: ColorConstants.kGrey100,
               body: Padding(

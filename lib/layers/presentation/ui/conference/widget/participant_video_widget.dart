@@ -98,34 +98,32 @@ class ParticipantVideoWidget extends StatelessWidget {
                           showEngagement == true &&
                           (remoteStream.moduleScores.values
                               .any((score) => score > 0)),
-                      child:
-                      Card(
-                      color: ColorConstants.kGray2,
-                      child:
-                      Padding(padding: const EdgeInsets.all(8),
-          child:      Column(
-
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: remoteStream.moduleScores.entries
-                .where((entry) => entry.value > 0)
-                .expand((entry) => [
-              Text(
-                entry.key.name,
-                style: context.textTheme.displaySmall?.copyWith(color: ColorConstants.graphColorFor(entry.key.id)),
-              ),
-              const SizedBox(height: 3),
-              EngagementProgress(engagement: entry.value),
-              const SizedBox(height: 10),
-            ])
-                .toList(),
-          ),)
-
-
-                  ,
-                      )
-
-
-                   ,
+                      child: Card(
+                        color: ColorConstants.kGray2,
+                        child: Padding(
+                          padding: const EdgeInsets.all(8),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: remoteStream.moduleScores.entries
+                                .where((entry) => entry.value > 0)
+                                .expand((entry) => [
+                                      Text(
+                                        entry.key.name,
+                                        style: context.textTheme.displaySmall
+                                            ?.copyWith(
+                                                color: ColorConstants
+                                                    .graphColorFor(
+                                                        entry.key.id)),
+                                      ),
+                                      const SizedBox(height: 3),
+                                      EngagementProgress(
+                                          engagement: entry.value),
+                                      const SizedBox(height: 10),
+                                    ])
+                                .toList(),
+                          ),
+                        ),
+                      ),
                     )
                   ],
                 ),
@@ -183,20 +181,32 @@ class ParticipantVideoWidget extends StatelessWidget {
                   left: 0,
                   child: SizedBox(
                     height: height / 4,
-                  child: MultiLineChart(
-                    series: remoteStream.modulesGraphData,
-                    showBorder: false,
-                    showLegend: false,
-                    showGrid: false,
-                    bottomTitleBuilder: null,
-                    leftTitleBuilder: null,
-                    backgroundColor: Colors.transparent,
-                    showSideTitles: false,
-                    showBottomTitles: false,
-                    padding: const EdgeInsets.all(0),
-
-                ),
-              )),
+                    child: remoteStream.modulesGraphData.isEmpty
+                        ? Container(
+                            color: Colors.transparent,
+                            child: const Center(
+                              child: Text(
+                                '',
+                                style: TextStyle(
+                                  color: Colors.white70,
+                                  fontSize: 12,
+                                ),
+                              ),
+                            ),
+                          )
+                        : MultiLineChart(
+                            series: remoteStream.modulesGraphData,
+                            showBorder: false,
+                            showLegend: false,
+                            showGrid: false,
+                            bottomTitleBuilder: null,
+                            leftTitleBuilder: null,
+                            backgroundColor: Colors.transparent,
+                            showSideTitles: false,
+                            showBottomTitles: false,
+                            padding: const EdgeInsets.all(0),
+                          ),
+                  )),
             ],
           );
         }),
