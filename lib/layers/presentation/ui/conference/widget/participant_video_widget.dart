@@ -1,5 +1,6 @@
 import 'dart:math';
 
+import 'package:cinteraction_vc/assets/colors/Colors.dart';
 import 'package:cinteraction_vc/core/extension/context.dart';
 import 'package:cinteraction_vc/core/util/platform/platform.dart';
 import 'package:cinteraction_vc/layers/presentation/ui/charts/ui/widget/chart.dart';
@@ -97,22 +98,34 @@ class ParticipantVideoWidget extends StatelessWidget {
                           showEngagement == true &&
                           (remoteStream.moduleScores.values
                               .any((score) => score > 0)),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: remoteStream.moduleScores.entries
-                            .where((entry) => entry.value > 0)
-                            .expand((entry) => [
-                                  Text(
-                                    '${entry.key[0].toUpperCase()}${entry.key.substring(1)}',
-                                    style: context.textTheme.displaySmall
-                                        ?.copyWith(color: Colors.white),
-                                  ),
-                                  const SizedBox(height: 5),
-                                  EngagementProgress(engagement: entry.value),
-                                  const SizedBox(height: 5),
-                                ])
-                            .toList(),
-                      ),
+                      child:
+                      Card(
+                      color: ColorConstants.kGray2,
+                      child:
+                      Padding(padding: const EdgeInsets.all(8),
+          child:      Column(
+
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: remoteStream.moduleScores.entries
+                .where((entry) => entry.value > 0)
+                .expand((entry) => [
+              Text(
+                entry.key.name,
+                style: context.textTheme.displaySmall?.copyWith(color: ColorConstants.graphColorFor(entry.key.id)),
+              ),
+              const SizedBox(height: 3),
+              EngagementProgress(engagement: entry.value),
+              const SizedBox(height: 10),
+            ])
+                .toList(),
+          ),)
+
+
+                  ,
+                      )
+
+
+                   ,
                     )
                   ],
                 ),

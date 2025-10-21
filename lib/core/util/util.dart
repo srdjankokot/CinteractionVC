@@ -3,6 +3,7 @@ import 'dart:typed_data';
 
 import 'package:cinteraction_vc/assets/colors/Colors.dart';
 import 'package:cinteraction_vc/core/util/platform/platform_stub.dart';
+import 'package:cinteraction_vc/layers/data/dto/ai/ai_module_dto.dart';
 import 'package:cinteraction_vc/layers/presentation/ui/charts/ui/widget/chart.dart';
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/cupertino.dart';
@@ -20,7 +21,7 @@ class StreamRenderer {
   String? publisherId;
   String publisherName;
 
-  Map<String, int> moduleScores = {};
+  Map<ModuleDto, int> moduleScores = {};
   String? audioMid;
   String? videoMid;
   bool? initialSet;
