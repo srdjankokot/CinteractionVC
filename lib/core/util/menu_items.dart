@@ -28,7 +28,7 @@ import '../navigation/route.dart';
 
 final mobileBottomMenu = <MenuItem>[
   buildChatMenuItem(),
-  dashboard,
+  // dashboard,
   meetings,
   users,
   aiModules,
@@ -47,7 +47,7 @@ final mobileProfileMenu = <MenuItem>[
 final desktopMenu = <MenuItem>[
   // home,
   buildChatMenuItem(),
-  dashboard,
+  // dashboard,
   meetings,
   users,
   aiModules,

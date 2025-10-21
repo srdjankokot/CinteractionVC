@@ -237,6 +237,7 @@ class _MeetingListLayoutState extends State<MeetingListLayout> {
                     ),
                   ),
                   Table(columnWidths: const {
+                    0: FixedColumnWidth(100),
                     1: FixedColumnWidth(200),
                     2: FixedColumnWidth(150),
                     //   3: FixedColumnWidth(209),
@@ -261,14 +262,14 @@ class _MeetingListLayoutState extends State<MeetingListLayout> {
                                 child: Text('Organizer'),
                               )),
 
-                          Visibility(
-                            visible: state.isShowingPastMeetings,
-                            child: const TableCell(
-                                verticalAlignment:
-                                    TableCellVerticalAlignment.middle,
-                                child:
-                                    Center(child: Text('Average Engagement'))),
-                          ),
+                          // Visibility(
+                          //   visible: state.isShowingPastMeetings,
+                          //   child: const TableCell(
+                          //       verticalAlignment:
+                          //           TableCellVerticalAlignment.middle,
+                          //       child:
+                          //           Center(child: Text('Average Engagement'))),
+                          // ),
 
                           const TableCell(
                               verticalAlignment:
@@ -296,6 +297,11 @@ class _MeetingListLayoutState extends State<MeetingListLayout> {
                                 child: Text('End'),
                               )),
 
+                          const TableCell(
+                              verticalAlignment: TableCellVerticalAlignment.middle,
+                              child: Center(child: Text('Actions')),
+                              ),
+
                           // TableCell(
                           //     verticalAlignment: TableCellVerticalAlignment.middle,
                           //     child: imageSVGAsset('')!),
@@ -312,6 +318,7 @@ class _MeetingListLayoutState extends State<MeetingListLayout> {
                                 color: ColorConstants.kGray5,
                                 style: BorderStyle.solid)),
                         columnWidths: const {
+                          0: FixedColumnWidth(100),
                           1: FixedColumnWidth(200),
                           2: FixedColumnWidth(150),
                           //   3: FixedColumnWidth(209),
@@ -323,21 +330,17 @@ class _MeetingListLayoutState extends State<MeetingListLayout> {
                               TableCell(
                                 verticalAlignment:
                                     TableCellVerticalAlignment.middle,
-                                child: InkWell(
-                                  onTap: () => _selectMeeting(meeting),
-                                  child: Padding(
+                                child: Padding(
                                     padding: const EdgeInsets.all(12.0),
                                     child: Text(
                                       meeting.callId.toString(),
                                       overflow: TextOverflow.clip,
                                     ),
                                   ),
-                                ),
+
                               ),
                               TableCell(
-                                  child: InkWell(
-                                onTap: () => _selectMeeting(meeting),
-                                child: Padding(
+                                  child:  Padding(
                                   padding: const EdgeInsets.only(
                                       top: 27, bottom: 27),
                                   child: Row(
@@ -361,32 +364,29 @@ class _MeetingListLayoutState extends State<MeetingListLayout> {
                                     ],
                                   ),
                                 ),
-                              )),
-                              Visibility(
-                                visible: state.isShowingPastMeetings,
-                                child: TableCell(
-                                    verticalAlignment:
-                                        TableCellVerticalAlignment.middle,
-                                    child: InkWell(
-                                      onTap: () => _selectMeeting(meeting),
-                                      child: EngagementProgress(
-                                        engagement:
-                                            ((meeting.averageEngagement ?? 0) *
-                                                    100)
-                                                .toInt(),
-                                        width: double.maxFinite,
-                                      ),
-                                    )),
                               ),
+                              // Visibility(
+                              //   visible: state.isShowingPastMeetings,
+                              //   child: TableCell(
+                              //       verticalAlignment:
+                              //           TableCellVerticalAlignment.middle,
+                              //       child: InkWell(
+                              //         onTap: () => _selectMeeting(meeting),
+                              //         child: EngagementProgress(
+                              //           engagement:
+                              //               ((meeting.averageEngagement ?? 0) *
+                              //                       100)
+                              //                   .toInt(),
+                              //           width: double.maxFinite,
+                              //         ),
+                              //       )),
+                              // ),
                               TableCell(
                                 verticalAlignment:
                                     TableCellVerticalAlignment.middle,
-                                child: InkWell(
-                                    onTap: () => _selectMeeting(meeting),
                                     child: Center(
                                         child: Text(
                                             '${meeting.totalNumberOfUsers ?? 0}'))),
-                              ),
                               //     child: isShowingPastMeetings
                               //         ? Center(child: Text('${meeting.users.length}'))
                               //         : Center(child: MembersWidget(users: meeting.users)))
@@ -397,34 +397,27 @@ class _MeetingListLayoutState extends State<MeetingListLayout> {
                                     verticalAlignment:
                                         TableCellVerticalAlignment.middle,
                                     child: Center(
-                                        child: InkWell(
-                                            onTap: () =>
-                                                _selectMeeting(meeting),
+
                                             child: imageSVGAsset(
                                                 meeting.recorded ?? false
                                                     ? 'badge_approved'
-                                                    : 'badge_waiting')))),
+                                                    : 'badge_waiting'))),
                               ),
                               TableCell(
                                 verticalAlignment:
                                     TableCellVerticalAlignment.middle,
-                                child: InkWell(
-                                  onTap: () => _selectMeeting(meeting),
-                                  child: Padding(
+                                child:  Padding(
                                     padding: const EdgeInsets.all(12.0),
                                     child: Text(
                                         DateFormat('dd.MM.yyyy. hh:mm a')
                                             .format(meeting.meetingStart)),
                                   ),
                                 ),
-                              ),
 
                               TableCell(
                                   verticalAlignment:
                                       TableCellVerticalAlignment.middle,
-                                  child: InkWell(
-                                    onTap: () => _selectMeeting(meeting),
-                                    child: Padding(
+                                  child: Padding(
                                       padding: const EdgeInsets.all(12.0),
                                       child: Visibility(
                                           visible: meeting.meetingEnd != null,
@@ -434,7 +427,16 @@ class _MeetingListLayoutState extends State<MeetingListLayout> {
                                                   .format(meeting.meetingEnd!))
                                               : const Text('')),
                                     ),
-                                  )),
+                                  ),
+                              
+                              TableCell(
+                                verticalAlignment:
+                                TableCellVerticalAlignment.middle,
+                                child:
+                                Center(child: TextButton(onPressed: () => _selectMeeting(meeting)
+                                    , child: const Text('Details'))),
+                              )
+                              
                             ]),
                         ],
                       ),

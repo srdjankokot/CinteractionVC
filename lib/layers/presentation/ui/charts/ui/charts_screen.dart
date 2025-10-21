@@ -158,7 +158,7 @@ class _ChartsScreenState extends State<ChartsScreen> {
                       // Individual User Charts
                       LayoutBuilder(builder: (context, constraints) {
                         var minWidth = 400;
-                        var space = 20.0;
+                        var space = 0.0;
                         var containerWidth =
                             constraints.maxWidth * 1 / 3 - space * 2 / 3;
 

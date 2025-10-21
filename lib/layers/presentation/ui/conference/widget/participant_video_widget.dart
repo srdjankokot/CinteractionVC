@@ -175,37 +175,42 @@ class ParticipantVideoWidget extends StatelessWidget {
                         }),
                   )),
 
+
               Positioned(
-                  bottom: 0,
-                  right: 0,
-                  left: 0,
-                  child: SizedBox(
-                    height: height / 4,
-                    child: remoteStream.modulesGraphData.isEmpty
-                        ? Container(
-                            color: Colors.transparent,
-                            child: const Center(
-                              child: Text(
-                                '',
-                                style: TextStyle(
-                                  color: Colors.white70,
-                                  fontSize: 12,
+                  bottom: 8,
+                  right: 4,
+                  left: 4,
+                  child:
+
+                  ClipRect(
+                    child: SizedBox(
+                      height: height / 4,
+                      child: remoteStream.modulesGraphData.isEmpty
+                          ? Container(
+                              color: Colors.transparent,
+                              child: const Center(
+                                child: Text(
+                                  '',
+                                  style: TextStyle(
+                                    color: Colors.white70,
+                                    fontSize: 12,
+                                  ),
                                 ),
                               ),
+                            )
+                          : MultiLineChart(
+                              series: remoteStream.modulesGraphData,
+                              showBorder: false,
+                              showLegend: false,
+                              showGrid: false,
+                              bottomTitleBuilder: null,
+                              leftTitleBuilder: null,
+                              backgroundColor: Colors.transparent,
+                              showSideTitles: false,
+                              showBottomTitles: false,
+                              padding: const EdgeInsets.all(0),
                             ),
-                          )
-                        : MultiLineChart(
-                            series: remoteStream.modulesGraphData,
-                            showBorder: false,
-                            showLegend: false,
-                            showGrid: false,
-                            bottomTitleBuilder: null,
-                            leftTitleBuilder: null,
-                            backgroundColor: Colors.transparent,
-                            showSideTitles: false,
-                            showBottomTitles: false,
-                            padding: const EdgeInsets.all(0),
-                          ),
+                    ),
                   )),
             ],
           );

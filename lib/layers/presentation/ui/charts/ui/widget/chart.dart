@@ -62,6 +62,8 @@ class MultiLineChart extends StatelessWidget {
 
   final Color backgroundColor;
 
+  final String? title;
+
   const MultiLineChart(
       {super.key,
       required this.series,
@@ -78,7 +80,9 @@ class MultiLineChart extends StatelessWidget {
       this.showBottomTitles = true,
       this.height = 260,
       this.padding = const EdgeInsets.all(12),
-      this.backgroundColor = Colors.white});
+      this.backgroundColor = Colors.white,
+      this.title
+      });
 
   @override
   Widget build(BuildContext context) {
@@ -191,28 +195,40 @@ class MultiLineChart extends StatelessWidget {
           ),
         ),
         lineTouchData: LineTouchData(
+          getTouchedSpotIndicator: (barData, indicators) {
+            return indicators.map((index) {
+
+              return TouchedSpotIndicatorData(
+                const FlLine(color: Colors.red, strokeWidth: 1), // hide vertical line if you want
+                FlDotData(
+                  show: true,
+                  getDotPainter: (spot, percent, bar, index) =>
+                      FlDotCirclePainter(
+                        radius: 3, // 👈 smaller circle (default ~6)
+                        color: barData.color ?? Colors.white,
+                      ),
+                ),
+              );
+            }).toList();
+          },
           handleBuiltInTouches: true,
           touchTooltipData: LineTouchTooltipData(
-            tooltipBgColor:
-                Theme.of(context).colorScheme.surface.withOpacity(0.95),
+            tooltipBgColor: Theme.of(context).colorScheme.surface.withValues(alpha: 0.95),
             fitInsideHorizontally: true,
             fitInsideVertically: true,
             getTooltipItems: (touchedSpots) {
-              // One tooltip entry per touched line
               return touchedSpots.map((ts) {
                 final s = series[ts.barIndex];
-                final label = s.id;
-                final val =
-                    '(${_trimTrailingZeros(ts.x)}, ${_trimTrailingZeros(ts.y)})';
+                // final label = s.id;
+                final valueY  = double.parse(ts.y.toStringAsFixed(2));
+                final val = '${_trimTrailingZeros(valueY)}%';
                 return LineTooltipItem(
-                  '$label\n$val',
-                  TextStyle(
-                    fontWeight: FontWeight.w600,
-                    color: (s.color ?? Colors.white),
+                  val, TextStyle(fontSize: 12, color: (s.color ?? Colors.white),
                   ),
                 );
               }).toList();
             },
+
           ),
         ),
       ),
@@ -237,6 +253,19 @@ class MultiLineChart extends StatelessWidget {
               MainAxisSize.min, // helps if parent allows intrinsic height
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
+            if(title != null)
+              Column(
+                  children: [
+        Text(
+        title!,
+        style: const TextStyle(
+          fontWeight: FontWeight.bold,
+          fontSize: 18,
+        ),
+      ),
+                    const SizedBox(height: 12),
+                  ],
+                ),
             if (showLegend) _Legend(series: series),
             const SizedBox(height: 12),
             Flexible(

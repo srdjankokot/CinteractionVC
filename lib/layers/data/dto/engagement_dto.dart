@@ -83,9 +83,17 @@ class EngagementTotalAverageDto {
         .toList();
 
 
+
     final users = rawData.map((e) => GraphUser(id: e.userId, name: e.userName)).toSet().toList();
 
 
+
+    List<GraphUser> mockUsers = List.empty(growable: true);
+    mockUsers.addAll(users);
+    mockUsers.addAll(users);
+    mockUsers.addAll(users);
+    mockUsers.addAll(users);
+    mockUsers.addAll(users);
     return EngagementTotalAverageDto(
       data: rawData,
         users: users
