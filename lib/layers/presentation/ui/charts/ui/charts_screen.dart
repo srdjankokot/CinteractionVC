@@ -1,6 +1,6 @@
 import 'package:cinteraction_vc/core/extension/context_user.dart';
 import 'package:cinteraction_vc/layers/presentation/cubit/dashboard/dashboard_cubit.dart';
-import 'package:cinteraction_vc/layers/presentation/ui/charts/ui/widget/all_users_chart.dart';
+import 'package:cinteraction_vc/layers/presentation/ui/charts/ui/widget/chart.dart';
 import 'package:cinteraction_vc/layers/presentation/ui/charts/ui/widget/user_chart_card.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -8,15 +8,23 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../../../assets/colors/Colors.dart';
 
 class ChartsScreen extends StatefulWidget {
-  const ChartsScreen({super.key, this.meetingId});
+  const ChartsScreen({
+    super.key,
+    this.meetingId, required this.meetStart, required this.meetEnd});
 
   final int? meetingId;
+  final DateTime meetStart;
+  final DateTime meetEnd;
 
   @override
   State<ChartsScreen> createState() => _ChartsScreenState();
 }
 
 class _ChartsScreenState extends State<ChartsScreen> {
+
+  var duration = 0.0;
+
+
   @override
   void initState() {
     super.initState();
@@ -52,7 +60,11 @@ class _ChartsScreenState extends State<ChartsScreen> {
     } else {
       print('⚠️ ChartsScreen: No meetingId provided');
     }
+
+     duration = widget.meetEnd.difference(widget.meetStart).inSeconds as double;
   }
+
+
 
   @override
   Widget build(BuildContext context) {
@@ -69,10 +81,30 @@ class _ChartsScreenState extends State<ChartsScreen> {
                         height: 20,
                       ),
 
-                      // Large Chart for All Users
-                      AllUsersChart(
-                        engagementData: state.engagementData,
-                        isLoading: state.engagementLoading ?? false,
+                      MultiLineChart(
+                        series: state.engagementData?.buildBinnedSeriesByModule(
+                          slot: const Duration(seconds: 10),
+                          xAsTime: true,
+                          meetStart: widget.meetStart,
+                          meetEnd: widget.meetEnd,
+
+                        ) ?? [],
+                        // Example: custom bottom titles if x is time index
+                        bottomTitleBuilder: (value, meta)
+                            {
+                              if(value % 10 != 0)
+                                {
+                                  return const Text("");
+                                }
+
+                              final secs = value.round(); // or: (value + 1e-6).floor()
+                              final m = (secs ~/ 60).toString().padLeft(2, '0');
+                              final s = (secs % 60).toString().padLeft(2, '0');
+                              return Text('$m:$s', style: Theme.of(context).textTheme.labelSmall);
+                            }
+
+                            ,
+                        leftTitleBuilder: (value, meta) => Text('${value.toInt()}%', style: Theme.of(context).textTheme.labelSmall),
                       ),
 
                       const SizedBox(
@@ -109,65 +141,29 @@ class _ChartsScreenState extends State<ChartsScreen> {
                           containerWidth = constraints.maxWidth;
                         }
 
-                        // Show real user data if available, otherwise show default
-                        if (state.engagementData?.usersAverage.isNotEmpty ==
-                            true) {
                           return Wrap(
                             spacing: space,
                             runSpacing: space,
-                            children: state.engagementData!.usersAverage
-                                .map((userData) {
-                              // Calculate average performance for this user
-                              final avgValue = userData.data.isNotEmpty
-                                  ? (userData.data
-                                              .map((d) => d.avgValue)
-                                              .reduce((a, b) => a + b) /
-                                          userData.data.length *
-                                          100)
-                                      .round()
-                                      .toDouble()
-                                  : 0.0;
-
-                              // Convert data points to chart data (0-100 scale)
-                              final chartData = userData.data
-                                  .map((d) => (d.avgValue * 100).toDouble())
-                                  .toList();
-
+                            children: state.engagementData!.users.map((userData) {
                               return SizedBox(
                                 width: containerWidth,
                                 child: UserChartCard(
                                   userName: userData.name,
-                                  performanceValue: avgValue,
-                                  chartPoints: userData.data,
+                                  duration: duration,
+                                  data: state.engagementData?.buildBinnedSeriesByModule(
+                                      slot: const Duration(seconds: 10),
+                                      userId: userData.id,
+                                      xAsTime: true,
+                                      meetStart: widget.meetStart,
+                                      meetEnd: widget.meetEnd
+                                  ) ?? [],
+
                                 ),
                               );
                             }).toList(),
                           );
-                        } else {
-                          // Default hardcoded data
-                          return Wrap(
-                            spacing: space,
-                            runSpacing: space,
-                            children: [
-                              SizedBox(
-                                width: containerWidth,
-                                child: UserChartCard(
-                                  userName: 'KAMERA 1',
-                                  performanceValue: 70,
-                                  chartPoints: const [],
-                                ),
-                              ),
-                              SizedBox(
-                                width: containerWidth,
-                                child: UserChartCard(
-                                  userName: 'KAMERA 2',
-                                  performanceValue: 85,
-                                  chartPoints: const [],
-                                ),
-                              ),
-                            ],
-                          );
-                        }
+
+
                       }),
 
                       const SizedBox(

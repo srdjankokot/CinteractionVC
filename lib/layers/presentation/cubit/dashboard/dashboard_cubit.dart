@@ -74,9 +74,6 @@ class DashboardCubit extends Cubit<DashboardState> with BlocLoggy {
 
     if (data.error == null && data.response != null) {
       print('✅ Engagement data loaded successfully');
-      print(
-          '✅ Total attention average points: ${data.response!.totalAttentionAverage.length}');
-      print('✅ Users average: ${data.response!.usersAverage.length}');
 
       loggy.info('Engagement data loaded successfully');
       emit(state.copyWith(

@@ -8,6 +8,7 @@ import 'package:intl/intl.dart';
 import '../../../../../../core/ui/images/image.dart';
 import '../../../../../../core/ui/widget/content_layout_web.dart';
 import '../../../../../../core/ui/widget/engagement_progress.dart';
+import '../../../../../domain/entities/meetings/meeting.dart';
 import '../../../../cubit/meetings/meetings_cubit.dart';
 import '../../../../../../core/app/injector.dart';
 import '../../../charts/ui/charts_screen.dart';
@@ -24,7 +25,7 @@ class _MeetingListLayoutState extends State<MeetingListLayout> {
   late double extentAfter;
   final _controller = ScrollController();
 
-  int? _selectedMeetingId; // inline charts selection
+  Meeting? _selectedMeeting; // inline charts selection
 
   @override
   void initState() {
@@ -44,17 +45,17 @@ class _MeetingListLayoutState extends State<MeetingListLayout> {
     }
   }
 
-  void _selectMeeting(int meetingId) {
-    setState(() => _selectedMeetingId = meetingId);
+  void _selectMeeting(Meeting meeting) {
+    setState(() => _selectedMeeting = meeting);
   }
 
   void _clearSelection() {
-    setState(() => _selectedMeetingId = null);
+    setState(() => _selectedMeeting = null);
   }
 
   @override
   Widget build(BuildContext context) {
-    if (_selectedMeetingId != null) {
+    if (_selectedMeeting != null) {
       // Show Charts inline with back button
       return Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -68,7 +69,7 @@ class _MeetingListLayoutState extends State<MeetingListLayout> {
                   onPressed: _clearSelection,
                 ),
                 const SizedBox(width: 8),
-                Text('Charts for meeting #${_selectedMeetingId}',
+                Text('Charts for meeting #${_selectedMeeting?.callId}',
                     style: context.titleTheme.titleLarge),
               ],
             ),
@@ -77,7 +78,7 @@ class _MeetingListLayoutState extends State<MeetingListLayout> {
           Expanded(
             child: BlocProvider(
               create: (_) => getIt.get<DashboardCubit>(),
-              child: ChartsScreen(meetingId: _selectedMeetingId),
+              child: ChartsScreen(meetingId: _selectedMeeting?.callId, meetStart:_selectedMeeting!.meetingStart, meetEnd: _selectedMeeting!.meetingEnd ?? _selectedMeeting!.meetingStart.add(Duration(minutes: 30) ) ),
             ),
           ),
         ],
@@ -318,7 +319,7 @@ class _MeetingListLayoutState extends State<MeetingListLayout> {
                                 verticalAlignment:
                                     TableCellVerticalAlignment.middle,
                                 child: InkWell(
-                                  onTap: () => _selectMeeting(meeting.callId),
+                                  onTap: () => _selectMeeting(meeting),
                                   child: Padding(
                                     padding: const EdgeInsets.all(12.0),
                                     child: Text(
@@ -330,7 +331,7 @@ class _MeetingListLayoutState extends State<MeetingListLayout> {
                               ),
                               TableCell(
                                   child: InkWell(
-                                onTap: () => _selectMeeting(meeting.callId),
+                                onTap: () => _selectMeeting(meeting),
                                 child: Padding(
                                   padding: const EdgeInsets.only(
                                       top: 27, bottom: 27),
@@ -363,7 +364,7 @@ class _MeetingListLayoutState extends State<MeetingListLayout> {
                                         TableCellVerticalAlignment.middle,
                                     child: InkWell(
                                       onTap: () =>
-                                          _selectMeeting(meeting.callId),
+                                          _selectMeeting(meeting),
                                       child: EngagementProgress(
                                         engagement:
                                             ((meeting.averageEngagement ?? 0) *
@@ -377,7 +378,7 @@ class _MeetingListLayoutState extends State<MeetingListLayout> {
                                 verticalAlignment:
                                     TableCellVerticalAlignment.middle,
                                 child: InkWell(
-                                    onTap: () => _selectMeeting(meeting.callId),
+                                    onTap: () => _selectMeeting(meeting),
                                     child: Center(
                                         child: Text(
                                             '${meeting.totalNumberOfUsers ?? 0}'))),
@@ -394,7 +395,7 @@ class _MeetingListLayoutState extends State<MeetingListLayout> {
                                     child: Center(
                                         child: InkWell(
                                             onTap: () =>
-                                                _selectMeeting(meeting.callId),
+                                                _selectMeeting(meeting),
                                             child: imageSVGAsset(
                                                 meeting.recorded ?? false
                                                     ? 'badge_approved'
@@ -404,7 +405,7 @@ class _MeetingListLayoutState extends State<MeetingListLayout> {
                                 verticalAlignment:
                                     TableCellVerticalAlignment.middle,
                                 child: InkWell(
-                                  onTap: () => _selectMeeting(meeting.callId),
+                                  onTap: () => _selectMeeting(meeting),
                                   child: Padding(
                                     padding: const EdgeInsets.all(12.0),
                                     child: Text(
@@ -418,7 +419,7 @@ class _MeetingListLayoutState extends State<MeetingListLayout> {
                                   verticalAlignment:
                                       TableCellVerticalAlignment.middle,
                                   child: InkWell(
-                                    onTap: () => _selectMeeting(meeting.callId),
+                                    onTap: () => _selectMeeting(meeting),
                                     child: Padding(
                                       padding: const EdgeInsets.all(12.0),
                                       child: Visibility(
@@ -554,7 +555,7 @@ class _MeetingListLayoutState extends State<MeetingListLayout> {
                                 itemBuilder: (BuildContext context, int index) {
                                   return InkWell(
                                     onTap: () => _selectMeeting(
-                                        state.meetings[index].callId),
+                                        state.meetings[index]),
                                     child: Padding(
                                       padding: const EdgeInsets.only(
                                           top: 10,
