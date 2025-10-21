@@ -51,12 +51,16 @@ class MultiLineChart extends StatelessWidget {
   final bool showGrid;
   final bool showBorder;
   final bool showLegend;
+  final bool showSideTitles;
+  final bool showBottomTitles;
 
   /// Height of the chart; wrap with SizedBox/Expanded outside if you prefer.
   final double height;
 
   /// Padding around chart.
   final EdgeInsetsGeometry padding;
+
+  final Color backgroundColor;
 
   const MultiLineChart({
     super.key,
@@ -70,8 +74,11 @@ class MultiLineChart extends StatelessWidget {
     this.showGrid = true,
     this.showBorder = true,
     this.showLegend = true,
+    this.showSideTitles = true,
+    this.showBottomTitles = true,
     this.height = 260,
     this.padding = const EdgeInsets.all(12),
+    this.backgroundColor = Colors.white
   });
 
   @override
@@ -135,7 +142,7 @@ class MultiLineChart extends StatelessWidget {
         titlesData: FlTitlesData(
           leftTitles: AxisTitles(
             sideTitles: SideTitles(
-              showTitles: true,
+              showTitles: showSideTitles,
               reservedSize: 44,
               interval: yInterval,
               getTitlesWidget: leftTitleBuilder ??
@@ -147,7 +154,7 @@ class MultiLineChart extends StatelessWidget {
           ),
           bottomTitles: AxisTitles(
             sideTitles: SideTitles(
-              showTitles: true,
+              showTitles: showBottomTitles,
               interval: xInterval,
               reservedSize: 28,
               getTitlesWidget: bottomTitleBuilder ??
@@ -198,27 +205,33 @@ class MultiLineChart extends StatelessWidget {
       curve: Curves.easeInOut,
     );
 
-    return
-      Card(
-        margin: const EdgeInsets.all(16),
-        child: Padding(
-          padding: padding,
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              if (showLegend) _Legend(series: series),
-              const SizedBox(
-                height: 20,
-              ),
-              SizedBox(
-                height: height,
+
+    return Card(
+      color: backgroundColor,
+      margin: padding,
+      elevation: showBorder ? 2 : 0,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(12),
+        side: showBorder ? const BorderSide(color: Colors.white, width: 1) : BorderSide.none,
+      ),
+      child: Padding(
+        padding: padding,
+        child: Column(
+          mainAxisSize: MainAxisSize.min, // helps if parent allows intrinsic height
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            if (showLegend) _Legend(series: series),
+            const SizedBox(height: 12),
+            Flexible( // 👈 instead of SizedBox(height: height)
+              child: SizedBox(
                 width: double.infinity,
                 child: chart,
               ),
-            ],
-          ),
+            ),
+          ],
         ),
-      );
+      ),
+    );
   }
 
   static double _niceInterval(double min, double max, {int targetTicks = 5}) {

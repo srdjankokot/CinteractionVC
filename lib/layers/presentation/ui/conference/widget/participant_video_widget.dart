@@ -2,6 +2,7 @@ import 'dart:math';
 
 import 'package:cinteraction_vc/core/extension/context.dart';
 import 'package:cinteraction_vc/core/util/platform/platform.dart';
+import 'package:cinteraction_vc/layers/presentation/ui/charts/ui/widget/chart.dart';
 import 'package:cinteraction_vc/layers/presentation/ui/conference/widget/user_avatar_widget.dart';
 import 'package:cinteraction_vc/layers/presentation/ui/profile/ui/widget/user_image.dart';
 import 'package:flutter/cupertino.dart';
@@ -10,7 +11,6 @@ import 'package:flutter_webrtc/flutter_webrtc.dart';
 import 'package:flutter/material.dart';
 import 'package:webrtc_interface/webrtc_interface.dart';
 
-import '../../../../../assets/colors/Colors.dart';
 import '../../../../../core/ui/images/image.dart';
 import '../../../../../core/ui/widget/call_button_shape.dart';
 import '../../../../../core/ui/widget/engagement_progress.dart';
@@ -162,7 +162,28 @@ class ParticipantVideoWidget extends StatelessWidget {
                               .setShareScreenId(
                                   int.parse(remoteStream.publisherId!));
                         }),
-                  ))
+                  )),
+
+              Positioned(
+                  bottom: 0,
+                  right: 0,
+                  left: 0,
+                  child: SizedBox(
+                    height: height / 4,
+                  child: MultiLineChart(
+                    series: remoteStream.modulesGraphData,
+                    showBorder: false,
+                    showLegend: false,
+                    showGrid: false,
+                    bottomTitleBuilder: null,
+                    leftTitleBuilder: null,
+                    backgroundColor: Colors.transparent,
+                    showSideTitles: false,
+                    showBottomTitles: false,
+                    padding: const EdgeInsets.all(0),
+
+                ),
+              )),
             ],
           );
         }),
@@ -201,35 +222,6 @@ class ParticipantVideoWidget extends StatelessWidget {
                 ),
               ),
             ),
-            // Positioned(
-            //     right: 0,
-            //     child: Row(
-            //       children: [
-            //         EngagementProgress(
-            //             engagement: remoteStream.engagement ?? 0),
-            //         PopupMenuButton<String>(
-            //           onSelected: (e) async {
-            //             switch (e) {
-            //               case 'Kick':
-            //                 context.read<ConferenceCubit>().kick(remoteStream.id);
-            //                 break;
-            //               case 'UnPublish':
-            //                 context.read<ConferenceCubit>().unPublishById(remoteStream.id);
-            //                 break;
-            //             }
-            //           },
-            //           itemBuilder: (BuildContext context) {
-            //             return {'Kick', 'UnPublish'}.map((String choice) {
-            //               return PopupMenuItem<String>(
-            //                 value: choice,
-            //                 child: Text(choice),
-            //               );
-            //             }).toList();
-            //           },
-            //         ),
-            //       ],
-            //     )),
-
             Positioned(
                 left: 10,
                 top: 10,
@@ -238,7 +230,6 @@ class ParticipantVideoWidget extends StatelessWidget {
                   style: context.textTheme.displayLarge
                       ?.copyWith(color: Colors.white),
                 )),
-
             Positioned(
                 bottom: 16,
                 left: 16,

@@ -81,7 +81,9 @@ class _ChartsScreenState extends State<ChartsScreen> {
                         height: 20,
                       ),
 
-                      MultiLineChart(
+                      SizedBox(
+                          height: 350,
+                          child:  MultiLineChart(
                         series: state.engagementData?.buildBinnedSeriesByModule(
                           slot: const Duration(seconds: 10),
                           xAsTime: true,
@@ -91,21 +93,22 @@ class _ChartsScreenState extends State<ChartsScreen> {
                         ) ?? [],
                         // Example: custom bottom titles if x is time index
                         bottomTitleBuilder: (value, meta)
-                            {
-                              if(value % 10 != 0)
-                                {
-                                  return const Text("");
-                                }
+                        {
+                          if(value % 10 != 0)
+                          {
+                            return const Text("");
+                          }
 
-                              final secs = value.round(); // or: (value + 1e-6).floor()
-                              final m = (secs ~/ 60).toString().padLeft(2, '0');
-                              final s = (secs % 60).toString().padLeft(2, '0');
-                              return Text('$m:$s', style: Theme.of(context).textTheme.labelSmall);
-                            }
+                          final secs = value.round(); // or: (value + 1e-6).floor()
+                          final m = (secs ~/ 60).toString().padLeft(2, '0');
+                          final s = (secs % 60).toString().padLeft(2, '0');
+                          return Text('$m:$s', style: Theme.of(context).textTheme.labelSmall);
+                        }
 
-                            ,
+                        ,
                         leftTitleBuilder: (value, meta) => Text('${value.toInt()}%', style: Theme.of(context).textTheme.labelSmall),
-                      ),
+                      ))
+                     ,
 
                       const SizedBox(
                         height: 30,

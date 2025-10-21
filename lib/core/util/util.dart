@@ -1,11 +1,15 @@
 import 'dart:async';
 import 'dart:typed_data';
 
+import 'package:cinteraction_vc/assets/colors/Colors.dart';
 import 'package:cinteraction_vc/core/util/platform/platform_stub.dart';
+import 'package:cinteraction_vc/layers/presentation/ui/charts/ui/widget/chart.dart';
+import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter_webrtc/flutter_webrtc.dart';
 
 import '../../layers/data/dto/chat/chat_detail_dto.dart';
+import '../../layers/data/dto/engagement_dto.dart';
 import '../../layers/presentation/ui/profile/ui/widget/user_image.dart';
 import '../janus/janus_client.dart';
 
@@ -16,9 +20,6 @@ class StreamRenderer {
   String? publisherId;
   String publisherName;
 
-
-  // int? engagement;
-  // int? drowsiness;
   Map<String, int> moduleScores = {};
   String? audioMid;
   String? videoMid;
@@ -43,6 +44,49 @@ class StreamRenderer {
   bool? _isVideoFlowing;
 
   bool? get isVideoFlowing => _isVideoFlowing!;
+
+  List<LineSeries> modulesGraphData = List.empty(growable: true);
+
+  void addSpot(String moduleName, int value, int moduleId) {
+    final timestamp = DateTime.now().millisecondsSinceEpoch.toDouble();
+
+    // Find existing line by name
+    final existing = modulesGraphData.firstWhere(
+          (s) => s.id == moduleName,
+      orElse: () => createLine(moduleName, moduleId),
+    );
+
+    // If new, add it to the list
+    if (!modulesGraphData.contains(existing)) {
+      modulesGraphData.add(existing);
+    }
+
+    // Add a new spot
+    existing.spots.add(FlSpot(timestamp, value.toDouble()));
+
+    // Keep only the latest 10 spots
+    if (existing.spots.length > 10) {
+      // remove oldest ones (FIFO)
+      existing.spots.removeRange(0, existing.spots.length - 10);
+    }
+  }
+
+  LineSeries createLine(String name, int moduleId)
+{
+  return LineSeries(
+    id: name,
+    spots: [],
+    color: ColorConstants.graphColorFor(moduleId),
+    isCurved: false,
+    showDots: false,
+    strokeWidth: 2,
+    fillBelowLine: true,
+  );
+}
+
+
+
+
   set setVideoFlowing(bool? value) {
     // fallbackTimer?.cancel();
     // showLastFrame = false;
