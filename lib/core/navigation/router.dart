@@ -19,7 +19,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../layers/data/repos/auth_repo_impl.dart';
 import '../../layers/data/source/local/local_storage.dart';
+import '../../layers/domain/repos/auth_repo.dart';
 import '../../layers/domain/usecases/auth/auth_usecases.dart';
 import '../../layers/presentation/cubit/auth/auth_cubit.dart';
 import '../../layers/presentation/cubit/conference/conference_cubit.dart';
@@ -30,6 +32,7 @@ import '../../layers/presentation/ui/auth/splash_page.dart';
 import '../../layers/presentation/ui/conference/video_room.dart';
 import '../../layers/presentation/ui/echotest/EchoTestWidget.dart';
 import '../../layers/presentation/ui/landing/ui/page/home_page.dart';
+import '../util/secure_local_storage.dart';
 
 final GoRouter router = GoRouter(
   initialLocation: AppRoute.splash.path,
@@ -169,8 +172,7 @@ final GoRouter router = GoRouter(
       builder: (context, state) {
         // final roomId = state.extra ?? '1234';
         final display = state.extra ?? 'displayName';
-        final roomId =
-            state.pathParameters['roomId'] ?? Random().nextInt(999999);
+        final roomId = state.pathParameters['roomId'] ?? Random().nextInt(999999);
 
         return MultiBlocProvider(providers: [
           BlocProvider<ConferenceCubit>(
@@ -186,7 +188,7 @@ final GoRouter router = GoRouter(
           ),
         ], child: const VideoRoomPage());
       },
-      redirect: (context, state) {
+      redirect: (context, state) async {
         print('🔁 Router redirect triggered for path: ${state.uri.toString()}');
 
         // if (kIsWeb) {
@@ -199,10 +201,29 @@ final GoRouter router = GoRouter(
 
         if (user == null) {
           var roomId = state.pathParameters['roomId'];
+          final qp = Map<String, String>.from(state.uri.queryParameters);
+          final username = qp['user'];
+          final password = qp['pass'];
+
+          if(username != null && password != null)
+            {
+              var response = await getIt.get<AuthRepo>().signInWithEmailAndPassword(email: username, password: password);
+              if (response.error == null) {
+
+                qp.remove('user');
+                qp.remove('pass');
+
+                if(roomId != null)
+                  {
+                    return AppRoute.meeting.path.replaceAll(':roomId', roomId);
+                  }
+                // return AppRoute.meeting.path;
+              }
+            }
+
           if (roomId != null) {
             getIt.get<LocalStorage>().saveRoomId(roomId: roomId);
           }
-
           return AppRoute.auth.path;
         }
 
