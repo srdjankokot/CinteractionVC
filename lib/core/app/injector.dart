@@ -79,9 +79,6 @@ Future<void> initializeGetIt() async {
         }
 
         return statusCode >= 200 && statusCode < 300;
-        if (statusCode == 422) {
-          return true;
-        }
       },
     ));
     dio.interceptors.add(
@@ -90,8 +87,7 @@ Future<void> initializeGetIt() async {
           DioException e,
           handler,
         ) async {
-          if (e.response?.statusCode == 401 &&
-              e.requestOptions.path != Urls.engagement) {
+          if (e.response?.statusCode == 401) {
             print("Token expired. Logging out...");
             await getIt.get<LocalStorage>().clearUser();
             // getIt.get<ChatCubit>().chatUseCases.leaveRoom();

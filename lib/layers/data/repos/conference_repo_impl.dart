@@ -1589,7 +1589,9 @@ class ConferenceRepoImpl extends ConferenceRepo {
         );
 
         if (result != null) {
-          final scoreInt = (result.score! * 100).toInt();
+          module.isPercentage = result.isPercentage;
+          final multiplier = result.isPercentage ? 100 : 1;
+          final scoreInt = (result.score! * multiplier).toInt();
 
           videoState.streamsToBeRendered['local']?.moduleScores[module] = scoreInt;
           videoState.streamsToBeRendered['local']?.addSpot(result.name, scoreInt, module.id);

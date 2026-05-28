@@ -1,8 +1,7 @@
-class Urls {
-  static String baseUrl = 'https://vc.cinteraction.com';
-  // static String baseUrl = 'https://huawei.nswebdevelopment.com';
-  // static String baseUrl = 'https://80d0-24-135-247-244.ngrok-free.app/api';
 
+import '../../util/conf.dart';
+
+class Urls {
   static String loginEndpoint = '$baseUrl/api/login';
   static String logOutEndpoint = '$baseUrl/api/logout';
   static String registerEndpoint = '$baseUrl/api/register';
@@ -21,13 +20,6 @@ class Urls {
   static String scheduleMeeting = '$baseUrl/api/meetings/schedule';
 
   static String sendMessage = '$baseUrl/call/{call_id}/message';
-
-  static String baseIviUrl = 'https://server.institutonline.ai';
-  static String IVIAccessToken =
-      'Bearer 15|Jsoy8PjvLXRw3Y9ggJyYRr4ylHamlWecHNKDSOVk';
-
-  static String engagement = '$baseIviUrl/engagement/rank';
-  static String drowsiness = '$baseIviUrl/drowsiness/';
   static String sendEngagement = '$baseUrl/api/meetings/update/attention/';
   static String dashboard = '$baseUrl/api/dashboards';
 
