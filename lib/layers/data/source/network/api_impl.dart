@@ -36,7 +36,7 @@ class ApiImpl extends Api {
     try {
       var formData = FormData.fromMap({'email': email, 'password': pass});
       Dio dio = await getIt.getAsync<Dio>();
-
+    print("");
       // clearDioCookies(dio);
 
       Response response = await dio.post(Urls.loginEndpoint, data: formData);
