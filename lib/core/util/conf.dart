@@ -1,19 +1,17 @@
-
-// String url = 'wss://vc.cinteraction.com:8088';
-// bool withCredentials = false;
-// String apiSecret = "";
-//
 import '../janus/janus_client.dart';
 
+String baseUrl = 'https://vc.cinteraction.com';
+
+//janus conf
 String url = "wss://vc.cinteraction.com:8088";
 bool withCredentials = false;
 String apiSecret = "";
+int maxPublishersDefault = 30;
 
+//stun/turn server cong
 String mixTurnServerUsername = 'nswd';
 String mixTurnServerCredential = 'vcnswd321';
-//
-int maxPublishersDefault = 30;
-//
+
 List<RTCIceServer> iceServers = <RTCIceServer>[
 
   RTCIceServer(urls: "stun:vc.cinteraction.com:3478", username: "", credential: ""),
@@ -27,50 +25,3 @@ List<RTCIceServer> iceServers = <RTCIceServer>[
       credential: mixTurnServerCredential),
 
 ];
-
-
-
-
-// String mixTurnServerUsername = "nswd";
-// String mixTurnServerCredential = "vcnswd321";
-//
-// //HUAWEI
-// String url = "wss://huawei.nswebdevelopment.com:8189";
-// bool withCredentials = false;
-// String apiSecret = "";
-//
-// String mixTurnServerUsernameHuawei = 'test';
-// String mixTurnServerCredentialHuawei = 'test123';
-//
-// int maxPublishersDefault = 30;
-//
-// List<RTCIceServer> iceServers = <RTCIceServer>[
-//   RTCIceServer(
-//       urls: 'stun:cinteraction.nswebdevelopment.com:3478',
-//       username: "",
-//       credential: ""),
-//   RTCIceServer(
-//       urls: 'turn:cinteraction.nswebdevelopment.com:3478?transport=udp',
-//       username: mixTurnServerUsernameHuawei,
-//       credential: mixTurnServerCredentialHuawei),
-//   RTCIceServer(
-//       urls: 'turn:cinteraction.nswebdevelopment.com:3478?transport=tcp',
-//       username: mixTurnServerUsernameHuawei,
-//       credential: mixTurnServerCredentialHuawei),
-//
-//   // RTCIceServer(
-//   //     urls: 'stun:huawei.nswebdevelopment.com:3478',
-//   //     username: "",
-//   //     credential: ""),
-//   // RTCIceServer(
-//   //     urls: 'turn:huawei.nswebdevelopment.com:3478?transport=udp',
-//   //     username: mixTurnServerUsernameHuawei,
-//   //     credential: mixTurnServerCredentialHuawei),
-//   // RTCIceServer(
-//   //     urls: 'turn:huawei.nswebdevelopment.com:3478?transport=tcp',
-//   //     username: mixTurnServerUsernameHuawei,
-//   //     credential: mixTurnServerCredentialHuawei),
-//
-//
-//
-// ];

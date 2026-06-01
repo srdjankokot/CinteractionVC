@@ -17,6 +17,7 @@ import 'dart:typed_data';
 import 'package:intl/intl.dart';
 
 import '../../../../core/io/network/urls.dart';
+import '../../../../core/util/conf.dart';
 import '../../../domain/entities/api_response.dart';
 import '../../dto/chat/chat_dto.dart';
 import '../../dto/dashboard/dashboard_response_dto.dart';
@@ -106,7 +107,7 @@ class ApiImpl extends Api {
     try {
       Dio dio = await getIt.getAsync<Dio>();
       final response = await dio.post(
-        '${Urls.baseUrl}/api/companies/$companyId/remove/$userId',
+        '${baseUrl}/api/companies/$companyId/remove/$userId',
       );
       return ApiResponse(response: response);
     } on DioException catch (e) {
@@ -308,65 +309,7 @@ class ApiImpl extends Api {
   }
 
   @override
-  Future<double?> getEngagement(
-      {required averageAttention,
-      required callId,
-      required image,
-      required participantId}) async {
-    var formData = {
-      'average_attention': 0,
-      'call_id': callId,
-      'current_attention': 0,
-      'image': image,
-      "participant_id": participantId
-    };
-
-    Dio dio = await getIt.getAsync<Dio>();
-    try {
-      dio.options.headers['Authorization'] = Urls.IVIAccessToken;
-      var response = await dio.post(Urls.engagement, data: formData);
-      return double.parse(response.data['engagements'][0]['score'].toString());
-      return -1;
-    } on DioException catch (e, s) {
-      print(e);
-    } on Exception catch (e) {
-      print(e);
-    }
-    return 0;
-  }
-
-  @override
-  Future<double?> getDrowsiness(
-      {required averageAttention,
-      required callId,
-      required image,
-      required participantId}) async {
-    var formData = {
-      'average_attention': 0,
-      'call_id': callId,
-      'current_attention': 0,
-      'image': image,
-      "participant_id": participantId
-    };
-
-    Dio dio = await getIt.getAsync<Dio>();
-    try {
-      dio.options.headers['Authorization'] = Urls.IVIAccessToken;
-      var response = await dio.post(Urls.drowsiness, data: formData);
-
-      return double.parse(response.data['drowsiness'][0]['score'].toString());
-      return -1;
-    } on DioException catch (e, s) {
-      print(e);
-    } on Exception catch (e) {
-      print(e);
-    }
-    return 0;
-    ;
-  }
-
-  @override
-  Future<({double score, String name})?> getModuleScore({
+  Future<({double score, String name, bool isPercentage})?> getModuleScore({
     required String url,
     required String name,
     required int averageAttention,
@@ -384,19 +327,20 @@ class ApiImpl extends Api {
 
     final Dio dio = await getIt.getAsync<Dio>();
     try {
-      dio.options.headers['Authorization'] = Urls.IVIAccessToken;
       final response = await dio.post(url, data: formData);
 
       final responseData = response.data;
       if (responseData is Map && responseData.isNotEmpty) {
         final firstKey = responseData.keys.first;
         final score = responseData[firstKey]?[0]?['score'];
+        final isPercentage = responseData["percentage"] as bool? ?? true;
 
         if (score != null) {
           print('module: $name, score: $score');
           return (
             score: double.parse(score.toString()),
             name: name.toLowerCase(),
+            isPercentage: isPercentage
           );
         }
       }
@@ -1141,7 +1085,7 @@ class ApiImpl extends Api {
       };
 
       final response = await dio.post(
-        '${Urls.baseUrl}/api/engagement/create',
+        '${baseUrl}/api/engagement/create',
         data: data,
       );
 
